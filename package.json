@@ -1,6 +1,6 @@
 {
-  "name": "@harmoniclabs/uplc",
-  "version": "1.0.1",
+  "name": "@harmoniclabs/cardano-ledger-ts",
+  "version": "1.0.0",
   "description": "",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -26,23 +26,22 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/HarmonicLabs/uplc.git"
+    "url": "git+https://github.com/HarmonicLabs/cardano-ledger-ts.git"
   },
   "bugs": {
-    "url": "https://github.com/HarmonicLabs/uplc/issues"
+    "url": "https://github.com/HarmonicLabs/cardano-ledger-ts/issues"
   },
-  "homepage": "https://github.com/HarmonicLabs/uplc#readme",
+  "homepage": "https://github.com/HarmonicLabs/cardano-ledger-ts#readme",
   "dependencies": {
     "@harmoniclabs/bigint-utils": "^1.0.0",
     "@harmoniclabs/crypto": "^0.1.0",
     "@harmoniclabs/uint8array-utils": "^1.0.0",
     "@harmoniclabs/obj-utils": "^1.0.0"
-
   },
   "peerDependencies": {
     "@harmoniclabs/pair": "^1.0.0",
     "@harmoniclabs/bytestring": "^1.0.0",
-    "@harmoniclabs/cbor": "^1.1.0",
+    "@harmoniclabs/cbor": "^1.1.1",
     "@harmoniclabs/plutus-data": "^1.0.0",
     "@harmoniclabs/cardano-costmodels-ts": "^1.0.0",
     "@harmoniclabs/plutus-machine": "^1.0.0"

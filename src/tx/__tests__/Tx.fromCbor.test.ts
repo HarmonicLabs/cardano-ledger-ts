@@ -1,6 +1,3 @@
-import { UPLCDecoder } from "../../../onchain/UPLC/UPLCDecoder";
-import { showUPLC } from "../../../onchain/UPLC/UPLCTerm";
-import { logJson } from "../../../utils/ts/ToJson";
 import { Tx } from "../Tx"
 
 describe("Tx.fromCbor", () => {
