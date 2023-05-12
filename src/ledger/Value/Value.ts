@@ -247,6 +247,21 @@ export class Value
         };
     }
 
+    static singleAsset(
+        policy: Hash28,
+        name: Uint8Array,
+        qty: number | bigint
+    ): Value
+    {
+        return new Value([
+            Value.singleAssetEntry(
+                policy,
+                name,
+                qty
+            )
+        ]);
+    }
+
     static entry(
         policy: Hash28,
         assets: IValueAssets
