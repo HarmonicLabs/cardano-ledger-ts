@@ -227,9 +227,9 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         ]);
     }
 
-    static fromCbor( cbor: CanBeCborString ): Script
+    static fromCbor( cbor: CanBeCborString, defType: ScriptType = ScriptType.PlutusV2 ): Script
     {
-        return Script.fromCborObj( Cbor.parse( forceCborString( cbor ) ) );
+        return Script.fromCborObj( Cbor.parse( forceCborString( cbor ) ), defType );
     }
 
     static fromCborObj( cObj: CborObj, defType: ScriptType = ScriptType.PlutusV2 ): Script
