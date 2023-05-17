@@ -33,7 +33,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
     readonly cbor!: T extends ScriptType.NativeScript ? never : CborString;
     readonly hash!: Hash28;
 
-    constructor( scriptType: T, bytes: Uint8Array | (T extends ScriptType.NativeScript ? NativeScript : PlutusScriptJsonFormat) )
+    constructor( scriptType: T, bytes: Uint8Array | string | (T extends ScriptType.NativeScript ? NativeScript : PlutusScriptJsonFormat) )
     {
         assert(
             scriptType === ScriptType.NativeScript  ||
@@ -50,7 +50,11 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
 
         if( !isUint8Array(bytes) )
         {
-            if(
+            if( typeof bytes === "string" )
+            {
+                bytes = fromHex( bytes );
+            }
+            else if(
                 (bytes.type as any) === ScriptType.PlutusV1 ||
                 (bytes.type as any) === ScriptType.PlutusV2
             )
