@@ -1,3 +1,4 @@
+import { logJson } from "../../utils/ToJson";
 import { Tx } from "../Tx"
 
 describe("Tx.fromCbor", () => {
@@ -57,5 +58,6 @@ describe("Tx.fromCbor", () => {
             )
         ).not.toThrow();
         
-    })
+    });
+
 });
