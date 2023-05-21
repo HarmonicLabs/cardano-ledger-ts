@@ -14,7 +14,7 @@ import { PoolParams } from "../PoolParams";
 import { MoveInstantRewardsCert } from "./MoveInstantRewardsCert";
 
 // number is important as it is included in serialization
-export const enum CertificateType {
+export enum CertificateType {
     StakeRegistration       = 0,
     StakeDeRegistration     = 1,
     StakeDelegation         = 2,
@@ -23,6 +23,8 @@ export const enum CertificateType {
     GenesisKeyDelegation    = 5,
     MoveInstantRewards      = 6
 };
+
+Object.freeze( CertificateType );
 
 export type CertTypeToStr<CertT extends CertificateType> =
     CertT extends CertificateType.StakeRegistration     ? "StakeRegistration" :

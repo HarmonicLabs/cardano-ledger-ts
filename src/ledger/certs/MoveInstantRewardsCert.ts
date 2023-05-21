@@ -6,10 +6,12 @@ import { assert } from "../../utils/assert";
 import { hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 
 
-export const enum InstantRewardsSource {
+export enum InstantRewardsSource {
     Reserves = 0,
     Treasurery = 1
 }
+
+Object.freeze( InstantRewardsSource );
 
 export type RewardSourceToStr<S extends InstantRewardsSource> =
     S extends InstantRewardsSource.Reserves   ? "Reserves" :

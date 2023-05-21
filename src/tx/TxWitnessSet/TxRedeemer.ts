@@ -12,12 +12,14 @@ import { ToJson } from "../../utils/ToJson";
 import { assert } from "../../utils/assert";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../utils/ints";
 
-export const enum TxRedeemerTag {
+export enum TxRedeemerTag {
     Spend    = 0,
     Mint     = 1,
     Cert     = 2,
     Withdraw = 3
 };
+
+Object.freeze( TxRedeemerTag );
 
 export function txRdmrTagToString( tag: TxRedeemerTag ): string
 {

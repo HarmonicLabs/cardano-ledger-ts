@@ -1,5 +1,5 @@
 
-export const enum Era {
+export enum Era {
     Byron = "byron",
     Shelley = "shelley",
     Allegra = "allegra",
@@ -7,3 +7,5 @@ export const enum Era {
     Alonzo = "alonzo",
     Babbage = "babbage"
 }
+
+Object.freeze( Era );
