@@ -50,7 +50,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
             scriptType
         );
 
-        if( !isUint8Array(bytes) )
+        if( !( bytes instanceof Uint8Array ) )
         {
             if(
                 (bytes.type as any) === ScriptType.PlutusV1 ||

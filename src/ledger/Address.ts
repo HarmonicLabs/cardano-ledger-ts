@@ -300,12 +300,12 @@ export class Address
         return Address.fromCborObj( Cbor.parse( forceCborString( cbor ) ) );
     }
 
-    toString(): string
+    toString(): AddressStr
     {
         return encodeBech32(
             this.network === "mainnet" ? "addr" : "addr_test",
             this.toBytes()
-        )
+        ) as AddressStr;
     }
 
     static fromString( addr: string ): Address
