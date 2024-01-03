@@ -420,8 +420,8 @@ export const defaultProtocolParameters: ProtocolParamters = freezeAll({
         PlutusScriptV2: defaultV2Costs
     },
     executionUnitPrices: [
-        new CborPositiveRational( 577, 1e2 ), // mem
-        new CborPositiveRational( 721, 1e5 )  // cpu
+        CborPositiveRational.fromNumber( 0.0577 ), // mem
+        CborPositiveRational.fromNumber( 0.0000721 )  // cpu
     ],
     maxTxExecutionUnits: new ExBudget({ mem: 12_500_000, cpu: 10_000_000_000 }),
     maxBlockExecutionUnits: new ExBudget({ mem: 50_000_000, cpu: 40_000_000_000 }),
@@ -429,11 +429,6 @@ export const defaultProtocolParameters: ProtocolParamters = freezeAll({
     collateralPercentage: 150,
     maxCollateralInputs: 3
 })
-
-function cborRationalToNum( rat: CborPositiveRational | undefined ): number | undefined
-{
-    return rat?.toNumber()
-}
 
 export function partialProtocolParamsToJson( pp: Partial<ProtocolParamters> )
 {

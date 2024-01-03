@@ -4,7 +4,7 @@ import { ToData, DataMap, DataB, DataI, DataPair } from "@harmoniclabs/plutus-da
 import { lexCompare, toHex, fromHex } from "@harmoniclabs/uint8array-utils";
 import { Hash28 } from "../../hashes";
 import { forceBigUInt, CanBeUInteger } from "../../utils/ints";
-import { IValue, IValueAssets, isIValue, getEmptyNameQty, getNameQty, IValueAdaEntry, IValueAsset, IValuePolicyEntry, addIValues, subIValues, cloneIValue, IValueToJson } from "./IValue";
+import { IValue, IValueAssets, isIValue, getEmptyNameQty, getNameQty, IValueAdaEntry, IValueAsset, IValuePolicyEntry, addIValues, subIValues, cloneIValue, IValueToJson, ValueJson } from "./IValue";
 import { assert } from "../../utils/assert";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 
@@ -442,7 +442,7 @@ export class Value
         return new Value(valueMap);
     }
 
-    toJson()
+    toJson(): ValueJson
     {
         return IValueToJson( this.map );
     }

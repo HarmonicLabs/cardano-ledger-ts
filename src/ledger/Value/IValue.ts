@@ -3,6 +3,11 @@ import { Hash28 } from "../../hashes/Hash28/Hash28";
 import { CanBeUInteger } from "../../utils/ints";
 import { defineReadOnlyProperty, isObject, hasOwn } from "@harmoniclabs/obj-utils";
 
+
+export type AssetJson = { [ name_hex: string ]: `${number}` };
+
+export type ValueJson = { [ policy_hex: string ]: AssetJson };
+
 export type IValue = (IValuePolicyEntry | IValueAdaEntry)[]
 
 export type IValueAsset = {
@@ -37,7 +42,7 @@ function policyToString( policy: "" | Hash28 ): string
     return policy === "" ? policy : policy.toString();
 }
 
-export function IValueToJson( iVal: IValue ): object
+export function IValueToJson( iVal: IValue ): ValueJson
 {
     const result = {};
 
