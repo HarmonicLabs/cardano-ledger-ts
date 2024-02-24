@@ -25,7 +25,7 @@ export interface Cip30LikeSignTx {
      * @param {boolean} partial (standard parameter) wheather to throw or not if the wallet can not sign the entire transaction (`true` always passed)
      * @returns {string} the cbor of the `TxWitnessSet` (!!! NOT the cbor of the signe transaction !!!)
      */
-    signTx: ( txCbor: string, partial?: boolean ) => string
+    signTx: ( txCbor: string, partial?: boolean ) => ( string | Promise<string> )
 }
 
 export class Tx
@@ -57,7 +57,7 @@ export class Tx
      * that follows the [CIP-0030 standard]
      * (https://github.com/cardano-foundation/CIPs/tree/master/CIP-0030#apisigntxtx-cbortransaction-partialsign-bool--false-promisecbortransaction_witness_set)
     **/
-    readonly signWithCip30Wallet!: ( cip30wallet: Cip30LikeSignTx ) => void
+    readonly signWithCip30Wallet!: ( cip30wallet: Cip30LikeSignTx ) => Promise<void>
 
     /**
      * @returns {boolean}
@@ -158,10 +158,10 @@ export class Tx
 
         defineReadOnlyProperty(
             this, "signWithCip30Wallet",
-            ( cip30: Cip30LikeSignTx ): void => {
+            async ( cip30: Cip30LikeSignTx ): Promise<void> => {
                 
                 const wits = TxWitnessSet.fromCbor(
-                    cip30.signTx(
+                    await cip30.signTx(
                         // signTx expects the entire transaction by standard (not only the body ¯\_(ツ)_/¯)
                         this.toCbor().toString(),
                         true

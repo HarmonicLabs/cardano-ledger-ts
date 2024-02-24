@@ -3,16 +3,17 @@ import { isObject } from "@harmoniclabs/obj-utils";
 import { GenesisHash } from "../../hashes/Hash28/GenesisHash";
 import { canBeUInteger, forceBigUInt } from "../../utils/ints";
 import { Epoch } from "../Epoch";
-import { ProtocolParamters, isPartialProtocolParameters, partialProtocolParametersFromCborObj, partialProtocolParametersToCborObj, partialProtocolParamsToJson } from "./ProtocolParameters";
+import { ProtocolParameters, isPartialProtocolParameters, partialProtocolParametersFromCborObj, partialProtocolParametersToCborObj, partialProtocolParamsToJson } from "./ProtocolParameters";
+import { Hash28 } from "../../hashes";
 
-export type ProtocolUpdateProposal = [ ProtocolParametersUpdateMap, Epoch ];
+export type LegacyPPUpdateProposal = [ LegacyPPUpdateMap, Epoch ];
 
-export type ProtocolParametersUpdateMap = {
-    genesisHash: GenesisHash
-    changes: Partial<ProtocolParamters>
+export type LegacyPPUpdateMap = {
+    genesisHash: Hash28, // GenesisHash
+    changes: Partial<ProtocolParameters>
 }[];
 
-export function isProtocolParametersUpdateMap( something: object ): something is ProtocolParametersUpdateMap
+export function isLegacyPPUpdateMap( something: object ): something is LegacyPPUpdateMap
 {
     return (
         Array.isArray( something ) &&
@@ -26,28 +27,28 @@ export function isProtocolParametersUpdateMap( something: object ): something is
     );
 }
 
-export function isProtocolUpdateProposal( something: object ): something is ProtocolUpdateProposal
+export function isLegacyPPUpdateProposal( something: any ): something is LegacyPPUpdateProposal
 {
     return (
         Array.isArray( something ) &&
         something.length >= 2 &&
-        isProtocolParametersUpdateMap( something[0] ) &&
+        isLegacyPPUpdateMap( something[0] ) &&
         canBeUInteger( something[1] )
     );
 }
 
-export function protocolUpdateToJson( pUp: ProtocolUpdateProposal ): object
+export function protocolUpdateToJson( pUp: LegacyPPUpdateProposal ): object
 {
     return {
         epoch: forceBigUInt( pUp[1] ).toString(),
         parametersUpdate: pUp[0].map( ({ genesisHash, changes }) => ({
-            genesisHash: genesisHash.asString,
+            genesisHash: genesisHash.toString(),
             changes: partialProtocolParamsToJson( changes )
         }))
     }
 }
 
-export function protocolParametersUpdateMapToCborObj( ppUpdate: ProtocolParametersUpdateMap ): CborMap
+export function LegacyPPUpdateMapToCborObj( ppUpdate: LegacyPPUpdateMap ): CborMap
 {
     return new CborMap(
         ppUpdate.map( entry => {
@@ -59,10 +60,10 @@ export function protocolParametersUpdateMapToCborObj( ppUpdate: ProtocolParamete
     )
 }
 
-export function protocolParametersUpdateMapFromCborObj( cObj: CborObj ): ProtocolParametersUpdateMap
+export function LegacyPPUpdateMapFromCborObj( cObj: CborObj ): LegacyPPUpdateMap
 {
     if(!(cObj instanceof CborMap))
-    throw new Error(`Invalid CBOR format for "ProtocolUpdateProposal"`);
+    throw new Error(`Invalid CBOR format for "LegacyPPUpdateProposal"`);
 
     return cObj.map.map( ({ k, v }) => ({
         genesisHash: GenesisHash.fromCborObj( k ),
@@ -70,18 +71,18 @@ export function protocolParametersUpdateMapFromCborObj( cObj: CborObj ): Protoco
     }));
 }
 
-export function protocolUpdateProposalToCborObj( protocolUpdate: ProtocolUpdateProposal ): CborObj
+export function LegacyPPUpdateProposalToCborObj( protocolUpdate: LegacyPPUpdateProposal ): CborObj
 {
     return new CborArray([
-        protocolParametersUpdateMapToCborObj( protocolUpdate[0] ),
+        LegacyPPUpdateMapToCborObj( protocolUpdate[0] ),
         new CborUInt( forceBigUInt( protocolUpdate[1] ) )
     ])
 }
 
-export function protocolUpdateProposalFromCborObj( cObj: CborObj ): ProtocolUpdateProposal
+export function LegacyPPUpdateProposalFromCborObj( cObj: CborObj ): LegacyPPUpdateProposal
 {
     if(!(cObj instanceof CborArray))
-    throw new Error(`Invalid CBOR format for "ProtocolUpdateProposal"`);
+    throw new Error(`Invalid CBOR format for "LegacyPPUpdateProposal"`);
 
     const [
         proposalMap,
@@ -89,10 +90,10 @@ export function protocolUpdateProposalFromCborObj( cObj: CborObj ): ProtocolUpda
     ] = cObj.array;
 
     if(!( epoch instanceof CborUInt))
-    throw new Error(`Invalid CBOR format for "ProtocolUpdateProposal"`);
+    throw new Error(`Invalid CBOR format for "LegacyPPUpdateProposal"`);
 
     return [
-        protocolParametersUpdateMapFromCborObj( proposalMap ),
+        LegacyPPUpdateMapFromCborObj( proposalMap ),
         epoch.num
     ]
 }

@@ -321,7 +321,7 @@ export class TxWitnessSet
                 _native.array.map( nativeCborObj => 
                     new Script(
                         ScriptType.NativeScript, 
-                        Cbor.encode( nativeCborObj ).asBytes
+                        Cbor.encode( nativeCborObj ).toBuffer()
                     )
                 ),
             bootstrapWitnesses: _bootstrap === undefined ? undefined :
@@ -330,7 +330,7 @@ export class TxWitnessSet
                 _plutusV1.array.map( cbor =>
                     new Script(
                         ScriptType.PlutusV1,
-                        Cbor.encode( cbor ).asBytes
+                        Cbor.encode( cbor ).toBuffer()
                     )
                 ),
             datums: _dats === undefined ? undefined :
@@ -341,7 +341,7 @@ export class TxWitnessSet
                 _plutusV2.array.map( cbor =>
                     new Script(
                         ScriptType.PlutusV2,
-                        Cbor.encode( cbor ).asBytes
+                        Cbor.encode( cbor ).toBuffer()
                     )
                 ),
             

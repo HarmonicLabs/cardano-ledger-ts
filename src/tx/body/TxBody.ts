@@ -3,12 +3,13 @@ import { blake2b_256 } from "@harmoniclabs/crypto";
 import { isObject, hasOwn, defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
 import { PubKeyHash } from "../../credentials";
 import { AuxiliaryDataHash, ScriptDataHash, Hash32 } from "../../hashes";
-import { Coin, AnyCertificate, TxWithdrawals, ITxWithdrawals, ProtocolUpdateProposal, Value, NetworkT, Certificate, canBeTxWithdrawals, isProtocolUpdateProposal, forceTxWithdrawals, protocolUpdateProposalToCborObj, protocolUpdateProposalFromCborObj, protocolUpdateToJson, certificatesToDepositLovelaces } from "../../ledger";
+import { Coin, AnyCertificate, TxWithdrawals, ITxWithdrawals, LegacyPPUpdateProposal, Value, NetworkT, Certificate, canBeTxWithdrawals, isLegacyPPUpdateProposal, forceTxWithdrawals, LegacyPPUpdateProposalToCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, certificatesToDepositLovelaces } from "../../ledger";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../utils/ints";
 import { UTxO, TxOut, isIUTxO, isITxOut, TxOutRef } from "./output";
 import { assert } from "../../utils/assert";
+import { VotingProcedures } from "../../governance/VotingProcedures";
 
 export interface ITxBody {
     inputs: [ UTxO, ...UTxO[] ],
@@ -17,7 +18,7 @@ export interface ITxBody {
     ttl?: CanBeUInteger,
     certs?: AnyCertificate[],
     withdrawals?: TxWithdrawals | ITxWithdrawals,
-    protocolUpdate?: ProtocolUpdateProposal,
+    protocolUpdate?: LegacyPPUpdateProposal,
     auxDataHash?: AuxiliaryDataHash, // hash 32
     validityIntervalStart?: CanBeUInteger,
     mint?: Value,
@@ -53,7 +54,7 @@ export function isITxBody( body: Readonly<object> ): body is ITxBody
         ( b.ttl === undefined || canBeUInteger( b.ttl ) ) &&
         ( b.certs === undefined || b.certs.every( c => c instanceof Certificate ) ) &&
         ( b.withdrawals === undefined || canBeTxWithdrawals( b.withdrawals ) ) &&
-        ( b.protocolUpdate === undefined || isProtocolUpdateProposal( b.protocolUpdate ) ) &&
+        ( b.protocolUpdate === undefined || isLegacyPPUpdateProposal( b.protocolUpdate ) ) &&
         ( b.auxDataHash === undefined || b.auxDataHash instanceof Hash32 ) &&
         ( b.validityIntervalStart === undefined || canBeUInteger( b.validityIntervalStart ) ) &&
         ( b.mint === undefined || b.mint instanceof Value ) &&
@@ -85,7 +86,7 @@ export class TxBody
     readonly ttl?: bigint;
     readonly certs?: AnyCertificate[];
     readonly withdrawals?: TxWithdrawals;
-    readonly protocolUpdate?: ProtocolUpdateProposal;
+    readonly protocolUpdate?: LegacyPPUpdateProposal; // babbage only; removed in conway
     readonly auxDataHash?: AuxiliaryDataHash; // hash 32
     readonly validityIntervalStart?: bigint;
     readonly mint?: Value;
@@ -94,8 +95,13 @@ export class TxBody
     readonly requiredSigners?: PubKeyHash[];
     readonly network?: NetworkT;
     readonly collateralReturn?: TxOut;
-    readonly totCollateral?: bigint;
+    readonly totCollateral?: bigint; // Coin
     readonly refInputs?: UTxO[];
+    // conway
+    readonly votingProcedures?: VotingProcedures;
+    readonly proposalProcedures?: any;
+    readonly currentTreasuryValue?: bigint; // Coin
+    readonly donation?: bigint; // Coin (positive)
 
     /**
      * getter
@@ -241,7 +247,7 @@ export class TxBody
         if( protocolUpdate !== undefined )
         {
             assert(
-                isProtocolUpdateProposal( protocolUpdate ),
+                isLegacyPPUpdateProposal( protocolUpdate ),
                 "invalid 'protocolUpdate' while constructing a 'Tx'"
             )
         }
@@ -334,7 +340,6 @@ export class TxBody
         );
         
         // -------------------------------------- requiredSigners -------------------------------------- //
-        requiredSigners
         if( requiredSigners !== undefined )
         {
             assert(
@@ -469,7 +474,7 @@ export class TxBody
             this.protocolUpdate === undefined ? undefined :
             {
                 k: new CborUInt( 6 ),
-                v: protocolUpdateProposalToCborObj( this.protocolUpdate )
+                v: LegacyPPUpdateProposalToCborObj( this.protocolUpdate )
             },
             this.auxDataHash === undefined ? undefined :
             {
@@ -594,7 +599,7 @@ export class TxBody
             ttl,
             certs:                      _certs instanceof CborArray ? _certs.array.map( Certificate.fromCborObj ) : undefined,
             withdrawals:                _withdrawals === undefined ? undefined : TxWithdrawals.fromCborObj( _withdrawals ),
-            protocolUpdate:             _pUp === undefined ? undefined : protocolUpdateProposalFromCborObj( _pUp ),
+            protocolUpdate:             _pUp === undefined ? undefined : LegacyPPUpdateProposalFromCborObj( _pUp ),
             auxDataHash:                _auxDataHash === undefined ? undefined : AuxiliaryDataHash.fromCborObj( _auxDataHash ),
             validityIntervalStart:      _validityStart instanceof CborUInt ? _validityStart.num : undefined,
             mint:                       _mint === undefined ? undefined : Value.fromCborObj( _mint ),

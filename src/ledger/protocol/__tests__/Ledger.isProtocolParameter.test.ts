@@ -3,7 +3,7 @@ import { defaultProtocolParameters, isPartialProtocolParameters, isProtocolParam
 
 describe("Ledger.isProtocolParameter", () => {
 
-    test("defaultProtocolParamters", () => {
+    test("defaultProtocolParameters", () => {
 
         expect(
             isProtocolParameters( defaultProtocolParameters )

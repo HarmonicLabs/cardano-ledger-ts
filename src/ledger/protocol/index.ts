@@ -1,2 +1,2 @@
 export * from "./ProtocolParameters";
-export * from "./ProtocolUpdateProposal";
+export * from "./LegacyPPUpdateProposal";

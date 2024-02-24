@@ -5,8 +5,11 @@ import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../utils/ints";
 import { CostModels, costModelsFromCborObj, costModelsToCborObj, costModelsToJson, defaultV1Costs, defaultV2Costs, isCostModels } from "@harmoniclabs/cardano-costmodels-ts";
 import { ExBudget, ExBudgetJson } from "@harmoniclabs/plutus-machine";
 import { freezeAll, isObject } from "@harmoniclabs/obj-utils";
+import { Rational, cborFromRational, isRational, isRationalOrUndefined, tryCborFromRational } from "./Rational";
+import { PParamsPoolVotingThresholds, isPParamsPoolVotingThresholds, poolVotingThresholdsToCborObj, tryGetPParamsPoolVotingThresholdsFromCborObj } from "./PParamsPoolVotingThresholds";
+import { PParamsDrepVotingThresholds, drepVotingThresholdsToCborObj, isPParamsDrepVotingThresholds, tryGetPParamsDrepVotingThresholdsFromCborObj } from "./PParamsDrepVotingThresholds";
 
-export interface ProtocolParamters {
+export interface ProtocolParameters {
     txFeePerByte: CanBeUInteger,
     txFeeFixed: CanBeUInteger,
     maxBlockBodySize: CanBeUInteger,
@@ -16,10 +19,11 @@ export interface ProtocolParamters {
     stakePoolDeposit: Coin,
     poolRetireMaxEpoch: Epoch,
     stakePoolTargetNum: CanBeUInteger,
-    poolPledgeInfluence: CborPositiveRational | number,
-    monetaryExpansion: CborPositiveRational | number,
-    treasuryCut: CborPositiveRational | number,
-    protocolVersion: [ CanBeUInteger, CanBeUInteger ] | { major: number, minor: number },
+    poolPledgeInfluence: Rational,
+    monetaryExpansion: Rational,
+    treasuryCut: Rational,
+    /** @deprecated protocolVersion removed in conway */
+    protocolVersion?: [ CanBeUInteger, CanBeUInteger ] | { major: number, minor: number },
     minPoolCost: Coin,
     utxoCostPerByte: Coin,
     costModels: CostModels,
@@ -34,10 +38,20 @@ export interface ProtocolParamters {
     maxBlockExecutionUnits: ExBudget | ExBudgetJson,
     maxValueSize: CanBeUInteger,
     collateralPercentage: CanBeUInteger,
-    maxCollateralInputs: CanBeUInteger
+    maxCollateralInputs: CanBeUInteger,
+    // conway (governance params)
+    poolVotingThresholds: PParamsPoolVotingThresholds,
+    drepVotingThresholds: PParamsDrepVotingThresholds,
+    minCommitteSize: CanBeUInteger,
+    committeeTermLimit: Epoch,
+    governanceActionValidityPeriod: Epoch,
+    governanceActionDeposit: Epoch,
+    drepDeposit: Coin,
+    drepActivityPeriod: Epoch,
+    minfeeRefScriptCostPerByte: Rational
 }
 
-export function isProtocolParameters( something: any ): something is ProtocolParamters
+export function isProtocolParameters( something: any ): something is ProtocolParameters
 {
     const expectedKeys = [
         "txFeePerByte",
@@ -52,7 +66,8 @@ export function isProtocolParameters( something: any ): something is ProtocolPar
         "poolPledgeInfluence",
         "monetaryExpansion",
         "treasuryCut",
-        "protocolVersion",
+        // protocolVersion removed in conway
+        // "protocolVersion",
         "minPoolCost",
         "utxoCostPerByte",
         "costModels",
@@ -61,7 +76,16 @@ export function isProtocolParameters( something: any ): something is ProtocolPar
         "maxBlockExecutionUnits",
         "maxValueSize",
         "collateralPercentage",
-        "maxCollateralInputs"
+        "maxCollateralInputs",
+        "poolVotingThresholds",
+        "drepVotingThresholds",
+        "minCommitteSize",
+        "committeeTermLimit",
+        "governanceActionValidityPeriod",
+        "governanceActionDeposit",
+        "drepDeposit",
+        "drepActivityPeriod",
+        "minfeeRefScriptCostPerByte"
     ] as const;
 
     const actualKeys = Object.keys( something )
@@ -70,7 +94,7 @@ export function isProtocolParameters( something: any ): something is ProtocolPar
         !expectedKeys.every( k => actualKeys.includes( k ) )
     ) return false;
 
-    const pp: ProtocolParamters = something;
+    const pp: ProtocolParameters = something;
 
     if(!
         ([
@@ -87,19 +111,28 @@ export function isProtocolParameters( something: any ): something is ProtocolPar
             "utxoCostPerByte",
             "maxValueSize",
             "collateralPercentage",
-            "maxCollateralInputs"
+            "maxCollateralInputs",
+            "minCommitteSize",
+            "committeeTermLimit",
+            "governanceActionValidityPeriod",
+            "governanceActionDeposit",
+            "drepDeposit",
+            "drepActivityPeriod"
         ] as const).every( uintKey => canBeUInteger( pp[uintKey] ) )
     ) return false;
 
     if(!(
-        typeof pp.poolPledgeInfluence === "number" || pp.poolPledgeInfluence instanceof CborPositiveRational &&
-        typeof pp.monetaryExpansion === "number" || pp.monetaryExpansion instanceof CborPositiveRational &&
-        typeof pp.treasuryCut === "number" || pp.treasuryCut instanceof CborPositiveRational
+        isRational( pp.poolPledgeInfluence ) &&
+        isRational( pp.monetaryExpansion ) &&
+        isRational( pp.treasuryCut ) &&
+        isRational( pp.minfeeRefScriptCostPerByte )
     )) return false
 
     const ppv = pp.protocolVersion;
 
     if(!(
+        // protocolVersion removed in conway
+        ppv === undefined ||
         (
             Array.isArray( ppv ) &&
             ppv.length >= 2 &&
@@ -133,22 +166,19 @@ export function isProtocolParameters( something: any ): something is ProtocolPar
     )) return false
 
     if(!(
-        isCostModels( pp.costModels )
+        isCostModels( pp.costModels ) &&
+        isPParamsPoolVotingThresholds( pp.poolVotingThresholds ) &&
+        isPParamsDrepVotingThresholds( pp.drepVotingThresholds )
     )) return false;
 
     return true;
 }
 
-function maybeValidCborPosRat( _: any ): boolean
-{
-    return (_ === undefined || _ instanceof CborPositiveRational || typeof _ === "number" );
-}
-
-export function isPartialProtocolParameters( something: object ): something is Partial<ProtocolParamters>
+export function isPartialProtocolParameters( something: object ): something is Partial<ProtocolParameters>
 {
     if( !isObject( something ) ) return false;
 
-    const pp: Partial<ProtocolParamters> = something;
+    const pp: Partial<ProtocolParameters> = something;
 
     if(!
         ([
@@ -165,15 +195,22 @@ export function isPartialProtocolParameters( something: object ): something is P
             "utxoCostPerByte",
             "maxValueSize",
             "collateralPercentage",
-            "maxCollateralInputs"
+            "maxCollateralInputs",
+            "minCommitteSize",
+            "committeeTermLimit",
+            "governanceActionValidityPeriod",
+            "governanceActionDeposit",
+            "drepDeposit",
+            "drepActivityPeriod"
         ] as const).every( uintKey => pp[uintKey] === undefined || canBeUInteger( pp[uintKey] ) )
     ) return false;
 
 
     if(!(
-        maybeValidCborPosRat( pp.poolPledgeInfluence ) &&
-        maybeValidCborPosRat( pp.monetaryExpansion ) &&
-        maybeValidCborPosRat( pp.treasuryCut )
+        isRationalOrUndefined( pp.poolPledgeInfluence ) &&
+        isRationalOrUndefined( pp.monetaryExpansion ) &&
+        isRationalOrUndefined( pp.treasuryCut )  &&
+        isRationalOrUndefined( pp.minfeeRefScriptCostPerByte )
     )) return false;
 
     const ppv = pp.protocolVersion;
@@ -222,7 +259,9 @@ export function isPartialProtocolParameters( something: object ): something is P
     )) return false
 
     if(!(
-        pp.costModels === undefined || isCostModels( pp.costModels )
+        (pp.costModels === undefined || isCostModels( pp.costModels )) &&
+        (pp.poolVotingThresholds === undefined || isPParamsPoolVotingThresholds( pp.poolVotingThresholds )) &&
+        (pp.drepVotingThresholds === undefined || isPParamsDrepVotingThresholds( pp.drepVotingThresholds ))
     )) return false;
 
     return true;
@@ -243,14 +282,13 @@ function fromUIntOrUndef( n: CborObj | undefined ): bigint | undefined
 
 function kv( k: number, v: CborObj | undefined ): CborMapEntry | undefined
 {
-    
     return v === undefined ? undefined : {
         k: new CborUInt( k ),
         v
     };
 }
 
-export function partialProtocolParametersToCborObj( pps: Partial<ProtocolParamters> ): CborMap
+export function partialProtocolParametersToCborObj( pps: Partial<ProtocolParameters> ): CborMap
 {
     const {
         protocolVersion,
@@ -272,17 +310,17 @@ export function partialProtocolParametersToCborObj( pps: Partial<ProtocolParamte
         mapUIntEntryOrUndefined( 6, pps.stakePoolDeposit ),
         mapUIntEntryOrUndefined( 7, pps.poolRetireMaxEpoch ),
         mapUIntEntryOrUndefined( 8, pps.stakePoolTargetNum ),
-        kv( 9 , typeof pps.poolPledgeInfluence === "number" ? CborPositiveRational.fromNumber( pps.poolPledgeInfluence ) : pps.poolPledgeInfluence ),
-        kv( 10, typeof pps.monetaryExpansion === "number" ? CborPositiveRational.fromNumber( pps.monetaryExpansion ) : pps.monetaryExpansion ),
-        kv( 11, typeof pps.treasuryCut === "number" ? CborPositiveRational.fromNumber( pps.treasuryCut ) : pps.treasuryCut ),
-        protocolVersion === undefined ? undefined:
-        {
-            k: new CborUInt( 14 ),
-            v: new CborArray([
+        kv( 9 , tryCborFromRational( pps.poolPledgeInfluence ) ),
+        kv( 10, tryCborFromRational( pps.monetaryExpansion   ) ),
+        kv( 11, tryCborFromRational( pps.treasuryCut         ) ),
+        protocolVersion === undefined ? undefined :
+        kv(
+            14,
+            new CborArray([
                 new CborUInt( forceBigUInt( Array.isArray(protocolVersion) ? protocolVersion[0] : protocolVersion.major ) ),
                 new CborUInt( forceBigUInt( Array.isArray(protocolVersion) ? protocolVersion[1] : protocolVersion.minor ) )
             ])
-        },
+        ),
         mapUIntEntryOrUndefined( 16, pps.minPoolCost ),
         mapUIntEntryOrUndefined( 17, pps.utxoCostPerByte ),
         kv( 18, 
@@ -292,31 +330,42 @@ export function partialProtocolParametersToCborObj( pps: Partial<ProtocolParamte
                 costModelsToCborObj( costModels )
         ),
         executionUnitPrices === undefined ? undefined:
-        {
-            k: new CborUInt( 19 ),
-            v: Array.isArray(executionUnitPrices) ? 
+        kv(
+            19,
+            Array.isArray(executionUnitPrices) ? 
                 new CborArray(executionUnitPrices) :
                 new CborArray([
                     CborPositiveRational.fromNumber( executionUnitPrices.priceSteps ),
                     CborPositiveRational.fromNumber( executionUnitPrices.priceMemory ),
                 ])
-        },
+        ),
         kv( 20, ExBudget.isJson( maxTxExecutionUnits    ) ? ExBudget.fromJson( maxTxExecutionUnits    ).toCborObj() : maxTxExecutionUnits?.toCborObj()      ),
         kv( 21, ExBudget.isJson( maxBlockExecutionUnits ) ? ExBudget.fromJson( maxBlockExecutionUnits ).toCborObj() : maxBlockExecutionUnits?.toCborObj()   ),
         mapUIntEntryOrUndefined( 22, pps.maxValueSize ),
         mapUIntEntryOrUndefined( 23, pps.collateralPercentage ),
         mapUIntEntryOrUndefined( 24, pps.maxCollateralInputs ),
+        pps.poolVotingThresholds ? kv( 25, poolVotingThresholdsToCborObj( pps.poolVotingThresholds ) ) : undefined, 
+        pps.drepVotingThresholds ? kv( 26, drepVotingThresholdsToCborObj( pps.drepVotingThresholds ) ) : undefined,
+        mapUIntEntryOrUndefined( 27, pps.minCommitteSize ),
+        mapUIntEntryOrUndefined( 28, pps.committeeTermLimit ),
+        mapUIntEntryOrUndefined( 29, pps.governanceActionValidityPeriod ),
+        mapUIntEntryOrUndefined( 30, pps.governanceActionDeposit ),
+        mapUIntEntryOrUndefined( 31, pps.drepDeposit ),
+        mapUIntEntryOrUndefined( 32, pps.drepActivityPeriod ),
+        kv( 33, tryCborFromRational( pps.minfeeRefScriptCostPerByte ) ),
     ].filter( elem => elem !== undefined ) as CborMapEntry[])
 }
 
-export function partialProtocolParametersFromCborObj( cObj: CborObj ): Partial<ProtocolParamters>
+const maxProtocolParamsEntries = 33;
+
+export function partialProtocolParametersFromCborObj( cObj: CborObj ): Partial<ProtocolParameters>
 {
     if(!( cObj instanceof CborMap ))
-    throw new Error(`Invalid CBOR format for "Partial<ProtocolParamters>"`)
+    throw new Error(`Invalid CBOR format for "Partial<ProtocolParameters>"`)
 
-    let fields: (CborObj | undefined)[] = new Array( 25 ).fill( undefined );
+    let fields: (CborObj | undefined)[] = new Array( maxProtocolParamsEntries ).fill( undefined );
 
-    for( let i = 0; i < 25; i++)
+    for( let i = 0; i <= maxProtocolParamsEntries; i++)
     {
         const { v } = (cObj as CborMap).map.find(
             ({ k }) => k instanceof CborUInt && Number( k.num ) === i
@@ -352,7 +401,17 @@ export function partialProtocolParametersFromCborObj( cObj: CborObj ): Partial<P
         _maxBlockExecUnits,
         _maxValueSize,
         _collatearalPerc,
-        _maxCollIns
+        _maxCollIns,
+        // conway
+        _poolVotingThresholds,
+        _drepVotingThresholds,
+        _minCommitteSize,
+        _committeeTermLimit,
+        _governanceActionValidityPeriod,
+        _governanceActionDeposit,
+        _drepDeposit,
+        _drepActivityPeriod,
+        _minfeeRefScriptCostPerByte,
     ] = fields;
 
     const protocolVersion: [bigint, bigint] | undefined = (
@@ -374,32 +433,41 @@ export function partialProtocolParametersFromCborObj( cObj: CborObj ): Partial<P
     const _costModels = costModelsFromCborObj( _costmdls );
 
     return {
-        txFeePerByte:      fromUIntOrUndef( _minFeeCoeff ),
-        txFeeFixed:            fromUIntOrUndef( _minFeeFix ),
-        maxBlockBodySize:       fromUIntOrUndef( _maxBlockBodySize ),
-        maxTxSize:              fromUIntOrUndef( _maxTxSize ),
-        maxBlockHeaderSize:     fromUIntOrUndef( _maxBlockHeaderSize ),
-        stakeAddressDeposit:             fromUIntOrUndef( _keyDep ),
-        stakePoolDeposit:            fromUIntOrUndef( _poolDep ),
-        poolRetireMaxEpoch:                  fromUIntOrUndef( _epoch ),
-        stakePoolTargetNum:                 fromUIntOrUndef( _kParam ),
-        poolPledgeInfluence:        CborPositiveRational.fromCborObjOrUndef( _pledgeInfluence ),
-        monetaryExpansion:          CborPositiveRational.fromCborObjOrUndef( _expansionRate ),
-        treasuryCut:   CborPositiveRational.fromCborObjOrUndef( _treasureryGrowthRate ),
+        txFeePerByte:                   fromUIntOrUndef( _minFeeCoeff ),
+        txFeeFixed:                     fromUIntOrUndef( _minFeeFix ),
+        maxBlockBodySize:               fromUIntOrUndef( _maxBlockBodySize ),
+        maxTxSize:                      fromUIntOrUndef( _maxTxSize ),
+        maxBlockHeaderSize:             fromUIntOrUndef( _maxBlockHeaderSize ),
+        stakeAddressDeposit:            fromUIntOrUndef( _keyDep ),
+        stakePoolDeposit:               fromUIntOrUndef( _poolDep ),
+        poolRetireMaxEpoch:             fromUIntOrUndef( _epoch ),
+        stakePoolTargetNum:             fromUIntOrUndef( _kParam ),
+        poolPledgeInfluence:            CborPositiveRational.fromCborObjOrUndef( _pledgeInfluence ),
+        monetaryExpansion:              CborPositiveRational.fromCborObjOrUndef( _expansionRate ),
+        treasuryCut:                    CborPositiveRational.fromCborObjOrUndef( _treasureryGrowthRate ),
         protocolVersion,
-        minPoolCost:             fromUIntOrUndef( _poolMinFee ),
-        utxoCostPerByte:         fromUIntOrUndef( _adaPerUtxoByte ),
-        costModels:             Object.keys( _costModels ).length === 0 ? undefined : _costModels,
+        minPoolCost:                    fromUIntOrUndef( _poolMinFee ),
+        utxoCostPerByte:                fromUIntOrUndef( _adaPerUtxoByte ),
+        costModels:                     Object.keys( _costModels ).length === 0 ? undefined : _costModels,
         executionUnitPrices,
-        maxTxExecutionUnits:     _maxTxExecUnits === undefined ? undefined : ExBudget.fromCborObj( _maxTxExecUnits ),
-        maxBlockExecutionUnits:  _maxBlockExecUnits === undefined ? undefined : ExBudget.fromCborObj( _maxBlockExecUnits ),
-        maxValueSize:          fromUIntOrUndef( _maxValueSize ),
-        collateralPercentage:   fromUIntOrUndef( _collatearalPerc ),
-        maxCollateralInputs:       fromUIntOrUndef( _maxCollIns ),
+        maxTxExecutionUnits:            _maxTxExecUnits === undefined ? undefined : ExBudget.fromCborObj( _maxTxExecUnits ),
+        maxBlockExecutionUnits:         _maxBlockExecUnits === undefined ? undefined : ExBudget.fromCborObj( _maxBlockExecUnits ),
+        maxValueSize:                   fromUIntOrUndef( _maxValueSize ),
+        collateralPercentage:           fromUIntOrUndef( _collatearalPerc ),
+        maxCollateralInputs:            fromUIntOrUndef( _maxCollIns ),
+        poolVotingThresholds:           tryGetPParamsPoolVotingThresholdsFromCborObj( _poolVotingThresholds ),
+        drepVotingThresholds:           tryGetPParamsDrepVotingThresholdsFromCborObj( _drepVotingThresholds ),
+        minCommitteSize:                fromUIntOrUndef( _minCommitteSize ),
+        committeeTermLimit:             fromUIntOrUndef( _committeeTermLimit ),
+        governanceActionValidityPeriod: fromUIntOrUndef( _governanceActionValidityPeriod ),
+        governanceActionDeposit:        fromUIntOrUndef( _governanceActionDeposit ),
+        drepDeposit:                    fromUIntOrUndef( _drepDeposit ),
+        drepActivityPeriod:             fromUIntOrUndef( _drepActivityPeriod ),
+        minfeeRefScriptCostPerByte:     tryCborFromRational( _minfeeRefScriptCostPerByte )
     }
 }
 
-export const defaultProtocolParameters: ProtocolParamters = freezeAll({
+export const defaultProtocolParameters: ProtocolParameters = freezeAll({
     txFeePerByte: 44,
     txFeeFixed: 155381,
     maxBlockBodySize: 73728,
@@ -427,10 +495,36 @@ export const defaultProtocolParameters: ProtocolParamters = freezeAll({
     maxBlockExecutionUnits: new ExBudget({ mem: 50_000_000, cpu: 40_000_000_000 }),
     maxValueSize: 5000,
     collateralPercentage: 150,
-    maxCollateralInputs: 3
-})
+    maxCollateralInputs: 3,
+    poolVotingThresholds: {
+        committeeNormal: CborPositiveRational.fromNumber( 0.51 ),
+        committeeNoConfidence: CborPositiveRational.fromNumber( 0.51 ),
+        hardForkInitiation: CborPositiveRational.fromNumber( 0.51 ),
+        motionNoConfidence: CborPositiveRational.fromNumber( 0.51 ),
+        securityRelevantVotingThresholds: CborPositiveRational.fromNumber( 0.51 )
+    } as PParamsPoolVotingThresholds,
+    drepVotingThresholds: {
+        motionNoConfidence: CborPositiveRational.fromNumber( 0.51 ),
+        committeeNormal: CborPositiveRational.fromNumber( 0.51 ),
+        committeeNoConfidence: CborPositiveRational.fromNumber( 0.51 ),
+        updateConstitution: CborPositiveRational.fromNumber( 0.51 ),
+        hardForkInitiation: CborPositiveRational.fromNumber( 0.51 ),
+        ppNetworkGroup: CborPositiveRational.fromNumber( 0.51 ),
+        ppEconomicGroup: CborPositiveRational.fromNumber( 0.51 ),
+        ppTechnicalGroup: CborPositiveRational.fromNumber( 0.51 ),
+        ppGovGroup: CborPositiveRational.fromNumber( 0.51 ),
+        treasuryWithdrawal: CborPositiveRational.fromNumber( 0.51 )
+    } as PParamsDrepVotingThresholds,
+    minCommitteSize: 0,
+    committeeTermLimit: 200,
+    governanceActionValidityPeriod: 10,
+    governanceActionDeposit: 1_000_000_000,
+    drepDeposit: 2_000_000,
+    drepActivityPeriod: 20,
+    minfeeRefScriptCostPerByte: CborPositiveRational.fromNumber( 0.5 )
+} as ProtocolParameters)
 
-export function partialProtocolParamsToJson( pp: Partial<ProtocolParamters> )
+export function partialProtocolParamsToJson( pp: Partial<ProtocolParameters> )
 {
     return {
         ...pp,

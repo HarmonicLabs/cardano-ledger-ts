@@ -10,7 +10,7 @@ export class PrivateKey extends Hash32
         return new PublicKey(
             new Uint8Array(
                 deriveEd25519PublicKey(
-                    Array.from( this.asBytes ) as byte[]
+                    Array.from( this.toBuffer() ) as byte[]
                 )
             )
         );
@@ -18,10 +18,10 @@ export class PrivateKey extends Hash32
 
     static fromCbor(cStr: CanBeCborString)
     {
-        return new PrivateKey( Hash32.fromCbor( cStr ).asBytes )
+        return new PrivateKey( Hash32.fromCbor( cStr ).toBuffer() )
     }
     static fromCborObj( cObj: CborObj )
     {
-        return new PrivateKey( Hash32.fromCborObj( cObj ).asBytes )
+        return new PrivateKey( Hash32.fromCborObj( cObj ).toBuffer() )
     }
 }

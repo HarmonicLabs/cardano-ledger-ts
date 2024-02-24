@@ -23,7 +23,7 @@ export class VKey extends Hash32
 
                     _hash = new PubKeyHash(
                         Uint8Array.from(
-                            blake2b_224( this.asBytes )
+                            blake2b_224( this.toBuffer() )
                         )
                     );
 

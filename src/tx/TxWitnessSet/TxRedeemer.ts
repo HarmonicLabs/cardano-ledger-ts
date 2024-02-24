@@ -5,7 +5,7 @@ import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { isObject, hasOwn, defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
 import { Data, isData, dataToCborObj, dataFromCborObj, DataConstr, DataB } from "@harmoniclabs/plutus-data";
 import { ExBudget } from "@harmoniclabs/plutus-machine";
-import { StakeCredentials, StakeValidatorHash } from "../../credentials";
+import { PaymentCredentials, StakeCredentials, StakeValidatorHash } from "../../credentials";
 import { BasePlutsError } from "../../utils/BasePlutsError";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
@@ -203,6 +203,7 @@ export class TxRedeemer
         }
     }
 
+    /** @deprecated */
     toSpendingPurposeData( tx: TxBody ): DataConstr
     {
         const tag = this.tag;
@@ -221,12 +222,12 @@ export class TxRedeemer
             throw new BasePlutsError(
                 "invalid minting policy for minting redeemer " + this.index.toString()
             );
-            purposeArgData = new DataB( policy.asBytes );
+            purposeArgData = new DataB( policy.toBuffer() );
         }
         else if( tag === TxRedeemerTag.Spend )
         {
             ctorIdx = 1;
-            const utxoRef = tx.inputs[ this.index ].utxoRef;
+            const utxoRef = tx.inputs.filter( input => input.resolved.address.paymentCreds.type === "script" )[ this.index ].utxoRef;
             if( utxoRef === undefined )
             throw new BasePlutsError(
                 "invalid utxo for spending redeemer " + this.index.toString()

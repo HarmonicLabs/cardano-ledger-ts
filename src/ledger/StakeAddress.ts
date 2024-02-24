@@ -74,7 +74,7 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType>
     {
         return encodeBech32(
             this.network === "mainnet" ? "stake" : "stake_test",
-            this.credentials.asBytes
+            this.credentials.toBuffer()
         ) as any;
     }
 
@@ -98,7 +98,7 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType>
 
     toBytes(): byte[]
     {
-        return Array.from( this.credentials.asBytes ) as any;
+        return Array.from( this.credentials.toBuffer() ) as any;
     }
 
     static fromBytes(

@@ -6,7 +6,7 @@ export class Signature extends Hash
 {
     constructor( bs: string | Uint8Array | Signature  )
     {
-        super( bs instanceof Signature ? bs.asBytes : bs );
+        super( bs instanceof Signature ? bs.toBuffer() : bs );
 
         assert(
             this._bytes.length === 64,
@@ -26,10 +26,10 @@ export class Signature extends Hash
 
     static fromCbor(cStr: CanBeCborString): Signature
     {
-        return new Signature( Hash.fromCbor( cStr ).asBytes )
+        return new Signature( Hash.fromCbor( cStr ).toBuffer() )
     }
     static fromCborObj( cObj: CborObj ): Signature
     {
-        return new Signature( Hash.fromCborObj( cObj ).asBytes )
+        return new Signature( Hash.fromCborObj( cObj ).toBuffer() )
     }
 }

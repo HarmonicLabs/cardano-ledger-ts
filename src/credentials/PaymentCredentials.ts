@@ -37,8 +37,8 @@ export class PaymentCredentials<T extends PaymentCredentialsType = PaymentCreden
             this,
             "hash",
             type === "pubKey" ? 
-                ( hash instanceof PubKeyHash ? hash : new PubKeyHash( hash.asBytes ) ) :
-                ( hash instanceof ValidatorHash ? hash : new ValidatorHash( hash.asBytes ) )
+                ( hash instanceof PubKeyHash ? hash : new PubKeyHash( hash.toBuffer() ) ) :
+                ( hash instanceof ValidatorHash ? hash : new ValidatorHash( hash.toBuffer() ) )
         );
     }
 
@@ -66,7 +66,7 @@ export class PaymentCredentials<T extends PaymentCredentialsType = PaymentCreden
                 1,  // PScriptCredential
             [
                 // both bytestring alias as argument
-                new DataB( this.hash.asBytes )
+                new DataB( this.hash.toBuffer() )
             ]
         )
     }

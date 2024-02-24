@@ -163,7 +163,7 @@ export class Hash
     }
     toCborObj(): CborObj
     {
-        return new CborBytes( this.asBytes )
+        return new CborBytes( this.toBuffer() )
     }
 
     static fromCbor( cStr: CanBeCborString ): Hash

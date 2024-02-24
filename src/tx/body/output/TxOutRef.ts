@@ -84,7 +84,7 @@ export class TxOutRef
             [
                 new DataConstr(
                     0, // PTxId only constructor
-                    [ new DataB( this.id.asBytes ) ]
+                    [ new DataB( this.id.toBuffer() ) ]
                 ),
                 new DataI( this.index )
             ]

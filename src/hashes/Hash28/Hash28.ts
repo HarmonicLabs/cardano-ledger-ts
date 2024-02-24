@@ -2,9 +2,11 @@ import { CanBeCborString, Cbor, forceCborString, CborObj, CborBytes } from "@har
 import { assert } from "../../utils/assert";
 import { Hash } from "../Hash";
 
+export type CanBeHash28 = string | Uint8Array | Hash28;
+
 export class Hash28 extends Hash
 {
-    constructor( bs: string | Uint8Array | Hash28 , className: string = "Hash28" )
+    constructor( bs: CanBeHash28 , className: string = "Hash28" )
     {
         super( bs instanceof Hash28 ? bs.toBuffer() : bs );
 

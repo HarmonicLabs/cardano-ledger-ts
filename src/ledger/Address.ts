@@ -166,7 +166,7 @@ export class Address
             ( this.paymentCreds.type === "script" ? 0b01_0000 : 0b00_0000 )
         ) as byte]
         .concat(
-            Array.from( this.paymentCreds.hash.asBytes ) as byte[]
+            Array.from( this.paymentCreds.hash.toBuffer() ) as byte[]
         )
         .concat(
             this.stakeCreds === (void 0) ? [] : // add nothing
@@ -184,7 +184,7 @@ export class Address
                     [] as byte[]
                 ) :
             // hash (script or key)
-            Array.from( this.stakeCreds?.hash.asBytes ?? [] ) as byte[]
+            Array.from( this.stakeCreds?.hash.toBuffer() ?? [] ) as byte[]
         );
     }
 

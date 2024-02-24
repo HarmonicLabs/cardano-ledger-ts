@@ -64,8 +64,8 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
                 this,
                 "hash",
                 type === "stakeKey" ? 
-                    ( hash instanceof StakeKeyHash ? hash : new StakeKeyHash( hash.asBytes ) ) :
-                    ( hash instanceof StakeValidatorHash ? hash : new StakeValidatorHash( hash.asBytes ) )
+                    ( hash instanceof StakeKeyHash ? hash : new StakeKeyHash( hash.toBuffer() ) ) :
+                    ( hash instanceof StakeValidatorHash ? hash : new StakeValidatorHash( hash.toBuffer() ) )
             );
         }
     }
