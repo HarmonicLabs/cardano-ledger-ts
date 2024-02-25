@@ -4,9 +4,12 @@ import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx";
 import { Constitution, IConstitution } from "../Constitution";
 import { GovActionType } from "./GovActionType";
 import { roDescr } from "../../utils/roDescr";
+import { isObject } from "@harmoniclabs/obj-utils";
 
 export interface IGovActionInfo {}
 
+export const isIGovActionInfo = isObject as ( stuff: any ) => stuff is IGovActionInfo;
+ 
 export class GovActionInfo
     implements IGovAction, IGovActionInfo, ToCbor
 {

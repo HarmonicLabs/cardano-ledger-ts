@@ -1,13 +1,22 @@
 import { Cbor, CborArray, CborSimple, CborString, CborUInt, ToCbor } from "@harmoniclabs/cbor";
 import { CanBeHash28, Hash28, canBeHash28 } from "../../hashes";
-import { ITxWithdrawals, TxWithdrawals } from "../../ledger";
+import { ITxWithdrawals, TxWithdrawals, isITxWithdrawals } from "../../ledger";
 import { IGovAction } from "./IGovAction";
 import { GovActionType } from "./GovActionType";
 import { roDescr } from "../../utils/roDescr";
+import { isObject } from "@harmoniclabs/obj-utils";
 
 export interface IGovActionTreasuryWithdrawals {
     withdrawals: ITxWithdrawals | TxWithdrawals,
     policyHash?: CanBeHash28 | undefined
+}
+
+export function isIGovActionTreasuryWithdrawals( stuff: any ): stuff is IGovActionTreasuryWithdrawals
+{
+    return isObject( stuff ) && (
+        ( stuff.withdrawals instanceof TxWithdrawals || isITxWithdrawals( stuff.withdrawals ) ) &&
+        ( stuff.policyHash === undefined || canBeHash28( stuff.policyHash ) )
+    );
 }
 
 export class GovActionTreasuryWithdrawals

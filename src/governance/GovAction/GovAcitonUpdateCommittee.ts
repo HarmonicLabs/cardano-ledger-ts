@@ -1,15 +1,24 @@
 import { Cbor, CborArray, CborMap, CborPositiveRational, CborSimple, CborString, CborUInt, ToCbor } from "@harmoniclabs/cbor";
 import { Epoch } from "../../ledger";
-import { Rational, cborFromRational } from "../../ledger/protocol/Rational";
+import { Rational, cborFromRational, isRational } from "../../ledger/protocol/Rational";
 import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx";
 import { IGovAction } from "./IGovAction";
 import { GovActionType } from "./GovActionType";
 import { Credential } from "../../credentials";import { roDescr } from "../../utils/roDescr";
-import { forceBigUInt } from "../../utils/ints";
+import { canBeUInteger, forceBigUInt } from "../../utils/ints";
+import { isObject } from "@harmoniclabs/obj-utils";
 
 export interface INewCommitteeEntry {
     coldCredential: Credential,
     epoch: Epoch,
+}
+
+export function isINewCommitteeEntry( stuff: any ): stuff is INewCommitteeEntry
+{
+    return isObject( stuff ) && (
+        stuff.coldCredential instanceof Credential &&
+        canBeUInteger( stuff.epoch )
+    );
 }
 
 export interface INewCommitteeEntryBI {
@@ -22,6 +31,22 @@ export interface IGovActionUpdateCommittee {
     toRemove: Credential[],
     toAdd: INewCommitteeEntry[],
     threshold: Rational
+}
+
+export function isIGovActionUpdateCommittee( stuff: any ): stuff is IGovActionUpdateCommittee
+{
+    return isObject( stuff ) && (
+        stuff.govActionId === undefined || isITxOutRef( stuff.govActionId ) &&
+        
+        Array.isArray( stuff.toRemove ) &&
+        (stuff.toRemove as any[]).length > 0 &&
+        (stuff.toRemove as any[]).every( elem => elem instanceof Credential ) &&
+
+        Array.isArray( stuff.toAdd ) &&
+        (stuff.toAdd as any[]).length > 0 &&
+        (stuff.toAdd as any[]).every( isINewCommitteeEntry ) &&
+        isRational( stuff.threshold )
+    );
 }
 
 export class GovActionUpdateCommittee

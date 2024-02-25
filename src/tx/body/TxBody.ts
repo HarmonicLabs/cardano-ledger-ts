@@ -9,8 +9,8 @@ import { ToJson } from "../../utils/ToJson";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../utils/ints";
 import { UTxO, TxOut, isIUTxO, isITxOut, TxOutRef } from "./output";
 import { assert } from "../../utils/assert";
-import { VotingProcedures } from "../../governance/VotingProcedures";
-import { ProposalProcedure } from "../../governance/ProposalProcedure";
+import { IVotingProcedures, VotingProcedures, isIVotingProceduresEntry } from "../../governance/VotingProcedures";
+import { IProposalProcedure, ProposalProcedure, isIProposalProcedure } from "../../governance/ProposalProcedure";
 
 export interface ITxBody {
     inputs: [ UTxO, ...UTxO[] ],
@@ -30,6 +30,11 @@ export interface ITxBody {
     collateralReturn?: TxOut,
     totCollateral?: Coin,
     refInputs?: UTxO[]
+    // conway
+    votingProcedures?: IVotingProcedures | VotingProcedures;
+    proposalProcedures?: (ProposalProcedure | IProposalProcedure)[];
+    currentTreasuryValue?: CanBeUInteger; // Coin
+    donation?: CanBeUInteger; // Coin (positive)
 }
 
 export function isITxBody( body: Readonly<object> ): body is ITxBody
@@ -74,7 +79,26 @@ export function isITxBody( body: Readonly<object> ): body is ITxBody
         ( b.refInputs === undefined || (
             Array.isArray( b.refInputs ) &&
             b.refInputs.every( ref => ref instanceof UTxO || isIUTxO( ref ) )
-        ))
+        )) &&
+        (b.votingProcedures === undefined || (
+            b.votingProcedures instanceof VotingProcedures ||
+            (
+                Array.isArray( b.votingProcedures ) &&
+                b.votingProcedures.length > 0 &&
+                b.votingProcedures.every( isIVotingProceduresEntry )
+            )
+        )) && (
+            b.proposalProcedures === undefined ||
+            (
+                Array.isArray( b.proposalProcedures ) &&
+                b.proposalProcedures.every( elem =>
+                    elem instanceof ProposalProcedure ||
+                    isIProposalProcedure( elem )
+                )
+            )
+        ) &&
+        ( b.currentTreasuryValue === undefined || canBeUInteger( b.currentTreasuryValue ) ) &&
+        ( b.donation === undefined || canBeUInteger( b.donation ) )
     )
 }
 

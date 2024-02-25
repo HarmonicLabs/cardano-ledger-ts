@@ -1,13 +1,22 @@
 import { Cbor, CborArray, CborObj, CborSimple, CborString, CborUInt, ToCbor } from "@harmoniclabs/cbor";
 import { IGovAction } from "./IGovAction";
 import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx";
-import { Constitution, IConstitution } from "../Constitution";
+import { Constitution, IConstitution, isIConstitution } from "../Constitution";
 import { GovActionType } from "./GovActionType";
 import { roDescr } from "../../utils/roDescr";
+import { isObject } from "@harmoniclabs/obj-utils";
 
 export interface IGovActionNewConstitution {
     govActionId?: ITxOutRef | undefined,
     constitution: IConstitution
+}
+
+export function isIGovActionNewConstitution( stuff: any ): stuff is IGovActionNewConstitution
+{
+    return isObject( stuff ) && (
+        stuff.govActionId === undefined || isITxOutRef( stuff.govActionId ) &&
+        isIConstitution( stuff.constitution )
+    );
 }
 
 export class GovActionNewConstitution

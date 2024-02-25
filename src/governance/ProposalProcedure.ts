@@ -1,16 +1,28 @@
 import { Cbor, CborArray, CborString, CborUInt, ToCbor } from "@harmoniclabs/cbor";
 import { Coin, StakeAddress } from "../ledger";
-import { Anchor, IAnchor } from "./Anchor";
-import { GovActionLike, toRealGovAction } from "./GovAction/GovActionLike";
+import { Anchor, IAnchor, isIAnchor } from "./Anchor";
+import { GovActionLike, isGovActionLike, toRealGovAction } from "./GovAction/GovActionLike";
 import { forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
 import { roDescr } from "../utils/roDescr";
 import { GovAction } from "./GovAction";
+import { isObject } from "@harmoniclabs/obj-utils";
+import { canBeUInteger } from "../utils/ints";
 
 export interface IProposalProcedure {
     deposit: Coin,
     rewardAccount: StakeAddress,
     govAction: GovActionLike,
     anchor: IAnchor
+}
+
+export function isIProposalProcedure( stuff: any ): stuff is IProposalProcedure
+{
+    return isObject( stuff ) && (
+        canBeUInteger( stuff.deposit ) &&
+        stuff.rewardAccount instanceof StakeAddress &&
+        isGovActionLike( stuff.govAction ) &&
+        isIAnchor( stuff.anchor )
+    );
 }
 
 export class ProposalProcedure

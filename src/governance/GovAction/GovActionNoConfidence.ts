@@ -3,9 +3,17 @@ import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx";
 import { IGovAction } from "./IGovAction";
 import { GovActionType } from "./GovActionType";
 import { roDescr } from "../../utils/roDescr";
+import { isObject } from "@harmoniclabs/obj-utils";
 
 export interface IGovActionNoConfidence {
     govActionId?: ITxOutRef | undefined,
+}
+
+export function isIGovActionNoConfidence( stuff: any ): stuff is IGovActionNoConfidence
+{
+    return isObject( stuff ) && (
+        stuff.govActionId === undefined || isITxOutRef( stuff.govActionId )
+    );
 }
 
 export class GovActionNoConfidence

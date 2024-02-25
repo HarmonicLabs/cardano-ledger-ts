@@ -1,10 +1,20 @@
 import { Cbor, CborArray, CborBytes, CborObj, CborString, CborText } from "@harmoniclabs/cbor";
-import { CanBeHash32, Hash32 } from "../hashes";
+import { CanBeHash32, Hash32, canBeHash32 } from "../hashes";
 import { roDescr } from "../utils/roDescr";
+import { isObject } from "@harmoniclabs/obj-utils";
 
 export interface IAnchor {
     url: string,
     anchorDataHash: CanBeHash32
+}
+
+export function isIAnchor( stuff: any ): stuff is IAnchor
+{
+    return isObject( stuff ) && (
+        typeof stuff.url === "string" &&
+        (stuff.url as string).length <= 128 &&
+        canBeHash32( stuff.anchorDataHash )
+    );
 }
 
 export class Anchor

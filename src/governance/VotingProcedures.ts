@@ -2,9 +2,10 @@ import { CborString, Cbor, CborObj, CborArray, CborText, CborBytes, CborUInt, Cb
 import { roDescr } from "../utils/roDescr";
 import { Anchor, IAnchor } from "./Anchor";
 import { Vote, voteToCborObj } from "./Vote";
-import { IVoter, Voter } from "./Voter";
+import { IVoter, Voter, isIVoter } from "./Voter";
 import { IVotingProcedure, VotingProcedure } from "./VotingProcedure";
-import { ITxOutRef, TxOutRef } from "../tx/body/output/TxOutRef";
+import { ITxOutRef, TxOutRef, isITxOutRef } from "../tx/body/output/TxOutRef";
+import { isObject } from "@harmoniclabs/obj-utils";
 
 export interface IVotingProceduresEntry {
     voter: IVoter,
@@ -12,6 +13,23 @@ export interface IVotingProceduresEntry {
         govActionId: ITxOutRef,
         vote: IVotingProcedure
     }[]
+}
+
+export function isIVotingProceduresEntry( stuff: any ): stuff is IVotingProceduresEntry
+{
+    if( !isObject( stuff ) ) return false;
+
+    return (
+        isIVoter( stuff.voter ) &&
+        Array.isArray( stuff.votes ) &&
+        (stuff.votes as any[]).every( elem => {
+            return (
+                isObject( elem ) &&
+                isITxOutRef( elem.govActionId ) &&
+                IVotingProcedure( elem.vote )
+            )
+        })
+    );
 }
 
 export interface ITypedVotingProceduresEntry {

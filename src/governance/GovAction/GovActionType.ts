@@ -9,3 +9,11 @@ export enum GovActionType {
 };
 
 Object.freeze( GovActionType );
+
+export function isGovActionType( stuff: any ): stuff is GovActionType
+{
+    return typeof stuff === "number" && (
+        stuff >= 0 && stuff <= 6 &&
+        stuff === Math.round( stuff )
+    );
+}

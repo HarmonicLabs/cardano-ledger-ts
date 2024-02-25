@@ -1,11 +1,22 @@
 import { CborString, Cbor, CborObj, CborArray, CborText, CborBytes, CborUInt, CborSimple } from "@harmoniclabs/cbor";
 import { roDescr } from "../utils/roDescr";
-import { Anchor, IAnchor } from "./Anchor";
-import { Vote, voteToCborObj } from "./Vote";
+import { Anchor, IAnchor, isIAnchor } from "./Anchor";
+import { Vote, isVote, voteToCborObj } from "./Vote";
+import { isObject } from "@harmoniclabs/obj-utils";
 
 export interface IVotingProcedure {
     vote: Vote,
     anchor?: IAnchor | undefined
+}
+
+export function IVotingProcedure( stuff: any ): stuff is IVotingProcedure
+{
+    return isObject( stuff ) && (
+        isVote( stuff.vote ) && (
+            stuff.anchor === undefined ||
+            isIAnchor( stuff.anchor )
+        )
+    );
 }
 
 export class VotingProcedure

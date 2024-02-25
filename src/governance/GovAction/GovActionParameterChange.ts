@@ -1,15 +1,25 @@
 import { Cbor, CborArray, CborSimple, CborString, CborUInt, ToCbor } from "@harmoniclabs/cbor";
 import { CanBeHash28, Hash28, canBeHash28, canBeHash32 } from "../../hashes";
-import { ProtocolParameters, partialProtocolParametersToCborObj } from "../../ledger";
-import { ITxOutRef, TxOutRef } from "../../tx";
+import { ProtocolParameters, isPartialProtocolParameters, partialProtocolParametersToCborObj } from "../../ledger";
+import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx";
 import { roDescr } from "../../utils/roDescr";
 import { GovActionType } from "./GovActionType";
 import { IGovAction } from "./IGovAction";
+import { isObject } from "@harmoniclabs/obj-utils";
 
 export interface IGovActionParameterChange {
     govActionId?: ITxOutRef | undefined,
     protocolParamsUpdate: Partial<ProtocolParameters>,
     policyHash?: CanBeHash28 | undefined
+}
+
+export function isIGovActionParameterChange( stuff: any ): stuff is IGovActionParameterChange
+{
+    return isObject( stuff ) && (
+        ( stuff.govActionId === undefined || isITxOutRef( stuff.govActionId ) ) &&
+        isPartialProtocolParameters( stuff.protocolParamsUpdate ) &&
+        ( stuff.policyHash === undefined || canBeHash28( stuff.policyHash ) )
+    );
 }
 
 export class GovActionParameterChange
