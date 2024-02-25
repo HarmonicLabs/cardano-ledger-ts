@@ -1,8 +1,24 @@
 import { CanBeCborString, Cbor, forceCborString, CborObj, CborBytes } from "@harmoniclabs/cbor";
 import { assert } from "../../utils/assert";
-import { Hash } from "../Hash";
+import { Hash, canBeHashInstance } from "../Hash";
+import { isHex } from "../../utils/hex";
 
 export type CanBeHash28 = string | Uint8Array | Hash28;
+
+export function canBeHash28( stuff: any ): stuff is CanBeHash28
+{
+    if( typeof stuff === "string" )
+    {
+        return stuff.length === 56 && isHex( stuff )
+    }
+
+    if( stuff instanceof Uint8Array )
+    {
+        return stuff.length === 28;
+    }
+
+    return canBeHashInstance( stuff ) && canBeHash28( stuff.toBuffer() )
+}
 
 export class Hash28 extends Hash
 {

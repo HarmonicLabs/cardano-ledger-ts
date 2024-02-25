@@ -8,6 +8,7 @@ import { freezeAll, isObject } from "@harmoniclabs/obj-utils";
 import { Rational, cborFromRational, isRational, isRationalOrUndefined, tryCborFromRational } from "./Rational";
 import { PParamsPoolVotingThresholds, isPParamsPoolVotingThresholds, poolVotingThresholdsToCborObj, tryGetPParamsPoolVotingThresholdsFromCborObj } from "./PParamsPoolVotingThresholds";
 import { PParamsDrepVotingThresholds, drepVotingThresholdsToCborObj, isPParamsDrepVotingThresholds, tryGetPParamsDrepVotingThresholdsFromCborObj } from "./PParamsDrepVotingThresholds";
+import { IProtocolVerision, isIProtocolVersion, protocolVersionToCborObj, tryIProtocolVersionFromCborObj } from "./protocolVersion";
 
 export interface ProtocolParameters {
     txFeePerByte: CanBeUInteger,
@@ -23,7 +24,7 @@ export interface ProtocolParameters {
     monetaryExpansion: Rational,
     treasuryCut: Rational,
     /** @deprecated protocolVersion removed in conway */
-    protocolVersion?: [ CanBeUInteger, CanBeUInteger ] | { major: number, minor: number },
+    protocolVersion?: IProtocolVerision,
     minPoolCost: Coin,
     utxoCostPerByte: Coin,
     costModels: CostModels,
@@ -133,15 +134,7 @@ export function isProtocolParameters( something: any ): something is ProtocolPar
     if(!(
         // protocolVersion removed in conway
         ppv === undefined ||
-        (
-            Array.isArray( ppv ) &&
-            ppv.length >= 2 &&
-            canBeUInteger( ppv[0] ) && canBeUInteger( ppv[1] )
-        ) || (
-            isObject( ppv ) &&
-            canBeUInteger( (ppv as any).major ) &&
-            canBeUInteger( (ppv as any).minor )
-        )
+        isIProtocolVersion( ppv )
     )) return false;
 
     const ppexecCosts = pp.executionUnitPrices;
@@ -217,16 +210,7 @@ export function isPartialProtocolParameters( something: object ): something is P
 
     if(!(
         ppv === undefined ||
-        (
-            Array.isArray( ppv ) &&
-            ppv.length >= 2 &&
-            canBeUInteger( ppv[0] ) && canBeUInteger( ppv[1] )
-        ) || 
-        (
-            isObject( ppv ) &&
-            typeof (ppv as any).major === "number" &&
-            typeof (ppv as any).minor === "number"
-        )
+        isIProtocolVersion( ppv )
     )) return false;
 
     const ppexecCosts = pp.executionUnitPrices;
@@ -316,10 +300,7 @@ export function partialProtocolParametersToCborObj( pps: Partial<ProtocolParamet
         protocolVersion === undefined ? undefined :
         kv(
             14,
-            new CborArray([
-                new CborUInt( forceBigUInt( Array.isArray(protocolVersion) ? protocolVersion[0] : protocolVersion.major ) ),
-                new CborUInt( forceBigUInt( Array.isArray(protocolVersion) ? protocolVersion[1] : protocolVersion.minor ) )
-            ])
+            protocolVersionToCborObj( protocolVersion )
         ),
         mapUIntEntryOrUndefined( 16, pps.minPoolCost ),
         mapUIntEntryOrUndefined( 17, pps.utxoCostPerByte ),
@@ -414,13 +395,7 @@ export function partialProtocolParametersFromCborObj( cObj: CborObj ): Partial<P
         _minfeeRefScriptCostPerByte,
     ] = fields;
 
-    const protocolVersion: [bigint, bigint] | undefined = (
-        _protocolVersion instanceof CborArray &&
-        _protocolVersion.array[0] instanceof CborUInt &&
-        _protocolVersion.array[1] instanceof CborUInt
-    ) ? 
-    [ _protocolVersion.array[0].num, _protocolVersion.array[1].num ]
-    : undefined;
+    const protocolVersion = tryIProtocolVersionFromCborObj( _protocolVersion )
 
     let executionUnitPrices: [CborPositiveRational, CborPositiveRational] | undefined = undefined;
     if( _execCosts instanceof CborArray )

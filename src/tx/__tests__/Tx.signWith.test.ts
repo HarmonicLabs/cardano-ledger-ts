@@ -1,4 +1,4 @@
-import { PaymentCredentials, PrivateKey } from "../../credentials";
+import { Credential, PrivateKey } from "../../credentials";
 import { Address, Value, defaultProtocolParameters } from "../../ledger";
 import { UTxO } from "../body";
 
@@ -18,7 +18,7 @@ const ffPkh = ffPubK.hash;
 
 const ffAddr = new Address(
     "testnet",
-    new PaymentCredentials(
+    new Credential(
         "pubKey",
         ffPkh.clone()
     )

@@ -5,7 +5,7 @@ import { canBeHashInstance, Hash } from "../Hash";
 
 export type CanBeHash32 = string | Uint8Array | Hash32;
 
-export function canBeHash32( stuff: string | Uint8Array | Hash32 ): boolean
+export function canBeHash32( stuff: any ): stuff is CanBeHash32
 {
     if( typeof stuff === "string" )
     {

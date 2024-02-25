@@ -3,38 +3,38 @@ import { NetworkT } from "./Network";
 import { Address } from "./Address";
 import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
 import { ToData, DataMap, DataConstr, DataI, DataPair } from "@harmoniclabs/plutus-data";
-import { Hash28 } from "../hashes";
+import { CanBeHash28, Hash28, canBeHash28 } from "../hashes";
 import { canBeUInteger, forceBigUInt } from "../utils/ints";
 import { Coin } from "./Coin";
 import { Value } from "./Value";
 import { assert } from "../utils/assert";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 
-export type TxWithdrawalsEntryBigInt = {
+export type ITxWithdrawalsEntryBigInt = {
     rewardAccount: StakeAddress,
     amount: bigint
 }
 
-export type TxWithdrawalsMapBigInt = TxWithdrawalsEntryBigInt[];
+export type TxWithdrawalsMapBigInt = ITxWithdrawalsEntryBigInt[];
 
-export type TxWithdrawalsEntry = {
-    rewardAccount: Hash28 | StakeAddress,
+export type ITxWithdrawalsEntry = {
+    rewardAccount: CanBeHash28 | StakeAddress,
     amount: Coin
 }
 
-export type TxWithdrawalsMap = TxWithdrawalsEntry[];
+export type ITxWithdrawalsMap = ITxWithdrawalsEntry[];
 
 export type ITxWithdrawals
     = { [rewardAccount: StakeAddressBech32]: Coin }
-    | TxWithdrawalsMap;
+    | ITxWithdrawalsMap;
 
-export function isTxWithdrawalsMap( stuff: any ): stuff is TxWithdrawalsMap
+export function isTxWithdrawalsMap( stuff: any ): stuff is ITxWithdrawalsMap
 {
     if( !Array.isArray( stuff ) ) return false;
 
     return stuff.every( ({ rewardAccount, amount }) => 
         (
-            rewardAccount instanceof Hash28 ||
+            canBeHash28( rewardAccount ) ||
             rewardAccount instanceof StakeAddress
         ) &&
         canBeUInteger( amount )
@@ -51,7 +51,7 @@ export function isITxWithdrawals( stuff: any ): stuff is ITxWithdrawals
 
     return ks.every( k => {
         try {
-            Address.fromString( k );
+            void StakeAddress.fromString( k );
 
             return canBeUInteger( stuff[k] )
         }
@@ -68,33 +68,21 @@ export class TxWithdrawals
 
     constructor( map: ITxWithdrawals, network: NetworkT = "mainnet" )
     {
+        assert(
+            isITxWithdrawals( map ),
+            "invalid 'ITxWithdrawalsMap' passed to construct a 'TxWithdrawals'"
+        );
+
         if( Array.isArray( map ) )
         {
-            assert(
-                map.every( ({ rewardAccount, amount }) => (
-                    rewardAccount !== undefined &&
-                    amount !== undefined &&
-                    (
-                        rewardAccount instanceof Hash28 ||
-                        rewardAccount instanceof StakeAddress
-                    ) &&
-                    (
-                        (typeof amount === "bigint" && amount >= BigInt( 0 )) ||
-                        (typeof amount === "number" && amount === Math.round( Math.abs( amount ) ) )
-                    )
-                
-                )),
-                "invalid 'TxWithdrawalsMap' passed to construct a 'TxWithdrawals'"
-            );
-
-            const _map = map.map ( entry => ({
+            const _map = map.map( entry => ({
                 rewardAccount:
                     entry.rewardAccount instanceof StakeAddress ?
-                    entry.rewardAccount.clone() :
-                    new StakeAddress(
-                        network,
-                        entry.rewardAccount
-                    ),
+                        entry.rewardAccount.clone() :
+                        new StakeAddress(
+                            network,
+                            new Hash28( entry.rewardAccount )
+                        ),
                 amount: forceBigUInt( entry.amount )
             }));
 
@@ -108,7 +96,7 @@ export class TxWithdrawals
         {
             assert(
                 typeof map === "object",
-                "invalid object passed as 'TxWithdrawalsMap' to construct a 'TxWithdrawals'"
+                "invalid object passed as 'ITxWithdrawalsMap' to construct a 'TxWithdrawals'"
             );
 
             defineReadOnlyProperty(

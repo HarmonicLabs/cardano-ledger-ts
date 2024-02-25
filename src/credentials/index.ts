@@ -1,4 +1,4 @@
-export * from "./PaymentCredentials";
+export * from "./Credential";
 export * from "./PrivateKey";
 export * from "./PubKeyHash";
 export * from "./PublicKey";

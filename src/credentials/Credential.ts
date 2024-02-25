@@ -8,23 +8,28 @@ import { assert } from "../utils/assert";
 
 export class ValidatorHash extends Hash28 {}
 
-export type PaymentCredentialsType = "pubKey" | "script";
+export enum CredentialType {
+    KeyHash = 0,
+    Script  = 1
+};
 
-export class PaymentCredentials<T extends PaymentCredentialsType = PaymentCredentialsType>
-    implements ToCbor, ToData, Cloneable<PaymentCredentials<T>>
+Object.freeze( CredentialType );
+
+export class Credential<T extends CredentialType = CredentialType>
+    implements ToCbor, ToData, Cloneable<Credential<T>>
 {
     readonly type!: T;
-    readonly hash!: T extends "pubKey" ? PubKeyHash : ValidatorHash
+    readonly hash!: T extends CredentialType.KeyHash ? PubKeyHash : ValidatorHash
 
     constructor( type: T, hash: Hash28 )
     {
         assert(
             hash instanceof Hash28,
-            "can't construct 'PaymentCredentials'; hash must be instance of an 'Hash28'"
+            "can't construct 'Credential'; hash must be instance of an 'Hash28'"
         );
         assert(
-            type === "pubKey" || type ==="script",
-            "can't construct 'PaymentCredentials'; specified type is nor 'addres' nor 'script'"
+            type === CredentialType.KeyHash || type === CredentialType.Script,
+            "can't construct 'Credential'; specified type is nor 'key hash' nor 'script'"
         );
 
         defineReadOnlyProperty(
@@ -36,24 +41,24 @@ export class PaymentCredentials<T extends PaymentCredentialsType = PaymentCreden
         defineReadOnlyProperty(
             this,
             "hash",
-            type === "pubKey" ? 
+            type === CredentialType.KeyHash ? 
                 ( hash instanceof PubKeyHash ? hash : new PubKeyHash( hash.toBuffer() ) ) :
                 ( hash instanceof ValidatorHash ? hash : new ValidatorHash( hash.toBuffer() ) )
         );
     }
 
-    clone(): PaymentCredentials<T>
+    clone(): Credential<T>
     {
-        return new PaymentCredentials(
+        return new Credential(
             this.type,
             this.hash.clone()
         );
     }
 
-    static get fake(): PaymentCredentials
+    static get fake(): Credential<CredentialType.KeyHash>
     {
-        return new PaymentCredentials(
-            "pubKey",
+        return new Credential(
+            CredentialType.KeyHash,
             new Hash28("ff".repeat(28))
         );
     }
@@ -61,9 +66,7 @@ export class PaymentCredentials<T extends PaymentCredentialsType = PaymentCreden
     toData(): Data
     {
         return new DataConstr( // PCredential
-            this.type === "pubKey" ?
-                0 : // PPubKeyCredential
-                1,  // PScriptCredential
+            this.type,
             [
                 // both bytestring alias as argument
                 new DataB( this.hash.toBuffer() )
@@ -71,20 +74,26 @@ export class PaymentCredentials<T extends PaymentCredentialsType = PaymentCreden
         )
     }
 
-    static pubKey( hash: Uint8Array | Hash28 | string ): PaymentCredentials<"pubKey">
+    /** @deprecated use `keyHash` instead */
+    static pubKey( hash: Uint8Array | Hash28 | string ): Credential<CredentialType.KeyHash>
     {
-        return new PaymentCredentials(
-            "pubKey",
+        return Credential.keyHash( hash )
+    }
+
+    static keyHash( hash: Uint8Array | Hash28 | string ): Credential<CredentialType.KeyHash>
+    {
+        return new Credential(
+            CredentialType.KeyHash,
             hash instanceof PubKeyHash ?
                 hash :
                 new PubKeyHash( hash )
         );
     }
 
-    static script( hash: Uint8Array | Hash28 | string ): PaymentCredentials<"script">
+    static script( hash: Uint8Array | Hash28 | string ): Credential<CredentialType.Script>
     {
-        return new PaymentCredentials(
-            "script",
+        return new Credential(
+            CredentialType.Script,
             hash instanceof ValidatorHash ?
                 hash :
                 new ValidatorHash( hash )
@@ -98,25 +107,26 @@ export class PaymentCredentials<T extends PaymentCredentialsType = PaymentCreden
     toCborObj(): CborObj
     {
         return new CborArray([
-            new CborUInt( this.type === "pubKey" ? 0 : 1 ),
+            new CborUInt( this.type ),
             this.hash.toCborObj()
         ])
     }
 
-    static fromCbor( cStr: CanBeCborString ): PaymentCredentials
+    static fromCbor( cStr: CanBeCborString ): Credential
     {
-        return PaymentCredentials.fromCborObj( Cbor.parse( forceCborString( cStr ) ) );
+        return Credential.fromCborObj( Cbor.parse( forceCborString( cStr ) ) );
     }
-    static fromCborObj( cObj: CborObj ): PaymentCredentials
+    static fromCborObj( cObj: CborObj ): Credential
     {
         if(!(
             cObj instanceof CborArray &&
-            cObj.array[0] instanceof CborUInt
+            cObj.array[0] instanceof CborUInt &&
+            (cObj.array[0].num === BigInt( 0 ) || cObj.array[0].num === BigInt( 1 ))
         ))
-        throw new Error(`Invalid CBOR format for "PaymentCredentials"`);
+        throw new Error(`Invalid CBOR format for "Credential"`);
 
-        return new PaymentCredentials(
-            Number( cObj.array[0].num ) === 0 ? "pubKey" : "script",
+        return new Credential(
+            Number( cObj.array[0].num ),
             Hash28.fromCborObj( cObj.array[1] )
         );
     }

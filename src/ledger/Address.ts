@@ -1,7 +1,7 @@
 import { ToCbor, CborObj, CborBytes, CborString, Cbor, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
 import { byte, encodeBech32, decodeBech32 } from "@harmoniclabs/crypto";
 import { ToData, Data, DataConstr } from "@harmoniclabs/plutus-data";
-import { PaymentCredentials, StakeCredentials, PaymentCredentialsType, StakeCredentialsType } from "../credentials";
+import { Credential, StakeCredentials, StakeCredentialsType, CredentialType } from "../credentials";
 import { Hash28 } from "../hashes";
 import { forceBigUInt } from "../utils/ints";
 import { NetworkT } from "./Network";
@@ -39,12 +39,12 @@ export class Address
     implements ToData, ToCbor
 {
     readonly network!: NetworkT
-    readonly paymentCreds!: PaymentCredentials
+    readonly paymentCreds!: Credential
     readonly stakeCreds?: StakeCredentials
     readonly type!: AddressType;
 
     static mainnet(
-        paymentCreds: PaymentCredentials,
+        paymentCreds: Credential,
         stakeCreds?: StakeCredentials,
         type?: AddressType
     ): Address
@@ -58,7 +58,7 @@ export class Address
     }
 
     static testnet(
-        paymentCreds: PaymentCredentials,
+        paymentCreds: Credential,
         stakeCreds?: StakeCredentials,
         type?: AddressType
     ): Address
@@ -73,7 +73,7 @@ export class Address
 
     constructor(
         network: NetworkT,
-        paymentCreds: PaymentCredentials,
+        paymentCreds: Credential,
         stakeCreds?: StakeCredentials,
         type?: AddressType
     )
@@ -101,7 +101,7 @@ export class Address
         );
 
         assert(
-            paymentCreds instanceof PaymentCredentials,
+            paymentCreds instanceof Credential,
             "invalid payment credentials"
         );
         defineReadOnlyProperty(
@@ -132,7 +132,7 @@ export class Address
     {
         return new Address(
             "mainnet",
-            PaymentCredentials.fake
+            Credential.fake
         );
     }
 
@@ -163,7 +163,7 @@ export class Address
                 0b1000 // bootstrap
             ) |
             ( this.stakeCreds?.type === "script"  ? 0b10_0000 : 0b00_0000 ) |
-            ( this.paymentCreds.type === "script" ? 0b01_0000 : 0b00_0000 )
+            ( this.paymentCreds.type === CredentialType.Script ? 0b01_0000 : 0b00_0000 )
         ) as byte]
         .concat(
             Array.from( this.paymentCreds.hash.toBuffer() ) as byte[]
@@ -208,7 +208,7 @@ export class Address
         let payment: byte[];
         let stake: byte[];
 
-        const paymentType: PaymentCredentialsType = (addrType & 0b0001) === 1 ? "script": "pubKey"; 
+        const paymentType: CredentialType = (addrType & 0b0001) === 1 ? CredentialType.Script: CredentialType.KeyHash; 
         const   stakeType: StakeCredentialsType   = (addrType & 0b0010) === 1 ? "script": "stakeKey";
 
         switch( type )
@@ -249,7 +249,7 @@ export class Address
         
         return new Address(
             network,
-            new PaymentCredentials(
+            new Credential(
                 paymentType,
                 new Hash28( new Uint8Array( payment ) )
             ),

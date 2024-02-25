@@ -2,7 +2,7 @@ import { ToCbor, CborString, Cbor, CborObj, CborArray, CborUInt, CanBeCborString
 import { ToData, DataConstr, DataI } from "@harmoniclabs/plutus-data";
 import { Hash28 } from "../hashes/Hash28/Hash28";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../utils/ints";
-import { PaymentCredentials } from "./PaymentCredentials";
+import { Credential, CredentialType } from "./Credential";
 import { StakeKeyHash } from "./StakeKeyHash";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils"
 import { assert } from "../utils/assert";
@@ -31,7 +31,7 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
         );
         assert(
             type === "stakeKey" || type ==="script" || type === "pointer",
-            "can't construct 'PaymentCredentials'; specified type is nor 'addres' nor 'script'"
+            "can't construct 'Credential'; specified type is nor 'addres' nor 'script'"
         );
 
         defineReadOnlyProperty( this, "type", type );
@@ -91,8 +91,8 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
         return new DataConstr(
             0, // PStakingHash
             [
-                new PaymentCredentials(
-                    this.type === "stakeKey" ? "pubKey" : "script",
+                new Credential(
+                    this.type === "stakeKey" ? CredentialType.KeyHash : CredentialType.Script,
                     (this.hash as StakeHash<"script" | "stakeKey">)
                 ).toData()
             ]
