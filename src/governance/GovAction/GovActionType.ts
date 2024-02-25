@@ -3,7 +3,7 @@ export enum GovActionType {
     InitHardFork = 1,
     TreasuryWithdrawals = 2,
     NoConfidence = 3,
-    UpdateCommitee = 4,
+    UpdateCommittee = 4,
     NewConstitution = 5,
     Info = 6
 };

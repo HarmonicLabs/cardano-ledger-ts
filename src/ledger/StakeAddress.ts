@@ -2,11 +2,12 @@ import { NetworkT } from "../ledger/Network";
 import { StakeCredentials, StakeValidatorHash } from "../credentials/StakeCredentials";
 import { StakeKeyHash } from "../credentials/StakeKeyHash";
 import { Hash28 } from "../hashes/Hash28/Hash28";
-import { PublicKey } from "../credentials";
+import { CredentialType, PublicKey } from "../credentials";
 import { encodeBech32, decodeBech32, byte } from "@harmoniclabs/crypto";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { assert } from "../utils/assert";
 import { fromHex } from "@harmoniclabs/uint8array-utils";
+import { Credential } from "../credentials";
 
 
 export type StakeAddressBech32 = `stake1${string}` | `stake_test1${string}`;
@@ -124,6 +125,14 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType>
         )
     }
 
+    toCredential()
+    {
+        return new Credential(
+            this.type === "script" ? CredentialType.Script : CredentialType.KeyHash,
+            new Hash28( this.credentials )
+        );
+    }
+    
     toStakeCredentials(): StakeCredentials<T>
     {
         return new StakeCredentials(

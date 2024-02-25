@@ -10,6 +10,7 @@ import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../utils/ints";
 import { UTxO, TxOut, isIUTxO, isITxOut, TxOutRef } from "./output";
 import { assert } from "../../utils/assert";
 import { VotingProcedures } from "../../governance/VotingProcedures";
+import { ProposalProcedure } from "../../governance/ProposalProcedure";
 
 export interface ITxBody {
     inputs: [ UTxO, ...UTxO[] ],
@@ -99,7 +100,7 @@ export class TxBody
     readonly refInputs?: UTxO[];
     // conway
     readonly votingProcedures?: VotingProcedures;
-    readonly proposalProcedures?: any;
+    readonly proposalProcedures?: ProposalProcedure[];
     readonly currentTreasuryValue?: bigint; // Coin
     readonly donation?: bigint; // Coin (positive)
 

@@ -27,7 +27,7 @@ export interface IGovActionUpdateCommittee {
 export class GovActionUpdateCommittee
     implements IGovAction, IGovActionUpdateCommittee, ToCbor
 {
-    readonly govActionType: GovActionType.UpdateCommitee;
+    readonly govActionType: GovActionType.UpdateCommittee;
     readonly govActionId: TxOutRef | undefined;
     readonly toRemove: Credential[];
     readonly toAdd: INewCommitteeEntryBI[];
@@ -37,7 +37,7 @@ export class GovActionUpdateCommittee
     {
         Object.defineProperties(
             this, {
-                govActionType: { value: GovActionType.UpdateCommitee, ...roDescr },
+                govActionType: { value: GovActionType.UpdateCommittee, ...roDescr },
                 govActionId: { value: isITxOutRef( govActionId ) ? new TxOutRef( govActionId ): undefined, ...roDescr },
                 toRemove: { value: toRemove.slice(), ...roDescr },
                 toAdd: {
