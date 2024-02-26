@@ -130,4 +130,12 @@ export class Credential<T extends CredentialType = CredentialType>
             Hash28.fromCborObj( cObj.array[1] )
         );
     }
+
+    toJson()
+    {
+        return {
+            credentialType: this.type === CredentialType.Script ? "Script" : "KeyHash",
+            hash: this.hash.toString()
+        }
+    }
 }

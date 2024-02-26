@@ -124,20 +124,20 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
     static fromCborObj( cObj: CborObj ): StakeCredentials
     {
         if(!( cObj instanceof CborArray ))
-        throw new Error(`Invalid CBOR fromat for "Certificate"`);
+        throw new Error(`Invalid CBOR fromat for "StakeCredentials"`);
 
         const [ _type, _creds ] = cObj.array;
 
         if(!( _type instanceof CborUInt ))
-        throw new Error(`Invalid CBOR fromat for "Certificate"`);
+        throw new Error(`Invalid CBOR fromat for "StakeCredentials"`);
 
         if(!( _creds instanceof CborArray || _creds instanceof CborBytes ))
-        throw new Error(`Invalid CBOR fromat for "Certificate"`);
+        throw new Error(`Invalid CBOR fromat for "StakeCredentials"`);
 
         if( _creds instanceof CborArray )
         {
             if(!_creds.array.every( n => n instanceof CborUInt ))
-            throw new Error(`Invalid CBOR fromat for "Certificate"`);
+            throw new Error(`Invalid CBOR fromat for "StakeCredentials"`);
 
             return new StakeCredentials(
                 "pointer",

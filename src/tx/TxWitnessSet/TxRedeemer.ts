@@ -1,6 +1,6 @@
 import { TxBody } from "../body/TxBody"
 import { Hash28 } from "../../hashes"
-import { ToCbor, CborString, Cbor, CborArray, CborUInt, CanBeCborString, forceCborString, CborObj } from "@harmoniclabs/cbor";
+import { ToCbor, CborString, Cbor, CborArray, CborUInt, CanBeCborString, forceCborString, CborObj, CborMapEntry, isCborObj } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { isObject, hasOwn, defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
 import { Data, isData, dataToCborObj, dataFromCborObj, DataConstr, DataB } from "@harmoniclabs/plutus-data";
@@ -154,6 +154,40 @@ export class TxRedeemer
             ...this,
             data: this.data.clone(),
             execUnits: this.execUnits.clone()
+        });
+    }
+
+    toCborMapEntry(): CborMapEntry
+    {
+        return {
+            k: new CborArray([
+                new CborUInt( this.tag ),
+                new CborUInt( this.index ),
+            ]),
+            v: new CborArray([
+                dataToCborObj( this.data ),
+                this.execUnits.toCborObj()
+            ])
+        };
+    }
+    
+    static fromCborMapEntry( entry: CborMapEntry ): TxRedeemer
+    {
+        if(!(
+            isObject( entry ) &&
+            entry.k instanceof CborArray &&
+            entry.k.array.length >= 2 &&
+            entry.k.array[0] instanceof CborUInt &&
+            entry.k.array[1] instanceof CborUInt &&
+            entry.v instanceof CborArray &&
+            entry.v.array.length >= 2
+        )) throw new Error("invalid CborMapEntry building TxRedeemer");
+
+        return new TxRedeemer({
+            tag: Number( entry.k.array[0].num ),
+            index: Number( entry.k.array[1].num ),
+            data: dataFromCborObj( entry.v.array[0] ),
+            execUnits: ExBudget.fromCborObj( entry.v.array[1] )
         });
     }
 

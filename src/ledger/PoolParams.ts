@@ -1,32 +1,70 @@
 
 import { Coin } from "./Coin";
 import { PubKeyHash } from "../credentials/PubKeyHash";
-import { Hash32 } from "../hashes/Hash32/Hash32";
+import { CanBeHash32, Hash32, canBeHash32 } from "../hashes/Hash32/Hash32";
 import { PoolKeyHash } from "../hashes/Hash28/PoolKeyHash";
 import { VRFKeyHash } from "../hashes/Hash32/VRFKeyHash";
 import { ByteString } from "@harmoniclabs/bytestring";
 import { CborPositiveRational, CborObj, CborUInt, CborArray, CborSimple, CborText, CborTag, CborBytes } from "@harmoniclabs/cbor";
-import { Hash28 } from "../hashes";
+import { CanBeHash28, Hash28, canBeHash28 } from "../hashes";
 import { canBeUInteger, forceBigUInt } from "../utils/ints";
 import { PoolRelay, isPoolRelay, poolRelayToCborObj, poolRelayFromCborObj, poolRelayToJson } from "./PoolRelay";
 import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { assert } from "../utils/assert";
+import { Rational, cborFromRational, isRational } from "./protocol/Rational";
 
+export interface IPoolParamsMetadata {
+    poolMetadataUrl: string,
+    hash: CanBeHash32
+}
+
+export function isIPoolParamsMetadata( stuff: any ): stuff is IPoolParamsMetadata
+{
+    return isObject( stuff ) && (
+        typeof stuff.poolMetadataUrl === "string" &&
+        canBeHash32( stuff.hash )
+    );
+}
+
+export interface ITypedPoolParamsMetadata {
+    poolMetadataUrl: string,
+    hash: Hash32
+}
+
+export function typedPoolParamsMetadata({ poolMetadataUrl, hash }: IPoolParamsMetadata ): ITypedPoolParamsMetadata
+{
+    return {
+        poolMetadataUrl,
+        hash: new Hash32( hash )
+    };
+}
 
 export interface IPoolParams {
-    operator: PoolKeyHash,
-    vrfKeyHash: VRFKeyHash,
+    operator: CanBeHash28,// PoolKeyHash,
+    vrfKeyHash: CanBeHash32,// VRFKeyHash,
     pledge: Coin,
     cost: Coin,
+    margin: Rational, //CborPositiveRational,
+    rewardAccount: CanBeHash28,
+    owners: CanBeHash28[], // PubKeyHash[],
+    relays: PoolRelay[],
+    metadata?: IPoolParamsMetadata
+}
+
+export interface ITypedPoolParams {
+    operator: PoolKeyHash,
+    vrfKeyHash: VRFKeyHash,
+    pledge: bigint,
+    cost: bigint,
     margin: CborPositiveRational,
     rewardAccount: Hash28,
     owners: PubKeyHash[],
     relays: PoolRelay[],
-    metadata?: [poolMetadataUrl: string, hash: Hash32]
+    metadata?: ITypedPoolParamsMetadata
 }
 
 export class PoolParams
-    implements IPoolParams
+    implements ITypedPoolParams
 {
     readonly operator!: PoolKeyHash;
     readonly vrfKeyHash!: VRFKeyHash;
@@ -36,7 +74,7 @@ export class PoolParams
     readonly rewardAccount!: Hash28;
     readonly owners!: PubKeyHash[];
     readonly relays!: PoolRelay[];
-    readonly metadata?: [poolMetadataUrl: string, hash: Hash32];
+    readonly metadata?: ITypedPoolParamsMetadata;
 
     constructor( params: IPoolParams )
     {
@@ -66,16 +104,16 @@ export class PoolParams
         } = params;
 
         assert(
-            operator instanceof PoolKeyHash,
+            canBeHash28( operator ),
             "invalid 'operator' constructing 'PoolParams'"
         );
-        defineReadOnlyProperty( this, "operator", operator );
+        defineReadOnlyProperty( this, "operator", new PoolKeyHash( operator ) );
 
         assert(
-            vrfKeyHash instanceof VRFKeyHash,
+            canBeHash32( vrfKeyHash ),
             "invalid 'vrfKeyHash' constructing 'PoolParams'"
         );
-        defineReadOnlyProperty( this, "vrfKeyHash", vrfKeyHash );
+        defineReadOnlyProperty( this, "vrfKeyHash", new VRFKeyHash( vrfKeyHash ) );
 
         assert(
             canBeUInteger( pledge ),
@@ -90,23 +128,23 @@ export class PoolParams
         defineReadOnlyProperty( this, "cost", forceBigUInt( cost ) );
 
         assert(
-            margin instanceof CborPositiveRational,
+            isRational( margin ),
             "invalid 'margin' constructing 'PoolParams'"
         );
-        defineReadOnlyProperty( this, "margin", margin );
+        defineReadOnlyProperty( this, "margin", cborFromRational( margin ) );
 
         assert(
-            rewardAccount instanceof ByteString,
+            canBeHash28( rewardAccount ),
             "invalid 'rewardAccount' constructing 'PoolParams'"
         );
-        defineReadOnlyProperty( this, "rewardAccount", rewardAccount );
+        defineReadOnlyProperty( this, "rewardAccount", new Hash28( rewardAccount ) );
 
         assert(
             Array.isArray( owners ) &&
-            owners.every( owner => owner instanceof PubKeyHash ),
+            owners.every( canBeHash28 ),
             "invalid 'owners' constructing 'PoolParams'"
         );
-        defineReadOnlyProperty( this, "owners", Object.freeze( owners ) );
+        defineReadOnlyProperty( this, "owners", Object.freeze( owners.map( hash => new Hash28( hash ) ) ) );
 
         assert(
             Array.isArray( relays ) &&
@@ -117,20 +155,14 @@ export class PoolParams
 
         assert(
             metadata === undefined ||
-            (
-                Array.isArray( metadata ) && metadata.length >= 2 &&
-                typeof metadata[0] === "string" && metadata[1] instanceof Hash32
-            ),
+            isIPoolParamsMetadata( metadata ),
             "invalid 'metadata' filed for 'PoolParams'"
         );
         defineReadOnlyProperty(
             this,
             "metadata",
             metadata === undefined ? undefined:
-            Object.freeze([
-                metadata[0],
-                metadata[1]
-            ])
+            typedPoolParamsMetadata( metadata )
         );
 
     }
@@ -149,8 +181,8 @@ export class PoolParams
             this.metadata === undefined || this.metadata === null ?
                 new CborSimple( null ) :
                 new CborArray([
-                    new CborText( this.metadata[0] ),
-                    this.metadata[1].toCborObj()
+                    new CborText( this.metadata.poolMetadataUrl ),
+                    this.metadata.hash.toCborObj()
                 ])
         ]) as any;
     }
@@ -193,7 +225,10 @@ export class PoolParams
                 _metadata.array[0] instanceof CborText &&
                 _metadata.array[1] instanceof CborBytes
             ) ? 
-            [ _metadata.array[0].text, Hash32.fromCborObj( _metadata.array[1] ) ]
+            {
+                poolMetadataUrl: _metadata.array[0].text,
+                hash: Hash32.fromCborObj( _metadata.array[1] )
+            }
             : undefined
         })
     }
@@ -210,8 +245,8 @@ export class PoolParams
             owners: this.owners.map( owner => owner.asString ),
             relays: this.relays.map( poolRelayToJson ),
             metadata: this.metadata === undefined ? undefined : {
-                poolMetadataUrl: this.metadata[0],
-                hash: this.metadata[1].asString
+                poolMetadataUrl: this.metadata.poolMetadataUrl,
+                hash: this.metadata.hash.toString()
             }
         }
     }

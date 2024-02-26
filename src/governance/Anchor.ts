@@ -41,7 +41,29 @@ export class Anchor
     {
         return new CborArray([
             new CborText( this.url ),
-            new CborBytes( this.anchorDataHash.toBuffer() )
+            this.anchorDataHash.toCborObj()
         ]);
+    }
+
+    static fromCborObj( cbor: CborObj ): Anchor
+    {
+        if(!(
+            cbor instanceof CborArray &&
+            cbor.array.length >= 2 &&
+            cbor.array[0] instanceof CborText
+        )) throw new Error("invalid cbor for Anchor");
+
+        return new Anchor({
+            url: cbor.array[0].text,
+            anchorDataHash: Hash32.fromCborObj( cbor.array[1] )
+        });
+    }
+
+    toJson()
+    {
+        return {
+            url: this.url,
+            anchorDataHash: this.anchorDataHash.toString() 
+        }
     }
 }

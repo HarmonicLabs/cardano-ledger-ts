@@ -1,10 +1,11 @@
 import { CborMap, CborNegInt, CborUInt, CborObj, ToCbor, CborString, Cbor, CborArray } from "@harmoniclabs/cbor";
-import { StakeCredentials } from "../../credentials";
 import { canBeUInteger, forceBigUInt } from "../../utils/ints";
 import { Coin } from "../Coin";
 import { assert } from "../../utils/assert";
 import { hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
-
+import { CertificateType, certTypeToString } from "./CertificateType";
+import { ToJson } from "../../utils/ToJson";
+import { Credential } from "../../credentials";
 
 export enum InstantRewardsSource {
     Reserves = 0,
@@ -30,7 +31,7 @@ export function rewardSourceToStr<S extends InstantRewardsSource>( source: S ): 
 }
 
 export type RewardsMap = {
-    stakeCredentials: StakeCredentials,
+    stakeCredentials: Credential,
     amount: number | bigint
 }[]
 
@@ -68,7 +69,7 @@ function rewardsMapFromCborObj( cObj: CborObj ): RewardsMap
         throw new Error(`Invalid CBOR fromat for "MoveInstantRewardsCert"`);
 
         rewMap[i] = {
-            stakeCredentials: StakeCredentials.fromCborObj( k ),
+            stakeCredentials: Credential.fromCborObj( k ),
             amount: v.num
         }
     }
@@ -76,18 +77,25 @@ function rewardsMapFromCborObj( cObj: CborObj ): RewardsMap
     return rewMap;
 }
 
+export interface IMoveInstantRewardsCert {
+    source: InstantRewardsSource,
+    destination: RewardsMap | Coin
+}
+
+/** @deprecated */
 export class MoveInstantRewardsCert
-    implements ToCbor
+    implements ToCbor, ToJson
 {
+    readonly certType: CertificateType.MoveInstantRewards;
     readonly source!: InstantRewardsSource;
     /**
      * If the second field is a map, funds are moved to stake credentials,
      * otherwise the funds are given to the other accounting pot
      * (eg. source is Reserve, hence founds are going to treasurery)
      */
-    readonly destintaion!: RewardsMap | Coin
+    readonly destination!: RewardsMap | Coin
 
-    constructor( source: InstantRewardsSource, destintaion: RewardsMap | Coin )
+    constructor({ source, destination }: IMoveInstantRewardsCert)
     {
         assert(
             source === InstantRewardsSource.Reserves ||
@@ -95,17 +103,17 @@ export class MoveInstantRewardsCert
             "invalid 'source' while constructing 'MoveInstantRewardsCert'"
         );
         assert(
-            canBeUInteger( destintaion ) ||
+            canBeUInteger( destination ) ||
             (
-                Array.isArray( destintaion ) &&
-                destintaion.every( entry => (
+                Array.isArray( destination ) &&
+                destination.every( entry => (
                     hasOwn( entry, "amount" ) &&
                     hasOwn( entry, "stakeCredentials" ) &&
                     (
                         (typeof (entry.amount) === "number" && entry.amount === Math.round( entry.amount )) ||
                         (typeof (entry.amount) === "bigint")
                     )  &&
-                    entry.stakeCredentials instanceof StakeCredentials
+                    entry.stakeCredentials instanceof Credential
                 ))
             ),
             "invalid 'destintaiton' while constructing 'MoveInstantRewardsCert'"
@@ -113,13 +121,18 @@ export class MoveInstantRewardsCert
 
         defineReadOnlyProperty(
             this,
+            "certType",
+            CertificateType.MoveInstantRewards
+        );
+        defineReadOnlyProperty(
+            this,
             "source",
             source
         );
         defineReadOnlyProperty(
             this,
-            "destintaion",
-            destintaion
+            "destination",
+            destination
         );
     }
 
@@ -132,9 +145,9 @@ export class MoveInstantRewardsCert
     {
         return new CborArray([
             new CborUInt( this.source ),
-            canBeUInteger( this.destintaion ) ?
-                new CborUInt( forceBigUInt( this.destintaion ) ) :
-                rewardsMapToCborObj( this.destintaion )
+            canBeUInteger( this.destination ) ?
+                new CborUInt( forceBigUInt( this.destination ) ) :
+                rewardsMapToCborObj( this.destination )
         ]);
     }
 
@@ -151,21 +164,22 @@ export class MoveInstantRewardsCert
         if(!( _src instanceof CborUInt ))
         throw new Error(`Invalid CBOR fromat for "MoveInstantRewardsCert"`);
 
-        return new MoveInstantRewardsCert(
-            Number( _src.num ),
-            _dst instanceof CborUInt ?
-            _dst.num :
-            rewardsMapFromCborObj( _dst )
-        )
+        return new MoveInstantRewardsCert({
+            source: Number( _src.num ),
+            destination: _dst instanceof CborUInt ?
+                _dst.num :
+                rewardsMapFromCborObj( _dst )
+        });
     }
 
     toJson()
     {
         return {
+            certType: certTypeToString( this.certType ), 
             source: rewardSourceToStr( this.source ),
-            destination: canBeUInteger( this.destintaion ) ?
-                forceBigUInt( this.destintaion ).toString() :
-                (this.destintaion as RewardsMap).map( ({ stakeCredentials, amount }) => 
+            destination: canBeUInteger( this.destination ) ?
+                forceBigUInt( this.destination ).toString() :
+                (this.destination as RewardsMap).map( ({ stakeCredentials, amount }) => 
                     ({
                         stakeCreds: stakeCredentials.toJson(),
                         amount: forceBigUInt( amount ).toString()

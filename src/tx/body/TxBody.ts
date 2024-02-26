@@ -3,7 +3,7 @@ import { blake2b_256 } from "@harmoniclabs/crypto";
 import { isObject, hasOwn, defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
 import { PubKeyHash } from "../../credentials";
 import { AuxiliaryDataHash, ScriptDataHash, Hash32 } from "../../hashes";
-import { Coin, AnyCertificate, TxWithdrawals, ITxWithdrawals, LegacyPPUpdateProposal, Value, NetworkT, Certificate, canBeTxWithdrawals, isLegacyPPUpdateProposal, forceTxWithdrawals, LegacyPPUpdateProposalToCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, certificatesToDepositLovelaces } from "../../ledger";
+import { Coin, TxWithdrawals, ITxWithdrawals, LegacyPPUpdateProposal, Value, NetworkT, Certificate, canBeTxWithdrawals, isLegacyPPUpdateProposal, forceTxWithdrawals, LegacyPPUpdateProposalToCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, isCertificate, certificateFromCborObj, certificatesToDepositLovelaces } from "../../ledger";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../utils/ints";
@@ -17,7 +17,7 @@ export interface ITxBody {
     outputs: TxOut[],
     fee: Coin,
     ttl?: CanBeUInteger,
-    certs?: AnyCertificate[],
+    certs?: Certificate[],
     withdrawals?: TxWithdrawals | ITxWithdrawals,
     protocolUpdate?: LegacyPPUpdateProposal,
     auxDataHash?: AuxiliaryDataHash, // hash 32
@@ -58,7 +58,7 @@ export function isITxBody( body: Readonly<object> ): body is ITxBody
         hasOwn( b, "fee" ) && canBeUInteger( b.fee ) &&
 
         ( b.ttl === undefined || canBeUInteger( b.ttl ) ) &&
-        ( b.certs === undefined || b.certs.every( c => c instanceof Certificate ) ) &&
+        ( b.certs === undefined || b.certs.every( isCertificate ) ) &&
         ( b.withdrawals === undefined || canBeTxWithdrawals( b.withdrawals ) ) &&
         ( b.protocolUpdate === undefined || isLegacyPPUpdateProposal( b.protocolUpdate ) ) &&
         ( b.auxDataHash === undefined || b.auxDataHash instanceof Hash32 ) &&
@@ -109,7 +109,7 @@ export class TxBody
     readonly outputs!: TxOut[];
     readonly fee!: bigint;
     readonly ttl?: bigint;
-    readonly certs?: AnyCertificate[];
+    readonly certs?: Certificate[];
     readonly withdrawals?: TxWithdrawals;
     readonly protocolUpdate?: LegacyPPUpdateProposal; // babbage only; removed in conway
     readonly auxDataHash?: AuxiliaryDataHash; // hash 32
@@ -228,7 +228,7 @@ export class TxBody
         {
             assert(
                 Array.isArray( certs )  &&
-                certs.every( cert => cert instanceof Certificate),
+                certs.every( isCertificate ),
                 "invalid 'certs' field"
             );
 
@@ -622,7 +622,7 @@ export class TxBody
             outputs: _outs.array.map( TxOut.fromCborObj ),
             fee: _fee.num,
             ttl,
-            certs:                      _certs instanceof CborArray ? _certs.array.map( Certificate.fromCborObj ) : undefined,
+            certs:                      _certs instanceof CborArray ? _certs.array.map( certificateFromCborObj ) : undefined,
             withdrawals:                _withdrawals === undefined ? undefined : TxWithdrawals.fromCborObj( _withdrawals ),
             protocolUpdate:             _pUp === undefined ? undefined : LegacyPPUpdateProposalFromCborObj( _pUp ),
             auxDataHash:                _auxDataHash === undefined ? undefined : AuxiliaryDataHash.fromCborObj( _auxDataHash ),
