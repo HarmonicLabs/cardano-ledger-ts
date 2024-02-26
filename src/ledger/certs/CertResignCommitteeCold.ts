@@ -4,6 +4,7 @@ import { roDescr } from "../../utils/roDescr";
 import { CertificateType, certTypeToString } from "./CertificateType"
 import { ICert } from "./ICert"
 import { Anchor, IAnchor, isIAnchor } from "../../governance/Anchor";
+import { Hash28 } from "../../hashes";
 
 export interface ICertResignCommitteeCold {
     coldCredential: Credential,
@@ -26,6 +27,11 @@ export class CertResignCommitteeCold
                 anchor : { value: isIAnchor( anchor ) ? new Anchor( anchor ) : undefined , ...roDescr },
             }
         );
+    }
+
+    getRequiredSigners(): Hash28[]
+    {
+        return [ this.coldCredential.hash.clone() ];
     }
 
     toCbor(): CborString

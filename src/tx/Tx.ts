@@ -1,4 +1,4 @@
-import { PrivateKey, PubKeyHash, StakeCredentials } from "../credentials";
+import { CredentialType, PrivateKey, PubKeyHash, StakeCredentials } from "../credentials";
 import { Hash28, Hash32, Signature } from "../hashes";
 import { VKeyWitness, VKey, ITxWitnessSet, TxWitnessSet, isITxWitnessSet } from "./TxWitnessSet";
 import { CertificateType, PoolParams } from "../ledger";
@@ -259,7 +259,7 @@ export function getAllRequiredSigners( body: Readonly<TxBody> ): Hash28[]
 
                 const { type, hash } =  _in.resolved.address.paymentCreds;
 
-                if( type === "pubKey" ) acc.push( new PubKeyHash( hash ) );
+                if( type === CredentialType.KeyHash ) acc.push( new PubKeyHash( hash ) );
 
                 return acc;
             },
@@ -267,32 +267,9 @@ export function getAllRequiredSigners( body: Readonly<TxBody> ): Hash28[]
         )
         // required to sign certificate
         .concat(
-            body.certs?.reduce( (acc, cert) => {
-
-                const [_0, _1, _2] = cert.params;
-
-                let hash: Hash28 | undefined = undefined;
-
-                switch( cert.certType )
-                {
-                    case CertificateType.StakeRegistration:
-                    case CertificateType.StakeDeRegistration:
-                    case CertificateType.StakeDelegation:
-                        hash = (_0 as StakeCredentials).hash as any;
-                    break;
-                    case CertificateType.PoolRegistration:
-                        hash = (_0 as PoolParams).operator;
-                    break;
-                    case CertificateType.PoolRetirement:
-                    case CertificateType.GenesisKeyDelegation:
-                        hash = _0 as any;
-                    break;
-                }
-
-                if( hash instanceof Hash28 ) acc.push( hash );
-                return acc;
-            },
-            [] as Hash28[]
+            body.certs?.reduce(
+                (acc, cert) => acc.concat( cert.getRequiredSigners() ),
+                [] as Hash28[]
             ) ?? []
         )
         // requred for withdrawal

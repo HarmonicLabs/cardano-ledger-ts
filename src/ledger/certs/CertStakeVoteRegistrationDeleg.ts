@@ -37,7 +37,12 @@ export class CertStakeVoteRegistrationDeleg
             }
         );
     }
-
+    
+    getRequiredSigners(): Hash28[]
+    {
+        return [ this.stakeCredential.hash.clone() ];
+    }
+    
     toCbor(): CborString
     {
         return Cbor.encode( this.toCborObj() );

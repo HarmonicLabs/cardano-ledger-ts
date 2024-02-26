@@ -1,7 +1,9 @@
+import { Hash28 } from "../../hashes";
 import { CertificateType } from "./CertificateType";
 
 export interface ICert {
-    certType: CertificateType
+    certType: CertificateType,
+    getRequiredSigners: () => Hash28[]
 }
 
 const ada = BigInt( 1_000_000 );

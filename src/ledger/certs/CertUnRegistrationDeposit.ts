@@ -5,6 +5,7 @@ import { CertificateType, certTypeToString } from "./CertificateType"
 import { ICert } from "./ICert"
 import { Coin } from "../Coin";
 import { forceBigUInt } from "../../utils/ints";
+import { Hash28 } from "../../hashes";
 
 export interface ICertUnRegistrationDeposit {
     stakeCredential: Credential,
@@ -27,6 +28,11 @@ export class CertUnRegistrationDeposit
                 deposit: { value: forceBigUInt( deposit ), ...roDescr }
             }
         );
+    }
+
+    getRequiredSigners(): Hash28[]
+    {
+        return [ this.stakeCredential.hash.clone() ];
     }
 
     toCbor(): CborString

@@ -31,7 +31,6 @@ export type Certificate
     | CertUnRegistrationDeposit
     | CertVoteDeleg
     | CertStakeVoteDeleg
-    | CertStakeRegistration
     | CertVoteRegistrationDeleg
     | CertStakeVoteRegistrationDeleg
     | CertAuthCommitteeHot
@@ -54,7 +53,6 @@ export function isCertificate( stuff: any ): stuff is Certificate
         stuff instanceof CertUnRegistrationDeposit ||
         stuff instanceof CertVoteDeleg ||
         stuff instanceof CertStakeVoteDeleg ||
-        stuff instanceof CertStakeRegistration ||
         stuff instanceof CertVoteRegistrationDeleg ||
         stuff instanceof CertStakeVoteRegistrationDeleg ||
         stuff instanceof CertAuthCommitteeHot ||

@@ -4,6 +4,7 @@ import { roDescr } from "../../utils/roDescr";
 import { CertificateType, certTypeToString } from "./CertificateType"
 import { ICert } from "./ICert"
 import { ToJson } from "../../utils/ToJson";
+import { Hash28 } from "../../hashes";
 
 export interface ICertAuthCommitteeHot {
     coldCredential: Credential,
@@ -26,6 +27,11 @@ export class CertAuthCommitteeHot
                 hotCredential : { value: hotCredential , ...roDescr },
             }
         );
+    }
+
+    getRequiredSigners(): Hash28[]
+    {
+        return [ this.coldCredential.hash.clone() ];
     }
 
     toCbor(): CborString

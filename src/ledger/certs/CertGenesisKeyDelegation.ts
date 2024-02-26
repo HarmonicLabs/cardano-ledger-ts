@@ -32,6 +32,11 @@ export class CertGenesisKeyDelegation
         )
     }
 
+    getRequiredSigners(): Hash28[]
+    {
+        return [ this.genesisHash.clone() ];
+    }
+
     toCbor(): CborString
     {
         return Cbor.encode( this.toCborObj() );

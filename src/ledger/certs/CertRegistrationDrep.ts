@@ -33,6 +33,11 @@ export class CertRegistrationDrep
         );
     }
 
+    getRequiredSigners(): Hash28[]
+    {
+        return [ this.drepCredential.hash.clone() ];
+    }
+
     toCbor(): CborString
     {
         return Cbor.encode( this.toCborObj() );

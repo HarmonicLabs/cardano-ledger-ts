@@ -3,6 +3,7 @@ import { Credential } from "../../credentials"
 import { roDescr } from "../../utils/roDescr";
 import { CertificateType, certTypeToString } from "./CertificateType"
 import { ICert } from "./ICert"
+import { Hash28 } from "../../hashes/Hash28/Hash28";
 
 export interface ICertStakeDeRegistration {
     stakeCredential: Credential
@@ -22,6 +23,11 @@ export class CertStakeDeRegistration
                 stakeCredential: { value: stakeCredential, ...roDescr }
             }
         );
+    }
+
+    getRequiredSigners(): Hash28[]
+    {
+        return [ this.stakeCredential.hash.clone() ];
     }
 
     toCbor(): CborString

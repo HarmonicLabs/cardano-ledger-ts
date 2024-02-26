@@ -6,6 +6,8 @@ import { hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { CertificateType, certTypeToString } from "./CertificateType";
 import { ToJson } from "../../utils/ToJson";
 import { Credential } from "../../credentials";
+import { ICert } from "./ICert";
+import { Hash28 } from "../../hashes";
 
 export enum InstantRewardsSource {
     Reserves = 0,
@@ -84,7 +86,7 @@ export interface IMoveInstantRewardsCert {
 
 /** @deprecated */
 export class MoveInstantRewardsCert
-    implements ToCbor, ToJson
+    implements ToCbor, ToJson, ICert
 {
     readonly certType: CertificateType.MoveInstantRewards;
     readonly source!: InstantRewardsSource;
@@ -134,6 +136,11 @@ export class MoveInstantRewardsCert
             "destination",
             destination
         );
+    }
+
+    getRequiredSigners(): Hash28[]
+    {
+        return [];
     }
 
     toCbor(): CborString

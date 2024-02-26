@@ -5,6 +5,7 @@ import { CertificateType, certTypeToString } from "./CertificateType"
 import { ICert } from "./ICert"
 import { DRepLike, toRealDRep } from "../../governance/DRep/DRepLike";
 import { DRep, drepFromCborObj } from "../../governance/DRep/DRep";
+import { Hash28 } from "../../hashes";
 
 export interface ICertVoteDeleg {
     stakeCredential: Credential,
@@ -27,6 +28,11 @@ export class CertVoteDeleg
                 drep: { value: toRealDRep( drep ), ...roDescr }
             }
         );
+    }
+
+    getRequiredSigners(): Hash28[]
+    {
+        return [ this.stakeCredential.hash.clone() ];
     }
 
     toCbor(): CborString

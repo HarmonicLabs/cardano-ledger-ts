@@ -30,6 +30,11 @@ export class CertPoolRetirement
         );
     }
 
+    getRequiredSigners()
+    {
+        return [ this.poolHash.clone() ];
+    }
+
     toCbor(): CborString
     {
         return Cbor.encode( this.toCborObj() );

@@ -6,6 +6,7 @@ import { ICert } from "./ICert"
 import { Anchor, IAnchor, isIAnchor } from "../../governance/Anchor";
 import { Coin } from "../Coin";
 import { forceBigUInt } from "../../utils/ints";
+import { Hash28 } from "../../hashes";
 
 export interface ICertUnRegistrationDrep {
     drepCredential: Credential,
@@ -28,6 +29,11 @@ export class CertUnRegistrationDrep
                 coin: { value: forceBigUInt( coin ), ...roDescr },
             }
         );
+    }
+
+    getRequiredSigners(): Hash28[]
+    {
+        return [ this.drepCredential.hash.clone() ];
     }
 
     toCbor(): CborString

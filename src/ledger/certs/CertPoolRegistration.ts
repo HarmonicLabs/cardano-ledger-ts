@@ -4,6 +4,7 @@ import { roDescr } from "../../utils/roDescr";
 import { CertificateType, certTypeToString } from "./CertificateType"
 import { ICert } from "./ICert"
 import { IPoolParams, PoolParams } from "../PoolParams";
+import { Hash28 } from "../../hashes";
 
 export interface ICertPoolRegistration {
     poolParams: IPoolParams
@@ -23,6 +24,14 @@ export class CertPoolRegistration
                 poolParams: { value: new PoolParams( poolParams ), ...roDescr }
             }
         );
+    }
+
+    getRequiredSigners(): Hash28[]
+    {
+        const ownersStr = this.poolParams.owners.map( pkh => pkh.toString() );
+        const operatorStr = this.poolParams.operator.toString();
+        if( !ownersStr.includes( operatorStr ) ) ownersStr.push( operatorStr );
+        return ownersStr.map( hash => new Hash28( hash ) );
     }
 
     toCbor(): CborString
