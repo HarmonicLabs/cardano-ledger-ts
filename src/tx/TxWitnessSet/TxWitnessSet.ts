@@ -335,15 +335,15 @@ export class TxWitnessSet
             _plutusV3,
         ] = fields;
 
+        // redeemer might be either array or map in conway
         if(!(
-            _vkey instanceof CborArray &&
-            _native instanceof CborArray &&
-            _bootstrap instanceof CborArray &&
-            _plutusV1 instanceof CborArray &&
-            _dats instanceof CborArray &&
-            // _reds
-            _plutusV2 instanceof CborArray &&
-            _plutusV3 instanceof CborArray
+            (_vkey === undefined        || _vkey instanceof CborArray)      &&
+            (_native === undefined      || _native instanceof CborArray)    &&
+            (_bootstrap === undefined   || _bootstrap instanceof CborArray) &&
+            (_plutusV1 === undefined    || _plutusV1 instanceof CborArray)  &&
+            (_dats === undefined        || _dats instanceof CborArray)      &&
+            (_plutusV2 === undefined    || _plutusV2 instanceof CborArray)  &&
+            (_plutusV3 === undefined    || _plutusV3 instanceof CborArray)
         )) throw new InvalidCborFormatError("TxWitnessSet");
 
         return new TxWitnessSet({

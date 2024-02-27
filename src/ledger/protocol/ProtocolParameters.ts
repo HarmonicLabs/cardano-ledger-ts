@@ -89,7 +89,7 @@ export function isProtocolParameters( something: any ): something is ProtocolPar
         "minfeeRefScriptCostPerByte"
     ] as const;
 
-    const actualKeys = Object.keys( something )
+    const actualKeys = Object.keys( something );
 
     if(
         !expectedKeys.every( k => actualKeys.includes( k ) )
