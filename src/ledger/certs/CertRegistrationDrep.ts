@@ -6,6 +6,7 @@ import { ICert } from "./ICert"
 import { Anchor, IAnchor, isIAnchor } from "../../governance/Anchor";
 import { Coin } from "../Coin";
 import { forceBigUInt } from "../../utils/ints";
+import { Hash28 } from "../../hashes";
 
 export interface ICertRegistrationDrep {
     drepCredential: Credential,

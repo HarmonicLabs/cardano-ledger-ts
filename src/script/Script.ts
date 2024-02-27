@@ -9,14 +9,15 @@ import { assert } from "../utils/assert";
 export enum ScriptType {
     NativeScript = "NativeScript",
     PlutusV1 = "PlutusScriptV1",
-    PlutusV2 = "PlutusScriptV2"
+    PlutusV2 = "PlutusScriptV2",
+    PlutusV3 = "PlutusScriptV3"
 }
 
 Object.freeze( ScriptType );
 
-export type PlutusScriptType = ScriptType.PlutusV1 | ScriptType.PlutusV2 | "PlutusScriptV1" | "PlutusScriptV2"
+export type PlutusScriptType = ScriptType.PlutusV1 | ScriptType.PlutusV2 | ScriptType.PlutusV3 | "PlutusScriptV1" | "PlutusScriptV2" | "PlutusScriptV3"
 
-export type LitteralScriptType = ScriptType | "NativeScript" | "PlutusScriptV1" | "PlutusScriptV2"
+export type LitteralScriptType = ScriptType | "NativeScript" | "PlutusScriptV1" | "PlutusScriptV2" | "PlutusScriptV3"
 
 export interface PlutusScriptJsonFormat<T extends PlutusScriptType = PlutusScriptType> {
     type: T,
@@ -31,6 +32,8 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
     readonly bytes!: Uint8Array;
     /**
      * format expected by `cardano-cli`
+     * 
+     * for standard ledger format (as defined in CDDL) use `toCbor` method
     **/
     readonly cbor!: T extends ScriptType.NativeScript ? never : CborString;
     readonly hash!: Hash28;
@@ -40,7 +43,8 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         assert(
             scriptType === ScriptType.NativeScript  ||
             scriptType === ScriptType.PlutusV1      ||
-            scriptType === ScriptType.PlutusV2,
+            scriptType === ScriptType.PlutusV2      ||
+            scriptType === ScriptType.PlutusV3,
             "invalid 'scriptType'"
         );
 
@@ -53,8 +57,9 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         if( !( bytes instanceof Uint8Array ) )
         {
             if(
-                (bytes.type as any) === ScriptType.PlutusV1 ||
-                (bytes.type as any) === ScriptType.PlutusV2
+                (bytes?.type as any) === ScriptType.PlutusV1 ||
+                (bytes?.type as any) === ScriptType.PlutusV2 ||
+                (bytes?.type as any) === ScriptType.PlutusV3
             )
             {
                 bytes = fromHex( (bytes as PlutusScriptJsonFormat).cborHex );
@@ -64,11 +69,12 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
                 bytes = nativeScriptToCbor( bytes as NativeScript ).toBuffer()
             }
         }
-        else bytes = bytes.slice()
+        else bytes = Uint8Array.prototype.slice.call( bytes );
 
         if(
             scriptType === ScriptType.PlutusV1 ||
-            scriptType === ScriptType.PlutusV2
+            scriptType === ScriptType.PlutusV2 ||
+            scriptType === ScriptType.PlutusV3
         )
         {
             // unwrap up to 2 cbor bytes 
@@ -103,7 +109,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
                 new CborBytes(
                     Cbor.encode(
                         new CborBytes(
-                            bytes.slice()
+                            Uint8Array.prototype.slice.call( bytes )
                         )
                     ).toBuffer()
                 )
@@ -133,7 +139,9 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
                         );
 
                         scriptDataToBeHashed = [
-                            this.type === ScriptType.PlutusV1 ? 0x01 : 0x02
+                            this.type === ScriptType.PlutusV1 ? 0x01 :
+                            this.type === ScriptType.PlutusV2 ? 0x02 :
+                            0x03
                         ].concat( singleCbor );
                     }
 
@@ -156,7 +164,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
     {
         return new Script(
             this.type as any,
-            this.bytes.slice()
+            Uint8Array.prototype.slice.call( this.bytes )
         );
     }
 
@@ -223,7 +231,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
             ),
             new CborBytes(
                 Cbor.encode(
-                    new CborBytes( this.bytes.slice() )
+                    new CborBytes( Uint8Array.prototype.slice.call( this.bytes ) )
                 ).toBuffer()
             )
         ]);

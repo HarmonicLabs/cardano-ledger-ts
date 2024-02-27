@@ -13,14 +13,17 @@ import { assert } from "../../utils/assert";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../utils/ints";
 
 export enum TxRedeemerTag {
-    Spend    = 0,
-    Mint     = 1,
-    Cert     = 2,
-    Withdraw = 3
+    Spend       = 0,
+    Mint        = 1,
+    Cert        = 2,
+    Withdraw    = 3,
+    Voting      = 4,
+    Proposing   = 5
 };
 
 Object.freeze( TxRedeemerTag );
 
+/** @deprecated */
 export function txRdmrTagToString( tag: TxRedeemerTag ): string
 {
     switch( tag )
@@ -29,6 +32,8 @@ export function txRdmrTagToString( tag: TxRedeemerTag ): string
         case TxRedeemerTag.Mint: return "Mint";
         case TxRedeemerTag.Spend: return "Spend";
         case TxRedeemerTag.Withdraw: return "Withdraw";
+        case TxRedeemerTag.Voting: return "Voting";
+        case TxRedeemerTag.Proposing: return "Proposing";
         default: return "";
     }
 }
@@ -38,6 +43,8 @@ export type TxRedeemerTagStr<Tag extends TxRedeemerTag> =
     Tag extends TxRedeemerTag.Mint      ? "Mint"        :
     Tag extends TxRedeemerTag.Cert      ? "Cert"        :
     Tag extends TxRedeemerTag.Withdraw  ? "Withdraw"    :
+    Tag extends TxRedeemerTag.Voting    ? "Voting"      :
+    Tag extends TxRedeemerTag.Proposing ? "Proposing"   :
     never;
 
 export function txRedeemerTagToString<Tag extends TxRedeemerTag>( tag: Tag ): TxRedeemerTagStr<Tag>
@@ -48,6 +55,8 @@ export function txRedeemerTagToString<Tag extends TxRedeemerTag>( tag: Tag ): Tx
         case TxRedeemerTag.Mint:        return "Mint" as any;
         case TxRedeemerTag.Cert:        return "Cert" as any;
         case TxRedeemerTag.Withdraw:    return "Withdraw" as any;
+        case TxRedeemerTag.Voting:      return "Voting" as any;
+        case TxRedeemerTag.Proposing:   return "Proposing" as any;
         default:
             throw new BasePlutsError("invalid TxRedeemerTag")
     }
@@ -235,69 +244,5 @@ export class TxRedeemer
             execUnits: this.execUnits.toJson(),
             data: this.data.toJson(),
         }
-    }
-
-    /** @deprecated */
-    toSpendingPurposeData( tx: TxBody ): DataConstr
-    {
-        const tag = this.tag;
-
-        let ctorIdx: 0 | 1 | 2 | 3;
-        let purposeArgData: Data;
-
-        if( tag === TxRedeemerTag.Mint )
-        {
-            ctorIdx = 0;
-            const policy = tx.mint
-                // "+ 1" because in `plu-ts` values we keep track of lovelaces anyway
-                ?.map[ this.index + 1 ]
-                .policy;
-            if(!( policy instanceof Hash28 ))
-            throw new BasePlutsError(
-                "invalid minting policy for minting redeemer " + this.index.toString()
-            );
-            purposeArgData = new DataB( policy.toBuffer() );
-        }
-        else if( tag === TxRedeemerTag.Spend )
-        {
-            ctorIdx = 1;
-            const utxoRef = tx.inputs.filter( input => input.resolved.address.paymentCreds.type === CredentialType.Script )[ this.index ].utxoRef;
-            if( utxoRef === undefined )
-            throw new BasePlutsError(
-                "invalid utxo for spending redeemer " + this.index.toString()
-            );
-            purposeArgData = utxoRef.toData();
-        }
-        else if( tag === TxRedeemerTag.Withdraw )
-        {
-            ctorIdx = 2;
-            const stakeAddr = tx.withdrawals?.map[ this.index ]?.rewardAccount
-            if( stakeAddr === undefined )
-            throw new BasePlutsError(
-                "invalid stake credentials for rewarding redeemer " + this.index.toString()
-            );
-            purposeArgData = new StakeCredentials(
-                "script",
-                new StakeValidatorHash( stakeAddr.credentials )
-            ).toData();
-        }
-        else if( tag === TxRedeemerTag.Cert )
-        {
-            ctorIdx = 3;
-            const cert = tx.certs?.at( this.index )
-            if( cert === undefined )
-            throw new BasePlutsError(
-                "invalid certificate for certifyng redeemer " + this.index.toString()
-            );
-            purposeArgData = cert.toData();
-        }
-        else throw new BasePlutsError(
-            "invalid redeemer tag"
-        );
-
-        return new DataConstr(
-            ctorIdx,
-            [ purposeArgData ]
-        );
     }
 }
