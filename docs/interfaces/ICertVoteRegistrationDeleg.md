@@ -1,0 +1,37 @@
+**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+
+***
+
+[@harmoniclabs/cardano-ledger-ts](../README.md) / ICertVoteRegistrationDeleg
+
+# Interface: ICertVoteRegistrationDeleg
+
+## Properties
+
+### coin
+
+> **coin**: `CanBeUInteger`
+
+#### Source
+
+[src/ledger/certs/CertVoteRegistrationDeleg.ts:15](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertVoteRegistrationDeleg.ts#L15)
+
+***
+
+### drep
+
+> **drep**: `DRepLike`
+
+#### Source
+
+[src/ledger/certs/CertVoteRegistrationDeleg.ts:14](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertVoteRegistrationDeleg.ts#L14)
+
+***
+
+### stakeCredential
+
+> **stakeCredential**: [`Credential`](../classes/Credential.md)\<[`CredentialType`](../enumerations/CredentialType.md)\>
+
+#### Source
+
+[src/ledger/certs/CertVoteRegistrationDeleg.ts:13](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertVoteRegistrationDeleg.ts#L13)

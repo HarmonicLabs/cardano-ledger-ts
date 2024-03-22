@@ -4,7 +4,7 @@ import { ToData, DataMap, DataB, DataI, DataPair } from "@harmoniclabs/plutus-da
 import { lexCompare, toHex, fromHex } from "@harmoniclabs/uint8array-utils";
 import { Hash28 } from "../../hashes";
 import { forceBigUInt, CanBeUInteger } from "../../utils/ints";
-import { IValue, IValueAssets, isIValue, getEmptyNameQty, getNameQty, IValueAdaEntry, IValueAsset, IValuePolicyEntry, addIValues, subIValues, cloneIValue, IValueToJson, ValueJson } from "./IValue";
+import { IValue, isIValue, getEmptyNameQty, getNameQty, IValueAdaEntry, IValueAsset, IValuePolicyEntry, addIValues, subIValues, cloneIValue, IValueToJson, ValueJson, NormalizedIValuePolicyEntry, IValueAssetBI, NormalizedIValueAdaEntry, normalizeIValueAsset, NormalizedIValue, normalizeIValue } from "./IValue";
 import { assert } from "../../utils/assert";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 
@@ -28,16 +28,18 @@ export type ValueUnitEntryBI = {
 
 export type ValueUnitsBI = ValueUnitEntryBI[]
 
+const _0n = BigInt( 0 );
+
 export class Value
     implements ToCbor, ToData
 {
-    readonly map!: IValue
+    readonly map!: NormalizedIValue
 
     *[Symbol.iterator]()
     {
         for( const { policy, assets } of this.map )
         {
-            yield { policy: policy.toString(), assets: assets as IValueAssets };
+            yield { policy: policy.toString(), assets: assets as IValueAssetBI[] };
         }
         return;
     }
@@ -49,7 +51,9 @@ export class Value
             "invalid value interface passed to contruct a 'value' instance"
         );
 
-        map.forEach( entry => {
+        const _map = normalizeIValue( map );
+
+        _map.forEach( (entry, i) => {
 
             const assets = entry.assets;
 
@@ -58,20 +62,20 @@ export class Value
         });
 
         // value MUST have an ada entry
-        if( !map.some( entry => entry.policy === "" ) )
+        if( !_map.some( entry => entry.policy === "" ) )
         {
-            map.unshift({
+            _map.unshift({
                 policy: "",
                 assets: [
                     {
                         name: new Uint8Array([]),
-                        quantity: 0
+                        quantity: _0n
                     }
                 ]
             });
         }
 
-        map.sort((a,b) => {
+        _map.sort((a,b) => {
             if( a.policy === "" )
             {
                 if( b.policy === "" ) return Ord.EQ;
@@ -87,7 +91,7 @@ export class Value
         defineReadOnlyProperty(
             this,
             "map",
-            Object.freeze( map )
+            Object.freeze( _map )
         );
 
         Object.defineProperty(
@@ -202,14 +206,14 @@ export class Value
         return v.map.length === 1;
     }
 
-    static lovelaceEntry( n: CanBeUInteger ): IValueAdaEntry
+    static lovelaceEntry( n: CanBeUInteger ): NormalizedIValueAdaEntry
     {
         return {
             policy: "",
             assets: [
                 {
                     name: new Uint8Array([]),
-                    quantity: typeof n === "number" ? Math.round( n ) : BigInt( n ) 
+                    quantity: typeof n === "number" ? BigInt( Math.round( n ) ) : BigInt( n ) 
                 }
             ]
         };
@@ -223,7 +227,7 @@ export class Value
     static assetEntry(
         name: Uint8Array,
         qty: number | bigint
-    ): IValueAsset
+    ): IValueAssetBI
     {
         if(!(
             name instanceof Uint8Array &&
@@ -231,7 +235,7 @@ export class Value
         )) throw new Error("invalid asset name; must be Uint8Array of length <= 32");
         return {
             name: name.slice(),
-            quantity: typeof qty === "number" ? Math.round( qty ) : BigInt( qty ) 
+            quantity: typeof qty === "number" ? BigInt( Math.round( qty ) ) : BigInt( qty ) 
         };
     }
 
@@ -239,7 +243,7 @@ export class Value
         policy: Hash28,
         name: Uint8Array,
         qty: number | bigint
-    ): IValuePolicyEntry
+    ): NormalizedIValuePolicyEntry
     {
         return {
             policy,
@@ -264,10 +268,10 @@ export class Value
 
     static entry(
         policy: Hash28,
-        assets: IValueAssets
-    ): IValuePolicyEntry
+        assets: IValueAsset[]
+    ): NormalizedIValuePolicyEntry
     {
-        return { policy, assets };
+        return { policy, assets: assets.map( normalizeIValueAsset ) };
     }
 
     static add( a: Value, b: Value ): Value
@@ -408,7 +412,7 @@ export class Value
             if(!( k instanceof CborBytes ))
             throw new Error(`Invalid CBOR format for "Value"`);
 
-            const policy = k.buffer.length === 0 ? "" : new Hash28( k.buffer )
+            const policy = k.bytes.length === 0 ? "" : new Hash28( k.bytes )
 
             if(!( v instanceof CborMap ))
             throw new Error(`Invalid CBOR format for "Value"`);
@@ -416,7 +420,7 @@ export class Value
             const assetsMap = v.map;
             const assetsMapLen = v.map.length;
 
-            const assets: IValueAssets = [];
+            const assets: IValueAssetBI[] = [];
 
             for( let j = 0 ; j < assetsMapLen; j++ )
             {
@@ -428,15 +432,15 @@ export class Value
                 throw new Error(`Invalid CBOR format for "Value"`);
 
                 assets.push({
-                    name: k.buffer,
+                    name: k.bytes,
                     quantity: v.num
                 });
             }
 
             valueMap[i + 1] = {
-                policy: policy as any,
+                policy: policy,
                 assets
-            };
+            } as NormalizedIValuePolicyEntry | NormalizedIValueAdaEntry;
         }
 
         return new Value(valueMap);

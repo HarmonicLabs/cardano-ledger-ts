@@ -1,6 +1,6 @@
 {
   "name": "@harmoniclabs/cardano-ledger-ts",
-  "version": "0.2.0-dev0",
+  "version": "0.2.0-dev1",
   "description": "",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -17,7 +17,8 @@
     "build:light": "tsc --project ./tsconfig.json && tsc-alias -p ./tsconfig.json",
     "buidl": "npm run build",
     "ci": "npm run test && npm run build",
-    "start": "npm-run-all --parallel build:watch run:watch"
+    "start": "npm-run-all --parallel build:watch run:watch",
+    "docs": "npx typedoc src --out ./docs"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
@@ -53,6 +54,8 @@
     "@types/node": "^20.10.5",
     "jest": "^29.4.3",
     "tsc-alias": "^1.7.1",
+    "typedoc": "^0.25.9",
+    "typedoc-plugin-markdown": "^4.0.0-next.53",
     "typescript": "^4.6.3"
   },
   "funding": "https://github.com/sponsors/HarmonicLabs"

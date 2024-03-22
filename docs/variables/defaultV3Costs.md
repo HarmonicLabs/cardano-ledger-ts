@@ -1,0 +1,13 @@
+**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+
+***
+
+[@harmoniclabs/cardano-ledger-ts](../README.md) / defaultV3Costs
+
+# Variable: defaultV3Costs
+
+> **`const`** **defaultV3Costs**: [`CostModelPlutusV3`](../interfaces/CostModelPlutusV3.md)
+
+## Source
+
+node\_modules/@harmoniclabs/cardano-costmodels-ts/dist/CostModels.d.ts:22

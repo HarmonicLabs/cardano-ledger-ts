@@ -1,7 +1,6 @@
-import { CredentialType, PrivateKey, PubKeyHash, StakeCredentials } from "../credentials";
+import { CredentialType, PrivateKey, PubKeyHash } from "../credentials";
 import { Hash28, Hash32, Signature } from "../hashes";
 import { VKeyWitness, VKey, ITxWitnessSet, TxWitnessSet, isITxWitnessSet } from "./TxWitnessSet";
-import { CertificateType, PoolParams } from "../ledger";
 import { ToCbor, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
 import { signEd25519 } from "@harmoniclabs/crypto";
 import { defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
@@ -144,8 +143,11 @@ export class Tx
 
         defineReadOnlyProperty(
             this, "signWith",
-            ( signer: PrivateKey ): void => {
-                const [ derivedPubKey, signature ] = signEd25519( this.body.hash.toBuffer(), signer.toBuffer() );
+            ( signer: PrivateKey | Uint8Array ): void => {
+                const [ derivedPubKey, signature ] = signEd25519(
+                    this.body.hash.toBuffer(),
+                    signer instanceof Uint8Array ? signer : signer.toBuffer()
+                );
 
                 this.addVKeyWitness(
                     new VKeyWitness(

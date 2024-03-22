@@ -188,9 +188,11 @@ export class Address
         );
     }
 
-    static fromBytes( bs: byte[] | string ): Address
+    static fromBytes( bs: byte[] | string | Uint8Array ): Address
     {
-        bs = typeof bs === "string" ? Array.from(fromHex( bs ))as byte[] : bs;
+        bs = Array.from(
+            typeof bs === "string" ? fromHex( bs ) : bs
+        ) as byte[];
 
         const [ header, ...payload ] = bs;
 

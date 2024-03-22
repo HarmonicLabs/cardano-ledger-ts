@@ -1,18 +1,61 @@
-import { toHex, uint8ArrayEq } from "@harmoniclabs/uint8array-utils";
-import { Hash28 } from "../../hashes/Hash28/Hash28";
+import { fromHex, toHex, uint8ArrayEq } from "@harmoniclabs/uint8array-utils";
+import { CanBeHash28, Hash28 } from "../../hashes/Hash28/Hash28";
 import { CanBeUInteger } from "../../utils/ints";
 import { defineReadOnlyProperty, isObject, hasOwn } from "@harmoniclabs/obj-utils";
-
 
 export type AssetJson = { [ name_hex: string ]: `${number}` };
 
 export type ValueJson = { [ policy_hex: string ]: AssetJson };
 
-export type IValue = (IValuePolicyEntry | IValueAdaEntry)[]
+export type IValue = (IValuePolicyEntry | IValueAdaEntry)[];
+export type NormalizedIValue = (NormalizedIValuePolicyEntry | NormalizedIValueAdaEntry)[];
+
+export function normalizeIValue( val: IValue ): NormalizedIValue
+{
+    return val.map<NormalizedIValuePolicyEntry | NormalizedIValueAdaEntry>(({ policy, assets }) => {
+
+        if( policy === "" )
+        return {
+            policy: "",
+            assets: [
+                {
+                    name: new Uint8Array([]),
+                    quantity: BigInt( assets[0].quantity )
+                }
+            ]
+        } as NormalizedIValueAdaEntry
+
+        policy = new Hash28( policy );
+
+        // precompute bytes and string representation.
+        policy.toBuffer();
+        policy.toString();
+
+        return {
+            policy,
+            assets: assets.map(({ name, quantity }) => {
+
+                return {
+                    name: typeof name === "string" ? fromHex( name ): name,
+                    quantity: BigInt( quantity )
+                };
+            })
+        } as NormalizedIValuePolicyEntry
+    });
+}
 
 export type IValueAsset = {
-    name: Uint8Array,
+    /** bytes or **HEXADECIMAL** string */
+    name: Uint8Array | string,
     quantity: CanBeUInteger
+}
+
+export function normalizeIValueAsset( asset: IValueAsset ): IValueAssetBI
+{
+    return {
+        name: typeof asset.name === "string" ? fromHex( asset.name ) : asset.name,
+        quantity: BigInt( asset.quantity )
+    };
 }
 
 export type IValueAssetBI = {
@@ -20,16 +63,24 @@ export type IValueAssetBI = {
     quantity: bigint
 }
 
-export type IValueAssets = IValueAsset[];
-
-export type IValuePolicyEntry = {
-    policy: Hash28,
-    assets: IValueAssets
+export interface IValuePolicyEntry {
+    policy: CanBeHash28,
+    assets: IValueAsset[]
 };
+
+export interface NormalizedIValuePolicyEntry {
+    policy: Hash28,
+    assets: IValueAssetBI[]
+}
 
 export type IValueAdaEntry = {
     policy: "",
     assets: [ IValueAsset ]
+}
+
+export type NormalizedIValueAdaEntry = {
+    policy: "",
+    assets: [ IValueAssetBI ]
 }
 
 export function cloneIValue( ival: IValue ): IValue
@@ -37,9 +88,12 @@ export function cloneIValue( ival: IValue ): IValue
     return ival.map( cloneIValueEntry );
 }
 
-function policyToString( policy: "" | Hash28 ): string
+function policyToString( policy: "" | CanBeHash28 ): string
 {
-    return policy === "" ? policy : policy.toString();
+    return typeof policy === "string" ? policy : (
+        policy instanceof Uint8Array ? toHex( policy ) :
+        policy.toString()
+    );
 }
 
 export function IValueToJson( iVal: IValue ): ValueJson
@@ -54,7 +108,7 @@ export function IValueToJson( iVal: IValue ): ValueJson
         {
             defineReadOnlyProperty(
                 _assets,
-                toHex( name ),
+                typeof name === "string" ? name : toHex( name ),
                 quantity.toString()
             )
         }
@@ -69,7 +123,7 @@ export function IValueToJson( iVal: IValue ): ValueJson
     return result;
 }
 
-function cloneIValueAssets( iValAssets: IValueAssets ): IValueAssets
+function cloneIValueAssets( iValAssets: IValueAsset[] ): IValueAsset[]
 {
     return iValAssets.map(({ name, quantity }) => ({ name: name.slice(), quantity }));
 }
@@ -138,7 +192,7 @@ function isIValueAsset( entry: any ): entry is IValueAsset
     );
 }
 
-function isIValueAssets( assets: any ): assets is IValueAssets
+function isIValueAssets( assets: any ): assets is IValueAsset[]
 {
     return (
         Array.isArray( assets ) &&
@@ -196,15 +250,20 @@ export function isIValue( entries: any[] ): entries is IValue
 
 const empty = new Uint8Array([]);
 
-export function getNameQty( assets: IValueAssets | undefined, searchName: Uint8Array ): CanBeUInteger | undefined
+export function getNameQty( assets: IValueAsset[] | undefined, searchName: Uint8Array ): CanBeUInteger | undefined
 {
     if(!(
         Array.isArray( assets )
     )) return undefined;
-    return assets.find( ({ name }) => uint8ArrayEq( name, searchName ) )?.quantity;
+    return assets.find( ({ name }) =>
+        uint8ArrayEq(
+            typeof name === "string" ? fromHex(name) : name,
+            searchName
+        )
+    )?.quantity;
 }
 
-export function getEmptyNameQty( assets: IValueAssets | undefined ): CanBeUInteger | undefined
+export function getEmptyNameQty( assets: IValueAsset[] | undefined ): CanBeUInteger | undefined
 {
     return getNameQty( assets, empty );
 }
@@ -213,8 +272,8 @@ export function addIValues( a: IValue, b: IValue ): IValue
 {
     const sum: IValue = [];
 
-    const short = (a.length < b.length ? a : b) as IValuePolicyEntry[];
-    const long  = (a.length < b.length ? b : a) as IValuePolicyEntry[];
+    const short = (a.length < b.length ? a : b) as NormalizedIValuePolicyEntry[];
+    const long  = (a.length < b.length ? b : a) as NormalizedIValuePolicyEntry[];
 
     const { assets: aAdaAssets } = long.find(  entry => (entry.policy as any) === "" ) ?? {};
     const { assets: bAdaAssets } = short.find( entry => (entry.policy as any) === "" ) ?? {};
@@ -304,9 +363,9 @@ function addInt( a: number | bigint, b: number | bigint ): bigint
     return BigInt( a ) + BigInt( b );
 }
 
-function addIValueAssets( a: IValueAssets, b: IValueAssets ): IValueAssets
+function addIValueAssets( a: IValueAssetBI[], b: IValueAssetBI[] ): IValueAssetBI[]
 {
-    const sum: IValueAssets = [];
+    const sum: IValueAssetBI[] = [];
 
     const aKeys = a.map( ({ name }) => name );
     const bKeys = b.map( ({ name }) => name );
@@ -413,8 +472,8 @@ export function subIValues( a: IValue, b: IValue ): IValue
             });
     }
 
-    const _a = a as IValuePolicyEntry[];
-    const _b = b as IValuePolicyEntry[];
+    const _a = a as NormalizedIValuePolicyEntry[];
+    const _b = b as NormalizedIValuePolicyEntry[];
 
     for( let i = 0; i < _a.length; i++ )
     {
@@ -443,7 +502,7 @@ export function subIValues( a: IValue, b: IValue ): IValue
             if( subtractedAssets.length !== 0 )
             {
                 result.push({
-                    policy,
+                    policy: new Hash28( policy ),
                     assets: subtractedAssets
                 });
             }
@@ -451,7 +510,7 @@ export function subIValues( a: IValue, b: IValue ): IValue
         else
         {
             result.push({
-                policy,
+                policy: new Hash28( policy ),
                 assets: aAssets
             });
         }
@@ -461,7 +520,7 @@ export function subIValues( a: IValue, b: IValue ): IValue
     {
         if( bIndiciesIncluded.includes( i ) ) continue;
 
-        const subAssets: IValueAssets = [];
+        const subAssets: IValueAssetBI[] = [];
 
         const { policy, assets } = _b[i];
         
@@ -487,9 +546,9 @@ function subInt( a: number | bigint, b: number | bigint ): bigint
     return BigInt( a ) - BigInt( b );
 }
 
-function subIValueAssets( a: IValueAssets, b: IValueAssets ): IValueAssets
+function subIValueAssets( a: IValueAssetBI[], b: IValueAssetBI[] ): IValueAssetBI[]
 {
-    const result: IValueAssets = [];
+    const result: IValueAssetBI[] = [];
 
     const aKeys = a.map( ({ name }) => name );
     const bKeys = b.map( ({ name }) => name );
@@ -525,7 +584,7 @@ function subIValueAssets( a: IValueAssets, b: IValueAssets ): IValueAssets
             {
                 result.push({
                     name: name.slice(),
-                    quantity: amt
+                    quantity: BigInt( amt )
                 });
             }
         }

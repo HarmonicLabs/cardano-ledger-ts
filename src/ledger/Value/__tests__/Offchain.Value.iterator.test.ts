@@ -11,7 +11,7 @@ describe("for entry of value", () => {
         for(const { policy, assets } of value)
         {
             expect( policy ).toEqual("");
-            expect(assets).toEqual([{ name: new Uint8Array([]), quantity: 0 }]);
+            expect(assets).toEqual([{ name: new Uint8Array([]), quantity: BigInt(0) }]);
             n++;
         }
 
@@ -29,7 +29,7 @@ describe("for entry of value", () => {
             expect(assets).toEqual([
                 {
                     name: new Uint8Array([]),
-                    quantity: 1e6
+                    quantity: BigInt( 1e6 )
                 }
             ]);
             n++;
