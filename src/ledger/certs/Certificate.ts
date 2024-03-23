@@ -18,6 +18,7 @@ import { CertVoteDeleg, ICertVoteDeleg } from "./CertVoteDeleg";
 import { CertVoteRegistrationDeleg, ICertVoteRegistrationDeleg } from "./CertVoteRegistrationDeleg";
 import { CertificateType, isCertificateType } from "./CertificateType";
 import { IMoveInstantRewardsCert, MoveInstantRewardsCert } from "./MoveInstantRewardsCert";
+import { CertStakeRegistrationDeleg, ICertStakeRegistrationDeleg } from "./CertStakeRegistrationDeleg";
 
 export type Certificate
     = CertStakeRegistration
@@ -31,6 +32,7 @@ export type Certificate
     | CertUnRegistrationDeposit
     | CertVoteDeleg
     | CertStakeVoteDeleg
+    | CertStakeRegistrationDeleg
     | CertVoteRegistrationDeleg
     | CertStakeVoteRegistrationDeleg
     | CertAuthCommitteeHot
@@ -53,6 +55,7 @@ export function isCertificate( stuff: any ): stuff is Certificate
         stuff instanceof CertUnRegistrationDeposit ||
         stuff instanceof CertVoteDeleg ||
         stuff instanceof CertStakeVoteDeleg ||
+        stuff instanceof CertStakeRegistrationDeleg ||
         stuff instanceof CertVoteRegistrationDeleg ||
         stuff instanceof CertStakeVoteRegistrationDeleg ||
         stuff instanceof CertAuthCommitteeHot ||
@@ -87,7 +90,7 @@ export function certificateFromCborObj( cbor: CborObj ): Certificate
         case CertificateType.UnRegistrationDeposit: return CertUnRegistrationDeposit.fromCborObj( cbor );
         case CertificateType.VoteDeleg: return CertVoteDeleg.fromCborObj( cbor );
         case CertificateType.StakeVoteDeleg: return CertStakeVoteDeleg.fromCborObj( cbor );
-        case CertificateType.StakeRegistration: return CertStakeRegistration.fromCborObj( cbor );
+        case CertificateType.StakeRegistrationDeleg: return CertStakeRegistrationDeleg.fromCborObj( cbor );
         case CertificateType.VoteRegistrationDeleg: return CertVoteRegistrationDeleg.fromCborObj( cbor );
         case CertificateType.StakeVoteRegistrationDeleg: return CertStakeVoteRegistrationDeleg.fromCborObj( cbor );
         case CertificateType.AuthCommitteeHot: return CertAuthCommitteeHot.fromCborObj( cbor );
@@ -111,6 +114,7 @@ export type CertificateLike
     | { certType: CertificateType.UnRegistrationDeposit } & ICertUnRegistrationDeposit
     | { certType: CertificateType.VoteDeleg } & ICertVoteDeleg
     | { certType: CertificateType.StakeVoteDeleg } & ICertStakeVoteDeleg
+    | { certType: CertificateType.StakeRegistrationDeleg } & ICertStakeRegistrationDeleg
     | { certType: CertificateType.StakeRegistration } & ICertStakeRegistration
     | { certType: CertificateType.VoteRegistrationDeleg } & ICertVoteRegistrationDeleg
     | { certType: CertificateType.StakeVoteRegistrationDeleg } & ICertStakeVoteRegistrationDeleg
@@ -121,3 +125,30 @@ export type CertificateLike
     | { certType: CertificateType.UpdateDrep } & ICertUpdateDrep
     | { certType: CertificateType.GenesisKeyDelegation } & ICertGenesisKeyDelegation
     | { certType: CertificateType.MoveInstantRewards } & IMoveInstantRewardsCert;
+
+export function certificateFromCertificateLike( like: CertificateLike ): Certificate
+{
+    switch( like.certType as CertificateType )
+    {
+        case CertificateType.StakeRegistration: return new CertStakeRegistration( like as ICertStakeRegistration );
+        case CertificateType.StakeDeRegistration: return new CertStakeDeRegistration( like as ICertStakeDeRegistration );
+        case CertificateType.StakeDelegation: return new CertStakeDelegation( like as ICertStakeDelegation );
+        case CertificateType.PoolRegistration: return new CertPoolRegistration( like as ICertPoolRegistration );
+        case CertificateType.PoolRetirement: return new CertPoolRetirement( like as ICertPoolRetirement );
+        case CertificateType.RegistrationDeposit: return new CertRegistrationDeposit( like as ICertRegistrationDeposit );
+        case CertificateType.UnRegistrationDeposit: return new CertUnRegistrationDeposit( like as ICertUnRegistrationDeposit );
+        case CertificateType.VoteDeleg: return new CertVoteDeleg( like as ICertVoteDeleg );
+        case CertificateType.StakeVoteDeleg: return new CertStakeVoteDeleg( like as ICertStakeVoteDeleg );
+        case CertificateType.StakeRegistrationDeleg: return new CertStakeRegistrationDeleg( like as ICertStakeRegistrationDeleg )
+        case CertificateType.StakeRegistration: return new CertStakeRegistration( like as ICertStakeRegistration );
+        case CertificateType.VoteRegistrationDeleg: return new CertVoteRegistrationDeleg( like as ICertVoteRegistrationDeleg );
+        case CertificateType.StakeVoteRegistrationDeleg: return new CertStakeVoteRegistrationDeleg( like as ICertStakeVoteRegistrationDeleg );
+        case CertificateType.AuthCommitteeHot: return new CertAuthCommitteeHot( like as ICertAuthCommitteeHot );
+        case CertificateType.ResignCommitteeCold: return new CertResignCommitteeCold( like as ICertResignCommitteeCold );
+        case CertificateType.RegistrationDrep: return new CertRegistrationDrep( like as ICertRegistrationDrep );
+        case CertificateType.UnRegistrationDrep: return new CertUnRegistrationDrep( like as ICertUnRegistrationDrep );
+        case CertificateType.UpdateDrep: return new CertUpdateDrep( like as ICertUpdateDrep );
+        case CertificateType.GenesisKeyDelegation: return new CertGenesisKeyDelegation( like as ICertGenesisKeyDelegation );
+        case CertificateType.MoveInstantRewards: return new MoveInstantRewardsCert( like as IMoveInstantRewardsCert );
+    }
+}

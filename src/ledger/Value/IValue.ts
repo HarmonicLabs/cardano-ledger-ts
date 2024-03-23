@@ -63,6 +63,14 @@ export type IValueAssetBI = {
     quantity: bigint
 }
 
+export function isIValueAssetBI( stuff: any ): stuff is IValueAssetBI
+{
+    return isObject( stuff ) && (
+        stuff.name instanceof Uint8Array &&
+        typeof stuff.quantity === "bigint"
+    );
+}
+
 export interface IValuePolicyEntry {
     policy: CanBeHash28,
     assets: IValueAsset[]
@@ -71,6 +79,34 @@ export interface IValuePolicyEntry {
 export interface NormalizedIValuePolicyEntry {
     policy: Hash28,
     assets: IValueAssetBI[]
+}
+
+export function normalizeIValuePolicyEntry({ policy, assets }: IValuePolicyEntry ): NormalizedIValuePolicyEntry
+{
+    policy = new Hash28( policy );
+
+    // precompute bytes and string representation.
+    policy.toBuffer();
+    policy.toString();
+
+    return {
+        policy,
+        assets: assets.map(({ name, quantity }) => {
+            return {
+                name: typeof name === "string" ? fromHex( name ): name,
+                quantity: BigInt( quantity )
+            };
+        })
+    } as NormalizedIValuePolicyEntry
+}
+
+export function isNormalizedIValuePolicyEntry( stuff: any ): stuff is NormalizedIValuePolicyEntry
+{
+    return isObject( stuff ) && (
+        stuff.policy instanceof Hash28 &&
+        Array.isArray( stuff.assets ) &&
+        stuff.assets.every( isIValueAssetBI )
+    );
 }
 
 export type IValueAdaEntry = {
