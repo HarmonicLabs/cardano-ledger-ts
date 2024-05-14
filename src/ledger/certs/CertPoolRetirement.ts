@@ -6,6 +6,8 @@ import { ICert } from "./ICert"
 import { Epoch } from "../Epoch";
 import { CanBeHash28, Hash28 } from "../../hashes";
 import { forceBigUInt } from "../../utils/ints";
+import { Data, DataConstr, DataI } from "@harmoniclabs/plutus-data";
+import { definitelyToDataVersion } from "../../toData/defaultToDataVersion";
 
 export interface ICertPoolRetirement {
     poolHash: CanBeHash28,
@@ -27,6 +29,27 @@ export class CertPoolRetirement
                 poolHash: { value: new Hash28( poolHash ), ...roDescr },
                 epoch: { value: forceBigUInt( epoch ), ...roDescr }
             }
+        );
+    }
+
+    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    {
+        version = definitelyToDataVersion( version );
+
+        const fields: Data[] = [
+            this.poolHash.toData(),
+            new DataI( this.epoch )
+        ];
+        
+        if( version === "v1" || version === "v2" )
+        return new DataConstr(
+            4, // PDCert.PoolRetire
+            fields
+        );
+
+        return new DataConstr(
+            8, // PCertificate.PoolRetire
+            fields
         );
     }
 

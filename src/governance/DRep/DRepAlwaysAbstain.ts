@@ -2,6 +2,8 @@ import { Cbor, CborArray, CborString, CborUInt } from "@harmoniclabs/cbor";
 import { roDescr } from "../../utils/roDescr";
 import { DRepType, drepTypeToString } from "./DRepType";
 import { IDRep } from "./IDRep";
+import { Data, DataConstr } from "@harmoniclabs/plutus-data";
+import { definitelyToDataVersion } from "../../toData/defaultToDataVersion";
 
 export interface IDRepAlwaysAbstain {
     hash?: undefined // to preserve shape
@@ -20,6 +22,19 @@ export class DRepAlwaysAbstain
                 drepType: { value: DRepType.AlwaysAbstain, ...roDescr },
                 hash: { value: undefined, ...roDescr } // to preserve shape
             }
+        );
+    }
+
+    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    {
+        version = definitelyToDataVersion( version );
+
+        if( version === "v1" || version === "v2" )
+        throw new Error("DRep not supported before v3");
+
+        return new DataConstr(
+            1, // PDrep.AlwaysAbstain
+            []
         );
     }
 

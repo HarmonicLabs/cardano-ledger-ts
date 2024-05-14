@@ -1,7 +1,8 @@
+import { ToData } from "@harmoniclabs/plutus-data";
 import { Hash28 } from "../../hashes";
 import { CertificateType } from "./CertificateType";
 
-export interface ICert {
+export interface ICert extends ToData {
     certType: CertificateType,
     getRequiredSigners: () => Hash28[]
 }

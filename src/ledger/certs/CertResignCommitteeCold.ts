@@ -5,6 +5,8 @@ import { CertificateType, certTypeToString } from "./CertificateType"
 import { ICert } from "./ICert"
 import { Anchor, IAnchor, isIAnchor } from "../../governance/Anchor";
 import { Hash28 } from "../../hashes";
+import { DataConstr } from "@harmoniclabs/plutus-data";
+import { definitelyToDataVersion } from "../../toData/defaultToDataVersion";
 
 export interface ICertResignCommitteeCold {
     coldCredential: Credential,
@@ -26,6 +28,22 @@ export class CertResignCommitteeCold
                 coldCredential: { value: coldCredential, ...roDescr },
                 anchor : { value: isIAnchor( anchor ) ? new Anchor( anchor ) : undefined , ...roDescr },
             }
+        );
+    }
+
+    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    {
+        version = definitelyToDataVersion( version );
+
+        if( version === "v1" || version === "v2" )
+        throw new Error("CertAuthCommiteeHot only allowed after v3");
+
+        return new DataConstr(
+            10, // PCertificate.CommitteeResignation
+            [
+                // cold
+                this.coldCredential.toData( version )
+            ]
         );
     }
 

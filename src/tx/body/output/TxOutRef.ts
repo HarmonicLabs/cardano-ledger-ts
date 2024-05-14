@@ -31,6 +31,22 @@ export function isITxOutRef( stuff: any ): stuff is ITxOutRef
     )
 }
 
+export function eqITxOutRef( a: ITxOutRef, b: ITxOutRef ): boolean
+{
+    if( !isObject( a ) ) return false;
+    if( !isObject( b ) ) return false;
+
+    try {
+        return (
+            new Hash32( a.id ).toString() === new Hash32( b.id ).toString() &&
+            typeof a.index === "number" &&
+            a.index === b.index
+        );
+    } catch {
+        return false;
+    }
+}
+
 export function ITxOutRefToStr( iRef: ITxOutRef ): TxOutRefStr
 {
     if( !isITxOutRef( iRef ) )
@@ -139,5 +155,15 @@ export class TxOutRef
             id: "ff".repeat(32),
             index: 0
         });
+    }
+
+    static eq( a: ITxOutRef, b: ITxOutRef ): boolean
+    {
+        return eqITxOutRef( a, b );
+    }
+
+    eq( other: ITxOutRef ): boolean
+    {
+        return eqITxOutRef( this, other );
     }
 }

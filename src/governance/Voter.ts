@@ -1,6 +1,7 @@
 import { CborArray, CborBytes, CborUInt } from "@harmoniclabs/cbor";
 import { CanBeHash28, Hash28, canBeHash28 } from "../hashes";
 import { isObject } from "@harmoniclabs/obj-utils";
+import { uint8ArrayEq } from "@harmoniclabs/uint8array-utils";
 
 export enum VoterKind {
     ConstitutionalCommitteKeyHash = 0,
@@ -35,6 +36,26 @@ export function isIVoter( stuff: any ): stuff is IVoter
         isVoterKind( stuff.kind ) &&
         canBeHash28( stuff.hash )
     );
+}
+
+export function eqIVoter( a: IVoter, b: IVoter ): boolean
+{
+    if( !isObject( a ) ) return false;
+    if( !isObject( b ) ) return false;
+
+    try {
+        return (
+            isVoterKind( a.kind ) && a.kind === b.kind &&
+            canBeHash28( a.hash ) &&
+            canBeHash28( b.hash ) &&
+            uint8ArrayEq(
+                new Hash28( a.hash ).toBuffer(),
+                new Hash28( b.hash ).toBuffer()
+            )
+        );
+    } catch {
+        return false;
+    }
 }
 
 export class Voter

@@ -5,6 +5,8 @@ import { CertificateType, certTypeToString } from "./CertificateType"
 import { ICert } from "./ICert"
 import { IPoolParams, PoolParams } from "../PoolParams";
 import { Hash28 } from "../../hashes";
+import { Data, DataConstr } from "@harmoniclabs/plutus-data";
+import { definitelyToDataVersion } from "../../toData/defaultToDataVersion";
 
 export interface ICertPoolRegistration {
     poolParams: IPoolParams
@@ -23,6 +25,30 @@ export class CertPoolRegistration
                 certType: { value: CertificateType.PoolRegistration, ...roDescr },
                 poolParams: { value: new PoolParams( poolParams ), ...roDescr }
             }
+        );
+    }
+
+    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    {
+        version = definitelyToDataVersion( version );
+
+        if( version === "v1" || version === "v2" )
+        return new DataConstr(
+            3, [ // PDCert.PoolRegistration
+                // poolId (PPubKeyHash)
+                this.poolParams.operator.toData( version ),
+                // poolVRF
+                this.poolParams.vrfKeyHash.toData( version )
+            ]
+        );
+
+        return new DataConstr(
+            7, [ // PCertificate.PoolRegistration
+                // poolId (PPubKeyHash)
+                this.poolParams.operator.toData( version ),
+                // poolVRF
+                this.poolParams.vrfKeyHash.toData( version )
+            ]
         );
     }
 

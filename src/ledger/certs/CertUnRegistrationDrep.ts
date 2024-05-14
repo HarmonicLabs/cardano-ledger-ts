@@ -7,6 +7,7 @@ import { Anchor, IAnchor, isIAnchor } from "../../governance/Anchor";
 import { Coin } from "../Coin";
 import { forceBigUInt } from "../../utils/ints";
 import { Hash28 } from "../../hashes";
+import { DataConstr, DataI } from "@harmoniclabs/plutus-data";
 
 export interface ICertUnRegistrationDrep {
     drepCredential: Credential,
@@ -18,6 +19,7 @@ export class CertUnRegistrationDrep
 {
     readonly certType: CertificateType.UnRegistrationDrep;
     readonly drepCredential: Credential;
+    /** refound */
     readonly coin: bigint;
 
     constructor({ drepCredential, coin }: ICertUnRegistrationDrep)
@@ -28,6 +30,23 @@ export class CertUnRegistrationDrep
                 drepCredential: { value: drepCredential, ...roDescr },
                 coin: { value: forceBigUInt( coin ), ...roDescr },
             }
+        );
+    }
+
+    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    {
+        version = typeof version !== "string" ? "v3" : version;
+        
+        if( version !== "v3" )
+        throw new Error(
+            "DRep registration certificate only allowed in plutus v3"
+        );
+        
+        return new DataConstr(
+            6, [
+                this.drepCredential.toData(),
+                new DataI( this.coin )
+            ]
         );
     }
 

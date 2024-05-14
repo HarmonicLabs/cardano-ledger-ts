@@ -8,6 +8,8 @@ import { ToJson } from "../../utils/ToJson";
 import { Credential } from "../../credentials";
 import { ICert } from "./ICert";
 import { Hash28 } from "../../hashes";
+import { Data, DataConstr } from "@harmoniclabs/plutus-data";
+import { definitelyToDataVersion } from "../../toData/defaultToDataVersion";
 
 export enum InstantRewardsSource {
     Reserves = 0,
@@ -136,6 +138,18 @@ export class MoveInstantRewardsCert
             "destination",
             destination
         );
+    }
+
+    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    {
+        version = definitelyToDataVersion( version );
+
+        if( version !== "v1" && version !== "v2" )
+        throw new Error(
+            "MIR certificate was deprecated with plutus v3; version:" + version
+        );
+
+        return new DataConstr( 6, [] );
     }
 
     getRequiredSigners(): Hash28[]

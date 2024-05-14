@@ -8,6 +8,9 @@ import { DRep, drepFromCborObj } from "../../governance/DRep/DRep";
 import { CanBeHash28, Hash28 } from "../../hashes";
 import { Coin } from "../Coin";
 import { forceBigUInt } from "../../utils/ints";
+import { definitelyToDataVersion } from "../../toData/defaultToDataVersion";
+import { DataConstr, DataI, DataList } from "@harmoniclabs/plutus-data";
+import { justData, nothingData } from "../../utils/maybeData";
 
 export interface ICertStakeVoteRegistrationDeleg {
     stakeCredential: Credential,
@@ -36,6 +39,48 @@ export class CertStakeVoteRegistrationDeleg
                 coin: { value: forceBigUInt( coin ), ...roDescr }
             }
         );
+    }
+
+    toData(version?: "v1" | "v2" | "v3" | undefined): DataList
+    {
+        version = definitelyToDataVersion( version );
+
+        return new DataList([
+            // stake registration
+            new DataConstr(
+                0, // PCertificate.StakeRegistration
+                [
+                    this.stakeCredential.toData( version ),
+                    justData( new DataI( this.coin ) )
+                ]
+            ),
+            // stake delegation
+            new DataConstr(
+                2, // PCertificate.Delegation
+                [
+                    // delegator (PCredential)
+                    this.stakeCredential.toData( version ),
+                    // delegatee
+                    new DataConstr(
+                        0, // PDelegatee.DelegStake
+                        [ this.poolKeyHash.toData( version ) ]
+                    )
+                ]
+            ),
+            // vote delegation
+            new DataConstr(
+                2, // PCertificate.Delegation
+                [
+                    // delegator (PCredential)
+                    this.stakeCredential.toData( version ),
+                    // delegatee
+                    new DataConstr(
+                        1, // PDelegatee.DelegVote
+                        [ this.drep.toData( version ) ]
+                    )
+                ]
+            )
+        ]);
     }
     
     getRequiredSigners(): Hash28[]

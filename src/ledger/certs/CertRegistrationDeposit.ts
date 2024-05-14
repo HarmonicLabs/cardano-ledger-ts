@@ -6,6 +6,9 @@ import { ICert } from "./ICert"
 import { Coin } from "../Coin";
 import { forceBigUInt } from "../../utils/ints";
 import { Hash28 } from "../../hashes";
+import { DataConstr, DataI } from "@harmoniclabs/plutus-data";
+import { definitelyToDataVersion } from "../../toData/defaultToDataVersion";
+import { justData, nothingData } from "../../utils/maybeData";
 
 export interface ICertRegistrationDeposit {
     stakeCredential: Credential,
@@ -27,6 +30,32 @@ export class CertRegistrationDeposit
                 stakeCredential: { value: stakeCredential, ...roDescr },
                 deposit: { value: forceBigUInt( deposit ), ...roDescr }
             }
+        );
+    }
+
+    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    {
+        version = definitelyToDataVersion( version );
+
+        if( version === "v1" || version === "v2" )
+        return new DataConstr(
+            0, [ // PDCert.KeyRegistration
+                new DataConstr(
+                    0, // StakingCredential.StakingHash
+                    // credential
+                    [ this.stakeCredential.toData( version ) ]
+                )
+            ]
+        );
+
+        return new DataConstr(
+            0, // PCertificate.StakeRegistration
+            [
+                this.stakeCredential.toData( version ),
+                justData(
+                    new DataI( this.deposit )
+                )
+            ]
         );
     }
 

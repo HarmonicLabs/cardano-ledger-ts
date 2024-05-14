@@ -178,7 +178,7 @@ export class Hash
         return new Hash( cObj.buffer )
     }
 
-    toData(): Data
+    toData(_version?: "v1" | "v2" | "v3" | undefined): Data
     {
         return new DataB( this.toBuffer() );
     }

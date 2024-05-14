@@ -3,6 +3,8 @@ import { CanBeHash28, CanBeHash32, Hash28, Hash32 } from "../../hashes";
 import { roDescr } from "../../utils/roDescr";
 import { CertificateType, certTypeToString } from "./CertificateType";
 import { ICert } from "./ICert";
+import { definitelyToDataVersion } from "../../toData/defaultToDataVersion";
+import { DataConstr } from "@harmoniclabs/plutus-data";
 
 /** @deprecated */
 export interface ICertGenesisKeyDelegation {
@@ -30,6 +32,19 @@ export class CertGenesisKeyDelegation
                 vrfKeyHash: { value: new Hash32( vrfKeyHash ), ...roDescr },
             }
         )
+    }
+    
+
+    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    {
+        version = definitelyToDataVersion( version );
+
+        if( version !== "v1" && version !== "v2" )
+        throw new Error(
+            "Genesis Key delegation was deprecated with plutus v3; version:" + version
+        );
+
+        return new DataConstr( 5, [] );
     }
 
     getRequiredSigners(): Hash28[]

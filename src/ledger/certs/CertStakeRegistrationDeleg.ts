@@ -8,6 +8,7 @@ import { DRep } from "../../governance/DRep/DRep";
 import { CanBeHash28, Hash28, PoolKeyHash } from "../../hashes";
 import { Coin } from "../Coin";
 import { forceBigUInt } from "../../utils/ints";
+import { Data, DataConstr, DataI } from "@harmoniclabs/plutus-data";
 
 export interface ICertStakeRegistrationDeleg {
     stakeCredential: Credential,
@@ -32,6 +33,24 @@ export class CertStakeRegistrationDeleg
                 poolKeyHash: { value: new Hash28( poolKeyHash ), ...roDescr },
                 coin: { value: forceBigUInt( coin ), ...roDescr }
             }
+        );
+    }
+
+    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    {
+        version = typeof version !== "string" ? "v3" : version;
+        
+        if( version !== "v3" )
+        throw new Error(
+            "Stake registration and delegation certificate only allowed in plutus v3"
+        );
+        
+        return new DataConstr(
+            3, [
+                this.stakeCredential.toData(),
+                this.poolKeyHash.toData(),
+                new DataI( this.coin )
+            ]
         );
     }
 

@@ -63,7 +63,7 @@ export class Credential<T extends CredentialType = CredentialType>
         );
     }
 
-    toData(): Data
+    toData( _v?: any ): Data
     {
         return new DataConstr( // PCredential
             this.type,

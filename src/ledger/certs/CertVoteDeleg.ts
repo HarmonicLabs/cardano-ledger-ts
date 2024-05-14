@@ -6,6 +6,8 @@ import { ICert } from "./ICert"
 import { DRepLike, toRealDRep } from "../../governance/DRep/DRepLike";
 import { DRep, drepFromCborObj } from "../../governance/DRep/DRep";
 import { Hash28 } from "../../hashes";
+import { DataConstr } from "@harmoniclabs/plutus-data";
+import { definitelyToDataVersion } from "../../toData/defaultToDataVersion";
 
 export interface ICertVoteDeleg {
     stakeCredential: Credential,
@@ -27,6 +29,24 @@ export class CertVoteDeleg
                 stakeCredential: { value: stakeCredential, ...roDescr },
                 drep: { value: toRealDRep( drep ), ...roDescr }
             }
+        );
+    }
+
+    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    {
+        version = definitelyToDataVersion( version );
+
+        return new DataConstr(
+            2, // PCertificate.Delegation
+            [
+                // delegator (PCredential)
+                this.stakeCredential.toData( version ),
+                // delegatee
+                new DataConstr(
+                    1, // PDelegatee.DelegVote
+                    [ this.drep.toData( version ) ]
+                )
+            ]
         );
     }
 

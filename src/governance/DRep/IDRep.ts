@@ -1,7 +1,8 @@
 import { isObject } from "@harmoniclabs/obj-utils";
 import { DRepType, isDRepType } from "./DRepType";
+import { ToData } from "@harmoniclabs/plutus-data";
 
-export interface IDRep {
+export interface IDRep extends ToData {
     drepType: DRepType
 };
 

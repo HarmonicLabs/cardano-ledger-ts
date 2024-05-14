@@ -3,8 +3,10 @@ import { CanBeHash28, Hash28, canBeHash28 } from "../../hashes";
 import { roDescr } from "../../utils/roDescr";
 import { DRepType, drepTypeToString } from "./DRepType";
 import { IDRep } from "./IDRep";
-import { ValidatorHash } from "../../credentials";
+import { Credential, ValidatorHash } from "../../credentials";
 import { isObject } from "@harmoniclabs/obj-utils";
+import { DataConstr } from "@harmoniclabs/plutus-data";
+import { definitelyToDataVersion } from "../../toData/defaultToDataVersion";
 
 export interface IDRepScript {
     hash: CanBeHash28
@@ -30,6 +32,20 @@ export class DRepScript
             }
         );
     }
+
+    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    {
+        version = definitelyToDataVersion( version );
+
+        if( version === "v1" || version === "v2" )
+        throw new Error("DRep only supported after v3");
+
+        return new DataConstr(
+            0, // PDRep.DRep
+            [ Credential.script( this.hash ).toData( version ) ]
+        );
+    }
+
 
     toCbor(): CborString
     {

@@ -15,7 +15,7 @@ export class GovActionInfo
 {
     readonly govActionType: GovActionType.Info
 
-    constructor( _info?: IGovActionInfo)
+    constructor( _info?: IGovActionInfo )
     {
         Object.defineProperties(
             this, {

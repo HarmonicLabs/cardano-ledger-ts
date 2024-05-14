@@ -5,6 +5,7 @@ import { CertificateType, certTypeToString } from "./CertificateType"
 import { ICert } from "./ICert"
 import { Anchor, IAnchor, isIAnchor } from "../../governance/Anchor";
 import { Hash28 } from "../../hashes";
+import { DataConstr } from "@harmoniclabs/plutus-data";
 
 export interface ICertUpdateDrep {
     drepCredential: Credential,
@@ -26,6 +27,22 @@ export class CertUpdateDrep
                 drepCredential: { value: drepCredential, ...roDescr },
                 anchor : { value: isIAnchor( anchor ) ? new Anchor( anchor ) : undefined , ...roDescr },
             }
+        );
+    }
+
+    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    {
+        version = typeof version !== "string" ? "v3" : version;
+        
+        if( version !== "v3" )
+        throw new Error(
+            "DRep registration certificate only allowed in plutus v3"
+        );
+        
+        return new DataConstr(
+            5, [
+                this.drepCredential.toData()
+            ]
         );
     }
 

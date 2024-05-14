@@ -4,6 +4,9 @@ import { roDescr } from "../../utils/roDescr";
 import { CertificateType, certTypeToString } from "./CertificateType"
 import { ICert } from "./ICert"
 import { CanBeHash28, Hash28 } from "../../hashes";
+import { DataB, DataConstr } from "@harmoniclabs/plutus-data";
+import { definitelyToDataVersion } from "../../toData/defaultToDataVersion";
+import { nothingData } from "../../utils/maybeData";
 
 export interface ICertStakeDelegation {
     stakeCredential: Credential,
@@ -25,6 +28,37 @@ export class CertStakeDelegation
                 stakeCredential: { value: stakeCredential, ...roDescr },
                 poolKeyHash: { value: new Hash28( poolKeyHash ), ...roDescr }
             }
+        );
+    }
+
+    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    {
+        version = definitelyToDataVersion( version );
+
+        if( version === "v1" || version === "v2" )
+        return new DataConstr(
+            2, [ // PDCert.KeyDelegation
+                new DataConstr( // delegator (PStakingCredential)
+                    0, // PStakingCredential.StakingHash
+                    // credential
+                    [ this.stakeCredential.toData( version ) ]
+                ),
+                // poolKeyHash
+                this.poolKeyHash.toData( version )
+            ]
+        );
+
+        return new DataConstr(
+            2, // PCertificate.Delegation
+            [
+                // delegator (PCredential)
+                this.stakeCredential.toData( version ),
+                // delegatee
+                new DataConstr(
+                    0, // PDelegatee.DelegStake
+                    [ this.poolKeyHash.toData( version ) ]
+                )
+            ]
         );
     }
 
