@@ -10,6 +10,7 @@ import { ToJson } from "../../../utils/ToJson";
 import { assert } from "../../../utils/assert";
 import { maybeData } from "../../../utils/maybeData";
 import { BasePlutsError } from "../../../utils/BasePlutsError";
+import { ToDataVersion } from "../../../toData/defaultToDataVersion";
 
 
 export interface ITxOut {
@@ -125,7 +126,7 @@ export class TxOut
         })
     }
 
-    toData( version: "v1" | "v2" = "v2" ): Data
+    toData( version: ToDataVersion = "v2" ): Data
     {
         if( version === "v1" )
         {

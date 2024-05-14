@@ -6,6 +6,8 @@ import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 import { ITxOut, isITxOut, TxOut } from "./TxOut";
 import { ITxOutRef, isITxOutRef, TxOutRef } from "./TxOutRef";
+import { lexCompare } from "@harmoniclabs/uint8array-utils";
+import { ToDataVersion } from "../../../toData/defaultToDataVersion";
 
 export interface IUTxO {
     utxoRef: ITxOutRef,
@@ -47,12 +49,12 @@ export class UTxO
         return new UTxO( this );
     }
 
-    toData( version: "v1" | "v2" = "v2" ): Data
+    toData( version?: ToDataVersion ): Data
     {
         return new DataConstr(
             0, // PTxInInfo only constructor
             [
-                this.utxoRef.toData(),
+                this.utxoRef.toData( version ),
                 this.resolved.toData( version ) // PTxOut based on specified version
             ]
         );
@@ -99,7 +101,7 @@ export class UTxO
         return new UTxO({
             utxoRef,
             resolved
-        })
+        });
     }
 
     toJson()
@@ -110,6 +112,10 @@ export class UTxO
         }
     }
 
+    static sort( a: IUTxO, b: IUTxO ): number
+    {
+        return TxOutRef.sort( a.utxoRef, b.utxoRef );
+    }
 }
 
 export { TxOutRef };

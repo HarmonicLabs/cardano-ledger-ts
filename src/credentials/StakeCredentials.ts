@@ -6,6 +6,7 @@ import { Credential, CredentialType } from "./Credential";
 import { StakeKeyHash } from "./StakeKeyHash";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils"
 import { assert } from "../utils/assert";
+import { ToDataVersion, definitelyToDataVersion } from "../toData/defaultToDataVersion";
 
 export class StakeValidatorHash extends Hash28 {}
 
@@ -78,7 +79,7 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
         );
     }
 
-    toData(): DataConstr
+    toData( version?: ToDataVersion ): DataConstr
     {
         if( this.type === "pointer" )
         {
@@ -86,7 +87,7 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
                 1, // PStakingPtr
                 ( this.hash as StakeHash<"pointer"> )
                 .map( n => new DataI( forceBigUInt( n ) ) )
-            )
+            );
         }
         return new DataConstr(
             0, // PStakingHash
@@ -94,9 +95,9 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
                 new Credential(
                     this.type === "stakeKey" ? CredentialType.KeyHash : CredentialType.Script,
                     (this.hash as StakeHash<"script" | "stakeKey">)
-                ).toData()
+                ).toData( version )
             ]
-        )
+        );
     }
 
     toCbor(): CborString

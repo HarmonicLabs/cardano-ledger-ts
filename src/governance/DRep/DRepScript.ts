@@ -6,7 +6,7 @@ import { IDRep } from "./IDRep";
 import { Credential, ValidatorHash } from "../../credentials";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { DataConstr } from "@harmoniclabs/plutus-data";
-import { definitelyToDataVersion } from "../../toData/defaultToDataVersion";
+import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
 
 export interface IDRepScript {
     hash: CanBeHash28
@@ -33,7 +33,7 @@ export class DRepScript
         );
     }
 
-    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    toData( version?: ToDataVersion | undefined): DataConstr
     {
         version = definitelyToDataVersion( version );
 

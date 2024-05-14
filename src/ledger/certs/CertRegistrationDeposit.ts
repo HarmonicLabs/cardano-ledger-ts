@@ -7,7 +7,7 @@ import { Coin } from "../Coin";
 import { forceBigUInt } from "../../utils/ints";
 import { Hash28 } from "../../hashes";
 import { DataConstr, DataI } from "@harmoniclabs/plutus-data";
-import { definitelyToDataVersion } from "../../toData/defaultToDataVersion";
+import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
 import { justData, nothingData } from "../../utils/maybeData";
 
 export interface ICertRegistrationDeposit {
@@ -33,7 +33,7 @@ export class CertRegistrationDeposit
         );
     }
 
-    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    toData( version?: ToDataVersion | undefined): DataConstr
     {
         version = definitelyToDataVersion( version );
 

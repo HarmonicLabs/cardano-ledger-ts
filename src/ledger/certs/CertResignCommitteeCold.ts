@@ -6,7 +6,7 @@ import { ICert } from "./ICert"
 import { Anchor, IAnchor, isIAnchor } from "../../governance/Anchor";
 import { Hash28 } from "../../hashes";
 import { DataConstr } from "@harmoniclabs/plutus-data";
-import { definitelyToDataVersion } from "../../toData/defaultToDataVersion";
+import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
 
 export interface ICertResignCommitteeCold {
     coldCredential: Credential,
@@ -31,7 +31,7 @@ export class CertResignCommitteeCold
         );
     }
 
-    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    toData( version?: ToDataVersion | undefined): DataConstr
     {
         version = definitelyToDataVersion( version );
 

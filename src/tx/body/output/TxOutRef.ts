@@ -8,6 +8,8 @@ import { BasePlutsError } from "../../../utils/BasePlutsError";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 import { assert } from "../../../utils/assert";
+import { lexCompare } from "@harmoniclabs/uint8array-utils";
+import { ToDataVersion } from "../../../toData/defaultToDataVersion";
 
 export type TxOutRefStr = `${string}#${number}`;
 
@@ -93,7 +95,7 @@ export class TxOutRef
         return `${this.id.toString()}#${this.index.toString()}` as any;
     }
 
-    toData(): DataConstr
+    toData( version?: ToDataVersion ): DataConstr
     {
         return new DataConstr(
             0, // PTxOutRef only constructor
@@ -165,5 +167,17 @@ export class TxOutRef
     eq( other: ITxOutRef ): boolean
     {
         return eqITxOutRef( this, other );
+    }
+
+    static sort( a: ITxOutRef, b: ITxOutRef ): number
+    {
+        const ord = lexCompare(
+            new Hash32( a.id ).toBuffer(),
+            new Hash32( b.id ).toBuffer()
+        );
+        // if equal tx id order based on tx output index
+        if( ord === 0 ) return a.index - b.index;
+        // else order by tx id
+        return ord;
     }
 }

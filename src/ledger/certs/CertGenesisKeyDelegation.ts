@@ -3,7 +3,7 @@ import { CanBeHash28, CanBeHash32, Hash28, Hash32 } from "../../hashes";
 import { roDescr } from "../../utils/roDescr";
 import { CertificateType, certTypeToString } from "./CertificateType";
 import { ICert } from "./ICert";
-import { definitelyToDataVersion } from "../../toData/defaultToDataVersion";
+import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
 import { DataConstr } from "@harmoniclabs/plutus-data";
 
 /** @deprecated */
@@ -35,7 +35,7 @@ export class CertGenesisKeyDelegation
     }
     
 
-    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    toData( version?: ToDataVersion | undefined): DataConstr
     {
         version = definitelyToDataVersion( version );
 

@@ -7,7 +7,7 @@ import { Epoch } from "../Epoch";
 import { CanBeHash28, Hash28 } from "../../hashes";
 import { forceBigUInt } from "../../utils/ints";
 import { Data, DataConstr, DataI } from "@harmoniclabs/plutus-data";
-import { definitelyToDataVersion } from "../../toData/defaultToDataVersion";
+import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
 
 export interface ICertPoolRetirement {
     poolHash: CanBeHash28,
@@ -32,7 +32,7 @@ export class CertPoolRetirement
         );
     }
 
-    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    toData( version?: ToDataVersion | undefined): DataConstr
     {
         version = definitelyToDataVersion( version );
 

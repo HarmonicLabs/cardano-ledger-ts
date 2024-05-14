@@ -6,7 +6,7 @@ import { ICert } from "./ICert"
 import { Hash28 } from "../../hashes/Hash28/Hash28";
 import { DataConstr } from "@harmoniclabs/plutus-data";
 import { nothingData } from "../../utils/maybeData";
-import { definitelyToDataVersion } from "../../toData/defaultToDataVersion";
+import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
 
 export interface ICertStakeDeRegistration {
     stakeCredential: Credential
@@ -28,7 +28,7 @@ export class CertStakeDeRegistration
         );
     }
 
-    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    toData( version?: ToDataVersion | undefined): DataConstr
     {
         version = definitelyToDataVersion( version );
 

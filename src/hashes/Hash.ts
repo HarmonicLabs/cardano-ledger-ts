@@ -5,6 +5,7 @@ import { fromAscii, fromHex, isUint8Array, toAscii, toHex } from "@harmoniclabs/
 import { assert } from "../utils/assert";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { isHex } from "../utils/hex";
+import { ToDataVersion } from "../toData/defaultToDataVersion";
 
 export function canBeHashInstance( obj: any ): boolean
 {
@@ -178,7 +179,7 @@ export class Hash
         return new Hash( cObj.buffer )
     }
 
-    toData(_version?: "v1" | "v2" | "v3" | undefined): Data
+    toData(_version?: ToDataVersion | undefined): Data
     {
         return new DataB( this.toBuffer() );
     }

@@ -9,7 +9,7 @@ import { Credential } from "../../credentials";
 import { ICert } from "./ICert";
 import { Hash28 } from "../../hashes";
 import { Data, DataConstr } from "@harmoniclabs/plutus-data";
-import { definitelyToDataVersion } from "../../toData/defaultToDataVersion";
+import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
 
 export enum InstantRewardsSource {
     Reserves = 0,
@@ -140,7 +140,7 @@ export class MoveInstantRewardsCert
         );
     }
 
-    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    toData( version?: ToDataVersion | undefined): DataConstr
     {
         version = definitelyToDataVersion( version );
 

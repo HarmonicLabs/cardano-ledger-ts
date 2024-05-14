@@ -6,7 +6,7 @@ import { ICert } from "./ICert"
 import { DRepLike, toRealDRep } from "../../governance/DRep/DRepLike";
 import { DRep, drepFromCborObj } from "../../governance/DRep/DRep";
 import { CanBeHash28, Hash28 } from "../../hashes";
-import { definitelyToDataVersion } from "../../toData/defaultToDataVersion";
+import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
 import { DataConstr } from "@harmoniclabs/plutus-data";
 
 export interface ICertStakeVoteDeleg {
@@ -35,7 +35,7 @@ export class CertStakeVoteDeleg
         );
     }
 
-    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    toData( version?: ToDataVersion | undefined): DataConstr
     {
         version = definitelyToDataVersion( version );
 

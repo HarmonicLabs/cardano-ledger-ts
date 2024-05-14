@@ -8,7 +8,7 @@ import { DRep, drepFromCborObj } from "../../governance/DRep/DRep";
 import { CanBeHash28, Hash28 } from "../../hashes";
 import { Coin } from "../Coin";
 import { forceBigUInt } from "../../utils/ints";
-import { definitelyToDataVersion } from "../../toData/defaultToDataVersion";
+import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
 import { DataConstr, DataI, DataList } from "@harmoniclabs/plutus-data";
 import { justData, nothingData } from "../../utils/maybeData";
 
@@ -41,7 +41,7 @@ export class CertStakeVoteRegistrationDeleg
         );
     }
 
-    toData(version?: "v1" | "v2" | "v3" | undefined): DataList
+    toData( version?: ToDataVersion | undefined): DataList
     {
         version = definitelyToDataVersion( version );
 

@@ -9,6 +9,7 @@ import { CanBeHash28, Hash28, PoolKeyHash } from "../../hashes";
 import { Coin } from "../Coin";
 import { forceBigUInt } from "../../utils/ints";
 import { Data, DataConstr, DataI } from "@harmoniclabs/plutus-data";
+import { ToDataVersion } from "../../toData/defaultToDataVersion";
 
 export interface ICertStakeRegistrationDeleg {
     stakeCredential: Credential,
@@ -36,7 +37,7 @@ export class CertStakeRegistrationDeleg
         );
     }
 
-    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    toData( version?: ToDataVersion | undefined): DataConstr
     {
         version = typeof version !== "string" ? "v3" : version;
         

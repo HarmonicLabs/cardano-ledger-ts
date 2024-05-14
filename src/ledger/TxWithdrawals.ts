@@ -9,6 +9,7 @@ import { Coin } from "./Coin";
 import { Value } from "./Value";
 import { assert } from "../utils/assert";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
+import { ToDataVersion } from "../toData/defaultToDataVersion";
 
 export type ITxWithdrawalsEntryBigInt = {
     rewardAccount: StakeAddress,
@@ -121,13 +122,13 @@ export class TxWithdrawals
         )
     }
 
-    toData(version?: "v1" | "v2" | undefined): DataMap<DataConstr,DataI>
+    toData( version?: ToDataVersion | undefined): DataMap<DataConstr,DataI>
     {
         return new DataMap(
             this.map
             .map( ({ rewardAccount, amount }) =>
                 new DataPair(
-                    rewardAccount.toStakeCredentials().toData(),
+                    rewardAccount.toStakeCredentials().toData( version ),
                     new DataI( amount )
                 )
             )

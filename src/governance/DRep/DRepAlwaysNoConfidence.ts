@@ -2,7 +2,7 @@ import { Cbor, CborArray, CborString, CborUInt } from "@harmoniclabs/cbor";
 import { roDescr } from "../../utils/roDescr";
 import { DRepType, drepTypeToString } from "./DRepType";
 import { IDRep } from "./IDRep";
-import { definitelyToDataVersion } from "../../toData/defaultToDataVersion";
+import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
 import { DataConstr } from "@harmoniclabs/plutus-data";
 
 export interface IDRepAlwaysNoConfidence {
@@ -25,7 +25,7 @@ export class DRepAlwaysNoConfidence
         );
     }
     
-    toData(version?: "v1" | "v2" | "v3" | undefined): DataConstr
+    toData( version?: ToDataVersion | undefined): DataConstr
     {
         version = definitelyToDataVersion( version );
 
