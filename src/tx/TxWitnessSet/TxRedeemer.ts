@@ -1,11 +1,8 @@
-import { TxBody } from "../body/TxBody"
-import { Hash28 } from "../../hashes"
-import { ToCbor, CborString, Cbor, CborArray, CborUInt, CanBeCborString, forceCborString, CborObj, CborMapEntry, isCborObj } from "@harmoniclabs/cbor";
+import { ToCbor, CborString, Cbor, CborArray, CborUInt, CanBeCborString, forceCborString, CborObj, CborMapEntry } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { isObject, hasOwn, defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
-import { Data, isData, dataToCborObj, dataFromCborObj, DataConstr, DataB } from "@harmoniclabs/plutus-data";
+import { Data, isData, dataToCborObj, dataFromCborObj } from "@harmoniclabs/plutus-data";
 import { ExBudget } from "@harmoniclabs/plutus-machine";
-import { Credential, CredentialType, StakeCredentials, StakeValidatorHash } from "../../credentials";
 import { BasePlutsError } from "../../utils/BasePlutsError";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
