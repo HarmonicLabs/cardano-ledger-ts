@@ -8,6 +8,7 @@ import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { assert } from "../utils/assert";
 import { fromHex } from "@harmoniclabs/uint8array-utils";
 import { Credential } from "../credentials";
+import { CanBeCborString, Cbor, CborBytes, CborObj, forceCborString } from "@harmoniclabs/cbor";
 
 
 export type StakeAddressBech32 = `stake1${string}` | `stake_test1${string}`;
@@ -97,9 +98,9 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType>
         )
     }
 
-    toBytes(): byte[]
+    toBytes(): Uint8Array
     {
-        return Array.from( this.credentials.toBuffer() ) as any;
+        return this.credentials.toBuffer();
     }
 
     static fromBytes(
@@ -123,6 +124,23 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType>
             bs.length === 28 ? new Hash28( bs ) : new PublicKey( bs ).hash,
             type
         )
+    }
+
+    toCborObj(): CborObj
+    {
+        return new CborBytes( this.toBytes() )
+    }
+
+    static fromCbor( cStr: CanBeCborString ): StakeAddress
+    {
+        return StakeAddress.fromCborObj( Cbor.parse( forceCborString( cStr ) ) );
+    }
+    static fromCborObj( cObj: CborObj ): StakeAddress
+    {
+        if(!(cObj instanceof CborBytes ))
+        throw new Error(`Invalid CBOR format for "Hash"`);
+
+        return StakeAddress.fromBytes( cObj.bytes );
     }
 
     toCredential()

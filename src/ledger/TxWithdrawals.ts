@@ -144,7 +144,7 @@ export class TxWithdrawals
         return new CborMap(
             this.map.map( entry => {
                 return {
-                    k: entry.rewardAccount.credentials.toCborObj(),
+                    k: entry.rewardAccount.toCborObj(),
                     v: new CborUInt( entry.amount )
                 }
             })
@@ -167,7 +167,7 @@ export class TxWithdrawals
                 throw new Error(`Invalid CBOR fromat for "TxWithdrawals"`);
 
                 return {
-                    rewardAccount: Hash28.fromCborObj( k ) ,
+                    rewardAccount: StakeAddress.fromCborObj( k ),
                     amount: v.num
                 }
             })

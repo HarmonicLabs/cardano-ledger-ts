@@ -12,6 +12,8 @@ import { PoolRelay, isPoolRelay, poolRelayToCborObj, poolRelayFromCborObj, poolR
 import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { assert } from "../utils/assert";
 import { Rational, cborFromRational, isRational } from "./protocol/Rational";
+import { StakeAddress } from "./StakeAddress";
+import { Network } from "./Network";
 
 export interface IPoolParamsMetadata {
     poolMetadataUrl: string,
@@ -45,7 +47,7 @@ export interface IPoolParams {
     pledge: Coin,
     cost: Coin,
     margin: Rational, //CborPositiveRational,
-    rewardAccount: CanBeHash28,
+    rewardAccount: StakeAddress | CanBeHash28,
     owners: CanBeHash28[], // PubKeyHash[],
     relays: PoolRelay[],
     metadata?: IPoolParamsMetadata
@@ -57,7 +59,7 @@ export interface ITypedPoolParams {
     pledge: bigint,
     cost: bigint,
     margin: CborPositiveRational,
-    rewardAccount: Hash28,
+    rewardAccount: StakeAddress,
     owners: PubKeyHash[],
     relays: PoolRelay[],
     metadata?: ITypedPoolParamsMetadata
@@ -71,7 +73,7 @@ export class PoolParams
     readonly pledge!: bigint;
     readonly cost!: bigint;
     readonly margin!: CborPositiveRational;
-    readonly rewardAccount!: Hash28;
+    readonly rewardAccount!: StakeAddress;
     readonly owners!: PubKeyHash[];
     readonly relays!: PoolRelay[];
     readonly metadata?: ITypedPoolParamsMetadata;
@@ -133,11 +135,29 @@ export class PoolParams
         );
         defineReadOnlyProperty( this, "margin", cborFromRational( margin ) );
 
-        assert(
-            canBeHash28( rewardAccount ),
-            "invalid 'rewardAccount' constructing 'PoolParams'"
-        );
-        defineReadOnlyProperty( this, "rewardAccount", new Hash28( rewardAccount ) );
+        if( canBeHash28( rewardAccount ) )
+        {
+            defineReadOnlyProperty(
+                this,
+                "rewardAccount",
+                new StakeAddress(
+                    "mainnet",
+                    new Hash28( rewardAccount )
+                )
+            );
+        }
+        else
+        {
+            assert(
+                rewardAccount instanceof StakeAddress,
+                "invalid 'rewardAccount' constructing 'PoolParams'"
+            );
+            defineReadOnlyProperty(
+                this,
+                "rewardAccount",
+                rewardAccount.clone()
+            );
+        }
 
         assert(
             Array.isArray( owners ) &&
@@ -205,11 +225,18 @@ export class PoolParams
             _owners instanceof CborArray &&
             _relays instanceof CborArray &&
             _margin instanceof CborTag && _margin.data instanceof CborArray &&
+            _rewAccount instanceof CborBytes &&
             _margin.data.array.every( n => n instanceof CborUInt ) && _margin.data.array.length >= 2
         ))
         throw new Error(`Invlid CBOR format for "PoolParams"`);
 
-        const [ margin_num, margin_den ] = _margin.data.array.map( n => (n as CborUInt).num )
+        const [ margin_num, margin_den ] = _margin.data.array.map( n => (n as CborUInt).num );
+
+        const rewAccountBytes = _rewAccount.bytes;
+        const rewardAccount =
+            rewAccountBytes.length === 28 ?
+            new Hash28( rewAccountBytes ) :
+            StakeAddress.fromBytes( rewAccountBytes );
 
         return new PoolParams({
             operator: PoolKeyHash.fromCborObj( _operator ),
@@ -217,7 +244,7 @@ export class PoolParams
             pledge: _pledge.num,
             cost: _cost.num,
             margin: new CborPositiveRational( margin_num, margin_den ),
-            rewardAccount: Hash28.fromCborObj( _rewAccount ),
+            rewardAccount,
             owners: _owners.array.map( PubKeyHash.fromCborObj ),
             relays: _relays.array.map( poolRelayFromCborObj ),
             metadata: (
@@ -236,13 +263,13 @@ export class PoolParams
     toJson()
     {
         return {
-            operator: this.operator.asString,
-            vrfKeyHash: this.vrfKeyHash.asString,
+            operator: this.operator.toString(),
+            vrfKeyHash: this.vrfKeyHash.toString(),
             pledge: this.pledge.toString(),
             cost: this.cost.toString(),
             margin: Number( this.margin.num ) / Number( this.margin.den ),
-            rewardAccount: this.rewardAccount.asString,
-            owners: this.owners.map( owner => owner.asString ),
+            rewardAccount: this.rewardAccount, // cloned in constructor
+            owners: this.owners.map( owner => owner.toString() ),
             relays: this.relays.map( poolRelayToJson ),
             metadata: this.metadata === undefined ? undefined : {
                 poolMetadataUrl: this.metadata.poolMetadataUrl,
