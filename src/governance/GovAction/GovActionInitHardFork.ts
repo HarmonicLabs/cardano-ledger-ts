@@ -5,6 +5,10 @@ import { IProtocolVerision, IProtocolVerisionObj, isIProtocolVersion, protocolVe
 import { GovActionType } from "./GovActionType";
 import { roDescr } from "../../utils/roDescr";
 import { isObject } from "@harmoniclabs/obj-utils";
+import { DataConstr, DataI, ToData } from "@harmoniclabs/plutus-data";
+import { partialProtocolParametersToData } from "../../ledger";
+import { ToDataVersion } from "../../toData/defaultToDataVersion";
+import { maybeData } from "../../utils/maybeData";
 
 
 export interface IGovActionInitHardFork {
@@ -21,7 +25,7 @@ export function isIGovActionInitHardFork( stuff: any ): stuff is IGovActionInitH
 }
 
 export class GovActionInitHardFork
-    implements IGovAction, IGovActionInitHardFork, ToCbor
+    implements IGovAction, IGovActionInitHardFork, ToCbor, ToData
 {
     readonly govActionType: GovActionType.InitHardFork;
     readonly govActionId: TxOutRef | undefined;
@@ -49,5 +53,21 @@ export class GovActionInitHardFork
             this.govActionId?.toCborObj() ?? new CborSimple( null ),
             protocolVersionToCborObj( this.protocolVersion )
         ]);
+    }
+
+    toData( v?: ToDataVersion ): DataConstr
+    {
+        v = "v3"; // only one supported so far
+        return new DataConstr(
+            1, [
+                maybeData( this.govActionId?.toData( v ) ),
+                new DataConstr(
+                    0, [
+                        new DataI( this.protocolVersion.major ),
+                        new DataI( this.protocolVersion.minor )
+                    ]
+                )
+            ]
+        );
     }
 }

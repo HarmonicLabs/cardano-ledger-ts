@@ -5,6 +5,8 @@ import { Constitution, IConstitution } from "../Constitution";
 import { GovActionType } from "./GovActionType";
 import { roDescr } from "../../utils/roDescr";
 import { isObject } from "@harmoniclabs/obj-utils";
+import { ToDataVersion } from "../../toData/defaultToDataVersion";
+import { DataConstr } from "@harmoniclabs/plutus-data";
 
 export interface IGovActionInfo {}
 
@@ -33,5 +35,10 @@ export class GovActionInfo
         return new CborArray([
             new CborUInt( this.govActionType )
         ]);
+    }
+
+    toData( v?: ToDataVersion ): DataConstr
+    {
+        return new DataConstr( 6, [] );
     }
 }

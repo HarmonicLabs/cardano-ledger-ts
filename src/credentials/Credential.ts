@@ -63,14 +63,11 @@ export class Credential<T extends CredentialType = CredentialType>
         );
     }
 
-    toData( _v?: any ): Data
+    toData( _v?: any ): DataConstr
     {
         return new DataConstr( // PCredential
             this.type,
-            [
-                // both bytestring alias as argument
-                new DataB( this.hash.toBuffer() )
-            ]
+            [ new DataB( this.hash.toBuffer() )  ]
         )
     }
 
@@ -136,6 +133,6 @@ export class Credential<T extends CredentialType = CredentialType>
         return {
             credentialType: this.type === CredentialType.Script ? "Script" : "KeyHash",
             hash: this.hash.toString()
-        }
+        };
     }
 }

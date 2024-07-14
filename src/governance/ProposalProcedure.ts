@@ -7,6 +7,8 @@ import { roDescr } from "../utils/roDescr";
 import { GovAction } from "./GovAction";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { canBeUInteger } from "../utils/ints";
+import { Data, DataConstr, DataI, ToData } from "@harmoniclabs/plutus-data";
+import { ToDataVersion } from "../toData/defaultToDataVersion";
 
 export interface IProposalProcedure {
     deposit: Coin,
@@ -26,7 +28,7 @@ export function isIProposalProcedure( stuff: any ): stuff is IProposalProcedure
 }
 
 export class ProposalProcedure
-    implements IProposalProcedure, ToCbor
+    implements IProposalProcedure, ToCbor, ToData
 {
     readonly deposit: bigint;
     readonly rewardAccount: StakeAddress;
@@ -57,5 +59,18 @@ export class ProposalProcedure
             this.govAction.toCborObj(),
             this.anchor.toCborObj()
         ]);
+    }
+
+    toData( v?: ToDataVersion ): DataConstr
+    {
+        v = "v3"; // only supported so far
+
+        return new DataConstr(
+            0, [
+                new DataI( this.deposit ),
+                this.rewardAccount.toCredential().toData( v ),
+                this.govAction.toData( v )
+            ]
+        );
     }
 }

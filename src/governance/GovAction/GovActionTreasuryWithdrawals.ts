@@ -5,6 +5,9 @@ import { IGovAction } from "./IGovAction";
 import { GovActionType } from "./GovActionType";
 import { roDescr } from "../../utils/roDescr";
 import { isObject } from "@harmoniclabs/obj-utils";
+import { DataConstr, DataI, ToData } from "@harmoniclabs/plutus-data";
+import { ToDataVersion } from "../../toData/defaultToDataVersion";
+import { maybeData } from "../../utils/maybeData";
 
 export interface IGovActionTreasuryWithdrawals {
     withdrawals: ITxWithdrawals | TxWithdrawals,
@@ -20,7 +23,7 @@ export function isIGovActionTreasuryWithdrawals( stuff: any ): stuff is IGovActi
 }
 
 export class GovActionTreasuryWithdrawals
-    implements IGovAction, IGovActionTreasuryWithdrawals, ToCbor
+    implements IGovAction, IGovActionTreasuryWithdrawals, ToCbor, ToData
 {
     readonly govActionType: GovActionType.TreasuryWithdrawals;
     readonly withdrawals: TxWithdrawals;
@@ -54,5 +57,16 @@ export class GovActionTreasuryWithdrawals
             this.withdrawals.toCborObj(),
             this.policyHash?.toCborObj() ?? new CborSimple( null )
         ]);
+    }
+
+    toData( v?: ToDataVersion ): DataConstr
+    {
+        v = "v3"; // only one supported so far
+        return new DataConstr(
+            2, [
+                this.withdrawals.toData( v ),
+                maybeData( this.policyHash?.toData( v ) )
+            ]
+        );
     }
 }

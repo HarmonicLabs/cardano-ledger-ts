@@ -1,12 +1,10 @@
 import { ToData } from "@harmoniclabs/plutus-data";
 
-type NotUndefined<T> = Exclude<T, undefined>;
-type MaybeToDataVersion = Parameters<ToData["toData"]>[0];
-export type ToDataVersion = NotUndefined<MaybeToDataVersion>
+export type ToDataVersion = "v1" | "v2" | "v3";
 
-export const defaultToDataVersion: ToDataVersion = "v2";
+export const defaultToDataVersion: ToDataVersion = "v3";
 
-export function definitelyToDataVersion( maybe: MaybeToDataVersion ): ToDataVersion
+export function definitelyToDataVersion( maybe?: ToDataVersion | undefined ): ToDataVersion
 {
     return typeof maybe === "string" ? maybe : defaultToDataVersion;
 }

@@ -1,6 +1,6 @@
 import type { Epoch } from "../Epoch";
 import type { Coin } from "../Coin";
-import { CborPositiveRational, CborUInt, CborObj, CborMapEntry, CborMap, CborArray } from "@harmoniclabs/cbor";
+import { CborPositiveRational, CborUInt, CborObj, CborMapEntry, CborMap, CborArray, CborNegInt, CborBytes, CborTag, CborText } from "@harmoniclabs/cbor";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../utils/ints";
 import { CostModels, costModelsFromCborObj, costModelsToCborObj, costModelsToJson, defaultV1Costs, defaultV2Costs, isCostModels } from "@harmoniclabs/cardano-costmodels-ts";
 import { ExBudget, ExBudgetJson } from "@harmoniclabs/plutus-machine";
@@ -9,6 +9,8 @@ import { Rational, cborFromRational, isRational, isRationalOrUndefined, tryCborF
 import { PParamsPoolVotingThresholds, isPParamsPoolVotingThresholds, poolVotingThresholdsToCborObj, tryGetPParamsPoolVotingThresholdsFromCborObj } from "./PParamsPoolVotingThresholds";
 import { PParamsDrepVotingThresholds, drepVotingThresholdsToCborObj, isPParamsDrepVotingThresholds, tryGetPParamsDrepVotingThresholdsFromCborObj } from "./PParamsDrepVotingThresholds";
 import { IProtocolVerision, isIProtocolVersion, protocolVersionToCborObj, tryIProtocolVersionFromCborObj } from "./protocolVersion";
+import { Data, DataB, DataConstr, DataI, DataList, DataMap, DataPair } from "@harmoniclabs/plutus-data";
+import { fromUtf8 } from "@harmoniclabs/uint8array-utils";
 
 export interface ProtocolParameters {
     txFeePerByte: CanBeUInteger,
@@ -335,6 +337,53 @@ export function partialProtocolParametersToCborObj( pps: Partial<ProtocolParamet
         mapUIntEntryOrUndefined( 32, pps.drepActivityPeriod ),
         kv( 33, tryCborFromRational( pps.minfeeRefScriptCostPerByte ) ),
     ].filter( elem => elem !== undefined ) as CborMapEntry[])
+}
+
+export function partialProtocolParametersToData( pps: Partial<ProtocolParameters> ): Data
+{
+    return cborToDataLitteral( partialProtocolParametersToCborObj( pps ) );
+}
+
+function cborToDataLitteral( cbor: CborObj ): Data
+{
+    if( cbor instanceof CborPositiveRational )
+    {
+        return new DataConstr( 0, [ new DataI( cbor.num ), new DataI( cbor.den ) ] );
+    }
+
+    if( cbor instanceof CborUInt || cbor instanceof CborNegInt )
+    {
+        return new DataI( cbor.num );
+    }
+    if( cbor instanceof CborBytes )
+    {
+        return new DataB( cbor.bytes );
+    }
+    if( cbor instanceof CborText )
+    {
+        return new DataB( fromUtf8( cbor.text ) );
+    }
+    if( cbor instanceof CborArray )
+    {
+        return new DataList( cbor.array.map( cborToDataLitteral ) );
+    }
+    if( cbor instanceof CborMap )
+    {
+        return new DataMap(
+            cbor.map.map(({ k, v }) => 
+                new DataPair(
+                    cborToDataLitteral( k ),
+                    cborToDataLitteral( v )
+                )
+            )
+        );
+    }
+    if( cbor instanceof CborTag )
+    {
+        return cborToDataLitteral( cbor.data );
+    }
+
+    throw new Error("unsupported cbor for litteral data");
 }
 
 const maxProtocolParamsEntries = 33;

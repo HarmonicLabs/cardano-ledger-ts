@@ -81,23 +81,32 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
 
     toData( version?: ToDataVersion ): DataConstr
     {
+        const isOldVersion = version !== "v1" && version !== "v2";
+
         if( this.type === "pointer" )
         {
+            if( isOldVersion )
+            throw new Error("staking pointer was deprecated in conway, can't convert to data");
+
             return new DataConstr(
                 1, // PStakingPtr
                 ( this.hash as StakeHash<"pointer"> )
                 .map( n => new DataI( forceBigUInt( n ) ) )
             );
         }
+
+        const credData = new Credential(
+            this.type === "stakeKey" ? CredentialType.KeyHash : CredentialType.Script,
+            (this.hash as StakeHash<"script" | "stakeKey">)
+        ).toData( version );
+
+        if( isOldVersion )
         return new DataConstr(
             0, // PStakingHash
-            [
-                new Credential(
-                    this.type === "stakeKey" ? CredentialType.KeyHash : CredentialType.Script,
-                    (this.hash as StakeHash<"script" | "stakeKey">)
-                ).toData( version )
-            ]
+            [ credData ]
         );
+
+        return credData;
     }
 
     toCbor(): CborString

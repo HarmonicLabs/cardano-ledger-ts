@@ -4,6 +4,9 @@ import { Anchor, IAnchor, isIAnchor } from "./Anchor";
 import { GovActionType } from "./GovAction/GovActionType";
 import { roDescr } from "../utils/roDescr";
 import { isObject } from "@harmoniclabs/obj-utils";
+import { DataConstr } from "@harmoniclabs/plutus-data";
+import { ToDataVersion } from "../toData/defaultToDataVersion";
+import { maybeData } from "../utils/maybeData";
 
 export interface IConstitution {
     anchor: IAnchor,
@@ -44,5 +47,15 @@ export class Constitution
             this.anchor.toCborObj(),
             this.scriptHash?.toCborObj() ?? new CborSimple( null )
         ]);
+    }
+
+    toData( v?: ToDataVersion ): DataConstr
+    {
+        v = "v3"; // only one for constitution so far
+        return  new DataConstr(
+            0, [
+                maybeData( this.scriptHash?.toData( v ) )
+            ]
+        )
     }
 }

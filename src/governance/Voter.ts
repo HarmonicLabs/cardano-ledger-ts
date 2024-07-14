@@ -2,6 +2,9 @@ import { CborArray, CborBytes, CborUInt } from "@harmoniclabs/cbor";
 import { CanBeHash28, Hash28, canBeHash28 } from "../hashes";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { uint8ArrayEq } from "@harmoniclabs/uint8array-utils";
+import { DataConstr, ToData } from "@harmoniclabs/plutus-data";
+import { Credential } from "../credentials";
+import { ToDataVersion } from "../toData/defaultToDataVersion";
 
 export enum VoterKind {
     ConstitutionalCommitteKeyHash = 0,
@@ -59,7 +62,7 @@ export function eqIVoter( a: IVoter, b: IVoter ): boolean
 }
 
 export class Voter
-    implements IVoter
+    implements IVoter, ToData
 {
     readonly kind: VoterKind;
     readonly hash: Hash28;
@@ -101,5 +104,37 @@ export class Voter
             new CborUInt( this.kind ),
             new CborBytes( this.hash.toBuffer() )
         ]);
+    }
+
+    toData( version?: ToDataVersion ): DataConstr
+    {
+        version = "v3"; // only supported for voter so far
+
+        const idx = (
+            (
+                this.kind === VoterKind.ConstitutionalCommitteKeyHash ||
+                this.kind === VoterKind.ConstitutionalCommitteScript
+            ) ? 0 : (
+                this.kind === VoterKind.DRepKeyHash ||
+                this.kind === VoterKind.DRepScript
+                ? 1 : 2
+            ) 
+        );
+
+        const arg = (
+            (
+                this.kind === VoterKind.ConstitutionalCommitteKeyHash ||
+                this.kind === VoterKind.DRepKeyHash
+            ) ? 
+            Credential.keyHash( this.hash ).toData( version ) :
+            (
+                this.kind === VoterKind.ConstitutionalCommitteScript ||
+                this.kind === VoterKind.DRepScript ?
+                Credential.script( this.hash ).toData( version ) :
+                this.hash.toData( version )
+            )
+        );
+
+        return new DataConstr( idx, [ arg ] );
     }
 }

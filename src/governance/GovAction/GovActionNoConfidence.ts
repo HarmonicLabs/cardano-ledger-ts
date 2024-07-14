@@ -4,6 +4,9 @@ import { IGovAction } from "./IGovAction";
 import { GovActionType } from "./GovActionType";
 import { roDescr } from "../../utils/roDescr";
 import { isObject } from "@harmoniclabs/obj-utils";
+import { DataConstr, ToData } from "@harmoniclabs/plutus-data";
+import { ToDataVersion } from "../../toData/defaultToDataVersion";
+import { maybeData } from "../../utils/maybeData";
 
 export interface IGovActionNoConfidence {
     govActionId?: ITxOutRef | undefined,
@@ -17,7 +20,7 @@ export function isIGovActionNoConfidence( stuff: any ): stuff is IGovActionNoCon
 }
 
 export class GovActionNoConfidence
-    implements IGovAction, IGovActionNoConfidence, ToCbor
+    implements IGovAction, IGovActionNoConfidence, ToCbor, ToData
 {
     readonly govActionType: GovActionType.NoConfidence;
     readonly govActionId: TxOutRef | undefined;
@@ -42,5 +45,15 @@ export class GovActionNoConfidence
             new CborUInt( this.govActionType ),
             this.govActionId?.toCborObj() ?? new CborSimple( null )
         ]);
+    }
+    
+    toData( v?: ToDataVersion ): DataConstr
+    {
+        v = "v3"; // only one supported so far
+        return new DataConstr(
+            3, [
+                maybeData( this.govActionId?.toData( v ) )
+            ]
+        );
     }
 }

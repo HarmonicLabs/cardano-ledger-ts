@@ -5,6 +5,9 @@ import { Constitution, IConstitution, isIConstitution } from "../Constitution";
 import { GovActionType } from "./GovActionType";
 import { roDescr } from "../../utils/roDescr";
 import { isObject } from "@harmoniclabs/obj-utils";
+import { DataConstr, DataI, ToData } from "@harmoniclabs/plutus-data";
+import { ToDataVersion } from "../../toData/defaultToDataVersion";
+import { maybeData } from "../../utils/maybeData";
 
 export interface IGovActionNewConstitution {
     govActionId?: ITxOutRef | undefined,
@@ -20,7 +23,7 @@ export function isIGovActionNewConstitution( stuff: any ): stuff is IGovActionNe
 }
 
 export class GovActionNewConstitution
-    implements IGovAction, IGovActionNewConstitution, ToCbor
+    implements IGovAction, IGovActionNewConstitution, ToCbor, ToData
 {
     readonly govActionType: GovActionType.NewConstitution
     readonly govActionId: TxOutRef | undefined;
@@ -48,5 +51,16 @@ export class GovActionNewConstitution
             this.govActionId?.toCborObj() ?? new CborSimple( null ),
             this.constitution.toCborObj()
         ]);
+    }
+
+    toData( v?: ToDataVersion ): DataConstr
+    {
+        v = "v3"; // only one supported so far
+        return new DataConstr(
+            5, [
+                maybeData( this.govActionId?.toData( v ) ),
+                this.constitution.toData( v )
+            ]
+        );
     }
 }

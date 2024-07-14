@@ -7,6 +7,9 @@ import { GovActionType } from "./GovActionType";
 import { Credential } from "../../credentials";import { roDescr } from "../../utils/roDescr";
 import { canBeUInteger, forceBigUInt } from "../../utils/ints";
 import { isObject } from "@harmoniclabs/obj-utils";
+import { DataConstr, DataI, DataList, DataMap, DataPair, ToData } from "@harmoniclabs/plutus-data";
+import { ToDataVersion } from "../../toData/defaultToDataVersion";
+import { maybeData } from "../../utils/maybeData";
 
 export interface INewCommitteeEntry {
     coldCredential: Credential,
@@ -50,7 +53,7 @@ export function isIGovActionUpdateCommittee( stuff: any ): stuff is IGovActionUp
 }
 
 export class GovActionUpdateCommittee
-    implements IGovAction, IGovActionUpdateCommittee, ToCbor
+    implements IGovAction, IGovActionUpdateCommittee, ToCbor, ToData
 {
     readonly govActionType: GovActionType.UpdateCommittee;
     readonly govActionId: TxOutRef | undefined;
@@ -95,5 +98,29 @@ export class GovActionUpdateCommittee
             ),
             this.threshold.clone()
         ]);
+    }
+    
+    toData( v?: ToDataVersion ): DataConstr
+    {
+        v = "v3"; // only one supported so far
+        return new DataConstr(
+            4, [
+                maybeData( this.govActionId?.toData( v ) ),
+                new DataList( this.toRemove.map( cred => cred.toData( v ) ) ),
+                new DataMap( this.toAdd.map(({ coldCredential, epoch }) =>
+                        new DataPair(
+                            coldCredential.toData( v ),
+                            new DataI( epoch )
+                        )
+                    )
+                ),
+                new DataConstr(
+                    0, [
+                        new DataI( this.threshold.num ),
+                        new DataI( this.threshold.den ),
+                    ]
+                )
+            ] 
+        );
     }
 }
