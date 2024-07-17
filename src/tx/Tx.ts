@@ -9,6 +9,7 @@ import { ToJson } from "../utils/ToJson";
 import { assert } from "../utils/assert";
 import { AuxiliaryData } from "./AuxiliaryData";
 import { ITxBody, TxBody, isITxBody } from "./body";
+import { XPrv } from "@harmoniclabs/bip32_ed25519";
 
 export interface ITx {
     body: ITxBody
@@ -49,7 +50,7 @@ export class Tx
      * if true signs the transaction with the specified key
      * otherwise nothing happens (the signature is not added)
     **/
-    readonly signWith!: ( signer: PrivateKey ) => void
+    readonly signWith!: ( signer: PrivateKey | XPrv ) => void
 
     /**
      * signs the transaction using any browser wallet 
@@ -143,15 +144,36 @@ export class Tx
 
         defineReadOnlyProperty(
             this, "signWith",
-            ( signer: PrivateKey | Uint8Array ): void => {
-                const [ derivedPubKey, signature ] = signEd25519(
+            ( signer: PrivateKey | Uint8Array | XPrv ): void => {
+
+                if( signer instanceof Uint8Array && signer.length >= 64 )
+                {
+                    signer = XPrv.fromExtended(
+                        signer.slice( 0, 64 ),
+                        new Uint8Array( 32 )
+                    );
+                }
+
+                if( signer instanceof XPrv )
+                {
+                    const { pubKey, signature } = signer.sign( this.body.hash.toBuffer() );
+                    this.addVKeyWitness(
+                        new VKeyWitness(
+                            new VKey( pubKey ),
+                            new Signature( signature )
+                        )
+                    );
+                    return;
+                }
+
+                const { pubKey, signature } = signEd25519(
                     this.body.hash.toBuffer(),
                     signer instanceof Uint8Array ? signer : signer.toBuffer()
                 );
 
                 this.addVKeyWitness(
                     new VKeyWitness(
-                        new VKey( derivedPubKey ),
+                        new VKey( pubKey ),
                         new Signature( signature )
                     )
                 );

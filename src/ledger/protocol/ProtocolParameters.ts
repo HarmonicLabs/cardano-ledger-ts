@@ -2,7 +2,7 @@ import type { Epoch } from "../Epoch";
 import type { Coin } from "../Coin";
 import { CborPositiveRational, CborUInt, CborObj, CborMapEntry, CborMap, CborArray, CborNegInt, CborBytes, CborTag, CborText } from "@harmoniclabs/cbor";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../utils/ints";
-import { CostModels, costModelsFromCborObj, costModelsToCborObj, costModelsToJson, defaultV1Costs, defaultV2Costs, isCostModels } from "@harmoniclabs/cardano-costmodels-ts";
+import { CostModels, costModelsFromCborObj, costModelsToCborObj, costModelsToJson, defaultV1Costs, defaultV2Costs, defaultV3Costs, isCostModels } from "@harmoniclabs/cardano-costmodels-ts";
 import { ExBudget, ExBudgetJson } from "@harmoniclabs/plutus-machine";
 import { freezeAll, isObject } from "@harmoniclabs/obj-utils";
 import { Rational, cborFromRational, isRational, isRationalOrUndefined, tryCborFromRational } from "./Rational";
@@ -509,7 +509,8 @@ export const defaultProtocolParameters: ProtocolParameters = freezeAll({
     utxoCostPerByte: 34482,
     costModels: {
         PlutusScriptV1: defaultV1Costs,
-        PlutusScriptV2: defaultV2Costs
+        PlutusScriptV2: defaultV2Costs,
+        PlutusScriptV3: defaultV3Costs
     },
     executionUnitPrices: [
         CborPositiveRational.fromNumber( 0.0577 ), // mem

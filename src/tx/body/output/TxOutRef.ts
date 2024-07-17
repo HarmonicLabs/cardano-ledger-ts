@@ -95,6 +95,18 @@ export class TxOutRef
         return `${this.id.toString()}#${this.index.toString()}` as any;
     }
 
+    static fromString( str: string ): TxOutRef
+    {
+        if( typeof str !== "string" )
+        throw new Error("TxOutRef.fromString expects a string");
+        
+        const [id,idx] = str.split('#');
+        return new TxOutRef({
+            id,
+            index: Number( idx )
+        });
+    }
+
     toData( version?: ToDataVersion ): DataConstr
     {
         return new DataConstr(

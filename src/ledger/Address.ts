@@ -1,7 +1,7 @@
 import { ToCbor, CborObj, CborBytes, CborString, Cbor, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
 import { byte, encodeBech32, decodeBech32 } from "@harmoniclabs/crypto";
 import { ToData, Data, DataConstr } from "@harmoniclabs/plutus-data";
-import { Credential, StakeCredentials, StakeCredentialsType, CredentialType } from "../credentials";
+import { Credential, StakeCredentials, StakeCredentialsType, CredentialType, PublicKey } from "../credentials";
 import { Hash28 } from "../hashes";
 import { forceBigUInt } from "../utils/ints";
 import { NetworkT } from "./Network";
@@ -10,6 +10,7 @@ import { assert } from "../utils/assert";
 import { nothingData, justData } from "../utils/maybeData";
 import UPLCFlatUtils from "../utils/UPLCFlatUtils";
 import { fromHex, toHex } from "@harmoniclabs/uint8array-utils";
+import { harden, XPrv } from "@harmoniclabs/bip32_ed25519";
 
 export type AddressStr = `${"addr1"|"addr_test1"}${string}`;
 
@@ -277,6 +278,47 @@ export class Address
             buff : 
             Array.from( buff ) as byte[]
         )
+    }
+
+    /**
+     * gets the standard address for single address wallets
+     * 
+     * payment key at path "m/1852'/1815'/0'/0/0"
+     * stake key at path   "m/1852'/1815'/0'/2/0"
+    */
+    static fromXPrv( xprv: XPrv, network: NetworkT = "mainnet" ): Address
+    {
+        const account = xprv
+        .derive( harden(1852) )
+        .derive( harden(1815) )
+        .derive( harden(0) );
+
+        const prv = account.derive( 0 ).derive( 0 );
+        const pub = new PublicKey( prv.public().toPubKeyBytes() );
+        const pkh = pub.hash;
+
+        const stake_prv = account.derive( 2 ).derive( 0 );
+        const stake_pub = new PublicKey( stake_prv.public().toPubKeyBytes() );
+        const stake_pkh = stake_pub.hash;
+
+        return new Address(
+            network,
+            Credential.keyHash( pkh ),
+            new StakeCredentials("stakeKey", stake_pkh)
+        );
+    }
+
+    /**
+     * generates an `XPrv` from entropy and calls `Addres.fromXPrv`
+     * 
+     * gets the standard address for single address wallets
+     * 
+     * payment key at path "m/1852'/1815'/0'/0/0"
+     * stake key at path   "m/1852'/1815'/0'/2/0"
+    */
+    static fromEntropy( entropy: Uint8Array | string, network: NetworkT = "mainnet" ): Address
+    {
+        return Address.fromXPrv( XPrv.fromEntropy( entropy ), network );
     }
 
     toCborObj(): CborObj
