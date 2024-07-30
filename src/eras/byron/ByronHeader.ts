@@ -1,10 +1,9 @@
-import { RealPoint } from "@harmoniclabs/ouroboros-miniprotocols-ts";
 import { IHeader } from "../IHeader";
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborText, CborUInt, forceCborString } from "@harmoniclabs/cbor";
-import { U8Arr, U8Arr28, U8Arr32 } from "../types";
+import { U8Arr32 } from "../types";
 import { roDescr } from "../../utils/roDescr";
 import { getCborBytesDescriptor } from "../../utils/getCborBytesDescriptor";
-import { blake2b_256 } from "../../crypto";
+import { blake2b_256 } from "../../utils/crypto";
 
 
 export type IByronTxProof = [ number, U8Arr32, U8Arr32 ];

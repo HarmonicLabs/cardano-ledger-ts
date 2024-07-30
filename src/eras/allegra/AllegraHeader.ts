@@ -1,6 +1,6 @@
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString } from "@harmoniclabs/cbor";
 import { U8Arr, U8Arr32 } from "../types";
-import { blake2b_256 } from "../../crypto";
+import { blake2b_256 } from "../../utils/crypto";
 import { IOperationalCert, opCertToCborObjElems } from "../common/operationalCert";
 import { IShelleyHeader } from "../shelley";
 import { VrfCert, vrfCertFromCborObj, vrfCertToCborObj } from "../common/vrfCert";

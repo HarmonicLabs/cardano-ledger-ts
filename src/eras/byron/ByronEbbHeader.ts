@@ -1,12 +1,11 @@
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString } from "@harmoniclabs/cbor";
 import { IHeader } from "../IHeader";
-import { U8Arr28, U8Arr32 } from "../types";
-import { IRealPoint } from "@harmoniclabs/ouroboros-miniprotocols-ts";
+import { U8Arr32 } from "../types";
 import { getCborBytesDescriptor } from "../../utils/getCborBytesDescriptor";
 import { roDescr } from "../../utils/roDescr";
-import { blake2b_256 } from "../../crypto";
+import { blake2b_256 } from "../../utils/crypto";
 import { type EpochId } from "./ByronHeader";
-import { logger } from "../../../src/logger";
+import { logger } from "../../utils/logger";
 
 export interface IByronEbbConsData {
     epochId: EpochId,

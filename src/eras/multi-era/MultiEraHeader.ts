@@ -8,10 +8,10 @@ import { ShelleyHeader } from "../shelley";
 import { roDescr } from "../../utils/roDescr";
 import { getEraIdxAndHeaderBytes } from "./getEraIdxAndHeaderBytes";
 import { ByronEbbHeader } from "../byron/ByronEbbHeader";
-import { logger } from "../../../src/logger";
+import { logger } from "../../utils/logger";
 import { toHex } from "@harmoniclabs/uint8array-utils";
 import { IHeader } from "../IHeader";
-import { U8Arr, U8Arr32 } from "../types";
+import { U8Arr32 } from "../types";
 
 export enum EraIndex {
     Byron = 0,

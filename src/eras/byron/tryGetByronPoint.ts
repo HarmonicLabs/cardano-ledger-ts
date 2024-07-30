@@ -1,8 +1,8 @@
 import { Cbor, CborArray, CborUInt, LazyCborArray } from "@harmoniclabs/cbor";
-import { RealPoint } from "@harmoniclabs/ouroboros-miniprotocols-ts";
-import { blake2b_256 } from "../../crypto";
+// import { RealPoint } from "@harmoniclabs/ouroboros-miniprotocols-ts";
+import { blake2b_256 } from "../../utils/crypto";
 
-export function tryGetByronPoint( headerBytes: Uint8Array ): RealPoint | undefined
+export function tryGetByronPoint( headerBytes: Uint8Array ): /**RealPoint**/ | undefined
 {
     const lazyHead = Cbor.parseLazy( headerBytes );
 
@@ -41,13 +41,13 @@ export function tryGetByronPoint( headerBytes: Uint8Array ): RealPoint | undefin
     const epochId = slotId.array[0].num; 
     const slot = slotId.array[1].num;
 
-    return new RealPoint({
-        blockHeader: {
-            // byron is a pain
-            // the hash is calculated wrapping the header in the second slot of an array
-            // the first slot is uint(0) for EBB and uint(1) for normal byron blocks
-            hash: blake2b_256( new Uint8Array([ 0x82, 0x01, ...headerBytes ]) ),
-            slotNumber: epochId * BigInt( 21600 ) + slot
-        }
-    });
+    // return new RealPoint({
+    //     blockHeader: {
+    //         // byron is a pain
+    //         // the hash is calculated wrapping the header in the second slot of an array
+    //         // the first slot is uint(0) for EBB and uint(1) for normal byron blocks
+    //         hash: blake2b_256( new Uint8Array([ 0x82, 0x01, ...headerBytes ]) ),
+    //         slotNumber: epochId * BigInt( 21600 ) + slot
+    //     }
+    // });
 }

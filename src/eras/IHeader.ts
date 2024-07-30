@@ -1,5 +1,4 @@
 import { isObject } from "@harmoniclabs/obj-utils"
-import { IRealPoint, RealPoint, isRealPoint } from "@harmoniclabs/ouroboros-miniprotocols-ts";
 
 /**
  * immutable infos that any header needs to have
