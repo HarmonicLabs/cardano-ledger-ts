@@ -37,7 +37,8 @@
     "@harmoniclabs/bigint-utils": "^1.0.0",
     "@harmoniclabs/crypto": "^0.2.4",
     "@harmoniclabs/obj-utils": "^1.0.0",
-    "@harmoniclabs/uint8array-utils": "^1.0.0"
+    "@harmoniclabs/uint8array-utils": "^1.0.0",
+    "@types/blake2": "^4.0.4"
   },
   "peerDependencies": {
     "@harmoniclabs/bytestring": "^1.0.0",
