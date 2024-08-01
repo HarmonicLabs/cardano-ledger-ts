@@ -1,5 +1,5 @@
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString } from "@harmoniclabs/cbor";
-import { U8Arr32 } from "../types";
+import { U8Arr32 } from "../../utils/types";
 import { blake2b_256 } from "../../utils/crypto";
 import { IOperationalCert, opCertFromCborObj, opCertToCborObj } from "../common/operationalCert";
 import { VrfCert, vrfCertFromCborObj, vrfCertToCborObj } from "../common/vrfCert";

@@ -1,11 +1,12 @@
 import { isObject } from "@harmoniclabs/obj-utils"
+import { U8Arr32 } from "../utils/types";
 
 /**
  * immutable infos that any header needs to have
 **/
 export interface IHeader {
-    readonly hash: Uint8Array & { readonly length: 32 },
-    readonly prevHash: Uint8Array & { readonly length: 32 },
+    readonly hash: U8Arr32,
+    readonly prevBlock: U8Arr32,
     readonly slotNo: bigint,
     // block number is not present on babbage headers
     // readonly blockNo: number,
@@ -26,8 +27,8 @@ export function isIHeader( stuff: any ): stuff is IHeader
         (stuff.hash instanceof Uint8Array) &&
         stuff.hash.length === 32 &&
 
-        (stuff.prevHash instanceof Uint8Array) &&
-        stuff.prevHash.length === 32 &&
+        (stuff.prevBlock instanceof Uint8Array) &&
+        stuff.prevBlock.length === 32 &&
 
         Number.isSafeInteger( stuff.slotNo ) &&
         typeof stuff.isEBB === "boolean"

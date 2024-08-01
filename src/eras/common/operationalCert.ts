@@ -1,5 +1,5 @@
 import { CborObj, CborBytes, CborUInt, CborArray } from "@harmoniclabs/cbor";
-import { U8Arr32, U8Arr } from "../types";
+import { U8Arr32, U8Arr } from "../../utils/types";
 
 /**
  * from the shelley to the alonzo eras the `operational_cert` is "inlined" in the header

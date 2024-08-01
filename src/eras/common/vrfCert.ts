@@ -1,5 +1,5 @@
 import { CborArray, CborBytes, CborObj } from "@harmoniclabs/cbor";
-import { U8Arr } from "../types";
+import { U8Arr } from "../../utils/types";
 
 export type VrfCert = [
     Uint8Array,

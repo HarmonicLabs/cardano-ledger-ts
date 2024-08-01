@@ -2,16 +2,16 @@ import { CanBeCborString, Cbor, CborObj, forceCborString } from "@harmoniclabs/c
 import { AllegraHeader } from "../allegra";
 import { AlonzoHeader } from "../alonzo/AlonzoHeader";
 import { BabbageHeader } from "../babbage/BabbageHeader";
-import { ByronHeader } from "../byron/ByronHeader";
+import { ByronHeader } from "../byron/ByronHeaders/ByronNoEBBHeader";
 import { MaryHeader } from "../mary/MaryHeader";
 import { ShelleyHeader } from "../shelley";
 import { roDescr } from "../../utils/roDescr";
 import { getEraIdxAndHeaderBytes } from "./getEraIdxAndHeaderBytes";
-import { ByronEbbHeader } from "../byron/ByronEbbHeader";
+import { ByronEbbHeader } from "../byron/ByronHeaders/ByronEBBHeader";
 import { logger } from "../../utils/logger";
 import { toHex } from "@harmoniclabs/uint8array-utils";
 import { IHeader } from "../IHeader";
-import { U8Arr32 } from "../types";
+import { U8Arr32 } from "../../utils/types";
 
 export enum EraIndex {
     Byron = 0,
