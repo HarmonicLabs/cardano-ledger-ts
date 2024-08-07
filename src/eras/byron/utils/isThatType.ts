@@ -13,6 +13,16 @@ export function isPubKey( stuff: PubKey ): stuff is PubKey
     return isHash( stuff );
 }
 
+export function isIssuer( stuff: Issuer ): stuff is Issuer 
+{
+    return isPubKey( stuff );
+}
+
+export function isDelegate( stuff: Delegate ): stuff is Delegate 
+{
+    return isPubKey( stuff );
+}
+
 // U8Arr28
 
 export function isAddressId( stuff: AddressId ): stuff is AddressId 
@@ -28,16 +38,6 @@ export function isStakeholderId( stuff: StakeholderId ): stuff is StakeholderId
 // U8Arr32
 
 export function isTxId( stuff: TxId ): stuff is TxId 
-{
-    return isHash32( stuff );
-}
-
-export function isIssuer( stuff: Issuer ): stuff is Issuer 
-{
-    return isHash32( stuff );
-}
-
-export function isDelegate( stuff: Delegate ): stuff is Delegate 
 {
     return isHash32( stuff );
 }
