@@ -57,9 +57,9 @@ export function opCertFromCborObj( cbor: CborObj ): IOperationalCert
     )) throw new Error("invalid cbor for IOperationalCert");
 
     return {
-        hotVkey: cbor.array[0].buffer as U8Arr32,
+        hotVkey: cbor.array[0].bytes as U8Arr32,
         sequenceNumber: cbor.array[1].num,
         kesPeriod: cbor.array[2].num,
-        signature: cbor.array[3].buffer as U8Arr<64>
+        signature: cbor.array[3].bytes as U8Arr<64>
     };
 }

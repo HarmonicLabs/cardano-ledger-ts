@@ -1,9 +1,9 @@
 import { CborArray, CborBytes, CborObj } from "@harmoniclabs/cbor";
-import { U8Arr } from "../../utils/types";
+import { U8Arr80 } from "../../utils/types";
 
 export type VrfCert = [
     Uint8Array,
-    U8Arr<80>
+    U8Arr80
 ];
 
 export function vrfCertToCborObj( vrfCert: VrfCert ): CborArray
@@ -21,11 +21,11 @@ export function vrfCertFromCborObj( vrfCert: CborObj ): VrfCert
         vrfCert.array.length >= 2 &&
         vrfCert.array[0] instanceof CborBytes &&
         vrfCert.array[1] instanceof CborBytes &&
-        vrfCert.array[1].buffer.length === 80
+        vrfCert.array[1].bytes.length === 80
     )) throw new Error("invalid cbor for 'VrfCert'");
 
     return [
-        vrfCert.array[0].buffer,
-        vrfCert.array[1].buffer as U8Arr<80>,
+        vrfCert.array[0].bytes,
+        vrfCert.array[1].bytes as U8Arr80,
     ];
 }
