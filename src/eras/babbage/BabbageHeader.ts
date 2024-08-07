@@ -1,11 +1,11 @@
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString } from "@harmoniclabs/cbor";
-import { U8Arr32 } from "../../utils/types";
+import { U8Arr32 } from "../byron/utils/types";
 import { blake2b_256 } from "../../utils/crypto";
 import { IOperationalCert, opCertFromCborObj, opCertToCborObj } from "../common/operationalCert";
 import { VrfCert, vrfCertFromCborObj, vrfCertToCborObj } from "../common/vrfCert";
 import { getCborBytesDescriptor } from "../../utils/getCborBytesDescriptor";
 import { roDescr } from "../../utils/roDescr";
-import { IHeader } from "../IHeader";
+import { IHeader } from "../../interfaces/IHeader";
 import { IProtocolVersion, protocolVersionFromCborObj, protocolVersionToCborObj } from "../common/protocolVersion";
 
 export interface IBabbageHeader extends IHeader {

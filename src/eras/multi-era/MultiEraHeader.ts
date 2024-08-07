@@ -10,8 +10,8 @@ import { getEraIdxAndHeaderBytes } from "./getEraIdxAndHeaderBytes";
 import { ByronEbbHeader } from "../byron/ByronHeaders/ByronEBBHeader";
 import { logger } from "../../utils/logger";
 import { toHex } from "@harmoniclabs/uint8array-utils";
-import { IHeader } from "../IHeader";
-import { U8Arr32 } from "../../utils/types";
+import { IHeader } from "../../interfaces/IHeader";
+import { U8Arr32 } from "../byron/utils/types";
 
 export enum EraIndex {
     Byron = 0,
