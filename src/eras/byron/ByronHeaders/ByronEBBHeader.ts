@@ -1,28 +1,28 @@
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString } from "@harmoniclabs/cbor";
-import { IHeader } from "../../IHeader";
-import { EpochId, U8Arr32 } from "../../../utils/types";
+import { isDifficulty, isEpochId, isProtocolMagic, isSlotNo } from "../utils/isThatType";
 import { getCborBytesDescriptor } from "../../../utils/getCborBytesDescriptor";
-import { roDescr } from "../../../utils/roDescr";
+import { Difficulty, EpochId, ProtocolMagic, SlotNo } from "../utils/types";
+import { isBoolean, isHash32 } from "../../../utils/isThatType";
+import { IHeader } from "../../../interfaces/IHeader";
 import { blake2b_256 } from "../../../utils/crypto";
+import { roDescr } from "../../../utils/roDescr";
 import { logger } from "../../../utils/logger";
-import { isAValidHash } from "../../../utils/crypto";
-import { isWord32 } from "../../../utils/isWord32";
-import { isWord64 } from "../../../utils/isWord64";
+import { U8Arr32 } from "../../../utils/types";
 
-export interface IByronEbbConsData {
+export interface IByronEBBConsData {
     epochid: EpochId,
-    difficulty: bigint
+    difficulty: Difficulty
 }
 
-export function isIByronEbbConsData( consensusData: any ) : consensusData is IByronEbbConsData
+export function isIByronEBBConsData( consensusData: any ) : consensusData is IByronEBBConsData
 {
     return(
-        isWord64( consensusData.epochId ) &&
-        isWord64( consensusData.difficulty )
+        isEpochId( consensusData.epochId ) &&
+        isDifficulty( consensusData.difficulty )
     );
 } 
 
-export function byronEbbConsDataToCborObj({ epochid, difficulty }: IByronEbbConsData ): CborArray
+export function byronEBBConsDataToCborObj({ epochid, difficulty }: IByronEBBConsData ): CborArray
 {
     return new CborArray([
         new CborUInt( epochid ),
@@ -32,7 +32,7 @@ export function byronEbbConsDataToCborObj({ epochid, difficulty }: IByronEbbCons
     ]);
 }
 
-export function byronEbbConsDataFromCborObj( cbor: CborObj ): IByronEbbConsData
+export function byronEBBConsDataFromCborObj( cbor: CborObj ): IByronEBBConsData
 {
     if(!(
         cbor instanceof CborArray &&
@@ -47,7 +47,7 @@ export function byronEbbConsDataFromCborObj( cbor: CborObj ): IByronEbbConsData
             "byron ebb consData form cborObj",
             Cbor.encode( cbor ).toString()
         );
-        throw new Error("invalid cbor for IByronEbbConsData");
+        throw new Error("invalid cbor for IByronEBBConsData");
     }
 
     return {
@@ -56,23 +56,26 @@ export function byronEbbConsDataFromCborObj( cbor: CborObj ): IByronEbbConsData
     };
 }
 
-export interface IByronEBBHeader extends IHeader {
-    readonly protocolMagic: number,
-    readonly prevBlock: U8Arr32,                             //previous block hash
+export interface IByronEBBHeader extends IHeader 
+{
+    readonly protocolMagic: ProtocolMagic,
+    readonly prevBlock: U8Arr32,
     readonly bodyProof: U8Arr32,
-    readonly consensusData: IByronEbbConsData,
+    readonly consensusData: IByronEBBConsData,
     readonly extraData: CborArray
 }
 
-export function isIByronEBBHeader( header: any ): header is IByronEBBHeader 
+export function isIByronEBBHeader( stuff: any ): stuff is IByronEBBHeader 
 {
-    return ( 
-        header.isEBB &&
-        isWord32( header.protocolMagic ) &&
-        isAValidHash( header.prevBlock ) &&
-        isAValidHash( header.bodyProof ) &&
-        isIByronEbbConsData( header.consensusData ) &&
-        header.extraData instanceof CborArray
+    return (
+        isHash32( stuff.hash ) &&
+        isSlotNo( stuff.slotNo ) &&
+        ( isBoolean( stuff.isEBB ) && stuff.isEBB ) &&
+        isProtocolMagic( stuff.protocolMagic ) &&
+        isHash32( stuff.prevBlock ) &&
+        isHash32( stuff.bodyProof ) &&
+        isIByronEBBConsData( stuff.consensusData ) &&
+        stuff.extraData instanceof CborArray
     );
 }
 
@@ -80,16 +83,16 @@ export class ByronEBBHeader
     implements IByronEBBHeader
 {
     readonly hash: U8Arr32;
-    readonly slotNo: bigint;
+    readonly slotNo: SlotNo;
     readonly isEBB: boolean;
 
-    readonly protocolMagic: number;
-    readonly prevBlock: U8Arr32;                    //previous block hash
+    readonly protocolMagic: ProtocolMagic;
+    readonly prevBlock: U8Arr32;
     readonly bodyProof: U8Arr32;
-    readonly consensusData: IByronEbbConsData;
+    readonly consensusData: IByronEBBConsData;
     readonly extraData: CborArray;
 
-    readonly cborBytes?: Uint8Array;
+    readonly cborBytes?: U8Arr32;
     
     constructor( header: IByronEBBHeader )
     {
@@ -128,7 +131,7 @@ export class ByronEBBHeader
             new CborUInt( this.protocolMagic ),
             new CborBytes( this.prevBlock ),
             new CborBytes( this.bodyProof ),
-            byronEbbConsDataToCborObj( this.consensusData ),
+            byronEBBConsDataToCborObj( this.consensusData ),
             this.extraData
         ]);
     }
@@ -172,7 +175,7 @@ export class ByronEBBHeader
             extraData instanceof CborArray
         )) throw new Error("invalid cbor for ByronEBBHeader");
 
-        const consensusData = byronEbbConsDataFromCborObj( cborConsData );
+        const consensusData = byronEBBConsDataFromCborObj( cborConsData );
 
         const originalWerePresent = _originalBytes instanceof Uint8Array; 
         _originalBytes = _originalBytes instanceof Uint8Array ? _originalBytes : Cbor.encode( cbor ).toBuffer();
@@ -182,11 +185,11 @@ export class ByronEBBHeader
             // the hash is calculated wrapping the header in the second slot of an array
             // the first slot is uint(0) for EBB and uint(1) for normal byron blocks
             hash: blake2b_256( new Uint8Array([ 0x82, 0x00, ..._originalBytes ]) ) as U8Arr32,
-            prevBlock: cborPrevHash.buffer as U8Arr32,
+            prevBlock: cborPrevHash.bytes as U8Arr32,
             slotNo: consensusData.epochid * BigInt( 21600 ),
             isEBB: false,
             protocolMagic: Number( cborMagic.num ),
-            bodyProof: cborBodyProof.buffer as U8Arr32,
+            bodyProof: cborBodyProof.bytes as U8Arr32,
             consensusData,
             extraData
         });
