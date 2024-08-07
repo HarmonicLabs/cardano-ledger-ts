@@ -1,15 +1,16 @@
-import { IHeader } from "../../IHeader";
+import { isBlockId, isDelegate, isDifficulty, isDlgProof, isEpochId, isExtraProof, isIssuer, isProtocolMagic, isPubKey, isSignature, isSlotNo, isUpdProof } from "../utils/isThatType";
+import { BlockId, Delegate, Difficulty, DlgProof, EpochId, ExtraProof, Issuer, ProtocolMagic, PubKey, Signature, SlotNo, UpdProof } from "../utils/types";
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborText, CborUInt, forceCborString, isCborObj } from "@harmoniclabs/cbor";
-import { EpochId, U8Arr32 } from "../../../utils/types";
-import { roDescr } from "../../../utils/roDescr";
+import { isBoolean, isByte, isHash32, isWord16, isWord32 } from "../../../utils/isThatType";
 import { getCborBytesDescriptor } from "../../../utils/getCborBytesDescriptor";
-import { blake2b_256, isAValidHash } from "../../../utils/crypto";
-import { isWord32 } from "../../../utils/isWord32";
-import { isWord64 } from "../../../utils/isWord64";
+import { Byte, U8Arr32, Word16, Word32 } from "../../../utils/types";
+import { IHeader } from "../../../interfaces/IHeader";
+import { blake2b_256 } from "../../../utils/crypto";
+import { roDescr } from "../../../utils/roDescr";
 
 // txproof
 
-export type IByronTxProof = [ number, U8Arr32, U8Arr32 ];
+export type IByronTxProof = [ Word32, U8Arr32, U8Arr32 ];
 
 export function byronTxProofToCborObj( txProof: IByronTxProof ): CborArray
 {
@@ -46,14 +47,14 @@ export function byronTxProofFromCborObj( cbor: CborObj ): IByronTxProof
     ];
 }
 
-export function isIByronNoEbbTxProof( txProof: any ): txProof is IByronTxProof
+export function isIByronNoEBBTxProof( stuff: any ): stuff is IByronTxProof
 {
     return(
-        Array.isArray( txProof ) &&
-        txProof.length === 3 &&
-        isWord32( txProof[0] ) &&
-        isAValidHash( txProof[1] ) &&
-        isAValidHash( txProof[2] )
+        Array.isArray( stuff ) &&
+        stuff.length === 3 &&
+        isWord32( stuff[0] ) &&
+        isHash32( stuff[1] ) &&
+        isHash32( stuff[2] )
     );
 }
 
@@ -112,12 +113,12 @@ export function byronSscProofFromCborObj( cbor: CborObj ): IByronSscProof
     ] as any;
 }
 
-export function isIByronNoEbbSscProof( sscProof: any ): sscProof is IByronSscProof
+export function isIByronNoEBBSscProof( stuff: any ): stuff is IByronSscProof
 {
     return(
-        Array.isArray( sscProof ) &&
-        ( sscProof[0] >= 0 && sscProof[0] <= 3 ) &&
-        sscProof.slice(1).every( isAValidHash )
+        Array.isArray( stuff ) &&
+        ( stuff[0] >= 0 && stuff[0] <= 3 ) &&
+        stuff.slice(1).every( isHash32 )
     );
 }
 
@@ -126,8 +127,8 @@ export function isIByronNoEbbSscProof( sscProof: any ): sscProof is IByronSscPro
 export interface IByronBodyProof {
     txProof: IByronTxProof,
     sscProof: IByronSscProof,
-    dlgProof: U8Arr32,
-    updProof: U8Arr32,
+    dlgProof: DlgProof,
+    updProof: UpdProof,
 }
 
 export function byronBodyProofToCborObj( bProof: IByronBodyProof ): CborArray
@@ -167,13 +168,13 @@ export function byronBodyProofFromCborObj( cbor: CborObj ): IByronBodyProof
     }
 }
 
-export function isIByronNoEbbBodyProof( bodyProof: any ): bodyProof is IByronBodyProof
+export function isIByronNoEBBBodyProof( stuff: any ): stuff is IByronBodyProof
 {
     return(
-        isIByronNoEbbTxProof( bodyProof.txProof ) &&
-        isIByronNoEbbSscProof( bodyProof.sscProof ) &&
-        isAValidHash( bodyProof.dlgProof ) &&
-        isAValidHash( bodyProof.updProof )
+        isIByronNoEBBTxProof( stuff.txProof ) &&
+        isIByronNoEBBSscProof( stuff.sscProof ) &&
+        isDlgProof( stuff.dlgProof ) &&
+        isUpdProof( stuff.updProof )
     );
 }
 
@@ -181,7 +182,7 @@ export function isIByronNoEbbBodyProof( bodyProof: any ): bodyProof is IByronBod
 
 export interface IByronSlotId {
     epoch: EpochId,
-    slot: bigint
+    slot: SlotNo
 }
 
 export function byronSlotIdToCborObj( slotid: IByronSlotId ): CborArray
@@ -208,11 +209,11 @@ export function byronSlotIdFromCborObj( cbor: CborObj ): IByronSlotId
     };
 }
 
-export function isIByronNoEbbSlotId( slotId: any ): slotId is IByronSlotId
+export function isIByronNoEBBSlotId( stuff: any ): stuff is IByronSlotId
 {
     return(
-        isWord64( slotId.epochId ) &&
-        isWord64( slotId.slot )
+        isEpochId( stuff.epochId ) &&
+        isSlotNo( stuff.slot )
     );
 }
 
@@ -221,9 +222,9 @@ export function isIByronNoEbbSlotId( slotId: any ): slotId is IByronSlotId
 // wtf is this name? <- idk bro ç-ç
 export interface ILwdlg {
     epochRange: [EpochId, EpochId],
-    issuer: U8Arr32,
-    delegate: U8Arr32,
-    certificate: Uint8Array,
+    issuer: Issuer,
+    delegate: Delegate,
+    certificate: Signature
 }
 
 export function byronLwdlgToCborObj({
@@ -267,21 +268,21 @@ export function byronLwdlgFromCborObj( cbor: CborObj ): ILwdlg
 
     return {
         epochRange: [ cEpochRange.array[0].num, cEpochRange.array[1].num ],
-        issuer: cIssuer.bytes as U8Arr32,
+        issuer: cIssuer.bytes as Issuer,
         delegate: cDelegate.bytes as U8Arr32,
         certificate: cCert.bytes,
     };
 }
 
-export function isIByronNoEbbLwdlg( lwdlg: any ): lwdlg is ILwdlg
+export function isIByronNoEBBLwdlg( stuff: any ): stuff is ILwdlg
 {
     return(
-        Array.isArray( lwdlg.epochRange ) && 
-        lwdlg.epochRange.length === 2 &&
-        lwdlg.epochRange.every( isWord64 ) &&
-        isAValidHash( lwdlg.issuer ) &&
-        isAValidHash( lwdlg.delegate ) &&
-        isAValidHash( lwdlg.certificate )
+        Array.isArray( stuff.epochRange ) && 
+        stuff.epochRange.length === 2 &&
+        stuff.epochRange.every( isEpochId ) &&
+        isIssuer( stuff.issuer ) &&
+        isDelegate( stuff.delegate ) &&
+        isSignature( stuff.certificate )
     );
 }
 
@@ -290,9 +291,9 @@ export function isIByronNoEbbLwdlg( lwdlg: any ): lwdlg is ILwdlg
 // wtf is this name? <- idk bro ç-ç
 export interface IDlg {
     epoch: EpochId,
-    issuer: U8Arr32,
-    delegate: U8Arr32,
-    certificate: Uint8Array,
+    issuer: Issuer,
+    delegate: Delegate,
+    certificate: Signature,
 }
 
 export function byronDlgToCborObj({
@@ -309,7 +310,6 @@ export function byronDlgToCborObj({
         new CborBytes( certificate ),
     ]);
 }
-
 
 export function byronDlgFromCborObj( cbor: CborObj ): IDlg
 {
@@ -334,25 +334,25 @@ export function byronDlgFromCborObj( cbor: CborObj ): IDlg
 
     return {
         epoch: cEpoch.num,
-        issuer: cIssuer.bytes as U8Arr32,
+        issuer: cIssuer.bytes as Issuer,
         delegate: cDelegate.bytes as U8Arr32,
         certificate: cCert.bytes,
     };
 }
 
-export function isIByronNoEbbDlg( dlg: any ): dlg is IDlg
+export function isIByronNoEBBDlg( stuff: any ): stuff is IDlg
 {
     return(
-        isWord64( dlg.epoch ) &&
-        isAValidHash( dlg.issuer ) &&
-        isAValidHash( dlg.delegate ) &&
-        isAValidHash( dlg.certificate )
+        isEpochId( stuff.epoch ) &&
+        isIssuer( stuff.issuer ) &&
+        isDelegate( stuff.delegate ) &&
+        isSignature( stuff.certificate )
     );
 }
 
 // lwdlgsig
 
-export type ILwdlgSig = [ ILwdlg, Uint8Array ];
+export type ILwdlgSig = [ ILwdlg, Signature ];
 
 export function byronLwdlgSigToCborObj( [ lwdlg, signature ]: ILwdlgSig ): CborArray
 {
@@ -385,19 +385,19 @@ export function byronLwdlgSigFromCborObj( cbor: CborObj ): ILwdlgSig
     ];
 }
 
-export function isIByronNoEbbLwdlgSig( lwdlgsig: any ): lwdlgsig is ILwdlgSig
+export function isIByronNoEBBLwdlgSig( stuff: any ): stuff is ILwdlgSig
 {
     return(
-        Array.isArray( lwdlgsig ) &&
-        lwdlgsig.length === 2 &&
-        isIByronNoEbbLwdlg( lwdlgsig[0] ) &&
-        isAValidHash( lwdlgsig[1] )
+        Array.isArray( stuff ) &&
+        stuff.length === 2 &&
+        isIByronNoEBBLwdlg( stuff[0] ) &&
+        isSignature( stuff[1] )
     );
 }
 
 // dlgsig
 
-export type IDlgSig = [ IDlg, Uint8Array ];
+export type IDlgSig = [ IDlg, Signature ];
 
 export function byronDlgSigToCborObj( [ dlg, signature ]: IDlgSig ): CborArray
 {  
@@ -427,20 +427,20 @@ export function byronDlgSigFromCborObj( cbor: CborObj ): IDlgSig
     ];
 }
 
-export function isIByronNoEbbDlgSig( dlgsig: any ): dlgsig is IDlgSig
+export function isIByronNoEBBDlgSig( stuff: any ): stuff is IDlgSig
 {
     return(
-        Array.isArray( dlgsig ) &&
-        dlgsig.length === 2 &&
-        isIByronNoEbbDlg( dlgsig[0] ) &&
-        isAValidHash( dlgsig[1] )
+        Array.isArray( stuff ) &&
+        stuff.length === 2 &&
+        isIByronNoEBBDlg( stuff[0] ) &&
+        isSignature( stuff[1] )
     );
 }
 
 // blocksig
 
 export type IByronBlockSig 
-    = [ 0, Uint8Array ]
+    = [ 0, Signature ]
     | [ 1, ILwdlgSig ]
     | [ 2, IDlgSig ];
 
@@ -511,24 +511,24 @@ export function byronBlockSigFromCborObj( cbor: CborObj ): IByronBlockSig
     ] as any;
 }
 
-export function isIByronNoEbbBlockSig( bSig: any ): bSig is IByronBlockSig
+export function isIByronNoEBBBlockSig( stuff: any ): stuff is IByronBlockSig
 {
     if(!( 
-        Array.isArray( bSig ) &&
-        bSig.length === 2 &&
-        ( bSig[0] >= 0 && bSig[0] <= 2 )
+        Array.isArray( stuff ) &&
+        stuff.length === 2 &&
+        ( stuff[0] >= 0 && stuff[0] <= 2 )
     )) return false;
     
-    switch( bSig[0] )
+    switch( stuff[0] )
     {
         case 0:
-            return( isAValidHash(bSig[1]) );
+            return( isSignature(stuff[1]) );
             break;
         case 1:
-            return( isIByronNoEbbLwdlgSig( bSig[1] ) );
+            return( isIByronNoEBBLwdlgSig( stuff[1] ) );
             break;
         case 2:
-            return( isIByronNoEbbDlgSig( bSig[1] ) );
+            return( isIByronNoEBBDlgSig( stuff[1] ) );
             break;
         default: throw new Error("provided 'IByronBlockSig' is not valid")
     }
@@ -538,8 +538,8 @@ export function isIByronNoEbbBlockSig( bSig: any ): bSig is IByronBlockSig
 
 export interface IByronConsData {
     slotid: IByronSlotId,
-    pubkey: U8Arr32, // pubkey is32; pub key hash is 28
-    difficulty: bigint,
+    pubkey: PubKey,
+    difficulty: Difficulty,
     blockSig: IByronBlockSig,
 }
 
@@ -585,23 +585,23 @@ export function byronConsDataFromCborObj( cbor: CborObj ): IByronConsData
     };
 }
 
-export function isIByronNoEbbConsData( consData: any ): consData is IByronConsData
+export function isIByronNoEBBConsData( stuff: any ): stuff is IByronConsData
 {
     return(
-        isIByronNoEbbSlotId( consData.slotid ) &&
-        isAValidHash( consData.pubkey ) &&
-        isWord64( consData.difficulty ) &&
-        isIByronNoEbbBlockSig( consData.blockSig )
+        isIByronNoEBBSlotId( stuff.slotid ) &&
+        isPubKey( stuff.pubkey ) &&
+        isDifficulty( stuff.difficulty ) &&
+        isIByronNoEBBBlockSig( stuff.blockSig )
     );
 }
 
 // blockheadex
 
 export interface IByronHeaderExtra {
-    version: [ number, number, number ],
-    softwareVersion: [ string, number ],
+    version: [ Word16, Word16, Byte ],
+    softwareVersion: [ string, Word32 ],
     attributes: CborObj,
-    extraProof: U8Arr32
+    extraProof: ExtraProof
 }
 
 export function byronHeaderExtraToCborObj({
@@ -664,42 +664,49 @@ export function byronHeaderExtraFromCborObj( cbor: CborObj ): IByronHeaderExtra
     }
 }
 
-export function isIByronNoEbbHeadExtra( headExtra: any ): headExtra is IByronHeaderExtra
+export function isIByronNoEBBHeadExtra( stuff: any ): stuff is IByronHeaderExtra
 {
     return(
-        Array.isArray( headExtra.version ) &&
-        headExtra.version.length === 3 &&
-        headExtra.version.every( isWord32 ) &&
-        Array.isArray( headExtra.softwareVersion ) &&
-        headExtra.softwareVersion.length === 2 &&
-        headExtra.softwareVersion[0] instanceof String &&
-        isWord32( headExtra.softwareVersion[1] ) &&
-        isCborObj( headExtra.attributes ) &&
-        isAValidHash( headExtra.extraProof )
+        Array.isArray( stuff.version ) &&
+        stuff.version.length === 3 &&
+        ( 
+            isWord16( stuff.version[0] ) &&
+            isWord16( stuff.version[1] )  &&
+            isByte( stuff.version[2] ) 
+        ) &&
+        Array.isArray( stuff.softwareVersion ) &&
+        stuff.softwareVersion.length === 2 &&
+        (
+            stuff.softwareVersion[0] instanceof String &&
+            isWord32( stuff.softwareVersion[1] )
+        ) &&
+        isCborObj( stuff.attributes ) &&
+        isExtraProof( stuff.extraProof )
     );
 }
 
 // blockhead
 
-export interface IByronNoEBBHeader
-    extends IHeader
+export interface IByronNoEBBHeader extends IHeader
 {
-    readonly protocolMagic: number,
-    readonly prevBlock: U8Arr32,                            //previous block hash
+    readonly protocolMagic: ProtocolMagic,
+    readonly prevBlock: BlockId,
     readonly bodyProof: IByronBodyProof,
     readonly consensusData: IByronConsData,
     readonly extraData: IByronHeaderExtra
 }
 
-export function isIByronNoEBBHeader( header: any ): header is IByronNoEBBHeader 
+export function isIByronNoEBBHeader( stuff: any ): stuff is IByronNoEBBHeader 
 {
     return ( 
-        !header.isEBB &&
-        isWord32( header.protocolMagic ) &&
-        isAValidHash( header.prevBlock ) &&
-        isIByronNoEbbBodyProof( header.bodyProof ) &&
-        isIByronNoEbbConsData( header.consensusData ) &&
-        isIByronNoEbbHeadExtra( header.extraData )
+        isHash32( stuff.hash ) &&
+        isSlotNo( stuff.slotNo ) &&
+        ( isBoolean( stuff.isEBB ) && !stuff.isEBB ) &&
+        isProtocolMagic( stuff.protocolMagic ) &&
+        isBlockId( stuff.prevBlock ) &&
+        isIByronNoEBBBodyProof( stuff.bodyProof ) &&
+        isIByronNoEBBConsData( stuff.consensusData ) &&
+        isIByronNoEBBHeadExtra( stuff.extraData )
     );
 }
 
@@ -707,11 +714,11 @@ export class ByronNoEBBHeader
     implements IByronNoEBBHeader
 {
     readonly hash: U8Arr32;
-    readonly slotNo: bigint;
+    readonly slotNo: SlotNo;
     readonly isEBB: boolean;
     
-    readonly protocolMagic: number;
-    readonly prevBlock: U8Arr32;
+    readonly protocolMagic: ProtocolMagic;
+    readonly prevBlock: BlockId;
     readonly bodyProof: IByronBodyProof;
     readonly consensusData: IByronConsData;
     readonly extraData: IByronHeaderExtra;
@@ -748,6 +755,7 @@ export class ByronNoEBBHeader
     {
         return new CborString( this.toCborBytes() );
     }
+
     toCborObj(): CborArray
     {
         return new CborArray([
@@ -758,6 +766,7 @@ export class ByronNoEBBHeader
             byronHeaderExtraToCborObj( this.extraData )
         ]);
     }
+
     toCborBytes(): Uint8Array
     {
         if(!( this.cborBytes instanceof Uint8Array ))
@@ -774,6 +783,7 @@ export class ByronNoEBBHeader
         const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor ).toBuffer();
         return ByronNoEBBHeader.fromCborObj( Cbor.parse( bytes ), bytes );
     }
+
     static fromCborObj( cbor: CborObj, _originalBytes?: Uint8Array ): ByronNoEBBHeader
     {
         if(!(
