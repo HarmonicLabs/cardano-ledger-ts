@@ -1,8 +1,7 @@
 import { CanBeCborString, Cbor, forceCborString, CborObj, CborBytes } from "@harmoniclabs/cbor";
+import { canBeHashInstance, Hash } from "../Hash";
 import { assert } from "../../utils/assert";
-import { Hash, canBeHashInstance } from "../Hash";
-import { isHex } from "../../utils/hex";
-import { toHex } from "@harmoniclabs/uint8array-utils";
+import { isHex } from "../../utils/isThatType";
 
 export type CanBeHash28 = string | Uint8Array | Hash28;
 
@@ -51,8 +50,6 @@ export class Hash28 extends Hash
     {
         if(!(cObj instanceof CborBytes ))
         throw new Error(`Invalid CBOR format for "Hash"`);
-
-        console.log( toHex( cObj.bytes ), cObj.bytes.length );
 
         return new Hash28( cObj.bytes )
     }

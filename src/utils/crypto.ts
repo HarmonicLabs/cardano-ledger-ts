@@ -6,9 +6,3 @@ export function blake2b_256( data: Uint8Array ): Uint8Array
         createHash("blake2b", { digestLength: 32 }).update(Buffer.from( data )).digest()
     );
 }
-
-export function isAValidHash( hash: any ): boolean 
-{
-    // TO FIX
-    return( hash instanceof Uint8Array );
-}

@@ -4,7 +4,7 @@ import { ToData, Data, DataB } from "@harmoniclabs/plutus-data";
 import { fromAscii, fromHex, isUint8Array, toAscii, toHex } from "@harmoniclabs/uint8array-utils";
 import { assert } from "../utils/assert";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
-import { isHex } from "../utils/hex";
+import { isHex } from "../utils/isThatType";
 import { ToDataVersion } from "../toData/defaultToDataVersion";
 
 export function canBeHashInstance( obj: any ): boolean

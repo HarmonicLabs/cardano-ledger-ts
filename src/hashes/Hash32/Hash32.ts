@@ -1,7 +1,7 @@
 import { CanBeCborString, Cbor, forceCborString, CborObj, CborBytes } from "@harmoniclabs/cbor";
-import { assert } from "../../utils/assert";
-import { isHex } from "../../utils/hex";
 import { canBeHashInstance, Hash } from "../Hash";
+import { assert } from "../../utils/assert";
+import { isHex } from "../../utils/isThatType";
 
 export type CanBeHash32 = string | Uint8Array | Hash32;
 
@@ -36,6 +36,7 @@ export class Hash32 extends Hash
     {
         return Hash32.fromCborObj( Cbor.parse( forceCborString( cStr ) ) );
     }
+
     static fromCborObj( cObj: CborObj ): Hash32
     {
         if(!(cObj instanceof CborBytes ))
@@ -43,5 +44,4 @@ export class Hash32 extends Hash
 
         return new Hash32( cObj.buffer )
     }
-    
 }
