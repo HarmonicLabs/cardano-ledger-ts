@@ -1,4 +1,4 @@
-import { EpochId, Difficulty, ProtocolMagic, SlotNo, DlgProof, UpdProof, Signature, Issuer, Delegate, PubKey, ExtraProof, BlockId, StakeholderId, AddressId, TxId } from "./types";
+import { EpochId, Difficulty, ProtocolMagic, SlotNo, DlgProof, UpdProof, Signature, Issuer, Delegate, PubKey, ExtraProof, BlockId, StakeholderId, AddressId, TxId, VssPubKey, VssEnc, VssSec, VssDec, UpdId } from "./types";
 import { isHash, isHash28, isHash32, isWord32, isWord64 } from "../../../utils/isThatType";
 
 // Uint8Array
@@ -13,6 +13,21 @@ export function isPubKey( stuff: PubKey ): stuff is PubKey
     return isHash( stuff );
 }
 
+export function isVssPubKey( stuff: VssPubKey ): stuff is VssPubKey 
+{
+    return isHash( stuff );
+}
+
+export function isVssSec( stuff: VssSec ): stuff is VssSec 
+{
+    return isHash( stuff );
+}
+
+export function isVssDec( stuff: VssDec ): stuff is VssDec 
+{
+    return isHash( stuff );
+}
+
 export function isIssuer( stuff: Issuer ): stuff is Issuer 
 {
     return isPubKey( stuff );
@@ -21,6 +36,16 @@ export function isIssuer( stuff: Issuer ): stuff is Issuer
 export function isDelegate( stuff: Delegate ): stuff is Delegate 
 {
     return isPubKey( stuff );
+}
+
+// Uint8Array[]
+
+export function isVssEnc( stuff: VssEnc ): stuff is VssEnc 
+{
+    return(
+        Array.isArray( stuff ) &&
+        stuff.every( isHash )
+    );
 }
 
 // U8Arr28
@@ -61,6 +86,12 @@ export function isBlockId( stuff: BlockId ): stuff is BlockId
 {
     return isHash32( stuff );
 }
+
+export function isUpdId( stuff: UpdId ): stuff is UpdId 
+{
+    return isHash32( stuff );
+}
+
 
 // number
 
