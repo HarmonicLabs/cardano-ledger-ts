@@ -220,7 +220,7 @@ export function isIByronNoEBBSlotId( stuff: any ): stuff is IByronSlotId
 // lwdlg
 
 // wtf is this name? <- idk bro ç-ç
-export interface ILwdlg {
+export interface IByronLwdlg {
     epochRange: [EpochId, EpochId],
     issuer: Issuer,
     delegate: Delegate,
@@ -232,7 +232,7 @@ export function byronLwdlgToCborObj({
     issuer,
     delegate,
     certificate
-}: ILwdlg ): CborArray
+}: IByronLwdlg ): CborArray
 {
     return new CborArray([
         new CborArray( epochRange.map( n => new CborUInt( n ) )),
@@ -242,7 +242,7 @@ export function byronLwdlgToCborObj({
     ]);
 }
 
-export function byronLwdlgFromCborObj( cbor: CborObj ): ILwdlg
+export function byronLwdlgFromCborObj( cbor: CborObj ): IByronLwdlg
 {
     if(!(
         cbor instanceof CborArray &&
@@ -274,7 +274,7 @@ export function byronLwdlgFromCborObj( cbor: CborObj ): ILwdlg
     };
 }
 
-export function isIByronNoEBBLwdlg( stuff: any ): stuff is ILwdlg
+export function isIByronNoEBBLwdlg( stuff: any ): stuff is IByronLwdlg
 {
     return(
         Array.isArray( stuff.epochRange ) && 
@@ -289,7 +289,7 @@ export function isIByronNoEBBLwdlg( stuff: any ): stuff is ILwdlg
 // dlg
 
 // wtf is this name? <- idk bro ç-ç
-export interface IDlg {
+export interface IByronDlg {
     epoch: EpochId,
     issuer: Issuer,
     delegate: Delegate,
@@ -301,7 +301,7 @@ export function byronDlgToCborObj({
     issuer,
     delegate,
     certificate,
-}: IDlg ): CborArray
+}: IByronDlg ): CborArray
 {
     return new CborArray([
         new CborUInt ( epoch ),
@@ -311,7 +311,7 @@ export function byronDlgToCborObj({
     ]);
 }
 
-export function byronDlgFromCborObj( cbor: CborObj ): IDlg
+export function byronDlgFromCborObj( cbor: CborObj ): IByronDlg
 {
     if(!(
         cbor instanceof CborArray &&
@@ -340,7 +340,7 @@ export function byronDlgFromCborObj( cbor: CborObj ): IDlg
     };
 }
 
-export function isIByronNoEBBDlg( stuff: any ): stuff is IDlg
+export function isIByronNoEBBDlg( stuff: any ): stuff is IByronDlg
 {
     return(
         isEpochId( stuff.epoch ) &&
@@ -352,9 +352,9 @@ export function isIByronNoEBBDlg( stuff: any ): stuff is IDlg
 
 // lwdlgsig
 
-export type ILwdlgSig = [ ILwdlg, Signature ];
+export type IByronLwdlgSig = [ IByronLwdlg, Signature ];
 
-export function byronLwdlgSigToCborObj( [ lwdlg, signature ]: ILwdlgSig ): CborArray
+export function byronLwdlgSigToCborObj( [ lwdlg, signature ]: IByronLwdlgSig ): CborArray
 {
     return new CborArray([
         byronLwdlgToCborObj( lwdlg ),
@@ -362,7 +362,7 @@ export function byronLwdlgSigToCborObj( [ lwdlg, signature ]: ILwdlgSig ): CborA
     ]);
 }
 
-export function byronLwdlgSigFromCborObj( cbor: CborObj ): ILwdlgSig
+export function byronLwdlgSigFromCborObj( cbor: CborObj ): IByronLwdlgSig
 {
     if(!(
         cbor instanceof CborArray &&
@@ -385,7 +385,7 @@ export function byronLwdlgSigFromCborObj( cbor: CborObj ): ILwdlgSig
     ];
 }
 
-export function isIByronNoEBBLwdlgSig( stuff: any ): stuff is ILwdlgSig
+export function isIByronNoEBBLwdlgSig( stuff: any ): stuff is IByronLwdlgSig
 {
     return(
         Array.isArray( stuff ) &&
@@ -397,9 +397,9 @@ export function isIByronNoEBBLwdlgSig( stuff: any ): stuff is ILwdlgSig
 
 // dlgsig
 
-export type IDlgSig = [ IDlg, Signature ];
+export type IByronDlgSig = [ IByronDlg, Signature ];
 
-export function byronDlgSigToCborObj( [ dlg, signature ]: IDlgSig ): CborArray
+export function byronDlgSigToCborObj( [ dlg, signature ]: IByronDlgSig ): CborArray
 {  
     return new CborArray([
         byronDlgToCborObj( dlg ),
@@ -407,7 +407,7 @@ export function byronDlgSigToCborObj( [ dlg, signature ]: IDlgSig ): CborArray
     ]);
 }
 
-export function byronDlgSigFromCborObj( cbor: CborObj ): IDlgSig
+export function byronDlgSigFromCborObj( cbor: CborObj ): IByronDlgSig
 {
     if(!(
         cbor instanceof CborArray &&
@@ -427,7 +427,7 @@ export function byronDlgSigFromCborObj( cbor: CborObj ): IDlgSig
     ];
 }
 
-export function isIByronNoEBBDlgSig( stuff: any ): stuff is IDlgSig
+export function isIByronNoEBBDlgSig( stuff: any ): stuff is IByronDlgSig
 {
     return(
         Array.isArray( stuff ) &&
@@ -441,8 +441,8 @@ export function isIByronNoEBBDlgSig( stuff: any ): stuff is IDlgSig
 
 export type IByronBlockSig 
     = [ 0, Signature ]
-    | [ 1, ILwdlgSig ]
-    | [ 2, IDlgSig ];
+    | [ 1, IByronLwdlgSig ]
+    | [ 2, IByronDlgSig ];
 
 export function byronBlockSigToCborObj( bSig: IByronBlockSig ): CborArray
 {

@@ -1,7 +1,7 @@
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString } from "@harmoniclabs/cbor";
-import { isDifficulty, isEpochId, isProtocolMagic, isSlotNo } from "../utils/isThatType";
+import { isBlockId, isDifficulty, isEpochId, isProtocolMagic, isSlotNo } from "../utils/isThatType";
+import { BlockId, Difficulty, EpochId, ProtocolMagic, SlotNo } from "../utils/types";
 import { getCborBytesDescriptor } from "../../../utils/getCborBytesDescriptor";
-import { Difficulty, EpochId, ProtocolMagic, SlotNo } from "../utils/types";
 import { isBoolean, isHash32 } from "../../../utils/isThatType";
 import { IHeader } from "../../../interfaces/IHeader";
 import { blake2b_256 } from "../../../utils/crypto";
@@ -59,7 +59,7 @@ export function byronEBBConsDataFromCborObj( cbor: CborObj ): IByronEBBConsData
 export interface IByronEBBHeader extends IHeader 
 {
     readonly protocolMagic: ProtocolMagic,
-    readonly prevBlock: U8Arr32,
+    readonly prevBlock: BlockId,
     readonly bodyProof: U8Arr32,
     readonly consensusData: IByronEBBConsData,
     readonly extraData: CborArray
@@ -72,7 +72,7 @@ export function isIByronEBBHeader( stuff: any ): stuff is IByronEBBHeader
         isSlotNo( stuff.slotNo ) &&
         ( isBoolean( stuff.isEBB ) && stuff.isEBB ) &&
         isProtocolMagic( stuff.protocolMagic ) &&
-        isHash32( stuff.prevBlock ) &&
+        isBlockId( stuff.prevBlock ) &&
         isHash32( stuff.bodyProof ) &&
         isIByronEBBConsData( stuff.consensusData ) &&
         stuff.extraData instanceof CborArray
@@ -87,7 +87,7 @@ export class ByronEBBHeader
     readonly isEBB: boolean;
 
     readonly protocolMagic: ProtocolMagic;
-    readonly prevBlock: U8Arr32;
+    readonly prevBlock: BlockId;
     readonly bodyProof: U8Arr32;
     readonly consensusData: IByronEBBConsData;
     readonly extraData: CborArray;
