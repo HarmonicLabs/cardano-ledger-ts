@@ -95,46 +95,36 @@ export function isUpdId( stuff: UpdId ): stuff is UpdId
 
 // number
 
+export function isNumber( stuff: any ): boolean
+{
+    return ( typeof stuff === "number" );
+}
+
 export function isProtocolMagic( stuff: ProtocolMagic ): stuff is ProtocolMagic 
 {
-    if( typeof stuff === "number" ) 
-    {
-        return( isWord32( stuff ) );
-    }
-
-    return false;
+    return isNumber( stuff )? isWord32( stuff ) : false;
 }
 
 // bigint
 
+export function isBigInt( stuff: any ): boolean
+{
+    return ( typeof stuff === "bigint" );
+}
+
 export function isDifficulty( stuff: Difficulty ): stuff is Difficulty 
 {
-    if( typeof stuff === "bigint" ) 
-    {
-        return( isWord64( stuff ) );
-    }
-
-    return false;
+    return isBigInt( stuff )? isWord64( stuff ) : false;
 }
 
 export function isEpochId( stuff: EpochId ): stuff is EpochId 
 {
-    if( typeof stuff === "bigint" ) 
-    {
-        return( isWord64( stuff ) );
-    }
-
-    return false;
+    return isBigInt( stuff )? isWord64( stuff ) : false;
 }
 
 export function isSlotNo( stuff: SlotNo ): stuff is SlotNo 
 {
-    if( typeof stuff === "bigint" ) 
-    {
-        return( isWord64( stuff ) );
-    }
-
-    return false;
+    return isBigInt( stuff )? isWord64( stuff ) : false;
 }
 
 // map
