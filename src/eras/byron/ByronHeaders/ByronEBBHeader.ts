@@ -179,9 +179,9 @@ export class ByronEBBHeader
             cborBodyProof instanceof CborBytes &&
             cborConsData instanceof CborArray &&
             cborExtraData instanceof CborArray
-        )) throw new Error("invalid cbor for IByronEBBHeader");
+        )) throw new Error("invalid cbor for ByronEBBHeader");
 
-        const consensusDataObj = consensusDataFromCborObj( cborConsData );
+        const consensusData = consensusDataFromCborObj( cborConsData );
 
         const originalWerePresent = _originalBytes instanceof Uint8Array; 
         _originalBytes = _originalBytes instanceof Uint8Array ? _originalBytes : Cbor.encode( cbor ).toBuffer();
@@ -191,12 +191,12 @@ export class ByronEBBHeader
             // the hash is calculated wrapping the header in the second slot of an array
             // the first slot is uint(0) for EBB and uint(1) for normal byron blocks
             hash: blake2b_256( new Uint8Array([ 0x82, 0x00, ..._originalBytes ]) ) as U8Arr32,
-            slotNo: consensusDataObj.epochid * BigInt( 21600 ),
+            slotNo: consensusData.epochid * BigInt( 21600 ),
             isEBB: true,
             protocolMagic: Number( cborMagic.num ),
             prevBlock: cborPrevHash.bytes as U8Arr32,
             bodyProof: cborBodyProof.bytes as U8Arr32,
-            consensusData: consensusDataObj,
+            consensusData: consensusData,
             extraData: cborExtraData
         });
 
