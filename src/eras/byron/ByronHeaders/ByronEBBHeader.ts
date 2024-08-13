@@ -5,49 +5,53 @@ import { getCborBytesDescriptor } from "../../../utils/getCborBytesDescriptor";
 import { isBoolean, isHash32 } from "../../../utils/isThatType";
 import { IHeader } from "../../../interfaces/IHeader";
 import { blake2b_256 } from "../../../utils/crypto";
+import { isObject } from "@harmoniclabs/obj-utils";
 import { roDescr } from "../../../utils/roDescr";
 import { logger } from "../../../utils/logger";
 import { U8Arr32 } from "../../../utils/types";
 
-export interface IByronEBBConsData {
+// ebbcons
+
+export interface IByronConsensusData {
     epochid: EpochId,
     difficulty: Difficulty
 }
 
-export function isIByronEBBConsData( consensusData: any ) : consensusData is IByronEBBConsData
+export function isIByronConsData( stuff: any ) : stuff is IByronConsensusData
 {
     return(
-        isEpochId( consensusData.epochId ) &&
-        isDifficulty( consensusData.difficulty )
+        isObject( stuff ) &&
+        isEpochId( stuff.epochId ) &&
+        isDifficulty( stuff.difficulty )
     );
 } 
 
-export function byronEBBConsDataToCborObj({ epochid, difficulty }: IByronEBBConsData ): CborArray
+export function consensusDataToCborObj( consensusData: IByronConsensusData ): CborArray
 {
     return new CborArray([
-        new CborUInt( epochid ),
+        new CborUInt( consensusData.epochid ),
         new CborArray([
-            new CborUInt( difficulty ),
+            new CborUInt( consensusData.difficulty ),
         ])
     ]);
 }
 
-export function byronEBBConsDataFromCborObj( cbor: CborObj ): IByronEBBConsData
+export function consensusDataFromCborObj( cbor: CborObj ): IByronConsensusData
 {
     if(!(
         cbor instanceof CborArray &&
-        cbor.array.length >= 2 &&
+        cbor.array.length !== 2 &&
         cbor.array[0] instanceof CborUInt &&
         cbor.array[1] instanceof CborArray &&
-        cbor.array[1].array.length >= 1 &&
+        cbor.array[1].array.length !== 1 &&
         cbor.array[1].array[0] instanceof CborUInt
     ))
     {
         logger.debug(
-            "byron ebb consData form cborObj",
+            "IByronConsensusData from cborObj",
             Cbor.encode( cbor ).toString()
         );
-        throw new Error("invalid cbor for IByronEBBConsData");
+        throw new Error("invalid cbor for IByronConsensusData");
     }
 
     return {
@@ -61,7 +65,7 @@ export interface IByronEBBHeader extends IHeader
     readonly protocolMagic: ProtocolMagic,
     readonly prevBlock: BlockId,
     readonly bodyProof: U8Arr32,
-    readonly consensusData: IByronEBBConsData,
+    readonly consensusData: IByronConsensusData,
     readonly extraData: CborArray
 }
 
@@ -74,7 +78,7 @@ export function isIByronEBBHeader( stuff: any ): stuff is IByronEBBHeader
         isProtocolMagic( stuff.protocolMagic ) &&
         isBlockId( stuff.prevBlock ) &&
         isHash32( stuff.bodyProof ) &&
-        isIByronEBBConsData( stuff.consensusData ) &&
+        isIByronConsData( stuff.consensusData ) &&
         stuff.extraData instanceof CborArray
     );
 }
@@ -89,17 +93,18 @@ export class ByronEBBHeader
     readonly protocolMagic: ProtocolMagic;
     readonly prevBlock: BlockId;
     readonly bodyProof: U8Arr32;
-    readonly consensusData: IByronEBBConsData;
+    readonly consensusData: IByronConsensusData;
     readonly extraData: CborArray;
+    // readonly extraData: Attributes[];
 
     readonly cborBytes?: U8Arr32;
     
-    constructor( header: IByronEBBHeader )
+    constructor( stuff: any )
     {
-        if(!( isIByronEBBHeader( header ) ))
+        if(!( isIByronEBBHeader( stuff ) ))
             throw new Error( "invalid new `IByronEBBHeader` data provided" );
 
-        const hash = Uint8Array.prototype.slice.call( header.hash, 0, 32 );
+        const hash = Uint8Array.prototype.slice.call( stuff.hash, 0, 32 );
         Object.defineProperties(
             this, {
                 hash: {
@@ -108,13 +113,13 @@ export class ByronEBBHeader
                     enumerable: true,
                     configurable: false  
                 },
-                prevBlock: { value: header.prevBlock, ...roDescr },
-                slotNo: { value: header.slotNo, ...roDescr },
-                isEBB: { value: header.isEBB, ...roDescr },
-                protocolMagic: { value: header.protocolMagic, ...roDescr },
-                bodyProof: { value: header.bodyProof, ...roDescr },
-                consensusData: { value: header.consensusData, ...roDescr },
-                extraData: { value: header.extraData, ...roDescr },
+                slotNo: { value: stuff.slotNo, ...roDescr },
+                isEBB: { value: stuff.isEBB, ...roDescr },
+                protocolMagic: { value: stuff.protocolMagic, ...roDescr },
+                prevBlock: { value: stuff.prevBlock, ...roDescr },
+                bodyProof: { value: stuff.bodyProof, ...roDescr },
+                consensusData: { value: stuff.consensusData, ...roDescr },
+                extraData: { value: stuff.extraData, ...roDescr },
                 cborBytes: getCborBytesDescriptor(),
             }
         );
@@ -131,7 +136,7 @@ export class ByronEBBHeader
             new CborUInt( this.protocolMagic ),
             new CborBytes( this.prevBlock ),
             new CborBytes( this.bodyProof ),
-            byronEBBConsDataToCborObj( this.consensusData ),
+            consensusDataToCborObj( this.consensusData ),
             this.extraData
         ]);
     }
@@ -157,7 +162,7 @@ export class ByronEBBHeader
     {
         if(!(
             cbor instanceof CborArray &&
-            cbor.array.length >= 5
+            cbor.array.length !== 5
         )) throw new Error("invalid cbor for ByronEBBHeader");
 
         const [
@@ -165,17 +170,18 @@ export class ByronEBBHeader
             cborPrevHash,
             cborBodyProof,
             cborConsData,
-            extraData
+            cborExtraData
         ] = cbor.array;
 
         if(!(
             cborMagic instanceof CborUInt &&
             cborPrevHash instanceof CborBytes &&
             cborBodyProof instanceof CborBytes &&
-            extraData instanceof CborArray
-        )) throw new Error("invalid cbor for ByronEBBHeader");
+            cborConsData instanceof CborArray &&
+            cborExtraData instanceof CborArray
+        )) throw new Error("invalid cbor for IByronEBBHeader");
 
-        const consensusData = byronEBBConsDataFromCborObj( cborConsData );
+        const consensusDataObj = consensusDataFromCborObj( cborConsData );
 
         const originalWerePresent = _originalBytes instanceof Uint8Array; 
         _originalBytes = _originalBytes instanceof Uint8Array ? _originalBytes : Cbor.encode( cbor ).toBuffer();
@@ -185,13 +191,13 @@ export class ByronEBBHeader
             // the hash is calculated wrapping the header in the second slot of an array
             // the first slot is uint(0) for EBB and uint(1) for normal byron blocks
             hash: blake2b_256( new Uint8Array([ 0x82, 0x00, ..._originalBytes ]) ) as U8Arr32,
-            prevBlock: cborPrevHash.bytes as U8Arr32,
-            slotNo: consensusData.epochid * BigInt( 21600 ),
-            isEBB: false,
+            slotNo: consensusDataObj.epochid * BigInt( 21600 ),
+            isEBB: true,
             protocolMagic: Number( cborMagic.num ),
+            prevBlock: cborPrevHash.bytes as U8Arr32,
             bodyProof: cborBodyProof.bytes as U8Arr32,
-            consensusData,
-            extraData
+            consensusData: consensusDataObj,
+            extraData: cborExtraData
         });
 
         if( originalWerePresent )
