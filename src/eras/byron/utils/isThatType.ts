@@ -1,4 +1,4 @@
-import { EpochId, Difficulty, ProtocolMagic, SlotNo, DlgProof, UpdProof, Signature, Issuer, Delegate, PubKey, ExtraProof, BlockId, StakeholderId, AddressId, TxId, VssPubKey, VssEnc, VssSec, VssDec, UpdId } from "./types";
+import { EpochId, Difficulty, ProtocolMagic, SlotNo, DlgProof, UpdProof, Signature, Issuer, Delegate, PubKey, ExtraProof, BlockId, StakeholderId, AddressId, TxId, VssPubKey, VssEnc, VssSec, VssDec, UpdId, Attributes } from "./types";
 import { isHash, isHash28, isHash32, isWord32, isWord64 } from "../../../utils/isThatType";
 
 // Uint8Array
@@ -135,4 +135,16 @@ export function isSlotNo( stuff: SlotNo ): stuff is SlotNo
     }
 
     return false;
+}
+
+// map
+
+export function isAttributes( stuff: any ): stuff is Attributes
+{
+    return(
+        stuff instanceof Map &&
+        Array.from(stuff.keys()).every(( key: any ) => { 
+            return ( stuff.get( key ) !== null );
+        })
+    );
 }
