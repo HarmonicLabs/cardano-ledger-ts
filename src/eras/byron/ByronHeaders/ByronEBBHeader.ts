@@ -40,10 +40,10 @@ export function consensusDataFromCborObj( cbor: CborObj ): IByronConsensusData
 {
     if(!(
         cbor instanceof CborArray &&
-        cbor.array.length !== 2 &&
+        cbor.array.length === 2 &&
         cbor.array[0] instanceof CborUInt &&
         cbor.array[1] instanceof CborArray &&
-        cbor.array[1].array.length !== 1 &&
+        cbor.array[1].array.length === 1 &&
         cbor.array[1].array[0] instanceof CborUInt
     ))
     {
@@ -162,7 +162,7 @@ export class ByronEBBHeader
     {
         if(!(
             cbor instanceof CborArray &&
-            cbor.array.length !== 5
+            cbor.array.length === 5
         )) throw new Error("invalid cbor for ByronEBBHeader");
 
         const [
