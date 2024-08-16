@@ -1,7 +1,8 @@
-import { isBoolean } from "../utils/isThat/isBoolean";
-import { isSlotNo } from "../eras/byron/utils/isSlotNo";
-import { isHash32 } from "../utils/isThat/isHash";
-import { SlotNo, U8Arr32 } from "../eras/byron/utils/types";
+import { isSlotNo } from "../eras/byron/utils/isThatType";      // to fix bc it using byron stuff and not generic stuff
+import { SlotNo } from "../eras/byron/utils/types";             // to fix bc it using byron stuff and not generic stuff
+import { isBoolean } from "../utils/isThatType";
+import { isHash32 } from "../utils/isThatType";
+import { U8Arr32 } from "../utils/types";
 
 export function isIHeader( stuff: any ): stuff is IHeader
 {

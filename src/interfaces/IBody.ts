@@ -1,7 +1,7 @@
-import { isBoolean } from "../utils/isThat/isBoolean";
-import { isObject } from "@harmoniclabs/obj-utils";
-import { isHash32 } from "../utils/isThat/isHash";
 import { U8Arr32 } from "../eras/byron/utils/types";
+import { isObject } from "@harmoniclabs/obj-utils";
+import { isBoolean } from "../utils/isThatType";
+import { isHash32 } from "../utils/isThatType";
 
 export function isIBody( stuff: any ): stuff is IBody
 {
