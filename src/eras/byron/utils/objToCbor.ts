@@ -1,5 +1,5 @@
-import { Attributes } from "./types";
 import { CborMap } from "@harmoniclabs/cbor";
+import { Attributes } from "./types";
 
 export function attributesToCborObj( stuff: Attributes ): CborMap
 {
