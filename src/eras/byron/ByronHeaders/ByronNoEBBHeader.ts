@@ -4,7 +4,7 @@ import { CanBeCborString, Cbor, CborArray, CborBytes, CborMap, CborObj, CborStri
 import { isBoolean, isByte, isHash32, isWord16, isWord32 } from "../../../utils/isThatType";
 import { getCborBytesDescriptor } from "../../../utils/getCborBytesDescriptor";
 import { Byte, U8Arr32, Word16, Word32 } from "../../../utils/types";
-import { attributesToCborObj } from "../utils/objToCbor";
+import { attributesMapToCborObj } from "../utils/objToCbor";
 import { cborMapToAttributes } from "../utils/cbortoObj";
 import { IHeader } from "../../../interfaces/IHeader";
 import { blake2b_256 } from "../../../utils/crypto";
@@ -345,7 +345,7 @@ export function dlgFromCborObj( cbor: CborObj ): IByronDlg
     if(!(
         cbor instanceof CborArray &&
         cbor.array.length === 4
-    )) throw new Error("invalid cbor for Lwdlg");
+    )) throw new Error("invalid cbor for `IByronDlg`");
 
     const [
         cborEpoch,
@@ -359,10 +359,10 @@ export function dlgFromCborObj( cbor: CborObj ): IByronDlg
         cborIssuer instanceof CborBytes &&
         cborDelegate instanceof CborBytes &&
         cborCert instanceof CborBytes
-    )) throw new Error("invalid cbor for `Lwdlg`");
+    )) throw new Error("invalid cbor for `IByronDlg`");
 
     return {
-        epoch: cborEpoch.num,
+        epoch: cborEpoch.num as EpochId,
         issuer: cborIssuer.bytes as Issuer,
         delegate: cborDelegate.bytes as Delegate,
         certificate: cborCert.bytes as Signature,
@@ -653,7 +653,7 @@ export function headerExtraToCborObj( stuff: IByronHeaderExtra ): CborArray
             new CborText( stuff.softwareVersion[0] ),
             new CborUInt( stuff.softwareVersion[1] ),
         ]),
-        attributesToCborObj( stuff.attributes ),
+        attributesMapToCborObj( stuff.attributes ),
         new CborBytes( stuff.extraProof )
     ]);
 }
