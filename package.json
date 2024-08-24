@@ -1,6 +1,6 @@
 {
   "name": "@harmoniclabs/cardano-ledger-ts",
-  "version": "0.2.3-dev0",
+  "version": "0.2.3",
   "description": "",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -45,8 +45,8 @@
     "@harmoniclabs/cbor": "^1.2.0",
     "@harmoniclabs/pair": "^1.0.0",
     "@harmoniclabs/plutus-data": "^1.2.4",
-    "@harmoniclabs/cardano-costmodels-ts": "^1.2.0-dev1",
-    "@harmoniclabs/plutus-machine": "^2.0.0-dev4"
+    "@harmoniclabs/cardano-costmodels-ts": "^1.2.0",
+    "@harmoniclabs/plutus-machine": "^2.0.1"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.18.6",
