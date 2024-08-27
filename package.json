@@ -9,6 +9,7 @@
     "dist"
   ],
   "scripts": {
+    "prepare": "npm run build",
     "test": "jest",
     "clear-jest": "jest --clearCache",
     "test-watch": "jest --watchman",
