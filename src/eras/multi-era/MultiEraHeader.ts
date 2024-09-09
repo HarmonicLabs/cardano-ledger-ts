@@ -2,16 +2,16 @@ import { CanBeCborString, Cbor, CborObj, forceCborString } from "@harmoniclabs/c
 import { AllegraHeader } from "../allegra";
 import { AlonzoHeader } from "../alonzo/AlonzoHeader";
 import { BabbageHeader } from "../babbage/BabbageHeader";
-import { ByronHeader } from "../byron/ByronHeaders/ByronNoEBBHeader";
+import { ByronMainHeader } from "../byron/headers/ByronMainHeader";
 import { MaryHeader } from "../mary/MaryHeader";
 import { ShelleyHeader } from "../shelley";
 import { roDescr } from "../../utils/roDescr";
 import { getEraIdxAndHeaderBytes } from "./getEraIdxAndHeaderBytes";
-import { ByronEbbHeader } from "../byron/ByronHeaders/ByronEBBHeader";
+import { ByronEBBHeader } from "../byron/headers/ByronEBBHeader";
 import { logger } from "../../utils/logger";
 import { toHex } from "@harmoniclabs/uint8array-utils";
 import { IHeader } from "../../interfaces/IHeader";
-import { U8Arr32 } from "../byron/utils/types";
+import { U8Arr32 } from "../../utils/types";
 
 export enum EraIndex {
     Byron = 0,
@@ -25,8 +25,8 @@ export enum EraIndex {
 Object.freeze( EraIndex );
 
 export type AnyEraHeader
-    = ByronEbbHeader
-    | ByronHeader
+    = ByronEBBHeader
+    | ByronMainHeader
     | ShelleyHeader
     | AllegraHeader
     | MaryHeader
@@ -34,12 +34,12 @@ export type AnyEraHeader
     | BabbageHeader;
 
 export type RealHeader<EraIdx extends EraIndex> =
-    EraIdx extends EraIndex.Byron         ? ByronHeader | ByronEbbHeader :
-    EraIdx extends EraIndex.Shelley          ? ShelleyHeader :
-    EraIdx extends EraIndex.Allegra          ? AllegraHeader :
-    EraIdx extends EraIndex.Mary             ? MaryHeader :
-    EraIdx extends EraIndex.Alonzo           ? AlonzoHeader :
-    EraIdx extends EraIndex.Babbage          ? BabbageHeader :
+    EraIdx extends EraIndex.Byron           ? ByronMainHeader | ByronEBBHeader :
+    EraIdx extends EraIndex.Shelley         ? ShelleyHeader :
+    EraIdx extends EraIndex.Allegra         ? AllegraHeader :
+    EraIdx extends EraIndex.Mary            ? MaryHeader :
+    EraIdx extends EraIndex.Alonzo          ? AlonzoHeader :
+    EraIdx extends EraIndex.Babbage         ? BabbageHeader :
     never
 
 export interface IMultiEraHeader<EraIdx extends EraIndex = EraIndex> {
@@ -54,14 +54,14 @@ export class MultiEraHeader<EraIdx extends EraIndex = EraIndex>
     readonly header: RealHeader<EraIdx>;
 
     get hash(): U8Arr32 { return this.header.hash }
-    get prevHash(): U8Arr32 { return this.header.prevHash }
+    get prevBlock(): U8Arr32 { return this.header.prevBlock }
     get slotNo(): bigint { return this.header.slotNo }
     get isEBB(): boolean { return this.header.isEBB }
     get blockNo(): bigint | undefined
     {
         if(
-            this.header instanceof ByronEbbHeader ||
-            this.header instanceof ByronHeader
+            this.header instanceof ByronEBBHeader ||
+            this.header instanceof ByronMainHeader
         ) return undefined;
         return  this.header.blockNo;
     }
@@ -98,10 +98,10 @@ export class MultiEraHeader<EraIdx extends EraIndex = EraIndex>
         {
             case EraIndex.Byron: {
                 try {
-                    header = ByronEbbHeader.fromCbor( headerBytes );
+                    header = ByronEBBHeader.fromCbor( headerBytes );
                 } catch (e) {
                     try {
-                        header = ByronHeader.fromCbor( headerBytes );
+                        header = ByronMainHeader.fromCbor( headerBytes );
                     } catch (b) {
                         logger.error( eraIdx, toHex( headerBytes ) );
                         throw b;
@@ -127,12 +127,12 @@ export class MultiEraHeader<EraIdx extends EraIndex = EraIndex>
         return (
             hdr.eraIndex === EraIndex.Byron
         ) && (
-            hdr.header instanceof ByronEbbHeader
+            hdr.header instanceof ByronEBBHeader
         );
     }
     static isByron( hdr: MultiEraHeader ): hdr is MultiEraHeader<EraIndex.Byron>
     {
-        return hdr.eraIndex === EraIndex.Byron && hdr.header instanceof ByronHeader;
+        return hdr.eraIndex === EraIndex.Byron && hdr.header instanceof ByronMainHeader;
     }
     static isShelley( hdr: MultiEraHeader ): hdr is MultiEraHeader<EraIndex.Shelley>
     {

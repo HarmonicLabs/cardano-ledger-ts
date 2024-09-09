@@ -11,7 +11,7 @@ import { IProtocolVersion } from "../common/protocolVersion";
 export interface IShelleyHeader extends IHeader {
     readonly blockNo: bigint,
     // readonly slotNo: bigint // part of IHeader
-    // readonly prevHash: U8Arr32 // part of IHeader,
+    // readonly prevBlock: U8Arr32 // part of IHeader,
     readonly issuerVkey: U8Arr32,
     readonly vrfVkey: U8Arr32,
     readonly blockBodySize: bigint,
@@ -27,7 +27,7 @@ export class ShelleyHeader
     implements IShelleyHeader
 {
     readonly hash: Uint8Array & { readonly length: 32; };
-    readonly prevHash: Uint8Array & { readonly length: 32; };
+    readonly prevBlock: Uint8Array & { readonly length: 32; };
     readonly slotNo: bigint;
     readonly isEBB: boolean;
     readonly cborBytes?: Uint8Array | undefined;
@@ -51,7 +51,7 @@ export class ShelleyHeader
         Object.defineProperties(
             this, {
                 hash: { value: header.hash, ...roDescr },
-                prevHash: { value: header.prevHash, ...roDescr },
+                prevBlock: { value: header.prevBlock, ...roDescr },
                 slotNo: { value: header.slotNo, ...roDescr },
                 isEBB: { value: header.isEBB, ...roDescr },
                 cborBytes: getCborBytesDescriptor(),
@@ -79,7 +79,7 @@ export class ShelleyHeader
             new CborArray([ // header_body
                 new CborUInt(  this.blockNo ),
                 new CborUInt(  this.slotNo ),
-                new CborBytes( this.prevHash ),
+                new CborBytes( this.prevBlock ),
                 new CborBytes( this.issuerVkey ),
                 new CborBytes( this.vrfVkey ),
                 vrfCertToCborObj( this.nonceVrf ),
@@ -130,7 +130,7 @@ export class ShelleyHeader
         const [
             cBlockNo,
             cSlotNo,
-            cPrevHash,
+            cprevBlock,
             cIssuerVkey,
             cVrfVkey,
             cNonceVrf,
@@ -148,7 +148,7 @@ export class ShelleyHeader
         if(!(
             cBlockNo instanceof CborUInt        &&
             cSlotNo  instanceof CborUInt        &&
-            cPrevHash   instanceof CborBytes    &&
+            cprevBlock   instanceof CborBytes    &&
             cIssuerVkey instanceof CborBytes    &&
             cVrfVkey    instanceof CborBytes    &&
             cBlockBodySize instanceof CborUInt  &&
@@ -169,7 +169,7 @@ export class ShelleyHeader
         
         const hdr = new ShelleyHeader({
             hash: blake2b_256( _originalBytes ) as U8Arr32,
-            prevHash: cPrevHash.buffer as U8Arr32,
+            prevBlock: cprevBlock.buffer as U8Arr32,
             slotNo: cSlotNo.num,
             isEBB: false,
             blockNo: cBlockNo.num,

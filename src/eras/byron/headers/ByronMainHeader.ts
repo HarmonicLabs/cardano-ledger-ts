@@ -791,7 +791,7 @@ export class ByronMainHeader
 
         const [
             cborMagic,
-            cborPrevHash,
+            cborPrevBlock,
             cborBodyProof,
             cborConsData,
             cborExtraData
@@ -799,7 +799,7 @@ export class ByronMainHeader
 
         if(!(
             cborMagic instanceof CborUInt &&
-            cborPrevHash instanceof CborBytes &&
+            cborPrevBlock instanceof CborBytes &&
             cborBodyProof instanceof CborArray &&
             cborConsData instanceof CborArray &&
             cborExtraData instanceof CborArray
@@ -818,7 +818,7 @@ export class ByronMainHeader
             slotNo: consensusData.slotid.epoch * BigInt( 21600 ) + consensusData.slotid.slot as SlotNo,
             isEBB: false,
             protocolMagic: Number( cborMagic.num ) as ProtocolMagic,
-            prevBlock: cborPrevHash.bytes as BlockId,
+            prevBlock: cborPrevBlock.bytes as BlockId,
             bodyProof: bodyProofFromCborObj( cborBodyProof ) as IByronBodyProof,
             consensusData: consensusData as IByronConsData,
             extraData: headerExtraFromCborObj( cborExtraData ) as IByronHeaderExtra

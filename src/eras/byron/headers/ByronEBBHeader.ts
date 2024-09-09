@@ -151,7 +151,7 @@ export class ByronEBBHeader
 
         const [
             cborMagic,
-            cborPrevHash,
+            cborprevBlock,
             cborBodyProof,
             cborConsData,
             cborExtraData
@@ -159,7 +159,7 @@ export class ByronEBBHeader
 
         if(!(
             cborMagic instanceof CborUInt &&
-            cborPrevHash instanceof CborBytes &&
+            cborprevBlock instanceof CborBytes &&
             cborBodyProof instanceof CborBytes &&
             cborConsData instanceof CborArray &&
             cborExtraData instanceof CborArray &&
@@ -179,7 +179,7 @@ export class ByronEBBHeader
             slotNo: consensusData.epochid * BigInt( 21600 ) as SlotNo,
             isEBB: true,
             protocolMagic: Number( cborMagic.num ) as ProtocolMagic,
-            prevBlock: cborPrevHash.bytes as U8Arr32,
+            prevBlock: cborprevBlock.bytes as U8Arr32,
             bodyProof: cborBodyProof.bytes as U8Arr32,
             consensusData: consensusData as IByronConsensusData,
             extraData: cborMapToAttributes( cborExtraData.array[0] ) as Attributes
