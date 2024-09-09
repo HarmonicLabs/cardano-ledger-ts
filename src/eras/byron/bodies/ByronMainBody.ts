@@ -1,15 +1,13 @@
 import { isAddressId, isAttributes, isDelegate, isEpochId, isIssuer, isPubKey, isSignature, isStakeholderId, isTxId, isUpdId, isVssDec, isVssEnc, isVssPubKey, isVssSec } from "../utils/isThatType";
-import { AddressId, Attributes, BlockId, Delegate, EpochId, Issuer, ProtocolMagic, PubKey, Signature, SlotNo, StakeholderId, TxId, UpdId, VssDec, VssEnc, VssPubKey, VssSec } from "../utils/types";
+import { AddressId, Attributes, Delegate, EpochId, Issuer, PubKey, Signature, StakeholderId, TxId, UpdId, VssDec, VssEnc, VssPubKey, VssSec } from "../utils/types";
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborMap, CborObj, CborString, CborText, CborUInt, forceCborString, isCborObj } from "@harmoniclabs/cbor";
 import { isBoolean, isHash, isByte, isWord16, isWord32, isWord64 } from "../../../utils/isThatType";
-import { getCborBytesDescriptor } from "../../../utils/getCborBytesDescriptor";
 import { Byte, U8Arr32, Word16, Word32, Word64 } from "../../../utils/types";
 import { attributesMapToCborObj } from "../utils/objToCbor";
 import { cborMapToAttributes } from "../utils/cbortoObj";
 import { blake2b_256 } from "../../../utils/crypto";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { IBody } from "../../../interfaces/IBody";
-import { roDescr } from "../../../utils/roDescr";
 import { isStringObject } from "util/types";
 
 // txPayload
@@ -2099,7 +2097,7 @@ export function updPayloadFromCborObj( cbor: CborObj ): IByronUpdPayload
 //             , "updPayload" : up
 //             ]
 
-export interface IByronNoEBBBody extends IBody
+export interface IByronMainBody extends IBody
 {
     readonly txPayload: IByronTxPayload,
     readonly sscPayload: IByronSscPayload,
@@ -2107,7 +2105,7 @@ export interface IByronNoEBBBody extends IBody
     readonly updPayload: IByronUpdPayload
 }
 
-export function isIByronNoEBBBody( stuff: any ): stuff is IByronNoEBBBody 
+export function isIByronMainBody( stuff: any ): stuff is IByronMainBody 
 {
     return ( 
         isObject( stuff ) &&
@@ -2118,8 +2116,8 @@ export function isIByronNoEBBBody( stuff: any ): stuff is IByronNoEBBBody
     );
 }
 
-export class ByronNoEBBBody
-    implements IByronNoEBBBody
+export class ByronMainBody
+    implements IByronMainBody
 {
     readonly hash: U8Arr32;
     readonly isEBB: boolean;
@@ -2131,35 +2129,20 @@ export class ByronNoEBBBody
 
     readonly cborBytes?: Uint8Array;
 
-    constructor( body: IByronNoEBBBody )
+    constructor( stuff: any )
     {
-        if(!( isIByronNoEBBBody( body ) ))
-            throw new Error( "invalid new `IByronNoEBBBody` data provided" );
+        if(!( isIByronMainBody( stuff ) )) throw new Error( "invalid new `IByronMainBody` data provided" );
 
-        const hash = Uint8Array.prototype.slice.call( body.hash, 0, 32 );
-        Object.defineProperties(
-            this, {
-                hash: {
-                    get: () => Uint8Array.prototype.slice.call( hash ),
-                    set: (arg) => arg,
-                    enumerable: true,
-                    configurable: false  
-                },
-                isEBB: { value: body.isEBB, ...roDescr },
-                txPayload: { value: body.txPayload, ...roDescr },
-                sscPayload: { value: body.sscPayload, ...roDescr },
-                dlgPayload: { value: body.dlgPayload, ...roDescr },
-                updPayload: { value: body.updPayload, ...roDescr },
-                cborBytes: getCborBytesDescriptor(),
-            }
-        );
+        this.txPayload = stuff.txPayload;
+        this.sscPayload = stuff.sscPayload;
+        this.dlgPayload = stuff.dlgPayload;
+        this.updPayload = stuff.updPayload;
     }
 
     toCbor(): CborString
     {
         return new CborString( this.toCborBytes() );
     }
-
     toCborObj(): CborArray
     {
         return new CborArray([
@@ -2169,7 +2152,6 @@ export class ByronNoEBBBody
             updPayloadToCborObj( this.updPayload )
         ]);
     }
-
     toCborBytes(): Uint8Array
     {
         if(!( this.cborBytes instanceof Uint8Array ))
@@ -2181,18 +2163,17 @@ export class ByronNoEBBBody
         return Uint8Array.prototype.slice.call( this.cborBytes );
     }
 
-    static fromCbor( cbor: CanBeCborString ): ByronNoEBBBody
+    static fromCbor( cbor: CanBeCborString ): ByronMainBody
     {
         const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor ).toBuffer();
-        return ByronNoEBBBody.fromCborObj( Cbor.parse( bytes ), bytes );
+        return ByronMainBody.fromCborObj( Cbor.parse( bytes ), bytes );
     }
-
-    static fromCborObj( cbor: CborObj, _originalBytes?: Uint8Array ): ByronNoEBBBody
+    static fromCborObj( cbor: CborObj, _originalBytes?: Uint8Array ): ByronMainBody
     {
         if(!(
             cbor instanceof CborArray &&
-            cbor.array.length >= 5
-        )) throw new Error("invalid cbor for `ByronNoEBBBody`");
+            cbor.array.length >= 4
+        )) throw new Error("invalid cbor for `ByronMainBody`");
 
         const [
             cborTxPayload,
@@ -2206,12 +2187,12 @@ export class ByronNoEBBBody
             cborSscPayload instanceof CborArray &&
             cborDlgPayload instanceof CborArray &&
             cborUpdPayload instanceof CborArray
-        )) throw new Error("invalid cbor for `ByronNoEBBBody`");
+        )) throw new Error("invalid cbor for `ByronMainBody`");
 
         const originalWerePresent = _originalBytes instanceof Uint8Array;
         _originalBytes = _originalBytes instanceof Uint8Array ? _originalBytes : Cbor.encode( cbor ).toBuffer();
         
-        const hdr = new ByronNoEBBBody({
+        const hdr = new ByronMainBody({
             // byron is a pain
             // the hash is calculated wrapping the header in the second slot of an array
             // the first slot is uint(0) for EBB and uint(1) for normal byron blocks
@@ -2231,4 +2212,5 @@ export class ByronNoEBBBody
 
         return hdr;
     }
+
 }

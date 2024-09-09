@@ -36,32 +36,19 @@ export class ByronEBBBody
 
     readonly cborBytes?: Uint8Array;
 
-    constructor( body: IByronEBBBody )
+    constructor( stuff: any )
     {
-        if(!( isIByronEBBBody( body ) ))
-            throw new Error( "invalid new `IByronEBBBody` data provided" );
+        if(!( isIByronEBBBody( stuff ) )) throw new Error( "invalid new `IByronEBBBody` data provided" );
 
-        const hash = Uint8Array.prototype.slice.call( body.hash, 0, 32 );
-        Object.defineProperties(
-            this, {
-                hash: {
-                    get: () => Uint8Array.prototype.slice.call( hash ),
-                    set: (arg) => arg,
-                    enumerable: true,
-                    configurable: false  
-                },
-                isEBB: { value: body.isEBB, ...roDescr },
-                stakeholderHashes: { value: body.stakeholderHashes, ...roDescr },
-                cborBytes: getCborBytesDescriptor(),
-            }
-        );
+        this.hash = stuff.hash;
+        this.isEBB = true;
+        this.stakeholderHashes = stuff.stakeholderHashes;
     }
 
     toCbor(): CborString
     {
         return new CborString( this.toCborBytes() );
     }
-
     toCborObj(): CborArray
     {
         return new CborArray( 
@@ -70,7 +57,6 @@ export class ByronEBBBody
             ))
         );
     }
-
     toCborBytes(): Uint8Array
     {
         if(!( this.cborBytes instanceof Uint8Array ))
@@ -87,15 +73,14 @@ export class ByronEBBBody
         const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor ).toBuffer();
         return ByronEBBBody.fromCborObj( Cbor.parse( bytes ), bytes );
     }
-
     static fromCborObj( cbor: CborObj, _originalBytes?: Uint8Array | undefined ): ByronEBBBody
     {
         if(!(
             cbor instanceof CborArray &&
-            cbor.array.length === 1
+            cbor.array.length >= 1
         )) throw new Error("invalid cbor for `ByronEBBBody`");
 
-        const cborStakeholderHashes = cbor.array;
+        const [ cborStakeholderHashes ] = cbor.array;
 
         if(!(
             cborStakeholderHashes instanceof CborArray &&
@@ -112,7 +97,7 @@ export class ByronEBBBody
             // the first slot is uint(0) for EBB and uint(1) for normal byron blocks
             hash: blake2b_256( new Uint8Array([ 0x82, 0x00, ..._originalBytes ]) ) as U8Arr32,
             isEBB: true,
-            stakeholderHashes: cborStakeholderHashes.map(( hash: CborBytes ) => ( hash.bytes as StakeholderId ))
+            stakeholderHashes: cborStakeholderHashes.array.map(( hash: CborBytes ) => ( hash.bytes as StakeholderId )) as StakeholderId[]
         });
 
         if( originalWerePresent )
@@ -123,4 +108,5 @@ export class ByronEBBBody
 
         return hdr;
     }
+
 }

@@ -1,4 +1,4 @@
-https://github.com/IntersectMBO/cardano-ledger/blob/master/eras/byron/cddl-spec/byron.cddl
+; refers to https://github.com/IntersectMBO/cardano-ledger/blob/master/eras/byron/cddl-spec/byron.cddl
 
 ; Cardano Byron blockchain CBOR schema
 

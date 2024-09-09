@@ -1,5 +1,5 @@
 import { tryGetByronEBBPoint } from "./tryGetByronPoints/tryGetByronEBBPoint";
-import { tryGetByronNoEBBPoint } from "./tryGetByronPoints/tryGetByronNoEBBPoint";
+import { tryGetByronMainPoint } from "./tryGetByronPoints/tryGetByronMainPoint";
 
 export function tryGetByronPoint ( headerBytes: Uint8Array ) : /**RealPoint**/ | undefined 
 {
@@ -7,7 +7,7 @@ export function tryGetByronPoint ( headerBytes: Uint8Array ) : /**RealPoint**/ |
     let tmpEBB = tryGetByronEBBPoint( headerBytes )
     if ( !( tmpEBB === undefined) ) return tmpEBB;
 
-    let tmpNoEBB = tryGetByronNoEBBPoint( headerBytes )
+    let tmpNoEBB = tryGetByronMainPoint( headerBytes )
     if ( !( tmpNoEBB === undefined) ) return tmpNoEBB;
 
     return undefined;

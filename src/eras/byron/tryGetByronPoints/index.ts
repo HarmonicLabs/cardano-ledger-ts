@@ -1,2 +1,2 @@
 export * from "./tryGetByronEBBPoint";
-export * from "./tryGetByronNoEBBPoint";
+export * from "./tryGetByronMainPoint";
