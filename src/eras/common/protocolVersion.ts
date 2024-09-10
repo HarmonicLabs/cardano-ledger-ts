@@ -1,9 +1,24 @@
-import { CborArray, CborObj, CborUInt } from "@harmoniclabs/cbor"
+import { CborArray, CborObj, CborUInt } from "@harmoniclabs/cbor";
+import { isObject } from "@harmoniclabs/obj-utils";
+import { canBeUInteger } from "../../utils/ints";
 
 export interface IProtocolVersion {
     major: number,
     minor: number
 }
+
+export function isIProtocolVersion( ppv: any ): ppv is IProtocolVersion
+{
+    return (
+        Array.isArray( ppv ) &&
+        ppv.length >= 2 &&
+        canBeUInteger( ppv[0] ) && canBeUInteger( ppv[1] )
+    ) || (
+        isObject( ppv ) &&
+        typeof (ppv as any).major === "number" &&
+        typeof (ppv as any).minor === "number"
+    );
+} 
 
 /**
  * **ONLY BABBAGE AND ABOVE**  

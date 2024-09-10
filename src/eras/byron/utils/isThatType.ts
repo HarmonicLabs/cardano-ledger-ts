@@ -1,5 +1,5 @@
-import { EpochId, Difficulty, ProtocolMagic, SlotNo, DlgProof, UpdProof, Signature, Issuer, Delegate, PubKey, ExtraProof, BlockId, StakeholderId, AddressId, TxId, VssPubKey, VssEnc, VssSec, VssDec, UpdId, Attributes } from "./types";
-import { isHash, isHash28, isHash32, isWord32, isWord64 } from "../../../utils/isThatType";
+import { EpochId, Difficulty, ProtocolMagic, DlgProof, UpdProof, Signature, Issuer, Delegate, PubKey, ExtraProof, BlockId, StakeholderId, AddressId, TxId, VssPubKey, VssEnc, VssSec, VssDec, UpdId, Attributes } from "./types";
+import { isHash, isWord32, isWord64 } from "../../../utils/isThatType";
 
 // Uint8Array
 
@@ -52,44 +52,44 @@ export function isVssEnc( stuff: VssEnc ): stuff is VssEnc
 
 export function isAddressId( stuff: AddressId ): stuff is AddressId 
 {
-    return isHash28( stuff );
+    return isHash( stuff, 28 );
 }
 
 export function isStakeholderId( stuff: StakeholderId ): stuff is StakeholderId 
 {
-    return isHash28( stuff );
+    return isHash( stuff, 28 );
 }
 
 // U8Arr32
 
 export function isTxId( stuff: TxId ): stuff is TxId 
 {
-    return isHash32( stuff );
+    return isHash( stuff, 28 );
 }
 
 export function isDlgProof( stuff: DlgProof ): stuff is DlgProof 
 {
-    return isHash32( stuff );
+    return isHash( stuff, 32 );
 }
 
 export function isUpdProof( stuff: UpdProof ): stuff is UpdProof 
 {
-    return isHash32( stuff );
+    return isHash( stuff, 32 );
 }
 
 export function isExtraProof( stuff: ExtraProof ): stuff is ExtraProof 
 {
-    return isHash32( stuff );
+    return isHash( stuff, 32 );
 }
 
 export function isBlockId( stuff: BlockId ): stuff is BlockId 
 {
-    return isHash32( stuff );
+    return isHash( stuff, 32 );
 }
 
 export function isUpdId( stuff: UpdId ): stuff is UpdId 
 {
-    return isHash32( stuff );
+    return isHash( stuff, 32 );
 }
 
 
@@ -118,11 +118,6 @@ export function isDifficulty( stuff: Difficulty ): stuff is Difficulty
 }
 
 export function isEpochId( stuff: EpochId ): stuff is EpochId 
-{
-    return isBigInt( stuff )? isWord64( stuff ) : false;
-}
-
-export function isSlotNo( stuff: SlotNo ): stuff is SlotNo 
 {
     return isBigInt( stuff )? isWord64( stuff ) : false;
 }

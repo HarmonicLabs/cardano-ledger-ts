@@ -1,13 +1,14 @@
-import { isBlockId, isDelegate, isDifficulty, isDlgProof, isEpochId, isExtraProof, isIssuer, isProtocolMagic, isPubKey, isSignature, isSlotNo, isUpdProof } from "../utils/isThatType";
-import { Attributes, BlockId, Delegate, Difficulty, DlgProof, EpochId, ExtraProof, Issuer, ProtocolMagic, PubKey, Signature, SlotNo, UpdProof } from "../utils/types";
+import { isBlockId, isDelegate, isDifficulty, isDlgProof, isEpochId, isExtraProof, isIssuer, isProtocolMagic, isPubKey, isSignature, isUpdProof } from "../utils/isThatType";
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborMap, CborObj, CborString, CborText, CborUInt, forceCborString, isCborObj } from "@harmoniclabs/cbor";
-import { isBoolean, isByte, isHash32, isWord16, isWord32 } from "../../../utils/isThatType";
-import { Byte, U8Arr32, Word16, Word32 } from "../../../utils/types";
+import { Attributes, BlockId, Delegate, Difficulty, DlgProof, EpochId, ExtraProof, Issuer, ProtocolMagic, PubKey, Signature, UpdProof } from "../utils/types";
+import { isBoolean, isByte, isHash32, isSlotNo, isWord16, isWord32 } from "../../../utils/isThatType";
+import { Byte, SlotNo, U8Arr32, Word16, Word32 } from "../../../utils/types";
 import { attributesMapToCborObj } from "../utils/objToCbor";
 import { cborMapToAttributes } from "../utils/cbortoObj";
 import { IHeader } from "../../../interfaces/IHeader";
 import { blake2b_256 } from "../../../utils/crypto";
 import { isObject } from "@harmoniclabs/obj-utils";
+import { Hash, Hash32 } from "../../../hashes";
 
 // txproof
 
@@ -703,7 +704,7 @@ export function headerExtraFromCborObj( cbor: CborObj ): IByronHeaderExtra
 export interface IByronMainHeader extends IHeader
 {
     readonly protocolMagic: ProtocolMagic,
-    readonly prevBlock: BlockId,
+    readonly prevBlock: Hash32,
     readonly bodyProof: IByronBodyProof,
     readonly consensusData: IByronConsData,
     readonly extraData: IByronHeaderExtra
@@ -727,17 +728,18 @@ export function isIByronMainHeader( stuff: any ): stuff is IByronMainHeader
 export class ByronMainHeader
     implements IByronMainHeader
 {
-    readonly hash: U8Arr32;
+    readonly hash: Hash32;
     readonly slotNo: SlotNo;
-    readonly isEBB: boolean;
     
     readonly protocolMagic: ProtocolMagic;
-    readonly prevBlock: BlockId;
+    readonly prevBlock: Hash32;
     readonly bodyProof: IByronBodyProof;
     readonly consensusData: IByronConsData;
     readonly extraData: IByronHeaderExtra;
 
     readonly cborBytes?: Uint8Array;
+
+    readonly isEBB: boolean;
 
     constructor( stuff: any )
     {
@@ -760,7 +762,7 @@ export class ByronMainHeader
     {
         return new CborArray([
             new CborUInt( this.protocolMagic ),
-            new CborBytes( this.prevBlock ),
+            this.prevBlock.toCborObj(),
             bodyProofToCborObj( this.bodyProof ),
             consDataToCborObj( this.consensusData ),
             headerExtraToCborObj( this.extraData )

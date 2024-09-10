@@ -1,5 +1,7 @@
 import { CborObj, CborBytes, CborUInt, CborArray } from "@harmoniclabs/cbor";
+import { isBigInt, isHash } from "../../utils/isThatType";
 import { U8Arr32, U8Arr } from "../../utils/types";
+import { canBeHash32 } from "../../hashes";
 
 /**
  * from the shelley to the alonzo eras the `operational_cert` is "inlined" in the header
@@ -14,6 +16,17 @@ export interface IOperationalCert {
     sequenceNumber: bigint,
     kesPeriod: bigint,
     signature: U8Arr<64>
+}
+
+export function isIOperationalCert( stuff: any ): stuff is IOperationalCert
+{
+    return (
+        stuff instanceof Object &&
+        canBeHash32( stuff.hotVkey ) &&
+        isBigInt( stuff.sequenceNumber ) &&
+        isBigInt( stuff.kesPeriod ) &&
+        isHash( 64, stuff.signature )
+    );
 }
 
 /**

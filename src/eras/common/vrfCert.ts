@@ -1,10 +1,21 @@
 import { CborArray, CborBytes, CborObj } from "@harmoniclabs/cbor";
 import { U8Arr80 } from "../../utils/types";
+import { isHash, isHash80 } from "../../utils/isThatType";
 
 export type VrfCert = [
     Uint8Array,
     U8Arr80
 ];
+
+export function isVrfCert( stuff: any ): stuff is VrfCert
+{
+    return(
+        Array.isArray( stuff ) &&
+        stuff.length === 2 &&
+        isHash( stuff[0] ) &&
+        isHash80( stuff[1] )
+    );
+}
 
 export function vrfCertToCborObj( vrfCert: VrfCert ): CborArray
 {

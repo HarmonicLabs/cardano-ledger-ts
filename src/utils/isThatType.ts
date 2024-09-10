@@ -1,28 +1,16 @@
-const hexChars = Object.freeze(Array.from("0123456789abcdef"));
+const hexChars = Object.freeze( Array.from( "0123456789abcdef" ) );
 
 export function isBoolean( stuff: any ): boolean 
 {
     return( typeof stuff === "boolean" );
 }
 
-export function isHash( stuff: any ): boolean 
+export function isHash( stuff: any, n?: number ): boolean 
 {
-    return( stuff instanceof Uint8Array );
-}
-
-export function isHash32( stuff: any ): boolean 
-{
-    return( 
-        isHash( stuff ) &&
-        stuff.length === 32
-    );
-}
-
-export function isHash28( stuff: any ): boolean 
-{
-    return( 
-        isHash( stuff ) &&
-        stuff.length === 28
+    if( n === undefined ) return stuff instanceof Uint8Array;
+    else return( 
+        stuff instanceof Uint8Array &&
+        stuff.length === n
     );
 }
 
@@ -78,4 +66,9 @@ export function isWord64( n: number | bigint ): boolean
         Number.isSafeInteger( n ) && 
         ( n >= 0 && n <= 18446744073709551615 ) 
     );
+}
+
+export function isBigInt( stuff: any ): boolean
+{
+    return ( typeof stuff === "bigint" );
 }

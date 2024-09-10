@@ -4,7 +4,7 @@ import { AlonzoHeader } from "../alonzo/AlonzoHeader";
 import { BabbageHeader } from "../babbage/BabbageHeader";
 import { ByronMainHeader } from "../byron/headers/ByronMainHeader";
 import { MaryHeader } from "../mary/MaryHeader";
-import { ShelleyHeader } from "../shelley";
+import { ShelleyHeader } from "../shelley/header";
 import { roDescr } from "../../utils/roDescr";
 import { getEraIdxAndHeaderBytes } from "./getEraIdxAndHeaderBytes";
 import { ByronEBBHeader } from "../byron/headers/ByronEBBHeader";

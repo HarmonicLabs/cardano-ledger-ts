@@ -2,7 +2,7 @@ import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborU
 import { U8Arr, U8Arr32 } from "../byron/utils/types";
 import { blake2b_256 } from "../../utils/crypto";
 import { IOperationalCert, opCertToCborObjElems } from "../common/operationalCert";
-import { IShelleyHeader } from "../shelley";
+import { IShelleyHeader } from "../shelley/header";
 import { VrfCert, vrfCertFromCborObj, vrfCertToCborObj } from "../common/vrfCert";
 import { getCborBytesDescriptor } from "../../utils/getCborBytesDescriptor";
 import { roDescr } from "../../utils/roDescr";

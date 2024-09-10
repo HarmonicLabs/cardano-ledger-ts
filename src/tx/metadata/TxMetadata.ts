@@ -9,6 +9,17 @@ export type ITxMetadata = {
     [metadatum_label: number | string]: TxMetadatum 
 }
 
+export function isITxMetadata( stuff: any ): stuff is ITxMetadata
+{
+    return(
+        typeof stuff === "object" &&
+        Object.keys( stuff ).every( k => 
+            ( typeof k === "number" || typeof k === "string" ) &&
+            isTxMetadatum( stuff[k] )
+        )
+    );
+}
+
 type ITxMetadataStr = { [metadatum_label: string]: TxMetadatum };
 
 export class TxMetadata

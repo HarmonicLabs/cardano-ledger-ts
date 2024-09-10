@@ -1,14 +1,15 @@
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborMap, CborObj, CborString, CborUInt, forceCborString } from "@harmoniclabs/cbor";
-import { isAttributes, isBlockId, isDifficulty, isEpochId, isProtocolMagic, isSlotNo } from "../utils/isThatType";
-import { Attributes, BlockId, Difficulty, EpochId, ProtocolMagic, SlotNo } from "../utils/types";
-import { isBoolean, isHash32 } from "../../../utils/isThatType";
+import { isAttributes, isBlockId, isDifficulty, isEpochId, isProtocolMagic } from "../utils/isThatType";
+import { Attributes, Difficulty, EpochId, ProtocolMagic } from "../utils/types";
+import { isBoolean, isSlotNo } from "../../../utils/isThatType";
 import { attributesMapToCborObj } from "../utils/objToCbor";
 import { cborMapToAttributes } from "../utils/cbortoObj";
+import { SlotNo, U8Arr32 } from "../../../utils/types";
 import { IHeader } from "../../../interfaces/IHeader";
+import { canBeHash32, Hash32 } from "../../../hashes";
 import { blake2b_256 } from "../../../utils/crypto";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { logger } from "../../../utils/logger";
-import { U8Arr32 } from "../../../utils/types";
 
 // ebbcons
 
@@ -63,7 +64,7 @@ export function consensusDataFromCborObj( cbor: CborObj ): IByronConsensusData
 export interface IByronEBBHeader extends IHeader 
 {
     readonly protocolMagic: ProtocolMagic,
-    readonly prevBlock: BlockId,
+    readonly prevBlock: Hash32,
     readonly bodyProof: U8Arr32,
     readonly consensusData: IByronConsensusData,
     readonly extraData: Attributes
@@ -72,12 +73,12 @@ export interface IByronEBBHeader extends IHeader
 export function isIByronEBBHeader( stuff: any ): stuff is IByronEBBHeader 
 {
     return (
-        isHash32( stuff.hash ) &&
+        canBeHash32( stuff.hash ) &&
         isSlotNo( stuff.slotNo ) &&
         ( isBoolean( stuff.isEBB ) && stuff.isEBB ) &&
         isProtocolMagic( stuff.protocolMagic ) &&
         isBlockId( stuff.prevBlock ) &&
-        isHash32( stuff.bodyProof ) &&
+        canBeHash32( stuff.bodyProof ) &&
         isIByronConsensusData( stuff.consensusData ) &&
         isAttributes( stuff.extraData )
     );
@@ -86,17 +87,18 @@ export function isIByronEBBHeader( stuff: any ): stuff is IByronEBBHeader
 export class ByronEBBHeader
     implements IByronEBBHeader
 {
-    readonly hash: U8Arr32;
+    readonly hash: Hash32;
     readonly slotNo: SlotNo;
-    readonly isEBB: boolean;
 
     readonly protocolMagic: ProtocolMagic;
-    readonly prevBlock: BlockId;
+    readonly prevBlock: Hash32;
     readonly bodyProof: U8Arr32;
     readonly consensusData: IByronConsensusData;
     readonly extraData: Attributes;
 
     readonly cborBytes?: U8Arr32;
+
+    readonly isEBB: boolean;
     
     constructor( stuff: any )
     {
@@ -120,7 +122,7 @@ export class ByronEBBHeader
     {
         return new CborArray([
             new CborUInt( this.protocolMagic ),
-            new CborBytes( this.prevBlock ),
+            this.prevBlock.toCborObj(),
             new CborBytes( this.bodyProof ),
             consensusDataToCborObj( this.consensusData ),
             new CborArray([ attributesMapToCborObj( this.extraData ) ])

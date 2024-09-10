@@ -24,6 +24,5 @@ export type ProtocolMagic = number;     // u32
 
 export type Difficulty = bigint;        // u64
 export type EpochId = bigint;           // u64
-export type SlotNo = bigint;            // u64
 
 export type Attributes = Map<any, any>;
