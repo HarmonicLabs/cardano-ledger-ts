@@ -1,5 +1,5 @@
 import { isBigInt, isWord64 } from "../../../utils/isThatType";
-import { SlotNo, BlockNo, BlockBodySize, TransactionIndex } from "./types";
+import { SlotNo, BlockNo, BlockBodySize, TransactionIndexN } from "./types";
 
 export function isSlotNo( stuff: SlotNo ): stuff is SlotNo 
 {
@@ -16,7 +16,7 @@ export function isBlockBodySize( stuff: BlockBodySize ): stuff is BlockBodySize
     return isBigInt( stuff )? isWord64( stuff ) : false;
 }
 
-function isValidTransactionIndex(value: number): value is TransactionIndex {
+function isValidTransactionIndexN(value: number): value is TransactionIndexN {
     return(
         Number.isInteger(value) && 
         ( value >= 0 && value <= 65535 )
