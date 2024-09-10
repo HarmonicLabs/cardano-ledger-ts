@@ -1,4 +1,5 @@
 ; refers to https://github.com/IntersectMBO/cardano-ledger/blob/master/eras/shelley/impl/cddl-files/shelley.cddl
+; and https://github.com/IntersectMBO/cardano-ledger/blob/master/eras/shelley/impl/cddl-files/crypto.cddl
 ; Shelley Types
 
 block =
