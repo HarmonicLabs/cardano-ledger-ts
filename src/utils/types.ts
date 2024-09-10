@@ -7,3 +7,9 @@ export type Byte = number;              // u8
 export type Word16 = number;            // u16
 export type Word32 = number;            // u32
 export type Word64 = bigint;            // u64
+
+export type BlockNo = bigint;
+export type SlotNo = bigint;
+export type BlockBodySize = bigint;
+
+export type TransactionIndexN = number;

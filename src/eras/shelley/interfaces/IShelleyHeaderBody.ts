@@ -1,10 +1,10 @@
 import { IProtocolVersion, isIProtocolVersion, protocolVersionToCborObj, protocolVersionFromCborObj } from "../../common/protocolVersion";
 import { IOperationalCert, isIOperationalCert, opCertFromCborObj, opCertToCborObj } from "../../common/operationalCert";
 import { VrfCert, isVrfCert, vrfCertFromCborObj, vrfCertToCborObj } from "../../common/vrfCert";
-import { isBlockNo, isSlotNo, isBlockBodySize } from "../utils/isThatType";
+import { isBlockNo, isSlotNo, isBlockBodySize } from "../../../utils/isThatType";
+import { BlockNo, SlotNo, BlockBodySize } from "../../../utils/types";
 import { CborArray, CborObj, CborUInt } from "@harmoniclabs/cbor";
 import { Hash32, VRFKeyHash, canBeHash32 } from "../../../hashes";
-import { BlockBodySize, BlockNo, SlotNo } from "../utils/types";
 
 export interface IShelleyHeaderBody {
     readonly blockNo: BlockNo;

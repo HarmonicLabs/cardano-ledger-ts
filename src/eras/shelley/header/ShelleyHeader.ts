@@ -1,11 +1,10 @@
 import { headerBodyFromCborObj, headerBodyToCborObj, IShelleyHeaderBody, isIShelleyHeaderBody } from "../interfaces/IShelleyHeaderBody";
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, forceCborString } from "@harmoniclabs/cbor";
 import { canBeHash32, Hash32, Signature } from "../../../hashes";
+import { SlotNo, U8Arr32 } from "../../../utils/types";
 import { IHeader } from "../../../interfaces/IHeader";
+import { isSlotNo } from "../../../utils/isThatType";
 import { blake2b_256 } from "../../../utils/crypto";
-import { isSlotNo } from "../utils/isThatType";
-import { U8Arr32 } from "../../../utils/types";
-import { SlotNo } from "../utils/types";
 
 export interface IShelleyHeader extends IHeader {
     readonly headerBody: IShelleyHeaderBody;

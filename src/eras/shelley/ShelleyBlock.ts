@@ -2,7 +2,7 @@ import { CborString, Cbor, CborArray, CanBeCborString, forceCborString, CborObj,
 import { TxBody, TxWitnessSet, TxMetadata, isITxBody, isITxWitnessSet, isITxMetadata } from "../../tx";
 import { isIShelleyHeader, ShelleyHeader } from "./header/ShelleyHeader";
 import { mapToCborObj, mapFromCborObj } from "../../utils/mapFromToCbor";
-import { TransactionIndexN } from "./utils/types";
+import { TransactionIndexN } from "../../utils/types";
 import { isMap } from "util/types";
 
 export interface IShelleyBlock
