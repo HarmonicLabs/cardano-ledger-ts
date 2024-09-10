@@ -1,1 +1,1 @@
-export * from "./AllegraHeader";
+export * from "./AllegraBlock";
