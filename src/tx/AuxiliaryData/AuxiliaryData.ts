@@ -16,6 +16,23 @@ export interface IAuxiliaryData {
     plutusV2Scripts?: (PlutusScriptJsonFormat<ScriptType.PlutusV2 | "PlutusScriptV2"> | Script<ScriptType.PlutusV2>)[];
 }
 
+export function isIAuxiliaryData( stuff: any ): stuff is IAuxiliaryData
+{
+    return(
+        ( stuff.metadata === undefined || stuff.metadata instanceof TxMetadata ) &&
+        ( stuff.nativeScripts === undefined || 
+            Array.isArray( stuff.nativeScripts ) &&
+            stuff.nativeScripts.every( nativeScriptFromCborObj )
+        ) &&
+        ( stuff.plutusV1Scripts === undefined || 
+            Array.isArray( stuff.plutusV1Scripts )
+        ) &&
+        ( stuff.plutusV2Scripts === undefined || 
+            Array.isArray( stuff.plutusV2Scripts )
+        )
+    );
+}
+
 function scriptArrToCbor( scripts: Script[] ): CborArray
 {
     return new CborArray(

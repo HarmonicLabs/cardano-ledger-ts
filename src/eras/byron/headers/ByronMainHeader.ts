@@ -1,7 +1,7 @@
 import { isBlockId, isDelegate, isDifficulty, isDlgProof, isEpochId, isExtraProof, isIssuer, isProtocolMagic, isPubKey, isSignature, isUpdProof } from "../utils/isThatType";
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborMap, CborObj, CborString, CborText, CborUInt, forceCborString, isCborObj } from "@harmoniclabs/cbor";
 import { Attributes, BlockId, Delegate, Difficulty, DlgProof, EpochId, ExtraProof, Issuer, ProtocolMagic, PubKey, Signature, UpdProof } from "../utils/types";
-import { isBoolean, isByte, isHash32, isSlotNo, isWord16, isWord32 } from "../../../utils/isThatType";
+import { isBoolean, isByte, isHash, isSlotNo, isWord16, isWord32 } from "../../../utils/isThatType";
 import { Byte, SlotNo, U8Arr32, Word16, Word32 } from "../../../utils/types";
 import { attributesMapToCborObj } from "../utils/objToCbor";
 import { cborMapToAttributes } from "../utils/cbortoObj";
@@ -23,8 +23,8 @@ export function isIByronTxProof( stuff: any ): stuff is IByronTxProof
     return(
         isObject( stuff ) &&
         isWord32( stuff.word32 ) &&
-        isHash32( stuff.firstHash ) &&
-        isHash32( stuff.secondHash )
+        isHash( stuff.firstHash, 32 ) &&
+        isHash( stuff.secondHash, 32 )
     );
 }
 
@@ -76,8 +76,8 @@ export function isIByronSscProof( stuff: any ): stuff is IByronSscProof
     return(
         isObject( stuff ) &&
         [0, 1, 2, 3].includes( stuff.type ) &&
-        isHash32( stuff.firstHash ) &&
-        ( stuff.type === 3 || isHash32(stuff.secondHash) )
+        isHash( stuff.firstHash, 32 ) &&
+        ( stuff.type === 3 || isHash( stuff.secondHash, 32 ) )
     );
 }
 
@@ -714,7 +714,7 @@ export function isIByronMainHeader( stuff: any ): stuff is IByronMainHeader
 {
     return ( 
         isObject( stuff ) &&
-        isHash32( stuff.hash ) &&
+        isHash( stuff.hash, 32 ) &&
         isSlotNo( stuff.slotNo ) &&
         ( isBoolean( stuff.isEBB ) && !stuff.isEBB ) &&
         isProtocolMagic( stuff.protocolMagic ) &&

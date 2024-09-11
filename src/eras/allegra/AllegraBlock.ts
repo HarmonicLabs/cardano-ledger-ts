@@ -1,5 +1,5 @@
 import { CborObj, CborString, Cbor, CborArray, CanBeCborString, forceCborString, CborMap } from "@harmoniclabs/cbor";
-import { TxBody, TxWitnessSet, TxMetadata, isITxBody, isITxWitnessSet, isITxMetadata } from "../../tx";
+import { TxBody, TxWitnessSet, AuxiliaryData, isITxBody, isITxWitnessSet, isIAuxiliaryData } from "../../tx";
 import { mapToCborObj, mapFromCborObj } from "../../utils/mapFromToCbor";
 import { AllegraHeader, isIAllegraHeader } from "./header";
 import { TransactionIndexN } from "../../utils/types";
@@ -10,7 +10,7 @@ export interface IAllegraBlock
     header: AllegraHeader;
     transactionBodies: TxBody[];
     transactionWitnessSets: TxWitnessSet[];
-    transactionMetadatas: Map<TransactionIndexN, TxMetadata>;
+    transactionMetadatas: Map<TransactionIndexN, AuxiliaryData>;
 }
 
 export function isIAllegraBlock( stuff: any ): stuff is IAllegraBlock
@@ -23,15 +23,15 @@ export function isIAllegraBlock( stuff: any ): stuff is IAllegraBlock
         stuff.transactionWitnessSets.every( isITxWitnessSet ) &&
         stuff.transactionMetadatas instanceof Map &&
         isMap( stuff.transactionMetadatas ) &&
-        Array.from( stuff.transactionMetadatas.values() ).every( isITxMetadata )
+        Array.from( stuff.transactionMetadatas.values() ).every( isIAuxiliaryData )
     );
 }
 
-function getMapFromCborObj( mapToBeFixed: Map<TransactionIndexN, CborObj> ): Map<TransactionIndexN, TxMetadata> {
-    const fixedMap = new Map<TransactionIndexN, TxMetadata>();
+function getMapFromCborObj( mapToBeFixed: Map<TransactionIndexN, CborObj> ): Map<TransactionIndexN, AuxiliaryData> {
+    const fixedMap = new Map<TransactionIndexN, AuxiliaryData>();
 
     mapToBeFixed.forEach(( value, key ) => {
-        fixedMap.set( key, TxMetadata.fromCborObj( value ) );
+        fixedMap.set( key, AuxiliaryData.fromCborObj( value ) );
     });
 
     return fixedMap;
@@ -43,7 +43,7 @@ export class AllegraBlock
     readonly header: AllegraHeader;
     readonly transactionBodies: TxBody[];
     readonly transactionWitnessSets: TxWitnessSet[];
-    readonly transactionMetadatas: Map<TransactionIndexN, TxMetadata>;
+    readonly transactionMetadatas: Map<TransactionIndexN, AuxiliaryData>;
 
     constructor( stuff: any )
     {
@@ -105,7 +105,7 @@ export class AllegraBlock
             header: AllegraHeader.fromCborObj( cborHeader ) as AllegraHeader,
             transactionBodies: cborTransactionBodies.array.map(( tCborBody ) => ( TxBody.fromCborObj( tCborBody ) )) as TxBody[],
             transactionWitnessSets: cborTransactionWitnessSets.array.map(( twCborSet ) => ( TxWitnessSet.fromCborObj( twCborSet ) )) as TxWitnessSet[],
-            transactionMetadatas: getMapFromCborObj( mapFromCborObj( cborTransactionMetadatas ) ) as Map<TransactionIndexN, TxMetadata>
+            transactionMetadatas: getMapFromCborObj( mapFromCborObj( cborTransactionMetadatas ) ) as Map<TransactionIndexN, AuxiliaryData>
         });
     }
 

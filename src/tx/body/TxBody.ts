@@ -105,6 +105,7 @@ export function isITxBody( body: Readonly<object> ): body is ITxBody
 export class TxBody
     implements ITxBody, ToCbor, ToJson
 {
+    // shelley
     readonly inputs!: [ UTxO, ...UTxO[] ];
     readonly outputs!: TxOut[];
     readonly fee!: bigint;
@@ -113,7 +114,9 @@ export class TxBody
     readonly withdrawals?: TxWithdrawals;
     readonly protocolUpdate?: LegacyPPUpdateProposal; // babbage only; removed in conway
     readonly auxDataHash?: AuxiliaryDataHash; // hash 32
+    //allegra
     readonly validityIntervalStart?: bigint;
+    // mary
     readonly mint?: Value;
     readonly scriptDataHash?: ScriptDataHash; // hash 32
     readonly collateralInputs?: UTxO[];
