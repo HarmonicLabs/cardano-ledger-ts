@@ -118,10 +118,12 @@ export class TxBody
     readonly validityIntervalStart?: bigint;
     // mary
     readonly mint?: Value;
+    // alonzo
     readonly scriptDataHash?: ScriptDataHash; // hash 32
     readonly collateralInputs?: UTxO[];
     readonly requiredSigners?: PubKeyHash[];
     readonly network?: NetworkT;
+    
     readonly collateralReturn?: TxOut;
     readonly totCollateral?: bigint; // Coin
     readonly refInputs?: UTxO[];

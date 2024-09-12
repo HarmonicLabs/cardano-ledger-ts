@@ -16,7 +16,7 @@ export interface IMaryHeaderBody {
     readonly blockBodySize: BlockBodySize;
     readonly blockBodyHash: Hash32;
     readonly operationalCert: IOperationalCert;
-    readonly protocolVersion: IProtocolVersion;
+    readonly protocolVersion: IProtocolVersion; // min: 1, max: 5
 
     // must be at the bottom to preserve object shape with other eras headers <- (?????)
     readonly vrfVkey: VRFKeyHash;

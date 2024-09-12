@@ -5,7 +5,7 @@ import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../utils/ints";
 import { CostModels, costModelsFromCborObj, costModelsToCborObj, costModelsToJson, defaultV1Costs, defaultV2Costs, defaultV3Costs, isCostModels } from "@harmoniclabs/cardano-costmodels-ts";
 import { ExBudget, ExBudgetJson } from "@harmoniclabs/plutus-machine";
 import { freezeAll, isObject } from "@harmoniclabs/obj-utils";
-import { Rational, cborFromRational, isRational, isRationalOrUndefined, tryCborFromRational } from "./Rational";
+import { Rational, isRational, isRationalOrUndefined, tryCborFromRational } from "./Rational";
 import { PParamsPoolVotingThresholds, isPParamsPoolVotingThresholds, poolVotingThresholdsToCborObj, tryGetPParamsPoolVotingThresholdsFromCborObj } from "./PParamsPoolVotingThresholds";
 import { PParamsDrepVotingThresholds, drepVotingThresholdsToCborObj, isPParamsDrepVotingThresholds, tryGetPParamsDrepVotingThresholdsFromCborObj } from "./PParamsDrepVotingThresholds";
 import { IProtocolVerision, isIProtocolVersion, protocolVersionToCborObj, tryIProtocolVersionFromCborObj } from "./protocolVersion";
@@ -25,8 +25,11 @@ export interface ProtocolParameters {
     poolPledgeInfluence: Rational,
     monetaryExpansion: Rational,
     treasuryCut: Rational,
+    // (12) decentralizationConstant (???)
+    // (13) extraEntropy (???)   
     /** @deprecated protocolVersion removed in conway */
     protocolVersion?: IProtocolVerision,
+    // alonzo
     minPoolCost: Coin,
     utxoCostPerByte: Coin,
     costModels: CostModels,

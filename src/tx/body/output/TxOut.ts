@@ -16,6 +16,7 @@ import { ToDataVersion } from "../../../toData/defaultToDataVersion";
 export interface ITxOut {
     address: Address | AddressStr,
     value: Value | IValue,
+    // alonzo
     datum?: Hash32 | Data,
     refScript?: Script
 }
@@ -40,6 +41,7 @@ export class TxOut
 {
     readonly address!: Address
     readonly value!: Value
+    // alonzo
     readonly datum?: Hash32 | Data
     readonly refScript?: Script
 

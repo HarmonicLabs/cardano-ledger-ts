@@ -90,9 +90,9 @@ export function isBlockBodySize( stuff: BlockBodySize ): stuff is BlockBodySize
     return isBigInt( stuff )? isWord64( stuff ) : false;
 }
 
-function isValidTransactionIndexN(value: number): value is TransactionIndexN {
+export function isTransactionIndexN( value: number ): value is TransactionIndexN {
     return(
-        Number.isInteger(value) && 
+        Number.isInteger( value ) && 
         ( value >= 0 && value <= 65535 )
     ); 
 }

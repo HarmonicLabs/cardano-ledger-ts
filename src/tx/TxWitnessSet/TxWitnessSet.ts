@@ -87,9 +87,11 @@ export class TxWitnessSet
     readonly vkeyWitnesses?: VKeyWitness[];
     readonly nativeScripts?: Script<ScriptType.NativeScript>[];
     readonly bootstrapWitnesses?: BootstrapWitness[];
+    // alonzo
     readonly plutusV1Scripts?: Script<ScriptType.PlutusV1>[];
     readonly datums?: Data[];
     readonly redeemers?: TxRedeemer[];
+
     readonly plutusV2Scripts?: Script<ScriptType.PlutusV2>[];
     readonly plutusV3Scripts?: Script<ScriptType.PlutusV3>[];
     
