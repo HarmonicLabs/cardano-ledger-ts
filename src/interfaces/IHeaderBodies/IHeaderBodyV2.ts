@@ -23,7 +23,7 @@ export interface IHeaderBodyV2 {
     readonly blockBodySize: BlockBodySize;
     readonly blockBodyHash: Hash32;
     readonly operationalCert: IOperationalCert;
-    readonly protocolVersion: IProtocolVersion;             // min: 1, max: 10
+    readonly protocolVersion: IProtocolVersion;
 }
 
 export function isIHeaderBodyV2( stuff: any ): stuff is IHeaderBodyV2 
