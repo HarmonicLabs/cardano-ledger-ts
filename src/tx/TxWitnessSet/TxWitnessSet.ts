@@ -84,6 +84,7 @@ export function isITxWitnessSet( set: object ): set is ITxWitnessSet
 export class TxWitnessSet
     implements ITxWitnessSet, ToCbor, ToJson
 {
+    // shelley to mary
     readonly vkeyWitnesses?: VKeyWitness[];
     readonly nativeScripts?: Script<ScriptType.NativeScript>[];
     readonly bootstrapWitnesses?: BootstrapWitness[];
@@ -93,7 +94,7 @@ export class TxWitnessSet
     readonly redeemers?: TxRedeemer[];
     // babbage
     readonly plutusV2Scripts?: Script<ScriptType.PlutusV2>[];
-    
+    // conway
     readonly plutusV3Scripts?: Script<ScriptType.PlutusV3>[];
     
     /*

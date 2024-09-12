@@ -108,11 +108,11 @@ export class TxBody
     // shelley
     readonly inputs!: [ UTxO, ...UTxO[] ];
     readonly outputs!: TxOut[];
-    readonly fee!: bigint;
+    readonly fee!: Coin;
     readonly ttl?: bigint;
     readonly certs?: Certificate[];
     readonly withdrawals?: TxWithdrawals;
-    readonly protocolUpdate?: LegacyPPUpdateProposal; // babbage only; removed in conway
+    readonly protocolUpdate?: LegacyPPUpdateProposal;               // from shelley to babbage; removed in conway
     readonly auxDataHash?: AuxiliaryDataHash;
     //allegra
     readonly validityIntervalStart?: bigint;

@@ -21,13 +21,15 @@ import { IMoveInstantRewardsCert, MoveInstantRewardsCert } from "./MoveInstantRe
 import { CertStakeRegistrationDeleg, ICertStakeRegistrationDeleg } from "./CertStakeRegistrationDeleg";
 
 export type Certificate
+    // shelley to babbage
     = CertStakeRegistration
     | CertStakeDeRegistration
     | CertStakeDelegation
     | CertPoolRegistration
     | CertPoolRetirement
-    | CertGenesisKeyDelegation
-    | MoveInstantRewardsCert
+    | CertGenesisKeyDelegation                  // removed in conway
+    | MoveInstantRewardsCert                    // removed in conway
+    // conway
     | CertRegistrationDeposit
     | CertUnRegistrationDeposit
     | CertVoteDeleg

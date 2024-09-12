@@ -10,10 +10,15 @@ import { assert } from "../../utils/assert";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 
 export interface IAuxiliaryData {
+    // allegra to mary
     metadata?: TxMetadata;
     nativeScripts?: (NativeScript | Script<ScriptType.NativeScript>)[];
+    // alonzo
     plutusV1Scripts?: (PlutusScriptJsonFormat<ScriptType.PlutusV1 | "PlutusScriptV1"> | Script<ScriptType.PlutusV1>)[];
+    // babbage
     plutusV2Scripts?: (PlutusScriptJsonFormat<ScriptType.PlutusV2 | "PlutusScriptV2"> | Script<ScriptType.PlutusV2>)[];
+    // conway
+    plutusV3Scripts?: (PlutusScriptJsonFormat<ScriptType.PlutusV3 | "PlutusScriptV3"> | Script<ScriptType.PlutusV3>)[];
 }
 
 export function isIAuxiliaryData( stuff: any ): stuff is IAuxiliaryData
@@ -29,6 +34,9 @@ export function isIAuxiliaryData( stuff: any ): stuff is IAuxiliaryData
         ) &&
         ( stuff.plutusV2Scripts === undefined || 
             Array.isArray( stuff.plutusV2Scripts )
+        ) &&
+        ( stuff.plutusV3Scripts === undefined || 
+            Array.isArray( stuff.plutusV3Scripts )
         )
     );
 }
@@ -47,6 +55,7 @@ export class AuxiliaryData
     readonly nativeScripts?: Script<ScriptType.NativeScript>[];
     readonly plutusV1Scripts?: Script<ScriptType.PlutusV1>[];
     readonly plutusV2Scripts?: Script<ScriptType.PlutusV2>[];
+    readonly plutusV3Scripts?: Script<ScriptType.PlutusV3>[];
 
     readonly hash!: AuxiliaryDataHash
 
@@ -61,7 +70,8 @@ export class AuxiliaryData
             metadata,
             nativeScripts,
             plutusV1Scripts,
-            plutusV2Scripts
+            plutusV2Scripts,
+            plutusV3Scripts
         } = auxData;
 
         // -------------------------------- native scripts -------------------------------- //
@@ -156,6 +166,32 @@ export class AuxiliaryData
             );
         }
 
+        if( plutusV3Scripts !== undefined )
+            {
+                assert(
+                    Array.isArray( plutusV3Scripts ) &&
+                    plutusV3Scripts.every( script => {
+    
+                        return true;
+                    }),
+                    "invalid plutusV3Scripts field"
+                );
+    
+                defineReadOnlyProperty(
+                    this,
+                    "plutusV3Scripts",
+                    plutusV3Scripts.length === 0 ? undefined : Object.freeze( plutusV3Scripts )
+                );
+            }
+            else
+            {
+                defineReadOnlyProperty(
+                    this,
+                    "plutusV3Scripts",
+                    undefined
+                );
+            }
+
         // --------- hash ---- //
         let _hash: AuxiliaryDataHash = undefined as any;
         definePropertyIfNotPresent(
@@ -209,6 +245,11 @@ export class AuxiliaryData
                 {
                     k: new CborUInt( 3 ),
                     v: scriptArrToCbor( this.plutusV2Scripts )
+                },
+                this.plutusV3Scripts === undefined || this.plutusV3Scripts.length === 0 ? undefined :
+                {
+                    k: new CborUInt( 4 ),
+                    v: scriptArrToCbor( this.plutusV3Scripts )
                 }
             ].filter( elem => elem !== undefined ) as CborMapEntry[])
         )
@@ -248,9 +289,9 @@ export class AuxiliaryData
         ))
         throw new InvalidCborFormatError("AuxiliaryData")
 
-        let fields: (CborObj | undefined)[] = new Array( 4 ).fill( undefined );
+        let fields: (CborObj | undefined)[] = new Array( 5 ).fill( undefined );
 
-        for( let i = 0; i < 4; i++)
+        for( let i = 0; i < 5; i++)
         {
             const { v } = cObj.data.map.find(
                 ({ k }) => k instanceof CborUInt && Number( k.num ) === i
@@ -265,13 +306,15 @@ export class AuxiliaryData
             _metadata,
             _native,
             _pV1,
-            _pV2
+            _pV2,
+            _pV3
         ] = fields;
 
         if(!(
             _native instanceof CborArray &&
             _pV1 instanceof CborArray &&
-            _pV2 instanceof CborArray
+            _pV2 instanceof CborArray &&
+            _pV3 instanceof CborArray
         ))
         throw new InvalidCborFormatError("AuxiliaryData")
 
@@ -297,6 +340,13 @@ export class AuxiliaryData
                         ScriptType.PlutusV2,
                         Cbor.encode( cbor ).toBuffer()
                     )
+                ),
+            plutusV3Scripts: _pV3 === undefined ? undefined :
+                _pV3.array.map( cbor =>
+                    new Script(
+                        ScriptType.PlutusV3,
+                        Cbor.encode( cbor ).toBuffer()
+                    )
                 )
         })
     }
@@ -308,6 +358,7 @@ export class AuxiliaryData
             nativeScripts: this.nativeScripts?.map( s => s.toJson() ),
             plutusV1Scripts: this.plutusV1Scripts?.map( s => s.toJson() ),
             plutusV2Scripts: this.plutusV2Scripts?.map( s => s.toJson() ),
+            plutusV3Scripts: this.plutusV3Scripts?.map( s => s.toJson() )
         }
     }
 }
