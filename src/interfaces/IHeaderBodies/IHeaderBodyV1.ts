@@ -1,28 +1,35 @@
-import { IProtocolVersion, isIProtocolVersion, protocolVersionToCborObj, protocolVersionFromCborObj } from "../../common/protocolVersion";
-import { IOperationalCert, isIOperationalCert, opCertFromCborObj, opCertToCborObj } from "../../common/operationalCert";
-import { VrfCert, isVrfCert, vrfCertFromCborObj, vrfCertToCborObj } from "../../common/vrfCert";
-import { isBlockNo, isSlotNo, isBlockBodySize } from "../../../utils/isThatType";
-import { BlockNo, SlotNo, BlockBodySize } from "../../../utils/types";
-import { CborArray, CborObj, CborUInt } from "@harmoniclabs/cbor";
-import { Hash32, VRFKeyHash, canBeHash32 } from "../../../hashes";
+import { IOperationalCert, isIOperationalCert, opCertToCborObj, opCertFromCborObj } from "../../eras/common/operationalCert";
+import { VrfCert, isVrfCert, vrfCertToCborObj, vrfCertFromCborObj } from "../../eras/common/vrfCert";
+import { IProtocolVersion, protocolVersionFromCborObj } from "../../eras/common/protocolVersion";
+import { isBlockNo, isSlotNo, isBlockBodySize } from "../../utils/isThatType";
+import { isIProtocolVersion, protocolVersionToCborObj } from "../../ledger";
+import { BlockNo, SlotNo, BlockBodySize } from "../../utils/types";
+import { CborArray, CborUInt, CborObj } from "@harmoniclabs/cbor";
+import { Hash32, VRFKeyHash, canBeHash32 } from "../../hashes";
 
-export interface IShelleyHeaderBody {
+// header body interface from shelley to alonzo
+
+// protocolVersion maxs e mins:
+// shelley -> min: 1, max: 3
+// allegra -> min: 1, max: 5
+// mary -> min: 1, max: 5
+// alonzo -> min: 1, max: 7
+
+export interface IHeaderBodyV1 {
     readonly blockNo: BlockNo;
     readonly slotNo: SlotNo;
     readonly prevBlock: Hash32;
     readonly issuerVkey: Hash32;
+    readonly vrfVkey: VRFKeyHash;
+    readonly nonceVrf: VrfCert;
     readonly leaderVrf: VrfCert;
     readonly blockBodySize: BlockBodySize;
     readonly blockBodyHash: Hash32;
     readonly operationalCert: IOperationalCert;
-    readonly protocolVersion: IProtocolVersion; // min: 1, max: 3
-
-    // must be at the bottom to preserve object shape with other eras headers <- (?????)
-    readonly vrfVkey: VRFKeyHash;
-    readonly nonceVrf: VrfCert;
+    readonly protocolVersion: IProtocolVersion;
 }
 
-export function isIShelleyHeaderBody( stuff: any ): stuff is IShelleyHeaderBody 
+export function isIHeaderBodyV1( stuff: any ): stuff is IHeaderBodyV1 
 {
     return (
         isBlockNo( stuff.blockNo ) &&
@@ -39,7 +46,7 @@ export function isIShelleyHeaderBody( stuff: any ): stuff is IShelleyHeaderBody
     );
 }
 
-export function headerBodyToCborObj( headerBody: IShelleyHeaderBody ): CborArray
+export function headerBodyToCborObj( headerBody: IHeaderBodyV1 ): CborArray
 {
     return new CborArray([
         new CborUInt( headerBody.blockNo ),
@@ -56,12 +63,12 @@ export function headerBodyToCborObj( headerBody: IShelleyHeaderBody ): CborArray
     ]);
 }
 
-export function headerBodyFromCborObj( cbor: CborObj ): IShelleyHeaderBody
+export function headerBodyFromCborObj( cbor: CborObj ): IHeaderBodyV1
 {
     if(!( 
         cbor instanceof CborArray &&
         cbor.array.length >= 11 
-    )) throw new Error( "invalid cbor format for `IShelleyHeaderBody`" );
+    )) throw new Error( "invalid cbor format for `IIHeaderBodyV1`" );
 
     const [ 
         cborBlockNo,
@@ -89,7 +96,7 @@ export function headerBodyFromCborObj( cbor: CborObj ): IShelleyHeaderBody
         cborBlockBodyHash instanceof CborArray &&
         cborOperationalCert instanceof CborArray &&
         cborProtocolVersion instanceof CborArray
-    )) throw new Error( "invalid cbor format for `IShelleyHeaderBody`" );
+    )) throw new Error( "invalid cbor format for `IIHeaderBodyV1`" );
 
     return {
         blockNo: cborBlockNo.num as BlockNo,

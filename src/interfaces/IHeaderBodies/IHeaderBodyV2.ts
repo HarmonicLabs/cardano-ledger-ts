@@ -1,29 +1,32 @@
-import { IOperationalCert, isIOperationalCert, opCertToCborObj, opCertFromCborObj } from "../../common/operationalCert";
-import { VrfCert, isVrfCert, vrfCertToCborObj, vrfCertFromCborObj } from "../../common/vrfCert";
-import { IProtocolVersion, protocolVersionFromCborObj } from "../../common/protocolVersion";
-import { isBlockNo, isSlotNo, isBlockBodySize } from "../../../utils/isThatType";
-import { isIProtocolVersion, protocolVersionToCborObj } from "../../../ledger";
-import { BlockNo, SlotNo, BlockBodySize } from "../../../utils/types";
+import { IOperationalCert, isIOperationalCert, opCertToCborObj, opCertFromCborObj } from "../../eras/common/operationalCert";
+import { VrfCert, isVrfCert, vrfCertToCborObj, vrfCertFromCborObj } from "../../eras/common/vrfCert";
+import { IProtocolVersion, protocolVersionFromCborObj } from "../../eras/common/protocolVersion";
+import { isBlockNo, isSlotNo, isBlockBodySize } from "../../utils/isThatType";
+import { isIProtocolVersion, protocolVersionToCborObj } from "../../ledger";
+import { BlockNo, SlotNo, BlockBodySize } from "../../utils/types";
 import { CborArray, CborUInt, CborObj } from "@harmoniclabs/cbor";
-import { Hash32, VRFKeyHash, canBeHash32 } from "../../../hashes";
+import { Hash32, VRFKeyHash, canBeHash32 } from "../../hashes";
 
-export interface IAllegraHeaderBody {
+// header body interface from babbage to conway
+
+// protocolVersion maxs e mins:
+// babbage -> min: 1, max: 9
+// conway -> min: 1, max: 10
+
+export interface IHeaderBodyV2 {
     readonly blockNo: BlockNo;
     readonly slotNo: SlotNo;
     readonly prevBlock: Hash32;
     readonly issuerVkey: Hash32;
-    readonly leaderVrf: VrfCert;
+    readonly vrfVkey: VRFKeyHash;
+    readonly vrfResult: VrfCert;
     readonly blockBodySize: BlockBodySize;
     readonly blockBodyHash: Hash32;
     readonly operationalCert: IOperationalCert;
-    readonly protocolVersion: IProtocolVersion; // min: 1, max: 5
-
-    // must be at the bottom to preserve object shape with other eras headers <- (?????)
-    readonly vrfVkey: VRFKeyHash;
-    readonly nonceVrf: VrfCert;
+    readonly protocolVersion: IProtocolVersion;             // min: 1, max: 10
 }
 
-export function isIAllegraHeaderBody( stuff: any ): stuff is IAllegraHeaderBody 
+export function isIHeaderBodyV2( stuff: any ): stuff is IHeaderBodyV2 
 {
     return (
         isBlockNo( stuff.blockNo ) &&
@@ -31,8 +34,7 @@ export function isIAllegraHeaderBody( stuff: any ): stuff is IAllegraHeaderBody
         canBeHash32( stuff.prevBlock ) &&
         canBeHash32( stuff.issuerVkey ) &&
         canBeHash32( stuff.vrfVkey ) &&
-        isVrfCert( stuff.nonceVrf ) &&
-        isVrfCert( stuff.leaderVrf ) &&
+        isVrfCert( stuff.vrfResult ) &&
         isBlockBodySize( stuff.blockBodySize ) &&
         canBeHash32( stuff.blockBodyHash ) &&
         isIOperationalCert( stuff.operationalCert ) &&
@@ -40,7 +42,7 @@ export function isIAllegraHeaderBody( stuff: any ): stuff is IAllegraHeaderBody
     );
 }
 
-export function headerBodyToCborObj( headerBody: IAllegraHeaderBody ): CborArray
+export function headerBodyToCborObj( headerBody: IHeaderBodyV2 ): CborArray
 {
     return new CborArray([
         new CborUInt( headerBody.blockNo ),
@@ -48,8 +50,7 @@ export function headerBodyToCborObj( headerBody: IAllegraHeaderBody ): CborArray
         headerBody.prevBlock.toCborObj(),
         headerBody.issuerVkey.toCborObj(),
         headerBody.vrfVkey.toCborObj(),
-        vrfCertToCborObj( headerBody.nonceVrf ),
-        vrfCertToCborObj( headerBody.leaderVrf ),
+        vrfCertToCborObj( headerBody.vrfResult ),
         new CborUInt( headerBody.blockBodySize ),
         headerBody.blockBodyHash.toCborObj(),
         opCertToCborObj( headerBody.operationalCert ),
@@ -57,12 +58,12 @@ export function headerBodyToCborObj( headerBody: IAllegraHeaderBody ): CborArray
     ]);
 }
 
-export function headerBodyFromCborObj( cbor: CborObj ): IAllegraHeaderBody
+export function headerBodyFromCborObj( cbor: CborObj ): IHeaderBodyV2
 {
     if(!( 
         cbor instanceof CborArray &&
         cbor.array.length >= 11 
-    )) throw new Error( "invalid cbor format for `IAllegraHeaderBody`" );
+    )) throw new Error( "invalid cbor format for `IHeaderBodyV2`" );
 
     const [ 
         cborBlockNo,
@@ -70,8 +71,7 @@ export function headerBodyFromCborObj( cbor: CborObj ): IAllegraHeaderBody
         cborPrevBlock,
         cborIssuerVkey,
         cborVrfVkey,
-        cborNonceVrf,
-        cborLeaderVrf,
+        cborVrfResult,
         cborBlockBodySize,
         cborBlockBodyHash,
         cborOperationalCert,
@@ -84,13 +84,12 @@ export function headerBodyFromCborObj( cbor: CborObj ): IAllegraHeaderBody
         cborPrevBlock instanceof CborArray &&
         cborIssuerVkey instanceof CborArray &&
         cborVrfVkey instanceof CborArray &&
-        cborNonceVrf instanceof CborArray &&
-        cborLeaderVrf instanceof CborArray &&
+        cborVrfResult instanceof CborArray &&
         cborBlockBodySize instanceof CborUInt &&
         cborBlockBodyHash instanceof CborArray &&
         cborOperationalCert instanceof CborArray &&
         cborProtocolVersion instanceof CborArray
-    )) throw new Error( "invalid cbor format for `IAllegraHeaderBody`" );
+    )) throw new Error( "invalid cbor format for `IHeaderBodyV2`" );
 
     return {
         blockNo: cborBlockNo.num as BlockNo,
@@ -98,8 +97,7 @@ export function headerBodyFromCborObj( cbor: CborObj ): IAllegraHeaderBody
         prevBlock: Hash32.fromCborObj( cborPrevBlock ) as Hash32,
         issuerVkey: Hash32.fromCborObj( cborIssuerVkey ) as Hash32,
         vrfVkey: VRFKeyHash.fromCborObj( cborVrfVkey ) as VRFKeyHash,
-        nonceVrf: vrfCertFromCborObj( cborNonceVrf ) as VrfCert,
-        leaderVrf: vrfCertFromCborObj( cborLeaderVrf ) as VrfCert,
+        vrfResult: vrfCertFromCborObj( cborVrfResult ) as VrfCert,
         blockBodySize: cborBlockBodySize.num as BlockBodySize,
         blockBodyHash: Hash32.fromCborObj( cborBlockBodyHash ) as Hash32,
         operationalCert: opCertFromCborObj( cborOperationalCert ) as IOperationalCert,

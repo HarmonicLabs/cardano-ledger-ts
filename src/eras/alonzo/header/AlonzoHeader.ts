@@ -1,5 +1,5 @@
+import { headerBodyFromCborObj, headerBodyToCborObj, IHeaderBodyV1, isIHeaderBodyV1 } from "../../../interfaces/IHeaderBodies/IHeaderBodyV1";
 import { CborString, CborArray, CanBeCborString, forceCborString, Cbor, CborObj, CborBytes } from "@harmoniclabs/cbor";
-import { IAlonzoHeaderBody, isIAlonzoHeaderBody, headerBodyToCborObj, headerBodyFromCborObj } from "../interfaces";
 import { Signature, canBeHash32, Hash32 } from "../../../hashes";
 import { SlotNo, U8Arr32 } from "../../../utils/types";
 import { isSlotNo } from "../../../utils/isThatType";
@@ -7,7 +7,7 @@ import { blake2b_256 } from "@harmoniclabs/crypto";
 import { IHeader } from "../../../interfaces";
 
 export interface IAlonzoHeader extends IHeader {
-    readonly headerBody: IAlonzoHeaderBody;
+    readonly headerBody: IHeaderBodyV1;
     readonly bodySignature: Signature;
 }
 
@@ -17,7 +17,7 @@ export function isIAlonzoHeader( stuff: any ): stuff is IAlonzoHeader
         canBeHash32( stuff.hash ) &&
         isSlotNo( stuff.slotNo ) &&
         canBeHash32( stuff.prevBlock ) &&
-        isIAlonzoHeaderBody( stuff.headerBody ) &&
+        isIHeaderBodyV1( stuff.headerBody ) &&
         canBeHash32( stuff.bodySignature )
     );
 }
@@ -31,7 +31,7 @@ export class AlonzoHeader
     readonly slotNo: SlotNo;
     readonly prevBlock: Hash32;
 
-    readonly headerBody: IAlonzoHeaderBody;
+    readonly headerBody: IHeaderBodyV1;
     readonly bodySignature: Signature;
 
     readonly cborBytes?: U8Arr32;
@@ -102,7 +102,7 @@ export class AlonzoHeader
             hash: blake2b_256( new Uint8Array([ 0x82, 0x00, ..._originalBytes ]) ) as U8Arr32,
             slotNo: newSlotNo as SlotNo,
             prevBlock: newPrevBlock as Hash32,
-            headerBody: newHeader as IAlonzoHeaderBody,
+            headerBody: newHeader as IHeaderBodyV1,
             bodySignature: Signature.fromCborObj( cborBodySignature ) as Signature,
         });
 
