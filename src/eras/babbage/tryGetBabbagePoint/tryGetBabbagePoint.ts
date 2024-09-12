@@ -1,6 +1,6 @@
 import { Cbor, CborUInt, LazyCborArray } from "@harmoniclabs/cbor";
 // import { RealPoint } from "@harmoniclabs/ouroboros-miniprotocols-ts";
-import { blake2b_256 } from "../../utils/crypto";
+import { blake2b_256 } from "../../../utils/crypto";
 
 export function tryGetBabbagePoint( headerBytes: Uint8Array ): /**RealPoint**/ | undefined
 {
