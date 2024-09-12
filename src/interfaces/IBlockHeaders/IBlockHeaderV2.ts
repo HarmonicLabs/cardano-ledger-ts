@@ -1,29 +1,29 @@
-import { headerBodyFromCborObj, headerBodyToCborObj, IHeaderBodyV1, isIHeaderBodyV1 } from "../../../interfaces/IHeaderBodies/IHeaderBodyV1";
-import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, forceCborString } from "@harmoniclabs/cbor";
-import { canBeHash32, Hash32, Signature } from "../../../hashes";
-import { SlotNo, U8Arr32 } from "../../../utils/types";
-import { IHeader } from "../../../interfaces/IHeader";
-import { isSlotNo } from "../../../utils/isThatType";
-import { blake2b_256 } from "../../../utils/crypto";
+import { headerBodyToCborObj, headerBodyFromCborObj, IHeaderBodyV2, isIHeaderBodyV2 } from "../IHeaderBodies/IHeaderBodyV2";
+import { CborString, CborArray, CanBeCborString, forceCborString, Cbor, CborObj, CborBytes } from "@harmoniclabs/cbor";
+import { Signature, canBeHash32, Hash32 } from "../../hashes";
+import { SlotNo, U8Arr32 } from "../../utils/types";
+import { blake2b_256 } from "@harmoniclabs/crypto";
+import { isSlotNo } from "../../utils/isThatType";
+import { IHeader } from "../IHeader";
 
-export interface IShelleyHeader extends IHeader {
-    readonly headerBody: IHeaderBodyV1;
+export interface IBlockHeaderV2 extends IHeader {
+    readonly headerBody: IHeaderBodyV2;
     readonly bodySignature: Signature;
 }
 
-export function isIShelleyHeader( stuff: any ): stuff is IShelleyHeader 
+export function isIBlockHeaderV2( stuff: any ): stuff is IBlockHeaderV2 
 {
     return (
         canBeHash32( stuff.hash ) &&
         isSlotNo( stuff.slotNo ) &&
         canBeHash32( stuff.prevBlock ) &&
-        isIHeaderBodyV1( stuff.headerBody ) &&
+        isIHeaderBodyV2( stuff.headerBody ) &&
         canBeHash32( stuff.bodySignature )
     );
 }
 
-export class ShelleyHeader
-    implements IShelleyHeader
+export class BlockHeaderV2
+    implements IBlockHeaderV2
 {
     readonly hash: Hash32;
 
@@ -31,14 +31,14 @@ export class ShelleyHeader
     readonly slotNo: SlotNo;
     readonly prevBlock: Hash32;
 
-    readonly headerBody: IHeaderBodyV1;
+    readonly headerBody: IHeaderBodyV2;
     readonly bodySignature: Signature;
 
     readonly cborBytes?: U8Arr32;
 
     constructor( stuff: any )
     {
-        if(!( isIShelleyHeader( stuff ) )) throw new Error( "invalid new `IShelleyHeader` data provided" );
+        if(!( isIBlockHeaderV2( stuff ) )) throw new Error( "invalid new `IBlockHeaderV2` data provided" );
 
         this.hash = stuff.hash;
         this.slotNo = stuff.slotNo;
@@ -69,17 +69,17 @@ export class ShelleyHeader
         return Uint8Array.prototype.slice.call( this.cborBytes );
     }
 
-    static fromCbor( cbor: CanBeCborString ): ShelleyHeader
+    static fromCbor( cbor: CanBeCborString ): BlockHeaderV2
     {
         const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor ).toBuffer();
-        return ShelleyHeader.fromCborObj( Cbor.parse( bytes ), bytes );
+        return BlockHeaderV2.fromCborObj( Cbor.parse( bytes ), bytes );
     }
-    static fromCborObj( cbor: CborObj, _originalBytes?: Uint8Array ): ShelleyHeader
+    static fromCborObj( cbor: CborObj, _originalBytes?: Uint8Array ): BlockHeaderV2
     {
         if(!(
             cbor instanceof CborArray &&
             cbor.array.length >= 2
-        )) throw new Error( "invalid cbor for ShelleyHeader" );
+        )) throw new Error( "invalid cbor for BlockHeaderV2" );
 
         const [
             cborHeaderBody,
@@ -89,7 +89,7 @@ export class ShelleyHeader
         if(!(
             cborHeaderBody instanceof CborArray &&
             cborBodySignature instanceof CborBytes
-        )) throw new Error( "invalid cbor for ShelleyHeader" );
+        )) throw new Error( "invalid cbor for BlockHeaderV2" );
 
         const originalWerePresent = _originalBytes instanceof Uint8Array;
         _originalBytes = _originalBytes instanceof Uint8Array ? _originalBytes : Cbor.encode( cbor ).toBuffer();
@@ -98,11 +98,11 @@ export class ShelleyHeader
         let newSlotNo = newHeader.slotNo;
         let newPrevBlock = newHeader.prevBlock;
 
-        const hdr = new ShelleyHeader({
+        const hdr = new BlockHeaderV2({
             hash: blake2b_256( new Uint8Array([ 0x82, 0x00, ..._originalBytes ]) ) as U8Arr32,
             slotNo: newSlotNo as SlotNo,
             prevBlock: newPrevBlock as Hash32,
-            headerBody: newHeader as IHeaderBodyV1,
+            headerBody: newHeader as IHeaderBodyV2,
             bodySignature: Signature.fromCborObj( cborBodySignature ) as Signature,
         });
 

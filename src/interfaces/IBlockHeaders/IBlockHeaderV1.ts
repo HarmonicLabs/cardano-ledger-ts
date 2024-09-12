@@ -1,17 +1,17 @@
-import { headerBodyFromCborObj, headerBodyToCborObj, IHeaderBodyV1, isIHeaderBodyV1 } from "../../../interfaces/IHeaderBodies/IHeaderBodyV1";
+import { IHeaderBodyV1, isIHeaderBodyV1, headerBodyToCborObj, headerBodyFromCborObj } from "../IHeaderBodies/IHeaderBodyV1";
 import { CborString, CborArray, CanBeCborString, forceCborString, Cbor, CborObj, CborBytes } from "@harmoniclabs/cbor";
-import { Signature, canBeHash32, Hash32 } from "../../../hashes";
-import { SlotNo, U8Arr32 } from "../../../utils/types";
-import { isSlotNo } from "../../../utils/isThatType";
+import { Signature, canBeHash32, Hash32 } from "../../hashes";
+import { SlotNo, U8Arr32 } from "../../utils/types";
 import { blake2b_256 } from "@harmoniclabs/crypto";
-import { IHeader } from "../../../interfaces";
+import { isSlotNo } from "../../utils/isThatType";
+import { IHeader } from "../IHeader";
 
-export interface IAllegraHeader extends IHeader {
+export interface IBlockHeaderV1 extends IHeader {
     readonly headerBody: IHeaderBodyV1;
     readonly bodySignature: Signature;
 }
 
-export function isIAllegraHeader( stuff: any ): stuff is IAllegraHeader 
+export function isIBlockHeaderV1( stuff: any ): stuff is IBlockHeaderV1 
 {
     return (
         canBeHash32( stuff.hash ) &&
@@ -22,8 +22,8 @@ export function isIAllegraHeader( stuff: any ): stuff is IAllegraHeader
     );
 }
 
-export class AllegraHeader
-    implements IAllegraHeader
+export class BlockHeaderV1
+    implements IBlockHeaderV1
 {
     readonly hash: Hash32;
 
@@ -38,7 +38,7 @@ export class AllegraHeader
 
     constructor( stuff: any )
     {
-        if(!( isIAllegraHeader( stuff ) )) throw new Error( "invalid new `IAllegraHeader` data provided" );
+        if(!( isIBlockHeaderV1( stuff ) )) throw new Error( "invalid new `IBlockHeaderV1` data provided" );
 
         this.hash = stuff.hash;
         this.slotNo = stuff.slotNo;
@@ -69,17 +69,17 @@ export class AllegraHeader
         return Uint8Array.prototype.slice.call( this.cborBytes );
     }
 
-    static fromCbor( cbor: CanBeCborString ): AllegraHeader
+    static fromCbor( cbor: CanBeCborString ): IBlockHeaderV1
     {
         const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor ).toBuffer();
-        return AllegraHeader.fromCborObj( Cbor.parse( bytes ), bytes );
+        return BlockHeaderV1.fromCborObj( Cbor.parse( bytes ), bytes );
     }
-    static fromCborObj( cbor: CborObj, _originalBytes?: Uint8Array ): AllegraHeader
+    static fromCborObj( cbor: CborObj, _originalBytes?: Uint8Array ): IBlockHeaderV1
     {
         if(!(
             cbor instanceof CborArray &&
             cbor.array.length >= 2
-        )) throw new Error( "invalid cbor for AllegraHeader" );
+        )) throw new Error( "invalid cbor for IBlockHeaderV1" );
 
         const [
             cborHeaderBody,
@@ -89,7 +89,7 @@ export class AllegraHeader
         if(!(
             cborHeaderBody instanceof CborArray &&
             cborBodySignature instanceof CborBytes
-        )) throw new Error( "invalid cbor for AllegraHeader" );
+        )) throw new Error( "invalid cbor for IBlockHeaderV1" );
 
         const originalWerePresent = _originalBytes instanceof Uint8Array;
         _originalBytes = _originalBytes instanceof Uint8Array ? _originalBytes : Cbor.encode( cbor ).toBuffer();
@@ -98,7 +98,7 @@ export class AllegraHeader
         let newSlotNo = newHeader.slotNo;
         let newPrevBlock = newHeader.prevBlock;
 
-        const hdr = new AllegraHeader({
+        const hdr = new BlockHeaderV1({
             hash: blake2b_256( new Uint8Array([ 0x82, 0x00, ..._originalBytes ]) ) as U8Arr32,
             slotNo: newSlotNo as SlotNo,
             prevBlock: newPrevBlock as Hash32,

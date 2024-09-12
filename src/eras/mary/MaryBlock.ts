@@ -1,13 +1,13 @@
 import { CborObj, CborString, Cbor, CborArray, CanBeCborString, forceCborString, CborMap } from "@harmoniclabs/cbor";
 import { TxBody, TxWitnessSet, AuxiliaryData, isITxBody, isITxWitnessSet, isIAuxiliaryData } from "../../tx";
+import { BlockHeaderV1, isIBlockHeaderV1 } from "../../interfaces/IBlockHeaders/IBlockHeaderV1";
 import { mapToCborObj, mapFromCborObj } from "../../utils/mapFromToCbor";
 import { TransactionIndexN } from "../../utils/types";
-import { MaryHeader, isIMaryHeader } from "./header";
 import { isMap } from "util/types";
 
 export interface IMaryBlock
 {
-    header: MaryHeader;
+    header: BlockHeaderV1;
     transactionBodies: TxBody[];    // not totally sure about TxBody.outputs.value -> transaction_output = [address, amount : value]
     transactionWitnessSets: TxWitnessSet[];
     transactionMetadatas: Map<TransactionIndexN, AuxiliaryData>;
@@ -16,7 +16,7 @@ export interface IMaryBlock
 export function isIMaryBlock( stuff: any ): stuff is IMaryBlock
 {
     return (
-        isIMaryHeader( stuff.header ) &&
+        isIBlockHeaderV1( stuff.header ) &&
         Array.isArray( stuff.transactionBodies ) &&
         stuff.transactionBodies.every( isITxBody ) &&
         Array.isArray( stuff.transactionWitnessSets ) &&
@@ -40,7 +40,7 @@ function getMapFromCborObj( mapToBeFixed: Map<TransactionIndexN, CborObj> ): Map
 export class MaryBlock 
     implements IMaryBlock
 {
-    readonly header: MaryHeader;
+    readonly header: BlockHeaderV1;
     readonly transactionBodies: TxBody[];
     readonly transactionWitnessSets: TxWitnessSet[];
     readonly transactionMetadatas: Map<TransactionIndexN, AuxiliaryData>;
@@ -102,7 +102,7 @@ export class MaryBlock
         )) throw new Error( "invalid `MaryBlock` cbor" );
 
         return new MaryBlock({
-            header: MaryHeader.fromCborObj( cborHeader ) as MaryHeader,
+            header: BlockHeaderV1.fromCborObj( cborHeader ) as BlockHeaderV1,
             transactionBodies: cborTransactionBodies.array.map(( tCborBody ) => ( TxBody.fromCborObj( tCborBody ) )) as TxBody[],
             transactionWitnessSets: cborTransactionWitnessSets.array.map(( twCborSet ) => ( TxWitnessSet.fromCborObj( twCborSet ) )) as TxWitnessSet[],
             transactionMetadatas: getMapFromCborObj( mapFromCborObj( cborTransactionMetadatas ) ) as Map<TransactionIndexN, AuxiliaryData>

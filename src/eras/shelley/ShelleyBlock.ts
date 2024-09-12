@@ -1,13 +1,13 @@
 import { CborString, Cbor, CborArray, CanBeCborString, forceCborString, CborObj, CborMap } from "@harmoniclabs/cbor";
+import { BlockHeaderV1, IBlockHeaderV1, isIBlockHeaderV1 } from "../../interfaces/IBlockHeaders/IBlockHeaderV1";
 import { TxBody, TxWitnessSet, TxMetadata, isITxBody, isITxWitnessSet, isITxMetadata } from "../../tx";
-import { isIShelleyHeader, ShelleyHeader } from "./header/ShelleyHeader";
 import { mapToCborObj, mapFromCborObj } from "../../utils/mapFromToCbor";
 import { TransactionIndexN } from "../../utils/types";
 import { isMap } from "util/types";
 
 export interface IShelleyBlock
 {
-    header: ShelleyHeader;
+    header: BlockHeaderV1;
     transactionBodies: TxBody[];
     transactionWitnessSets: TxWitnessSet[];
     transactionMetadatas: Map<TransactionIndexN, TxMetadata>;
@@ -16,7 +16,7 @@ export interface IShelleyBlock
 export function isIShelleyBlock( stuff: any ): stuff is IShelleyBlock
 {
     return (
-        isIShelleyHeader( stuff.header ) &&
+        isIBlockHeaderV1( stuff.header ) &&
         Array.isArray( stuff.transactionBodies ) &&
         stuff.transactionBodies.every( isITxBody ) &&
         Array.isArray( stuff.transactionWitnessSets ) &&
@@ -40,7 +40,7 @@ function getMapFromCborObj( mapToBeFixed: Map<TransactionIndexN, CborObj> ): Map
 export class ShelleyBlock 
     implements IShelleyBlock
 {
-    readonly header: ShelleyHeader;
+    readonly header: BlockHeaderV1;
     readonly transactionBodies: TxBody[];
     readonly transactionWitnessSets: TxWitnessSet[];
     readonly transactionMetadatas: Map<TransactionIndexN, TxMetadata>;
@@ -102,7 +102,7 @@ export class ShelleyBlock
         )) throw new Error( "invalid `ShelleyBlock` cbor" );
 
         return new ShelleyBlock({
-            header: ShelleyHeader.fromCborObj( cborHeader ) as ShelleyHeader,
+            header: BlockHeaderV1.fromCborObj( cborHeader ) as IBlockHeaderV1,
             transactionBodies: cborTransactionBodies.array.map(( tCborBody ) => ( TxBody.fromCborObj( tCborBody ) )) as TxBody[],
             transactionWitnessSets: cborTransactionWitnessSets.array.map(( twCborSet ) => ( TxWitnessSet.fromCborObj( twCborSet ) )) as TxWitnessSet[],
             transactionMetadatas: getMapFromCborObj( mapFromCborObj( cborTransactionMetadatas ) ) as Map<TransactionIndexN, TxMetadata>
