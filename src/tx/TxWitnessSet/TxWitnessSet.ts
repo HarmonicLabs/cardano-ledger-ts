@@ -91,8 +91,9 @@ export class TxWitnessSet
     readonly plutusV1Scripts?: Script<ScriptType.PlutusV1>[];
     readonly datums?: Data[];
     readonly redeemers?: TxRedeemer[];
-
+    // babbage
     readonly plutusV2Scripts?: Script<ScriptType.PlutusV2>[];
+    
     readonly plutusV3Scripts?: Script<ScriptType.PlutusV3>[];
     
     /*

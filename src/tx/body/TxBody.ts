@@ -20,10 +20,10 @@ export interface ITxBody {
     certs?: Certificate[],
     withdrawals?: TxWithdrawals | ITxWithdrawals,
     protocolUpdate?: LegacyPPUpdateProposal,
-    auxDataHash?: AuxiliaryDataHash, // hash 32
+    auxDataHash?: AuxiliaryDataHash,
     validityIntervalStart?: CanBeUInteger,
     mint?: Value,
-    scriptDataHash?: ScriptDataHash, // hash 32
+    scriptDataHash?: ScriptDataHash,
     collateralInputs?: UTxO[], 
     requiredSigners?: PubKeyHash[],
     network?: NetworkT,
@@ -33,8 +33,8 @@ export interface ITxBody {
     // conway
     votingProcedures?: IVotingProcedures | VotingProcedures;
     proposalProcedures?: (ProposalProcedure | IProposalProcedure)[];
-    currentTreasuryValue?: CanBeUInteger; // Coin
-    donation?: CanBeUInteger; // Coin (positive)
+    currentTreasuryValue?: Coin;
+    donation?: Coin;
 }
 
 export function isITxBody( body: Readonly<object> ): body is ITxBody
@@ -113,25 +113,25 @@ export class TxBody
     readonly certs?: Certificate[];
     readonly withdrawals?: TxWithdrawals;
     readonly protocolUpdate?: LegacyPPUpdateProposal; // babbage only; removed in conway
-    readonly auxDataHash?: AuxiliaryDataHash; // hash 32
+    readonly auxDataHash?: AuxiliaryDataHash;
     //allegra
     readonly validityIntervalStart?: bigint;
     // mary
     readonly mint?: Value;
     // alonzo
-    readonly scriptDataHash?: ScriptDataHash; // hash 32
+    readonly scriptDataHash?: ScriptDataHash;
     readonly collateralInputs?: UTxO[];
     readonly requiredSigners?: PubKeyHash[];
     readonly network?: NetworkT;
-    
+    // babbage
     readonly collateralReturn?: TxOut;
-    readonly totCollateral?: bigint; // Coin
+    readonly totCollateral?: Coin;
     readonly refInputs?: UTxO[];
     // conway
     readonly votingProcedures?: VotingProcedures;
     readonly proposalProcedures?: ProposalProcedure[];
-    readonly currentTreasuryValue?: bigint; // Coin
-    readonly donation?: bigint; // Coin (positive)
+    readonly currentTreasuryValue?: Coin;
+    readonly donation?: Coin;
 
     /**
      * getter
