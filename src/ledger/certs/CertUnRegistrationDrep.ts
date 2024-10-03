@@ -45,7 +45,7 @@ export class CertUnRegistrationDrep
         
         return new DataConstr(
             6, [
-                this.drepCredential.toData(),
+                this.drepCredential.toData( version ),
                 new DataI( this.coin )
             ]
         );

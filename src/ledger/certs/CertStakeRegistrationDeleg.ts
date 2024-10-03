@@ -48,8 +48,8 @@ export class CertStakeRegistrationDeleg
         
         return new DataConstr(
             3, [
-                this.stakeCredential.toData(),
-                this.poolKeyHash.toData(),
+                this.stakeCredential.toData( version ),
+                this.poolKeyHash.toData( version ),
                 new DataI( this.coin )
             ]
         );

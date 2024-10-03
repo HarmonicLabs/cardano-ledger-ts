@@ -37,7 +37,7 @@ export class CertPoolRetirement
         version = definitelyToDataVersion( version );
 
         const fields: Data[] = [
-            this.poolHash.toData(),
+            this.poolHash.toData( version ),
             new DataI( this.epoch )
         ];
         
