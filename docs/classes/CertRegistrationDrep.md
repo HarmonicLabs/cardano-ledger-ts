@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / CertRegistrationDrep
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / CertRegistrationDrep
 
 # Class: CertRegistrationDrep
 
@@ -13,7 +13,7 @@
 
 ## Constructors
 
-### new CertRegistrationDrep(__namedParameters)
+### new CertRegistrationDrep()
 
 > **new CertRegistrationDrep**(`__namedParameters`): [`CertRegistrationDrep`](CertRegistrationDrep.md)
 
@@ -25,65 +25,65 @@
 
 [`CertRegistrationDrep`](CertRegistrationDrep.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertRegistrationDrep.ts:25](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertRegistrationDrep.ts#L25)
+[src/ledger/certs/CertRegistrationDrep.ts:27](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertRegistrationDrep.ts#L27)
 
 ## Properties
 
 ### anchor
 
-> **`readonly`** **anchor**: `undefined` \| `Anchor`
+> `readonly` **anchor**: `undefined` \| [`Anchor`](Anchor.md)
 
 #### Implementation of
 
 [`ICertRegistrationDrep`](../interfaces/ICertRegistrationDrep.md).[`anchor`](../interfaces/ICertRegistrationDrep.md#anchor)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertRegistrationDrep.ts:23](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertRegistrationDrep.ts#L23)
+[src/ledger/certs/CertRegistrationDrep.ts:25](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertRegistrationDrep.ts#L25)
 
 ***
 
 ### certType
 
-> **`readonly`** **certType**: [`RegistrationDrep`](../enumerations/CertificateType.md#registrationdrep)
+> `readonly` **certType**: [`RegistrationDrep`](../enumerations/CertificateType.md#registrationdrep)
 
 #### Implementation of
 
 [`ICert`](../interfaces/ICert.md).[`certType`](../interfaces/ICert.md#certtype)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertRegistrationDrep.ts:20](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertRegistrationDrep.ts#L20)
+[src/ledger/certs/CertRegistrationDrep.ts:22](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertRegistrationDrep.ts#L22)
 
 ***
 
 ### coin
 
-> **`readonly`** **coin**: `bigint`
+> `readonly` **coin**: `bigint`
 
 #### Implementation of
 
 [`ICertRegistrationDrep`](../interfaces/ICertRegistrationDrep.md).[`coin`](../interfaces/ICertRegistrationDrep.md#coin)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertRegistrationDrep.ts:22](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertRegistrationDrep.ts#L22)
+[src/ledger/certs/CertRegistrationDrep.ts:24](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertRegistrationDrep.ts#L24)
 
 ***
 
 ### drepCredential
 
-> **`readonly`** **drepCredential**: [`Credential`](Credential.md)\<[`CredentialType`](../enumerations/CredentialType.md)\>
+> `readonly` **drepCredential**: [`Credential`](Credential.md)\<[`CredentialType`](../enumerations/CredentialType.md)\>
 
 #### Implementation of
 
 [`ICertRegistrationDrep`](../interfaces/ICertRegistrationDrep.md).[`drepCredential`](../interfaces/ICertRegistrationDrep.md#drepcredential)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertRegistrationDrep.ts:21](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertRegistrationDrep.ts#L21)
+[src/ledger/certs/CertRegistrationDrep.ts:23](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertRegistrationDrep.ts#L23)
 
 ## Methods
 
@@ -99,9 +99,9 @@
 
 [`ICert`](../interfaces/ICert.md).[`getRequiredSigners`](../interfaces/ICert.md#getrequiredsigners)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertRegistrationDrep.ts:37](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertRegistrationDrep.ts#L37)
+[src/ledger/certs/CertRegistrationDrep.ts:56](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertRegistrationDrep.ts#L56)
 
 ***
 
@@ -113,9 +113,9 @@
 
 `CborString`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertRegistrationDrep.ts:42](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertRegistrationDrep.ts#L42)
+[src/ledger/certs/CertRegistrationDrep.ts:61](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertRegistrationDrep.ts#L61)
 
 ***
 
@@ -127,23 +127,45 @@
 
 `CborArray`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertRegistrationDrep.ts:46](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertRegistrationDrep.ts#L46)
+[src/ledger/certs/CertRegistrationDrep.ts:65](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertRegistrationDrep.ts#L65)
+
+***
+
+### toData()
+
+> **toData**(`version`?): `DataConstr`
+
+#### Parameters
+
+• **version?**: `ToDataVersion`
+
+#### Returns
+
+`DataConstr`
+
+#### Implementation of
+
+[`ICert`](../interfaces/ICert.md).[`toData`](../interfaces/ICert.md#todata)
+
+#### Defined in
+
+[src/ledger/certs/CertRegistrationDrep.ts:39](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertRegistrationDrep.ts#L39)
 
 ***
 
 ### toJson()
 
-> **toJson**(): `Object`
+> **toJson**(): `object`
 
 #### Returns
 
-`Object`
+`object`
 
 ##### anchor
 
-> **anchor**: `null` \| `Object`
+> **anchor**: `null` \| `object`
 
 ##### certType
 
@@ -155,7 +177,7 @@
 
 ##### stakeCredential
 
-> **stakeCredential**: `Object`
+> **stakeCredential**: `object`
 
 ##### stakeCredential.credentialType
 
@@ -165,15 +187,15 @@
 
 > **hash**: `string`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertRegistrationDrep.ts:75](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertRegistrationDrep.ts#L75)
+[src/ledger/certs/CertRegistrationDrep.ts:94](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertRegistrationDrep.ts#L94)
 
 ***
 
 ### fromCborObj()
 
-> **`static`** **fromCborObj**(`cbor`): [`CertRegistrationDrep`](CertRegistrationDrep.md)
+> `static` **fromCborObj**(`cbor`): [`CertRegistrationDrep`](CertRegistrationDrep.md)
 
 #### Parameters
 
@@ -183,6 +205,6 @@
 
 [`CertRegistrationDrep`](CertRegistrationDrep.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertRegistrationDrep.ts:56](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertRegistrationDrep.ts#L56)
+[src/ledger/certs/CertRegistrationDrep.ts:75](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertRegistrationDrep.ts#L75)

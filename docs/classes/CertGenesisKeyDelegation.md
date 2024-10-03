@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / CertGenesisKeyDelegation
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / CertGenesisKeyDelegation
 
 # Class: ~~CertGenesisKeyDelegation~~
 
@@ -15,7 +15,7 @@
 
 ## Constructors
 
-### new CertGenesisKeyDelegation(__namedParameters)
+### new CertGenesisKeyDelegation()
 
 > **new CertGenesisKeyDelegation**(`__namedParameters`): [`CertGenesisKeyDelegation`](CertGenesisKeyDelegation.md)
 
@@ -27,65 +27,65 @@
 
 [`CertGenesisKeyDelegation`](CertGenesisKeyDelegation.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertGenesisKeyDelegation.ts:23](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertGenesisKeyDelegation.ts#L23)
+[src/ledger/certs/CertGenesisKeyDelegation.ts:25](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertGenesisKeyDelegation.ts#L25)
 
 ## Properties
 
 ### ~~certType~~
 
-> **`readonly`** **certType**: [`GenesisKeyDelegation`](../enumerations/CertificateType.md#genesiskeydelegation)
+> `readonly` **certType**: [`GenesisKeyDelegation`](../enumerations/CertificateType.md#genesiskeydelegation)
 
 #### Implementation of
 
 [`ICert`](../interfaces/ICert.md).[`certType`](../interfaces/ICert.md#certtype)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertGenesisKeyDelegation.ts:18](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertGenesisKeyDelegation.ts#L18)
+[src/ledger/certs/CertGenesisKeyDelegation.ts:20](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertGenesisKeyDelegation.ts#L20)
 
 ***
 
 ### ~~genesisDelegateHash~~
 
-> **`readonly`** **genesisDelegateHash**: [`Hash28`](Hash28.md)
+> `readonly` **genesisDelegateHash**: [`Hash28`](Hash28.md)
 
 #### Implementation of
 
 [`ICertGenesisKeyDelegation`](../interfaces/ICertGenesisKeyDelegation.md).[`genesisDelegateHash`](../interfaces/ICertGenesisKeyDelegation.md#genesisdelegatehash)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertGenesisKeyDelegation.ts:20](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertGenesisKeyDelegation.ts#L20)
+[src/ledger/certs/CertGenesisKeyDelegation.ts:22](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertGenesisKeyDelegation.ts#L22)
 
 ***
 
 ### ~~genesisHash~~
 
-> **`readonly`** **genesisHash**: [`Hash28`](Hash28.md)
+> `readonly` **genesisHash**: [`Hash28`](Hash28.md)
 
 #### Implementation of
 
 [`ICertGenesisKeyDelegation`](../interfaces/ICertGenesisKeyDelegation.md).[`genesisHash`](../interfaces/ICertGenesisKeyDelegation.md#genesishash)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertGenesisKeyDelegation.ts:19](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertGenesisKeyDelegation.ts#L19)
+[src/ledger/certs/CertGenesisKeyDelegation.ts:21](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertGenesisKeyDelegation.ts#L21)
 
 ***
 
 ### ~~vrfKeyHash~~
 
-> **`readonly`** **vrfKeyHash**: [`Hash32`](Hash32.md)
+> `readonly` **vrfKeyHash**: [`Hash32`](Hash32.md)
 
 #### Implementation of
 
 [`ICertGenesisKeyDelegation`](../interfaces/ICertGenesisKeyDelegation.md).[`vrfKeyHash`](../interfaces/ICertGenesisKeyDelegation.md#vrfkeyhash)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertGenesisKeyDelegation.ts:21](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertGenesisKeyDelegation.ts#L21)
+[src/ledger/certs/CertGenesisKeyDelegation.ts:23](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertGenesisKeyDelegation.ts#L23)
 
 ## Methods
 
@@ -101,9 +101,9 @@
 
 [`ICert`](../interfaces/ICert.md).[`getRequiredSigners`](../interfaces/ICert.md#getrequiredsigners)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertGenesisKeyDelegation.ts:35](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertGenesisKeyDelegation.ts#L35)
+[src/ledger/certs/CertGenesisKeyDelegation.ts:50](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertGenesisKeyDelegation.ts#L50)
 
 ***
 
@@ -115,9 +115,9 @@
 
 `CborString`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertGenesisKeyDelegation.ts:40](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertGenesisKeyDelegation.ts#L40)
+[src/ledger/certs/CertGenesisKeyDelegation.ts:55](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertGenesisKeyDelegation.ts#L55)
 
 ***
 
@@ -129,19 +129,41 @@
 
 `CborArray`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertGenesisKeyDelegation.ts:44](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertGenesisKeyDelegation.ts#L44)
+[src/ledger/certs/CertGenesisKeyDelegation.ts:59](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertGenesisKeyDelegation.ts#L59)
+
+***
+
+### ~~toData()~~
+
+> **toData**(`version`?): `DataConstr`
+
+#### Parameters
+
+• **version?**: `ToDataVersion`
+
+#### Returns
+
+`DataConstr`
+
+#### Implementation of
+
+[`ICert`](../interfaces/ICert.md).[`toData`](../interfaces/ICert.md#todata)
+
+#### Defined in
+
+[src/ledger/certs/CertGenesisKeyDelegation.ts:38](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertGenesisKeyDelegation.ts#L38)
 
 ***
 
 ### ~~toJson()~~
 
-> **toJson**(): `Object`
+> **toJson**(): `object`
 
 #### Returns
 
-`Object`
+`object`
 
 ##### ~~certType~~
 
@@ -159,15 +181,15 @@
 
 > **vrfKeyHash**: `string`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertGenesisKeyDelegation.ts:71](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertGenesisKeyDelegation.ts#L71)
+[src/ledger/certs/CertGenesisKeyDelegation.ts:86](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertGenesisKeyDelegation.ts#L86)
 
 ***
 
 ### ~~fromCborObj()~~
 
-> **`static`** **fromCborObj**(`cbor`): [`CertGenesisKeyDelegation`](CertGenesisKeyDelegation.md)
+> `static` **fromCborObj**(`cbor`): [`CertGenesisKeyDelegation`](CertGenesisKeyDelegation.md)
 
 #### Parameters
 
@@ -177,6 +199,6 @@
 
 [`CertGenesisKeyDelegation`](CertGenesisKeyDelegation.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertGenesisKeyDelegation.ts:54](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertGenesisKeyDelegation.ts#L54)
+[src/ledger/certs/CertGenesisKeyDelegation.ts:69](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertGenesisKeyDelegation.ts#L69)

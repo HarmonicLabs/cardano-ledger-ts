@@ -331,7 +331,7 @@ export class Address
         if(!( buff instanceof CborBytes))
         throw new Error(`Invalid CBOR format for "Address"`);
 
-        return Address.fromBuffer( buff.buffer )
+        return Address.fromBuffer( buff.bytes )
     }
 
     toCbor(): CborString

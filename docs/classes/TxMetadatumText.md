@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / TxMetadatumText
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / TxMetadatumText
 
 # Class: TxMetadatumText
 
@@ -13,7 +13,7 @@
 
 ## Constructors
 
-### new TxMetadatumText(text)
+### new TxMetadatumText()
 
 > **new TxMetadatumText**(`text`): [`TxMetadatumText`](TxMetadatumText.md)
 
@@ -25,19 +25,19 @@
 
 [`TxMetadatumText`](TxMetadatumText.md)
 
-#### Source
+#### Defined in
 
-[src/tx/metadata/TxMetadatum.ts:236](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/metadata/TxMetadatum.ts#L236)
+[src/tx/metadata/TxMetadatum.ts:236](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/metadata/TxMetadatum.ts#L236)
 
 ## Properties
 
 ### text
 
-> **`readonly`** **text**: `string`
+> `readonly` **text**: `string`
 
-#### Source
+#### Defined in
 
-[src/tx/metadata/TxMetadatum.ts:234](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/metadata/TxMetadatum.ts#L234)
+[src/tx/metadata/TxMetadatum.ts:234](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/metadata/TxMetadatum.ts#L234)
 
 ## Methods
 
@@ -53,9 +53,9 @@
 
 `ToCbor.toCbor`
 
-#### Source
+#### Defined in
 
-[src/tx/metadata/TxMetadatum.ts:250](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/metadata/TxMetadatum.ts#L250)
+[src/tx/metadata/TxMetadatum.ts:250](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/metadata/TxMetadatum.ts#L250)
 
 ***
 
@@ -71,19 +71,19 @@
 
 `ToCbor.toCborObj`
 
-#### Source
+#### Defined in
 
-[src/tx/metadata/TxMetadatum.ts:254](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/metadata/TxMetadatum.ts#L254)
+[src/tx/metadata/TxMetadatum.ts:254](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/metadata/TxMetadatum.ts#L254)
 
 ***
 
 ### toJson()
 
-> **toJson**(): `Object`
+> **toJson**(): `object`
 
 #### Returns
 
-`Object`
+`object`
 
 ##### text
 
@@ -93,6 +93,6 @@
 
 `ToJson.toJson`
 
-#### Source
+#### Defined in
 
-[src/tx/metadata/TxMetadatum.ts:275](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/metadata/TxMetadatum.ts#L275)
+[src/tx/metadata/TxMetadatum.ts:275](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/metadata/TxMetadatum.ts#L275)

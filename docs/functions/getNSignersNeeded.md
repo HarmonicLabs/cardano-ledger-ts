@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / getNSignersNeeded
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / getNSignersNeeded
 
 # Function: getNSignersNeeded()
 
@@ -16,6 +16,6 @@
 
 `number`
 
-## Source
+## Defined in
 
-[src/tx/Tx.ts:290](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/Tx.ts#L290)
+[src/tx/Tx.ts:314](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/Tx.ts#L314)

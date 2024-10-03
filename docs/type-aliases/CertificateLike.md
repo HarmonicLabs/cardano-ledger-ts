@@ -1,13 +1,13 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / CertificateLike
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / CertificateLike
 
-# Type alias: CertificateLike
+# Type Alias: CertificateLike
 
-> **CertificateLike**: `Object` & [`ICertStakeRegistration`](../interfaces/ICertStakeRegistration.md) \| `Object` & [`ICertStakeDeRegistration`](../interfaces/ICertStakeDeRegistration.md) \| `Object` & [`ICertStakeDelegation`](../interfaces/ICertStakeDelegation.md) \| `Object` & [`ICertPoolRegistration`](../interfaces/ICertPoolRegistration.md) \| `Object` & [`ICertPoolRetirement`](../interfaces/ICertPoolRetirement.md) \| `Object` & [`ICertRegistrationDeposit`](../interfaces/ICertRegistrationDeposit.md) \| `Object` & [`ICertUnRegistrationDeposit`](../interfaces/ICertUnRegistrationDeposit.md) \| `Object` & [`ICertVoteDeleg`](../interfaces/ICertVoteDeleg.md) \| `Object` & [`ICertStakeVoteDeleg`](../interfaces/ICertStakeVoteDeleg.md) \| `Object` & [`ICertStakeRegistration`](../interfaces/ICertStakeRegistration.md) \| `Object` & [`ICertVoteRegistrationDeleg`](../interfaces/ICertVoteRegistrationDeleg.md) \| `Object` & [`ICertStakeVoteRegistrationDeleg`](../interfaces/ICertStakeVoteRegistrationDeleg.md) \| `Object` & [`ICertAuthCommitteeHot`](../interfaces/ICertAuthCommitteeHot.md) \| `Object` & [`ICertResignCommitteeCold`](../interfaces/ICertResignCommitteeCold.md) \| `Object` & [`ICertRegistrationDrep`](../interfaces/ICertRegistrationDrep.md) \| `Object` & [`ICertUnRegistrationDrep`](../interfaces/ICertUnRegistrationDrep.md) \| `Object` & [`ICertUpdateDrep`](../interfaces/ICertUpdateDrep.md) \| `Object` & [`ICertGenesisKeyDelegation`](../interfaces/ICertGenesisKeyDelegation.md) \| `Object` & [`IMoveInstantRewardsCert`](../interfaces/IMoveInstantRewardsCert.md)
+> **CertificateLike**: `object` & [`ICertStakeRegistration`](../interfaces/ICertStakeRegistration.md) \| `object` & [`ICertStakeDeRegistration`](../interfaces/ICertStakeDeRegistration.md) \| `object` & [`ICertStakeDelegation`](../interfaces/ICertStakeDelegation.md) \| `object` & [`ICertPoolRegistration`](../interfaces/ICertPoolRegistration.md) \| `object` & [`ICertPoolRetirement`](../interfaces/ICertPoolRetirement.md) \| `object` & [`ICertRegistrationDeposit`](../interfaces/ICertRegistrationDeposit.md) \| `object` & [`ICertUnRegistrationDeposit`](../interfaces/ICertUnRegistrationDeposit.md) \| `object` & [`ICertVoteDeleg`](../interfaces/ICertVoteDeleg.md) \| `object` & [`ICertStakeVoteDeleg`](../interfaces/ICertStakeVoteDeleg.md) \| `object` & [`ICertStakeRegistrationDeleg`](../interfaces/ICertStakeRegistrationDeleg.md) \| `object` & [`ICertStakeRegistration`](../interfaces/ICertStakeRegistration.md) \| `object` & [`ICertVoteRegistrationDeleg`](../interfaces/ICertVoteRegistrationDeleg.md) \| `object` & [`ICertStakeVoteRegistrationDeleg`](../interfaces/ICertStakeVoteRegistrationDeleg.md) \| `object` & [`ICertAuthCommitteeHot`](../interfaces/ICertAuthCommitteeHot.md) \| `object` & [`ICertResignCommitteeCold`](../interfaces/ICertResignCommitteeCold.md) \| `object` & [`ICertRegistrationDrep`](../interfaces/ICertRegistrationDrep.md) \| `object` & [`ICertUnRegistrationDrep`](../interfaces/ICertUnRegistrationDrep.md) \| `object` & [`ICertUpdateDrep`](../interfaces/ICertUpdateDrep.md) \| `object` & [`ICertGenesisKeyDelegation`](../interfaces/ICertGenesisKeyDelegation.md) \| `object` & [`IMoveInstantRewardsCert`](../interfaces/IMoveInstantRewardsCert.md)
 
-## Source
+## Defined in
 
-[src/ledger/certs/Certificate.ts:104](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/Certificate.ts#L104)
+[src/ledger/certs/Certificate.ts:107](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/Certificate.ts#L107)

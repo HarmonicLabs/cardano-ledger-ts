@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / IMoveInstantRewardsCert
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / IMoveInstantRewardsCert
 
 # Interface: IMoveInstantRewardsCert
 
@@ -12,9 +12,9 @@
 
 > **destination**: `CanBeUInteger` \| [`RewardsMap`](../type-aliases/RewardsMap.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/MoveInstantRewardsCert.ts:84](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/MoveInstantRewardsCert.ts#L84)
+[src/ledger/certs/MoveInstantRewardsCert.ts:86](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/MoveInstantRewardsCert.ts#L86)
 
 ***
 
@@ -22,6 +22,6 @@
 
 > **source**: [`InstantRewardsSource`](../enumerations/InstantRewardsSource.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/MoveInstantRewardsCert.ts:83](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/MoveInstantRewardsCert.ts#L83)
+[src/ledger/certs/MoveInstantRewardsCert.ts:85](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/MoveInstantRewardsCert.ts#L85)

@@ -1,12 +1,12 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / ITxWithdrawalsEntryBigInt
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / ITxWithdrawalsEntryBigInt
 
-# Type alias: ITxWithdrawalsEntryBigInt
+# Type Alias: ITxWithdrawalsEntryBigInt
 
-> **ITxWithdrawalsEntryBigInt**: `Object`
+> **ITxWithdrawalsEntryBigInt**: `object`
 
 ## Type declaration
 
@@ -18,6 +18,6 @@
 
 > **rewardAccount**: [`StakeAddress`](../classes/StakeAddress.md)
 
-## Source
+## Defined in
 
-[src/ledger/TxWithdrawals.ts:13](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/TxWithdrawals.ts#L13)
+[src/ledger/TxWithdrawals.ts:14](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/TxWithdrawals.ts#L14)

@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / ITxOutRef
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / ITxOutRef
 
 # Interface: ITxOutRef
 
@@ -12,9 +12,9 @@
 
 > **id**: `string` \| [`Hash32`](../classes/Hash32.md)
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/TxOutRef.ts:15](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/TxOutRef.ts#L15)
+[src/tx/body/output/TxOutRef.ts:17](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/TxOutRef.ts#L17)
 
 ***
 
@@ -22,6 +22,6 @@
 
 > **index**: `number`
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/TxOutRef.ts:16](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/TxOutRef.ts#L16)
+[src/tx/body/output/TxOutRef.ts:18](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/TxOutRef.ts#L18)

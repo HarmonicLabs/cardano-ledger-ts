@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / TxRedeemerTag
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / TxRedeemerTag
 
 # Enumeration: TxRedeemerTag
 
@@ -12,9 +12,9 @@
 
 > **Cert**: `2`
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/TxRedeemer.ts:18](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/TxRedeemer.ts#L18)
+[src/tx/TxWitnessSet/TxRedeemer.ts:15](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/TxRedeemer.ts#L15)
 
 ***
 
@@ -22,9 +22,9 @@
 
 > **Mint**: `1`
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/TxRedeemer.ts:17](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/TxRedeemer.ts#L17)
+[src/tx/TxWitnessSet/TxRedeemer.ts:14](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/TxRedeemer.ts#L14)
 
 ***
 
@@ -32,9 +32,9 @@
 
 > **Proposing**: `5`
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/TxRedeemer.ts:21](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/TxRedeemer.ts#L21)
+[src/tx/TxWitnessSet/TxRedeemer.ts:18](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/TxRedeemer.ts#L18)
 
 ***
 
@@ -42,9 +42,9 @@
 
 > **Spend**: `0`
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/TxRedeemer.ts:16](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/TxRedeemer.ts#L16)
+[src/tx/TxWitnessSet/TxRedeemer.ts:13](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/TxRedeemer.ts#L13)
 
 ***
 
@@ -52,9 +52,9 @@
 
 > **Voting**: `4`
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/TxRedeemer.ts:20](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/TxRedeemer.ts#L20)
+[src/tx/TxWitnessSet/TxRedeemer.ts:17](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/TxRedeemer.ts#L17)
 
 ***
 
@@ -62,6 +62,6 @@
 
 > **Withdraw**: `3`
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/TxRedeemer.ts:19](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/TxRedeemer.ts#L19)
+[src/tx/TxWitnessSet/TxRedeemer.ts:16](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/TxRedeemer.ts#L16)

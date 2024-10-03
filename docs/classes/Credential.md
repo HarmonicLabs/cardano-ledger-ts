@@ -1,14 +1,14 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / Credential
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / Credential
 
 # Class: Credential\<T\>
 
-## Type parameters
+## Type Parameters
 
-• **T** extends [`CredentialType`](../enumerations/CredentialType.md) = [`CredentialType`](../enumerations/CredentialType.md)
+• **T** *extends* [`CredentialType`](../enumerations/CredentialType.md) = [`CredentialType`](../enumerations/CredentialType.md)
 
 ## Implements
 
@@ -18,7 +18,7 @@
 
 ## Constructors
 
-### new Credential(type, hash)
+### new Credential()
 
 > **new Credential**\<`T`\>(`type`, `hash`): [`Credential`](Credential.md)\<`T`\>
 
@@ -32,43 +32,43 @@
 
 [`Credential`](Credential.md)\<`T`\>
 
-#### Source
+#### Defined in
 
-[src/credentials/Credential.ts:24](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/Credential.ts#L24)
+[src/credentials/Credential.ts:24](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/Credential.ts#L24)
 
 ## Properties
 
 ### hash
 
-> **`readonly`** **hash**: `T` extends [`KeyHash`](../enumerations/CredentialType.md#keyhash) ? [`PubKeyHash`](PubKeyHash.md) : [`ValidatorHash`](ValidatorHash.md)
+> `readonly` **hash**: `T` *extends* [`KeyHash`](../enumerations/CredentialType.md#keyhash) ? [`PubKeyHash`](PubKeyHash.md) : [`ValidatorHash`](ValidatorHash.md)
 
-#### Source
+#### Defined in
 
-[src/credentials/Credential.ts:22](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/Credential.ts#L22)
+[src/credentials/Credential.ts:22](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/Credential.ts#L22)
 
 ***
 
 ### type
 
-> **`readonly`** **type**: `T`
+> `readonly` **type**: `T`
 
-#### Source
+#### Defined in
 
-[src/credentials/Credential.ts:21](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/Credential.ts#L21)
+[src/credentials/Credential.ts:21](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/Credential.ts#L21)
 
 ## Accessors
 
 ### fake
 
-> **`get`** **`static`** **fake**(): [`Credential`](Credential.md)\<[`KeyHash`](../enumerations/CredentialType.md#keyhash)\>
+> `get` `static` **fake**(): [`Credential`](Credential.md)\<[`KeyHash`](../enumerations/CredentialType.md#keyhash)\>
 
 #### Returns
 
 [`Credential`](Credential.md)\<[`KeyHash`](../enumerations/CredentialType.md#keyhash)\>
 
-#### Source
+#### Defined in
 
-[src/credentials/Credential.ts:58](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/Credential.ts#L58)
+[src/credentials/Credential.ts:58](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/Credential.ts#L58)
 
 ## Methods
 
@@ -84,9 +84,9 @@
 
 `Cloneable.clone`
 
-#### Source
+#### Defined in
 
-[src/credentials/Credential.ts:50](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/Credential.ts#L50)
+[src/credentials/Credential.ts:50](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/Credential.ts#L50)
 
 ***
 
@@ -102,9 +102,9 @@
 
 `ToCbor.toCbor`
 
-#### Source
+#### Defined in
 
-[src/credentials/Credential.ts:103](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/Credential.ts#L103)
+[src/credentials/Credential.ts:100](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/Credential.ts#L100)
 
 ***
 
@@ -120,37 +120,41 @@
 
 `ToCbor.toCborObj`
 
-#### Source
+#### Defined in
 
-[src/credentials/Credential.ts:107](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/Credential.ts#L107)
+[src/credentials/Credential.ts:104](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/Credential.ts#L104)
 
 ***
 
 ### toData()
 
-> **toData**(): `Data`
+> **toData**(`_v`?): `DataConstr`
+
+#### Parameters
+
+• **\_v?**: `any`
 
 #### Returns
 
-`Data`
+`DataConstr`
 
 #### Implementation of
 
 `ToData.toData`
 
-#### Source
+#### Defined in
 
-[src/credentials/Credential.ts:66](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/Credential.ts#L66)
+[src/credentials/Credential.ts:66](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/Credential.ts#L66)
 
 ***
 
 ### toJson()
 
-> **toJson**(): `Object`
+> **toJson**(): `object`
 
 #### Returns
 
-`Object`
+`object`
 
 ##### credentialType
 
@@ -160,15 +164,15 @@
 
 > **hash**: `string`
 
-#### Source
+#### Defined in
 
-[src/credentials/Credential.ts:134](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/Credential.ts#L134)
+[src/credentials/Credential.ts:131](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/Credential.ts#L131)
 
 ***
 
 ### fromCbor()
 
-> **`static`** **fromCbor**(`cStr`): [`Credential`](Credential.md)\<[`CredentialType`](../enumerations/CredentialType.md)\>
+> `static` **fromCbor**(`cStr`): [`Credential`](Credential.md)\<[`CredentialType`](../enumerations/CredentialType.md)\>
 
 #### Parameters
 
@@ -178,15 +182,15 @@
 
 [`Credential`](Credential.md)\<[`CredentialType`](../enumerations/CredentialType.md)\>
 
-#### Source
+#### Defined in
 
-[src/credentials/Credential.ts:115](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/Credential.ts#L115)
+[src/credentials/Credential.ts:112](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/Credential.ts#L112)
 
 ***
 
 ### fromCborObj()
 
-> **`static`** **fromCborObj**(`cObj`): [`Credential`](Credential.md)\<[`CredentialType`](../enumerations/CredentialType.md)\>
+> `static` **fromCborObj**(`cObj`): [`Credential`](Credential.md)\<[`CredentialType`](../enumerations/CredentialType.md)\>
 
 #### Parameters
 
@@ -196,15 +200,15 @@
 
 [`Credential`](Credential.md)\<[`CredentialType`](../enumerations/CredentialType.md)\>
 
-#### Source
+#### Defined in
 
-[src/credentials/Credential.ts:119](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/Credential.ts#L119)
+[src/credentials/Credential.ts:116](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/Credential.ts#L116)
 
 ***
 
 ### keyHash()
 
-> **`static`** **keyHash**(`hash`): [`Credential`](Credential.md)\<[`KeyHash`](../enumerations/CredentialType.md#keyhash)\>
+> `static` **keyHash**(`hash`): [`Credential`](Credential.md)\<[`KeyHash`](../enumerations/CredentialType.md#keyhash)\>
 
 #### Parameters
 
@@ -214,15 +218,15 @@
 
 [`Credential`](Credential.md)\<[`KeyHash`](../enumerations/CredentialType.md#keyhash)\>
 
-#### Source
+#### Defined in
 
-[src/credentials/Credential.ts:83](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/Credential.ts#L83)
+[src/credentials/Credential.ts:80](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/Credential.ts#L80)
 
 ***
 
 ### ~~pubKey()~~
 
-> **`static`** **pubKey**(`hash`): [`Credential`](Credential.md)\<[`KeyHash`](../enumerations/CredentialType.md#keyhash)\>
+> `static` **pubKey**(`hash`): [`Credential`](Credential.md)\<[`KeyHash`](../enumerations/CredentialType.md#keyhash)\>
 
 #### Parameters
 
@@ -236,15 +240,15 @@
 
 use `keyHash` instead
 
-#### Source
+#### Defined in
 
-[src/credentials/Credential.ts:78](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/Credential.ts#L78)
+[src/credentials/Credential.ts:75](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/Credential.ts#L75)
 
 ***
 
 ### script()
 
-> **`static`** **script**(`hash`): [`Credential`](Credential.md)\<[`Script`](../enumerations/CredentialType.md#script)\>
+> `static` **script**(`hash`): [`Credential`](Credential.md)\<[`Script`](../enumerations/CredentialType.md#script)\>
 
 #### Parameters
 
@@ -254,6 +258,6 @@ use `keyHash` instead
 
 [`Credential`](Credential.md)\<[`Script`](../enumerations/CredentialType.md#script)\>
 
-#### Source
+#### Defined in
 
-[src/credentials/Credential.ts:93](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/Credential.ts#L93)
+[src/credentials/Credential.ts:90](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/Credential.ts#L90)

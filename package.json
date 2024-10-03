@@ -1,6 +1,6 @@
 {
   "name": "@harmoniclabs/cardano-ledger-ts",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -37,7 +37,7 @@
     "@harmoniclabs/bigint-utils": "^1.0.0",
     "@harmoniclabs/crypto": "^0.2.4",
     "@harmoniclabs/obj-utils": "^1.0.0",
-    "@harmoniclabs/uint8array-utils": "^1.0.0"
+    "@harmoniclabs/uint8array-utils": "^1.0.1"
   },
   "peerDependencies": {
     "@harmoniclabs/bip32_ed25519": "^0.1.2",

@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / CertificateType
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / CertificateType
 
 # Enumeration: CertificateType
 
@@ -12,9 +12,9 @@
 
 > **AuthCommitteeHot**: `14`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertificateType.ts:21](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertificateType.ts#L21)
+[src/ledger/certs/CertificateType.ts:21](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertificateType.ts#L21)
 
 ***
 
@@ -26,9 +26,9 @@
 
 since conway
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertificateType.ts:9](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertificateType.ts#L9)
+[src/ledger/certs/CertificateType.ts:9](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertificateType.ts#L9)
 
 ***
 
@@ -40,9 +40,9 @@ since conway
 
 since conway
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertificateType.ts:11](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertificateType.ts#L11)
+[src/ledger/certs/CertificateType.ts:11](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertificateType.ts#L11)
 
 ***
 
@@ -50,9 +50,9 @@ since conway
 
 > **PoolRegistration**: `3`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertificateType.ts:6](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertificateType.ts#L6)
+[src/ledger/certs/CertificateType.ts:6](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertificateType.ts#L6)
 
 ***
 
@@ -60,9 +60,9 @@ since conway
 
 > **PoolRetirement**: `4`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertificateType.ts:7](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertificateType.ts#L7)
+[src/ledger/certs/CertificateType.ts:7](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertificateType.ts#L7)
 
 ***
 
@@ -70,9 +70,9 @@ since conway
 
 > **RegistrationDeposit**: `7`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertificateType.ts:13](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertificateType.ts#L13)
+[src/ledger/certs/CertificateType.ts:13](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertificateType.ts#L13)
 
 ***
 
@@ -80,9 +80,9 @@ since conway
 
 > **RegistrationDrep**: `16`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertificateType.ts:23](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertificateType.ts#L23)
+[src/ledger/certs/CertificateType.ts:23](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertificateType.ts#L23)
 
 ***
 
@@ -90,9 +90,9 @@ since conway
 
 > **ResignCommitteeCold**: `15`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertificateType.ts:22](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertificateType.ts#L22)
+[src/ledger/certs/CertificateType.ts:22](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertificateType.ts#L22)
 
 ***
 
@@ -100,9 +100,9 @@ since conway
 
 > **StakeDeRegistration**: `1`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertificateType.ts:4](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertificateType.ts#L4)
+[src/ledger/certs/CertificateType.ts:4](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertificateType.ts#L4)
 
 ***
 
@@ -110,9 +110,9 @@ since conway
 
 > **StakeDelegation**: `2`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertificateType.ts:5](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertificateType.ts#L5)
+[src/ledger/certs/CertificateType.ts:5](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertificateType.ts#L5)
 
 ***
 
@@ -120,9 +120,9 @@ since conway
 
 > **StakeRegistration**: `0`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertificateType.ts:3](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertificateType.ts#L3)
+[src/ledger/certs/CertificateType.ts:3](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertificateType.ts#L3)
 
 ***
 
@@ -130,9 +130,9 @@ since conway
 
 > **StakeRegistrationDeleg**: `11`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertificateType.ts:17](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertificateType.ts#L17)
+[src/ledger/certs/CertificateType.ts:17](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertificateType.ts#L17)
 
 ***
 
@@ -140,9 +140,9 @@ since conway
 
 > **StakeVoteDeleg**: `10`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertificateType.ts:16](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertificateType.ts#L16)
+[src/ledger/certs/CertificateType.ts:16](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertificateType.ts#L16)
 
 ***
 
@@ -150,9 +150,9 @@ since conway
 
 > **StakeVoteRegistrationDeleg**: `13`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertificateType.ts:19](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertificateType.ts#L19)
+[src/ledger/certs/CertificateType.ts:19](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertificateType.ts#L19)
 
 ***
 
@@ -160,9 +160,9 @@ since conway
 
 > **UnRegistrationDeposit**: `8`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertificateType.ts:14](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertificateType.ts#L14)
+[src/ledger/certs/CertificateType.ts:14](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertificateType.ts#L14)
 
 ***
 
@@ -170,9 +170,9 @@ since conway
 
 > **UnRegistrationDrep**: `17`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertificateType.ts:24](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertificateType.ts#L24)
+[src/ledger/certs/CertificateType.ts:24](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertificateType.ts#L24)
 
 ***
 
@@ -180,9 +180,9 @@ since conway
 
 > **UpdateDrep**: `18`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertificateType.ts:25](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertificateType.ts#L25)
+[src/ledger/certs/CertificateType.ts:25](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertificateType.ts#L25)
 
 ***
 
@@ -190,9 +190,9 @@ since conway
 
 > **VoteDeleg**: `9`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertificateType.ts:15](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertificateType.ts#L15)
+[src/ledger/certs/CertificateType.ts:15](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertificateType.ts#L15)
 
 ***
 
@@ -200,6 +200,6 @@ since conway
 
 > **VoteRegistrationDeleg**: `12`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertificateType.ts:18](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertificateType.ts#L18)
+[src/ledger/certs/CertificateType.ts:18](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertificateType.ts#L18)

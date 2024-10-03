@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / TxIn
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / TxIn
 
 # Class: TxIn
 
@@ -12,7 +12,7 @@
 
 ## Constructors
 
-### new TxIn(utxo)
+### new TxIn()
 
 > **new TxIn**(`utxo`): [`TxIn`](TxIn.md)
 
@@ -28,37 +28,37 @@
 
 [`UTxO`](UTxO.md).[`constructor`](UTxO.md#constructors)
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/UTxO.ts:30](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/UTxO.ts#L30)
+[src/tx/body/output/UTxO.ts:32](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/UTxO.ts#L32)
 
 ## Properties
 
 ### resolved
 
-> **`readonly`** **resolved**: [`TxOut`](TxOut.md)
+> `readonly` **resolved**: [`TxOut`](TxOut.md)
 
 #### Inherited from
 
 [`UTxO`](UTxO.md).[`resolved`](UTxO.md#resolved)
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/UTxO.ts:28](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/UTxO.ts#L28)
+[src/tx/body/output/UTxO.ts:30](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/UTxO.ts#L30)
 
 ***
 
 ### utxoRef
 
-> **`readonly`** **utxoRef**: [`TxOutRef`](TxOutRef.md)
+> `readonly` **utxoRef**: [`TxOutRef`](TxOutRef.md)
 
 #### Inherited from
 
 [`UTxO`](UTxO.md).[`utxoRef`](UTxO.md#utxoref)
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/UTxO.ts:27](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/UTxO.ts#L27)
+[src/tx/body/output/UTxO.ts:29](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/UTxO.ts#L29)
 
 ## Methods
 
@@ -74,9 +74,9 @@
 
 [`UTxO`](UTxO.md).[`clone`](UTxO.md#clone)
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/UTxO.ts:45](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/UTxO.ts#L45)
+[src/tx/body/output/UTxO.ts:47](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/UTxO.ts#L47)
 
 ***
 
@@ -92,9 +92,9 @@
 
 [`UTxO`](UTxO.md).[`toCbor`](UTxO.md#tocbor)
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/UTxO.ts:61](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/UTxO.ts#L61)
+[src/tx/body/output/UTxO.ts:63](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/UTxO.ts#L63)
 
 ***
 
@@ -110,19 +110,19 @@
 
 [`UTxO`](UTxO.md).[`toCborObj`](UTxO.md#tocborobj)
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/UTxO.ts:65](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/UTxO.ts#L65)
+[src/tx/body/output/UTxO.ts:67](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/UTxO.ts#L67)
 
 ***
 
 ### toData()
 
-> **toData**(`version`): `Data`
+> **toData**(`version`?): `Data`
 
 #### Parameters
 
-• **version**: `"v1"` \| `"v2"`= `"v2"`
+• **version?**: `ToDataVersion`
 
 #### Returns
 
@@ -132,27 +132,27 @@
 
 [`UTxO`](UTxO.md).[`toData`](UTxO.md#todata)
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/UTxO.ts:50](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/UTxO.ts#L50)
+[src/tx/body/output/UTxO.ts:52](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/UTxO.ts#L52)
 
 ***
 
 ### toJson()
 
-> **toJson**(): `Object`
+> **toJson**(): `object`
 
 #### Returns
 
-`Object`
+`object`
 
 ##### resolved
 
-> **resolved**: `Object`
+> **resolved**: `object`
 
 ##### resolved.address
 
-> **address**: \`addr1${string}\` \| \`addr_test1${string}\`
+> **address**: \`addr1$\{string\}\` \| \`addr\_test1$\{string\}\`
 
 ##### resolved.datum
 
@@ -160,7 +160,7 @@
 
 ##### resolved.refScript
 
-> **refScript**: `undefined` \| [`ScriptSignature`](../interfaces/ScriptSignature.md) \| [`ScriptAll`](../interfaces/ScriptAll.md) \| [`ScriptAny`](../interfaces/ScriptAny.md) \| [`ScriptAtLeast`](../interfaces/ScriptAtLeast.md) \| [`ScriptAfter`](../interfaces/ScriptAfter.md) \| [`ScriptBefore`](../interfaces/ScriptBefore.md) \| `Object`
+> **refScript**: `undefined` \| [`ScriptSignature`](../interfaces/ScriptSignature.md) \| [`ScriptAll`](../interfaces/ScriptAll.md) \| [`ScriptAny`](../interfaces/ScriptAny.md) \| [`ScriptAtLeast`](../interfaces/ScriptAtLeast.md) \| [`ScriptAfter`](../interfaces/ScriptAfter.md) \| [`ScriptBefore`](../interfaces/ScriptBefore.md) \| `object`
 
 ##### resolved.value
 
@@ -174,15 +174,15 @@
 
 [`UTxO`](UTxO.md).[`toJson`](UTxO.md#tojson)
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/UTxO.ts:105](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/UTxO.ts#L105)
+[src/tx/body/output/UTxO.ts:107](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/UTxO.ts#L107)
 
 ***
 
 ### fromCbor()
 
-> **`static`** **fromCbor**(`cStr`): [`UTxO`](UTxO.md)
+> `static` **fromCbor**(`cStr`): [`UTxO`](UTxO.md)
 
 #### Parameters
 
@@ -196,15 +196,15 @@
 
 [`UTxO`](UTxO.md).[`fromCbor`](UTxO.md#fromcbor)
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/UTxO.ts:73](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/UTxO.ts#L73)
+[src/tx/body/output/UTxO.ts:75](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/UTxO.ts#L75)
 
 ***
 
 ### fromCborObj()
 
-> **`static`** **fromCborObj**(`cObj`): [`UTxO`](UTxO.md)
+> `static` **fromCborObj**(`cObj`): [`UTxO`](UTxO.md)
 
 #### Parameters
 
@@ -218,6 +218,30 @@
 
 [`UTxO`](UTxO.md).[`fromCborObj`](UTxO.md#fromcborobj)
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/UTxO.ts:77](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/UTxO.ts#L77)
+[src/tx/body/output/UTxO.ts:79](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/UTxO.ts#L79)
+
+***
+
+### sort()
+
+> `static` **sort**(`a`, `b`): `number`
+
+#### Parameters
+
+• **a**: [`IUTxO`](../interfaces/IUTxO.md)
+
+• **b**: [`IUTxO`](../interfaces/IUTxO.md)
+
+#### Returns
+
+`number`
+
+#### Inherited from
+
+[`UTxO`](UTxO.md).[`sort`](UTxO.md#sort)
+
+#### Defined in
+
+[src/tx/body/output/UTxO.ts:115](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/UTxO.ts#L115)

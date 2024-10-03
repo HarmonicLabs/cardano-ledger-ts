@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / Hash
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / Hash
 
 # Class: Hash
 
@@ -20,7 +20,7 @@
 
 ## Constructors
 
-### new Hash(bs)
+### new Hash()
 
 > **new Hash**(`bs`): [`Hash`](Hash.md)
 
@@ -32,43 +32,43 @@
 
 [`Hash`](Hash.md)
 
-#### Source
+#### Defined in
 
-[src/hashes/Hash.ts:88](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/hashes/Hash.ts#L88)
+[src/hashes/Hash.ts:89](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/hashes/Hash.ts#L89)
 
 ## Accessors
 
 ### \_bytes
 
-> **`get`** **`protected`** **\_bytes**(): `Uint8Array`
+> `get` `protected` **\_bytes**(): `Uint8Array`
 
 #### Returns
 
 `Uint8Array`
 
-#### Source
+#### Defined in
 
-[src/hashes/Hash.ts:44](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/hashes/Hash.ts#L44)
+[src/hashes/Hash.ts:45](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/hashes/Hash.ts#L45)
 
 ***
 
 ### \_str
 
-> **`get`** **`protected`** **\_str**(): `string`
+> `get` `protected` **\_str**(): `string`
 
 #### Returns
 
 `string`
 
-#### Source
+#### Defined in
 
-[src/hashes/Hash.ts:66](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/hashes/Hash.ts#L66)
+[src/hashes/Hash.ts:67](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/hashes/Hash.ts#L67)
 
 ***
 
 ### asBytes
 
-> **`get`** **asBytes**(): `Uint8Array`
+> `get` **asBytes**(): `Uint8Array`
 
 #### Deprecated
 
@@ -78,15 +78,15 @@ use `toBuffer()` instead
 
 `Uint8Array`
 
-#### Source
+#### Defined in
 
-[src/hashes/Hash.ts:137](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/hashes/Hash.ts#L137)
+[src/hashes/Hash.ts:138](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/hashes/Hash.ts#L138)
 
 ***
 
 ### asString
 
-> **`get`** **asString**(): `string`
+> `get` **asString**(): `string`
 
 #### Deprecated
 
@@ -96,9 +96,9 @@ use `toString()` instead
 
 `string`
 
-#### Source
+#### Defined in
 
-[src/hashes/Hash.ts:124](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/hashes/Hash.ts#L124)
+[src/hashes/Hash.ts:125](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/hashes/Hash.ts#L125)
 
 ## Methods
 
@@ -114,9 +114,9 @@ use `toString()` instead
 
 `Cloneable.clone`
 
-#### Source
+#### Defined in
 
-[src/hashes/Hash.ts:155](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/hashes/Hash.ts#L155)
+[src/hashes/Hash.ts:156](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/hashes/Hash.ts#L156)
 
 ***
 
@@ -128,9 +128,9 @@ use `toString()` instead
 
 `Uint8Array`
 
-#### Source
+#### Defined in
 
-[src/hashes/Hash.ts:142](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/hashes/Hash.ts#L142)
+[src/hashes/Hash.ts:143](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/hashes/Hash.ts#L143)
 
 ***
 
@@ -146,9 +146,9 @@ use `toString()` instead
 
 use `toBuffer()` instead
 
-#### Source
+#### Defined in
 
-[src/hashes/Hash.ts:150](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/hashes/Hash.ts#L150)
+[src/hashes/Hash.ts:151](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/hashes/Hash.ts#L151)
 
 ***
 
@@ -164,9 +164,9 @@ use `toBuffer()` instead
 
 `ToCbor.toCbor`
 
-#### Source
+#### Defined in
 
-[src/hashes/Hash.ts:160](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/hashes/Hash.ts#L160)
+[src/hashes/Hash.ts:161](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/hashes/Hash.ts#L161)
 
 ***
 
@@ -182,15 +182,19 @@ use `toBuffer()` instead
 
 `ToCbor.toCborObj`
 
-#### Source
+#### Defined in
 
-[src/hashes/Hash.ts:164](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/hashes/Hash.ts#L164)
+[src/hashes/Hash.ts:165](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/hashes/Hash.ts#L165)
 
 ***
 
 ### toData()
 
-> **toData**(): `Data`
+> **toData**(`_version`?): `Data`
+
+#### Parameters
+
+• **\_version?**: `ToDataVersion`
 
 #### Returns
 
@@ -200,9 +204,9 @@ use `toBuffer()` instead
 
 `ToData.toData`
 
-#### Source
+#### Defined in
 
-[src/hashes/Hash.ts:181](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/hashes/Hash.ts#L181)
+[src/hashes/Hash.ts:182](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/hashes/Hash.ts#L182)
 
 ***
 
@@ -210,19 +214,21 @@ use `toBuffer()` instead
 
 > **toString**(): `string`
 
+Returns a string representation of an object.
+
 #### Returns
 
 `string`
 
-#### Source
+#### Defined in
 
-[src/hashes/Hash.ts:129](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/hashes/Hash.ts#L129)
+[src/hashes/Hash.ts:130](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/hashes/Hash.ts#L130)
 
 ***
 
 ### fromAscii()
 
-> **`static`** **fromAscii**(`asciiStr`): [`Hash`](Hash.md)
+> `static` **fromAscii**(`asciiStr`): [`Hash`](Hash.md)
 
 #### Parameters
 
@@ -232,15 +238,15 @@ use `toBuffer()` instead
 
 [`Hash`](Hash.md)
 
-#### Source
+#### Defined in
 
-[src/hashes/Hash.ts:186](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/hashes/Hash.ts#L186)
+[src/hashes/Hash.ts:187](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/hashes/Hash.ts#L187)
 
 ***
 
 ### fromCbor()
 
-> **`static`** **fromCbor**(`cStr`): [`Hash`](Hash.md)
+> `static` **fromCbor**(`cStr`): [`Hash`](Hash.md)
 
 #### Parameters
 
@@ -250,15 +256,15 @@ use `toBuffer()` instead
 
 [`Hash`](Hash.md)
 
-#### Source
+#### Defined in
 
-[src/hashes/Hash.ts:169](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/hashes/Hash.ts#L169)
+[src/hashes/Hash.ts:170](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/hashes/Hash.ts#L170)
 
 ***
 
 ### fromCborObj()
 
-> **`static`** **fromCborObj**(`cObj`): [`Hash`](Hash.md)
+> `static` **fromCborObj**(`cObj`): [`Hash`](Hash.md)
 
 #### Parameters
 
@@ -268,15 +274,15 @@ use `toBuffer()` instead
 
 [`Hash`](Hash.md)
 
-#### Source
+#### Defined in
 
-[src/hashes/Hash.ts:173](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/hashes/Hash.ts#L173)
+[src/hashes/Hash.ts:174](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/hashes/Hash.ts#L174)
 
 ***
 
 ### isStrictInstance()
 
-> **`static`** **isStrictInstance**(`bs`): `bs is Hash`
+> `static` **isStrictInstance**(`bs`): `bs is Hash`
 
 #### Parameters
 
@@ -286,15 +292,15 @@ use `toBuffer()` instead
 
 `bs is Hash`
 
-#### Source
+#### Defined in
 
-[src/hashes/Hash.ts:39](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/hashes/Hash.ts#L39)
+[src/hashes/Hash.ts:40](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/hashes/Hash.ts#L40)
 
 ***
 
 ### isValidHexValue()
 
-> **`static`** **isValidHexValue**(`str`): `boolean`
+> `static` **isValidHexValue**(`str`): `boolean`
 
 #### Parameters
 
@@ -304,15 +310,15 @@ use `toBuffer()` instead
 
 `boolean`
 
-#### Source
+#### Defined in
 
-[src/hashes/Hash.ts:196](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/hashes/Hash.ts#L196)
+[src/hashes/Hash.ts:197](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/hashes/Hash.ts#L197)
 
 ***
 
 ### toAscii()
 
-> **`static`** **toAscii**(`bStr`): `string`
+> `static` **toAscii**(`bStr`): `string`
 
 #### Parameters
 
@@ -322,6 +328,6 @@ use `toBuffer()` instead
 
 `string`
 
-#### Source
+#### Defined in
 
-[src/hashes/Hash.ts:191](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/hashes/Hash.ts#L191)
+[src/hashes/Hash.ts:192](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/hashes/Hash.ts#L192)

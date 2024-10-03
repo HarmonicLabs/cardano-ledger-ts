@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / ITxBody
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / ITxBody
 
 # Interface: ITxBody
 
@@ -10,61 +10,61 @@
 
 ### auxDataHash?
 
-> **`optional`** **auxDataHash**: [`AuxiliaryDataHash`](../classes/AuxiliaryDataHash.md)
+> `optional` **auxDataHash**: [`AuxiliaryDataHash`](../classes/AuxiliaryDataHash.md)
 
-#### Source
+#### Defined in
 
-[src/tx/body/TxBody.ts:23](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/TxBody.ts#L23)
+[src/tx/body/TxBody.ts:23](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/TxBody.ts#L23)
 
 ***
 
 ### certs?
 
-> **`optional`** **certs**: [`Certificate`](../type-aliases/Certificate.md)[]
+> `optional` **certs**: [`Certificate`](../type-aliases/Certificate.md)[]
 
-#### Source
+#### Defined in
 
-[src/tx/body/TxBody.ts:20](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/TxBody.ts#L20)
+[src/tx/body/TxBody.ts:20](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/TxBody.ts#L20)
 
 ***
 
 ### collateralInputs?
 
-> **`optional`** **collateralInputs**: [`UTxO`](../classes/UTxO.md)[]
+> `optional` **collateralInputs**: [`UTxO`](../classes/UTxO.md)[]
 
-#### Source
+#### Defined in
 
-[src/tx/body/TxBody.ts:27](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/TxBody.ts#L27)
+[src/tx/body/TxBody.ts:27](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/TxBody.ts#L27)
 
 ***
 
 ### collateralReturn?
 
-> **`optional`** **collateralReturn**: [`TxOut`](../classes/TxOut.md)
+> `optional` **collateralReturn**: [`TxOut`](../classes/TxOut.md)
 
-#### Source
+#### Defined in
 
-[src/tx/body/TxBody.ts:30](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/TxBody.ts#L30)
+[src/tx/body/TxBody.ts:30](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/TxBody.ts#L30)
 
 ***
 
 ### currentTreasuryValue?
 
-> **`optional`** **currentTreasuryValue**: `CanBeUInteger`
+> `optional` **currentTreasuryValue**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/tx/body/TxBody.ts:36](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/TxBody.ts#L36)
+[src/tx/body/TxBody.ts:36](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/TxBody.ts#L36)
 
 ***
 
 ### donation?
 
-> **`optional`** **donation**: `CanBeUInteger`
+> `optional` **donation**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/tx/body/TxBody.ts:37](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/TxBody.ts#L37)
+[src/tx/body/TxBody.ts:37](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/TxBody.ts#L37)
 
 ***
 
@@ -72,9 +72,9 @@
 
 > **fee**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/tx/body/TxBody.ts:18](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/TxBody.ts#L18)
+[src/tx/body/TxBody.ts:18](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/TxBody.ts#L18)
 
 ***
 
@@ -82,29 +82,29 @@
 
 > **inputs**: [[`UTxO`](../classes/UTxO.md), `...UTxO[]`]
 
-#### Source
+#### Defined in
 
-[src/tx/body/TxBody.ts:16](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/TxBody.ts#L16)
+[src/tx/body/TxBody.ts:16](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/TxBody.ts#L16)
 
 ***
 
 ### mint?
 
-> **`optional`** **mint**: [`Value`](../classes/Value.md)
+> `optional` **mint**: [`Value`](../classes/Value.md)
 
-#### Source
+#### Defined in
 
-[src/tx/body/TxBody.ts:25](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/TxBody.ts#L25)
+[src/tx/body/TxBody.ts:25](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/TxBody.ts#L25)
 
 ***
 
 ### network?
 
-> **`optional`** **network**: [`NetworkT`](../type-aliases/NetworkT.md)
+> `optional` **network**: [`NetworkT`](../type-aliases/NetworkT.md)
 
-#### Source
+#### Defined in
 
-[src/tx/body/TxBody.ts:29](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/TxBody.ts#L29)
+[src/tx/body/TxBody.ts:29](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/TxBody.ts#L29)
 
 ***
 
@@ -112,106 +112,106 @@
 
 > **outputs**: [`TxOut`](../classes/TxOut.md)[]
 
-#### Source
+#### Defined in
 
-[src/tx/body/TxBody.ts:17](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/TxBody.ts#L17)
+[src/tx/body/TxBody.ts:17](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/TxBody.ts#L17)
 
 ***
 
 ### proposalProcedures?
 
-> **`optional`** **proposalProcedures**: (`IProposalProcedure` \| `ProposalProcedure`)[]
+> `optional` **proposalProcedures**: ([`IProposalProcedure`](IProposalProcedure.md) \| [`ProposalProcedure`](../classes/ProposalProcedure.md))[]
 
-#### Source
+#### Defined in
 
-[src/tx/body/TxBody.ts:35](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/TxBody.ts#L35)
+[src/tx/body/TxBody.ts:35](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/TxBody.ts#L35)
 
 ***
 
 ### protocolUpdate?
 
-> **`optional`** **protocolUpdate**: [`LegacyPPUpdateProposal`](../type-aliases/LegacyPPUpdateProposal.md)
+> `optional` **protocolUpdate**: [`LegacyPPUpdateProposal`](../type-aliases/LegacyPPUpdateProposal.md)
 
-#### Source
+#### Defined in
 
-[src/tx/body/TxBody.ts:22](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/TxBody.ts#L22)
+[src/tx/body/TxBody.ts:22](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/TxBody.ts#L22)
 
 ***
 
 ### refInputs?
 
-> **`optional`** **refInputs**: [`UTxO`](../classes/UTxO.md)[]
+> `optional` **refInputs**: [`UTxO`](../classes/UTxO.md)[]
 
-#### Source
+#### Defined in
 
-[src/tx/body/TxBody.ts:32](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/TxBody.ts#L32)
+[src/tx/body/TxBody.ts:32](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/TxBody.ts#L32)
 
 ***
 
 ### requiredSigners?
 
-> **`optional`** **requiredSigners**: [`PubKeyHash`](../classes/PubKeyHash.md)[]
+> `optional` **requiredSigners**: [`PubKeyHash`](../classes/PubKeyHash.md)[]
 
-#### Source
+#### Defined in
 
-[src/tx/body/TxBody.ts:28](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/TxBody.ts#L28)
+[src/tx/body/TxBody.ts:28](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/TxBody.ts#L28)
 
 ***
 
 ### scriptDataHash?
 
-> **`optional`** **scriptDataHash**: [`ScriptDataHash`](../classes/ScriptDataHash.md)
+> `optional` **scriptDataHash**: [`ScriptDataHash`](../classes/ScriptDataHash.md)
 
-#### Source
+#### Defined in
 
-[src/tx/body/TxBody.ts:26](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/TxBody.ts#L26)
+[src/tx/body/TxBody.ts:26](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/TxBody.ts#L26)
 
 ***
 
 ### totCollateral?
 
-> **`optional`** **totCollateral**: `CanBeUInteger`
+> `optional` **totCollateral**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/tx/body/TxBody.ts:31](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/TxBody.ts#L31)
+[src/tx/body/TxBody.ts:31](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/TxBody.ts#L31)
 
 ***
 
 ### ttl?
 
-> **`optional`** **ttl**: `CanBeUInteger`
+> `optional` **ttl**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/tx/body/TxBody.ts:19](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/TxBody.ts#L19)
+[src/tx/body/TxBody.ts:19](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/TxBody.ts#L19)
 
 ***
 
 ### validityIntervalStart?
 
-> **`optional`** **validityIntervalStart**: `CanBeUInteger`
+> `optional` **validityIntervalStart**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/tx/body/TxBody.ts:24](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/TxBody.ts#L24)
+[src/tx/body/TxBody.ts:24](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/TxBody.ts#L24)
 
 ***
 
 ### votingProcedures?
 
-> **`optional`** **votingProcedures**: `VotingProcedures` \| `IVotingProcedures`
+> `optional` **votingProcedures**: [`VotingProcedures`](../classes/VotingProcedures.md) \| [`IVotingProcedures`](../type-aliases/IVotingProcedures.md)
 
-#### Source
+#### Defined in
 
-[src/tx/body/TxBody.ts:34](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/TxBody.ts#L34)
+[src/tx/body/TxBody.ts:34](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/TxBody.ts#L34)
 
 ***
 
 ### withdrawals?
 
-> **`optional`** **withdrawals**: [`ITxWithdrawals`](../type-aliases/ITxWithdrawals.md) \| [`TxWithdrawals`](../classes/TxWithdrawals.md)
+> `optional` **withdrawals**: [`ITxWithdrawals`](../type-aliases/ITxWithdrawals.md) \| [`TxWithdrawals`](../classes/TxWithdrawals.md)
 
-#### Source
+#### Defined in
 
-[src/tx/body/TxBody.ts:21](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/TxBody.ts#L21)
+[src/tx/body/TxBody.ts:21](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/TxBody.ts#L21)

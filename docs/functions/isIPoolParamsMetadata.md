@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / isIPoolParamsMetadata
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / isIPoolParamsMetadata
 
 # Function: isIPoolParamsMetadata()
 
@@ -16,6 +16,6 @@
 
 `stuff is IPoolParamsMetadata`
 
-## Source
+## Defined in
 
-[src/ledger/PoolParams.ts:21](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L21)
+[src/ledger/PoolParams.ts:23](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L23)

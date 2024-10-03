@@ -1,13 +1,13 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / ValueUnits
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / ValueUnits
 
-# Type alias: ValueUnits
+# Type Alias: ValueUnits
 
 > **ValueUnits**: [`ValueUnitEntry`](ValueUnitEntry.md)[]
 
-## Source
+## Defined in
 
-[src/ledger/Value/Value.ts:22](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/Value/Value.ts#L22)
+[src/ledger/Value/Value.ts:22](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/Value/Value.ts#L22)

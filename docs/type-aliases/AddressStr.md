@@ -1,13 +1,13 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / AddressStr
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / AddressStr
 
-# Type alias: AddressStr
+# Type Alias: AddressStr
 
-> **AddressStr**: \`${"addr1" | "addr_test1"}${string}\`
+> **AddressStr**: \`$\{"addr1" \| "addr\_test1"\}$\{string\}\`
 
-## Source
+## Defined in
 
-[src/ledger/Address.ts:14](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/Address.ts#L14)
+[src/ledger/Address.ts:15](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/Address.ts#L15)

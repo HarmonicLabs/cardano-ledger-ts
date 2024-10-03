@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / ITypedPoolParams
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / ITypedPoolParams
 
 # Interface: ITypedPoolParams
 
@@ -12,9 +12,9 @@
 
 > **cost**: `bigint`
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:58](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L58)
+[src/ledger/PoolParams.ts:60](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L60)
 
 ***
 
@@ -22,19 +22,19 @@
 
 > **margin**: `CborPositiveRational`
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:59](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L59)
+[src/ledger/PoolParams.ts:61](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L61)
 
 ***
 
 ### metadata?
 
-> **`optional`** **metadata**: [`ITypedPoolParamsMetadata`](ITypedPoolParamsMetadata.md)
+> `optional` **metadata**: [`ITypedPoolParamsMetadata`](ITypedPoolParamsMetadata.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:63](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L63)
+[src/ledger/PoolParams.ts:65](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L65)
 
 ***
 
@@ -42,9 +42,9 @@
 
 > **operator**: [`PoolKeyHash`](../classes/PoolKeyHash.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:55](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L55)
+[src/ledger/PoolParams.ts:57](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L57)
 
 ***
 
@@ -52,9 +52,9 @@
 
 > **owners**: [`PubKeyHash`](../classes/PubKeyHash.md)[]
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:61](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L61)
+[src/ledger/PoolParams.ts:63](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L63)
 
 ***
 
@@ -62,9 +62,9 @@
 
 > **pledge**: `bigint`
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:57](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L57)
+[src/ledger/PoolParams.ts:59](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L59)
 
 ***
 
@@ -72,19 +72,19 @@
 
 > **relays**: [`PoolRelay`](../type-aliases/PoolRelay.md)[]
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:62](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L62)
+[src/ledger/PoolParams.ts:64](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L64)
 
 ***
 
 ### rewardAccount
 
-> **rewardAccount**: [`Hash28`](../classes/Hash28.md)
+> **rewardAccount**: [`StakeAddress`](../classes/StakeAddress.md)\<[`StakeAddressType`](../type-aliases/StakeAddressType.md)\>
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:60](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L60)
+[src/ledger/PoolParams.ts:62](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L62)
 
 ***
 
@@ -92,6 +92,6 @@
 
 > **vrfKeyHash**: [`VRFKeyHash`](../classes/VRFKeyHash.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:56](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L56)
+[src/ledger/PoolParams.ts:58](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L58)

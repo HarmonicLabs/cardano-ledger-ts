@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / ITx
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / ITx
 
 # Interface: ITx
 
@@ -10,11 +10,11 @@
 
 ### auxiliaryData?
 
-> **`optional`** **auxiliaryData**: `null` \| [`AuxiliaryData`](../classes/AuxiliaryData.md)
+> `optional` **auxiliaryData**: `null` \| [`AuxiliaryData`](../classes/AuxiliaryData.md)
 
-#### Source
+#### Defined in
 
-[src/tx/Tx.ts:18](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/Tx.ts#L18)
+[src/tx/Tx.ts:18](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/Tx.ts#L18)
 
 ***
 
@@ -22,19 +22,19 @@
 
 > **body**: [`ITxBody`](ITxBody.md)
 
-#### Source
+#### Defined in
 
-[src/tx/Tx.ts:15](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/Tx.ts#L15)
+[src/tx/Tx.ts:15](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/Tx.ts#L15)
 
 ***
 
 ### isScriptValid?
 
-> **`optional`** **isScriptValid**: `boolean`
+> `optional` **isScriptValid**: `boolean`
 
-#### Source
+#### Defined in
 
-[src/tx/Tx.ts:17](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/Tx.ts#L17)
+[src/tx/Tx.ts:17](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/Tx.ts#L17)
 
 ***
 
@@ -42,6 +42,6 @@
 
 > **witnesses**: [`ITxWitnessSet`](ITxWitnessSet.md)
 
-#### Source
+#### Defined in
 
-[src/tx/Tx.ts:16](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/Tx.ts#L16)
+[src/tx/Tx.ts:16](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/Tx.ts#L16)

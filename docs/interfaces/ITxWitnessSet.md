@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / ITxWitnessSet
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / ITxWitnessSet
 
 # Interface: ITxWitnessSet
 
@@ -10,78 +10,78 @@
 
 ### bootstrapWitnesses?
 
-> **`optional`** **bootstrapWitnesses**: [`BootstrapWitness`](../classes/BootstrapWitness.md)[]
+> `optional` **bootstrapWitnesses**: [`BootstrapWitness`](../classes/BootstrapWitness.md)[]
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/TxWitnessSet.ts:18](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/TxWitnessSet.ts#L18)
+[src/tx/TxWitnessSet/TxWitnessSet.ts:18](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/TxWitnessSet.ts#L18)
 
 ***
 
 ### datums?
 
-> **`optional`** **datums**: `Data`[]
+> `optional` **datums**: `Data`[]
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/TxWitnessSet.ts:20](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/TxWitnessSet.ts#L20)
+[src/tx/TxWitnessSet/TxWitnessSet.ts:20](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/TxWitnessSet.ts#L20)
 
 ***
 
 ### nativeScripts?
 
-> **`optional`** **nativeScripts**: [`Script`](../classes/Script.md)\<[`NativeScript`](../enumerations/ScriptType.md#nativescript)\>[]
+> `optional` **nativeScripts**: [`Script`](../classes/Script.md)\<[`NativeScript`](../enumerations/ScriptType.md#nativescript)\>[]
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/TxWitnessSet.ts:17](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/TxWitnessSet.ts#L17)
+[src/tx/TxWitnessSet/TxWitnessSet.ts:17](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/TxWitnessSet.ts#L17)
 
 ***
 
 ### plutusV1Scripts?
 
-> **`optional`** **plutusV1Scripts**: [`Script`](../classes/Script.md)\<[`PlutusV1`](../enumerations/ScriptType.md#plutusv1)\>[]
+> `optional` **plutusV1Scripts**: [`Script`](../classes/Script.md)\<[`PlutusV1`](../enumerations/ScriptType.md#plutusv1)\>[]
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/TxWitnessSet.ts:19](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/TxWitnessSet.ts#L19)
+[src/tx/TxWitnessSet/TxWitnessSet.ts:19](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/TxWitnessSet.ts#L19)
 
 ***
 
 ### plutusV2Scripts?
 
-> **`optional`** **plutusV2Scripts**: [`Script`](../classes/Script.md)\<[`PlutusV2`](../enumerations/ScriptType.md#plutusv2)\>[]
+> `optional` **plutusV2Scripts**: [`Script`](../classes/Script.md)\<[`PlutusV2`](../enumerations/ScriptType.md#plutusv2)\>[]
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/TxWitnessSet.ts:22](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/TxWitnessSet.ts#L22)
+[src/tx/TxWitnessSet/TxWitnessSet.ts:22](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/TxWitnessSet.ts#L22)
 
 ***
 
 ### plutusV3Scripts?
 
-> **`optional`** **plutusV3Scripts**: [`Script`](../classes/Script.md)\<[`PlutusV3`](../enumerations/ScriptType.md#plutusv3)\>[]
+> `optional` **plutusV3Scripts**: [`Script`](../classes/Script.md)\<[`PlutusV3`](../enumerations/ScriptType.md#plutusv3)\>[]
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/TxWitnessSet.ts:23](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/TxWitnessSet.ts#L23)
+[src/tx/TxWitnessSet/TxWitnessSet.ts:23](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/TxWitnessSet.ts#L23)
 
 ***
 
 ### redeemers?
 
-> **`optional`** **redeemers**: [`TxRedeemer`](../classes/TxRedeemer.md)[]
+> `optional` **redeemers**: [`TxRedeemer`](../classes/TxRedeemer.md)[]
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/TxWitnessSet.ts:21](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/TxWitnessSet.ts#L21)
+[src/tx/TxWitnessSet/TxWitnessSet.ts:21](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/TxWitnessSet.ts#L21)
 
 ***
 
 ### vkeyWitnesses?
 
-> **`optional`** **vkeyWitnesses**: [`VKeyWitness`](../classes/VKeyWitness.md)[]
+> `optional` **vkeyWitnesses**: [`VKeyWitness`](../classes/VKeyWitness.md)[]
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/TxWitnessSet.ts:16](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/TxWitnessSet.ts#L16)
+[src/tx/TxWitnessSet/TxWitnessSet.ts:16](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/TxWitnessSet.ts#L16)

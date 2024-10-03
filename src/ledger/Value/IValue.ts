@@ -1,4 +1,4 @@
-import { fromHex, toHex, uint8ArrayEq } from "@harmoniclabs/uint8array-utils";
+import { fromHex, lexCompare, toHex, uint8ArrayEq } from "@harmoniclabs/uint8array-utils";
 import { CanBeHash28, Hash28 } from "../../hashes/Hash28/Hash28";
 import { CanBeUInteger } from "../../utils/ints";
 import { defineReadOnlyProperty, isObject, hasOwn } from "@harmoniclabs/obj-utils";
@@ -33,14 +33,22 @@ export function normalizeIValue( val: IValue ): NormalizedIValue
 
         return {
             policy,
-            assets: assets.map(({ name, quantity }) => {
+            assets: assets
+            .map(({ name, quantity }) => {
 
                 return {
                     name: typeof name === "string" ? fromHex( name ): name,
                     quantity: BigInt( quantity )
                 };
             })
+            .sort(( a, b ) => lexCompare( a.name, b.name ) )
         } as NormalizedIValuePolicyEntry
+    })
+    .sort(( a, b ) => {
+        if( a.policy === "" ) return -1;
+        if( b.policy === "" ) return 1;
+
+        return lexCompare( a.policy.toBuffer(), b.policy.toBuffer() );
     });
 }
 

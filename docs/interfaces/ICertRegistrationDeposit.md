@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / ICertRegistrationDeposit
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / ICertRegistrationDeposit
 
 # Interface: ICertRegistrationDeposit
 
@@ -12,9 +12,9 @@
 
 > **deposit**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertRegistrationDeposit.ts:12](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertRegistrationDeposit.ts#L12)
+[src/ledger/certs/CertRegistrationDeposit.ts:15](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertRegistrationDeposit.ts#L15)
 
 ***
 
@@ -22,6 +22,6 @@
 
 > **stakeCredential**: [`Credential`](../classes/Credential.md)\<[`CredentialType`](../enumerations/CredentialType.md)\>
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertRegistrationDeposit.ts:11](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertRegistrationDeposit.ts#L11)
+[src/ledger/certs/CertRegistrationDeposit.ts:14](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertRegistrationDeposit.ts#L14)

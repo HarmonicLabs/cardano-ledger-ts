@@ -1,18 +1,18 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / StakeAddress
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / StakeAddress
 
 # Class: StakeAddress\<T\>
 
-## Type parameters
+## Type Parameters
 
-• **T** extends [`StakeAddressType`](../type-aliases/StakeAddressType.md) = [`StakeAddressType`](../type-aliases/StakeAddressType.md)
+• **T** *extends* [`StakeAddressType`](../type-aliases/StakeAddressType.md) = [`StakeAddressType`](../type-aliases/StakeAddressType.md)
 
 ## Constructors
 
-### new StakeAddress(network, credentials, type)
+### new StakeAddress()
 
 > **new StakeAddress**\<`T`\>(`network`, `credentials`, `type`?): [`StakeAddress`](StakeAddress.md)\<`T`\>
 
@@ -28,39 +28,39 @@
 
 [`StakeAddress`](StakeAddress.md)\<`T`\>
 
-#### Source
+#### Defined in
 
-[src/ledger/StakeAddress.ts:25](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/StakeAddress.ts#L25)
+[src/ledger/StakeAddress.ts:26](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/StakeAddress.ts#L26)
 
 ## Properties
 
 ### credentials
 
-> **`readonly`** **credentials**: [`StakeAddressCredentials`](../type-aliases/StakeAddressCredentials.md)\<`T`\>
+> `readonly` **credentials**: [`StakeAddressCredentials`](../type-aliases/StakeAddressCredentials.md)\<`T`\>
 
-#### Source
+#### Defined in
 
-[src/ledger/StakeAddress.ts:23](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/StakeAddress.ts#L23)
+[src/ledger/StakeAddress.ts:24](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/StakeAddress.ts#L24)
 
 ***
 
 ### network
 
-> **`readonly`** **network**: [`NetworkT`](../type-aliases/NetworkT.md)
+> `readonly` **network**: [`NetworkT`](../type-aliases/NetworkT.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/StakeAddress.ts:21](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/StakeAddress.ts#L21)
+[src/ledger/StakeAddress.ts:22](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/StakeAddress.ts#L22)
 
 ***
 
 ### type
 
-> **`readonly`** **type**: `T`
+> `readonly` **type**: `T`
 
-#### Source
+#### Defined in
 
-[src/ledger/StakeAddress.ts:22](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/StakeAddress.ts#L22)
+[src/ledger/StakeAddress.ts:23](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/StakeAddress.ts#L23)
 
 ## Methods
 
@@ -72,37 +72,51 @@
 
 [`StakeAddress`](StakeAddress.md)\<`T`\>
 
-#### Source
+#### Defined in
 
-[src/ledger/StakeAddress.ts:65](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/StakeAddress.ts#L65)
+[src/ledger/StakeAddress.ts:66](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/StakeAddress.ts#L66)
 
 ***
 
 ### toBytes()
 
-> **toBytes**(): `byte`[]
+> **toBytes**(): `Uint8Array`
 
 #### Returns
 
-`byte`[]
+`Uint8Array`
 
-#### Source
+#### Defined in
 
-[src/ledger/StakeAddress.ts:100](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/StakeAddress.ts#L100)
+[src/ledger/StakeAddress.ts:101](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/StakeAddress.ts#L101)
+
+***
+
+### toCborObj()
+
+> **toCborObj**(): `CborObj`
+
+#### Returns
+
+`CborObj`
+
+#### Defined in
+
+[src/ledger/StakeAddress.ts:129](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/StakeAddress.ts#L129)
 
 ***
 
 ### toCredential()
 
-> **toCredential**(): [`Credential`](Credential.md)\<`CredentialType`\>
+> **toCredential**(): [`Credential`](Credential.md)\<[`CredentialType`](../enumerations/CredentialType.md)\>
 
 #### Returns
 
-[`Credential`](Credential.md)\<`CredentialType`\>
+[`Credential`](Credential.md)\<[`CredentialType`](../enumerations/CredentialType.md)\>
 
-#### Source
+#### Defined in
 
-[src/ledger/StakeAddress.ts:128](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/StakeAddress.ts#L128)
+[src/ledger/StakeAddress.ts:146](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/StakeAddress.ts#L146)
 
 ***
 
@@ -114,9 +128,9 @@
 
 [`StakeCredentials`](StakeCredentials.md)\<`T`\>
 
-#### Source
+#### Defined in
 
-[src/ledger/StakeAddress.ts:136](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/StakeAddress.ts#L136)
+[src/ledger/StakeAddress.ts:154](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/StakeAddress.ts#L154)
 
 ***
 
@@ -128,31 +142,67 @@
 
 [`StakeAddressBech32`](../type-aliases/StakeAddressBech32.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/StakeAddress.ts:74](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/StakeAddress.ts#L74)
+[src/ledger/StakeAddress.ts:75](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/StakeAddress.ts#L75)
 
 ***
 
 ### fromBytes()
 
-> **`static`** **fromBytes**(`bs`, `netwok`, `type`): [`StakeAddress`](StakeAddress.md)\<[`StakeAddressType`](../type-aliases/StakeAddressType.md)\>
+> `static` **fromBytes**(`bs`, `netwok`, `type`): [`StakeAddress`](StakeAddress.md)\<[`StakeAddressType`](../type-aliases/StakeAddressType.md)\>
 
 #### Parameters
 
 • **bs**: `string` \| `Uint8Array` \| `byte`[]
 
-• **netwok**: [`NetworkT`](../type-aliases/NetworkT.md)= `"mainnet"`
+• **netwok**: [`NetworkT`](../type-aliases/NetworkT.md) = `"mainnet"`
 
-• **type**: [`StakeAddressType`](../type-aliases/StakeAddressType.md)= `"stakeKey"`
+• **type**: [`StakeAddressType`](../type-aliases/StakeAddressType.md) = `"stakeKey"`
 
 #### Returns
 
 [`StakeAddress`](StakeAddress.md)\<[`StakeAddressType`](../type-aliases/StakeAddressType.md)\>
 
-#### Source
+#### Defined in
 
-[src/ledger/StakeAddress.ts:105](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/StakeAddress.ts#L105)
+[src/ledger/StakeAddress.ts:106](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/StakeAddress.ts#L106)
+
+***
+
+### fromCbor()
+
+> `static` **fromCbor**(`cStr`): [`StakeAddress`](StakeAddress.md)\<[`StakeAddressType`](../type-aliases/StakeAddressType.md)\>
+
+#### Parameters
+
+• **cStr**: `CanBeCborString`
+
+#### Returns
+
+[`StakeAddress`](StakeAddress.md)\<[`StakeAddressType`](../type-aliases/StakeAddressType.md)\>
+
+#### Defined in
+
+[src/ledger/StakeAddress.ts:134](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/StakeAddress.ts#L134)
+
+***
+
+### fromCborObj()
+
+> `static` **fromCborObj**(`cObj`): [`StakeAddress`](StakeAddress.md)\<[`StakeAddressType`](../type-aliases/StakeAddressType.md)\>
+
+#### Parameters
+
+• **cObj**: `CborObj`
+
+#### Returns
+
+[`StakeAddress`](StakeAddress.md)\<[`StakeAddressType`](../type-aliases/StakeAddressType.md)\>
+
+#### Defined in
+
+[src/ledger/StakeAddress.ts:138](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/StakeAddress.ts#L138)
 
 ***
 
@@ -160,7 +210,7 @@
 
 #### fromString(str)
 
-> **`static`** **fromString**(`str`): [`StakeAddress`](StakeAddress.md)\<[`StakeAddressType`](../type-aliases/StakeAddressType.md)\>
+> `static` **fromString**(`str`): [`StakeAddress`](StakeAddress.md)\<[`StakeAddressType`](../type-aliases/StakeAddressType.md)\>
 
 ##### Parameters
 
@@ -170,17 +220,17 @@
 
 [`StakeAddress`](StakeAddress.md)\<[`StakeAddressType`](../type-aliases/StakeAddressType.md)\>
 
-##### Source
+##### Defined in
 
-[src/ledger/StakeAddress.ts:82](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/StakeAddress.ts#L82)
+[src/ledger/StakeAddress.ts:83](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/StakeAddress.ts#L83)
 
 #### fromString(str, type)
 
-> **`static`** **fromString**\<`T`\>(`str`, `type`): [`StakeAddress`](StakeAddress.md)\<`T`\>
+> `static` **fromString**\<`T`\>(`str`, `type`): [`StakeAddress`](StakeAddress.md)\<`T`\>
 
-##### Type parameters
+##### Type Parameters
 
-• **T** extends [`StakeAddressType`](../type-aliases/StakeAddressType.md) = [`StakeAddressType`](../type-aliases/StakeAddressType.md)
+• **T** *extends* [`StakeAddressType`](../type-aliases/StakeAddressType.md) = [`StakeAddressType`](../type-aliases/StakeAddressType.md)
 
 ##### Parameters
 
@@ -192,6 +242,6 @@
 
 [`StakeAddress`](StakeAddress.md)\<`T`\>
 
-##### Source
+##### Defined in
 
-[src/ledger/StakeAddress.ts:83](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/StakeAddress.ts#L83)
+[src/ledger/StakeAddress.ts:84](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/StakeAddress.ts#L84)

@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / isProtocolParameters
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / isProtocolParameters
 
 # Function: isProtocolParameters()
 
@@ -16,6 +16,6 @@
 
 `something is ProtocolParameters`
 
-## Source
+## Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:55](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L55)
+[src/ledger/protocol/ProtocolParameters.ts:57](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L57)

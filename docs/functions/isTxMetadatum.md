@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / isTxMetadatum
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / isTxMetadatum
 
 # Function: isTxMetadatum()
 
@@ -16,6 +16,6 @@
 
 `something is TxMetadatum`
 
-## Source
+## Defined in
 
-[src/tx/metadata/TxMetadatum.ts:50](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/metadata/TxMetadatum.ts#L50)
+[src/tx/metadata/TxMetadatum.ts:50](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/metadata/TxMetadatum.ts#L50)
