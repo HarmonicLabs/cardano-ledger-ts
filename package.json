@@ -9,7 +9,6 @@
     "dist"
   ],
   "scripts": {
-    "prepare": "npm run build",
     "test": "jest",
     "clear-jest": "jest --clearCache",
     "test-watch": "jest --watchman",
@@ -38,12 +37,14 @@
     "@harmoniclabs/bigint-utils": "^1.0.0",
     "@harmoniclabs/crypto": "^0.2.4",
     "@harmoniclabs/obj-utils": "^1.0.0",
-    "@harmoniclabs/uint8array-utils": "^1.0.0",
-    "@harmoniclabs/cbor": "^1.2.0",
+    "@harmoniclabs/uint8array-utils": "^1.0.0"
+  },
+  "peerDependencies": {
+    "@harmoniclabs/bip32_ed25519": "^0.1.2",
     "@harmoniclabs/bytestring": "^1.0.0",
-    "@harmoniclabs/plutus-data": "^1.2.4",
-    "@harmoniclabs/bip32_ed25519": "^0.1.2",  
+    "@harmoniclabs/cbor": "^1.2.0",
     "@harmoniclabs/pair": "^1.0.0",
+    "@harmoniclabs/plutus-data": "^1.2.4",
     "@harmoniclabs/cardano-costmodels-ts": "^1.2.0-dev1",
     "@harmoniclabs/plutus-machine": "^2.0.0-dev4"
   },
