@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / ITxRedeemer
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / ITxRedeemer
 
 # Interface: ITxRedeemer
 
@@ -12,9 +12,9 @@
 
 > **data**: `Data`
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/TxRedeemer.ts:68](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/TxRedeemer.ts#L68)
+[src/tx/TxWitnessSet/TxRedeemer.ts:65](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/TxRedeemer.ts#L65)
 
 ***
 
@@ -22,9 +22,9 @@
 
 > **execUnits**: `ExBudget`
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/TxRedeemer.ts:69](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/TxRedeemer.ts#L69)
+[src/tx/TxWitnessSet/TxRedeemer.ts:66](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/TxRedeemer.ts#L66)
 
 ***
 
@@ -32,9 +32,9 @@
 
 > **index**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/TxRedeemer.ts:67](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/TxRedeemer.ts#L67)
+[src/tx/TxWitnessSet/TxRedeemer.ts:64](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/TxRedeemer.ts#L64)
 
 ***
 
@@ -42,6 +42,6 @@
 
 > **tag**: [`TxRedeemerTag`](../enumerations/TxRedeemerTag.md)
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/TxRedeemer.ts:66](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/TxRedeemer.ts#L66)
+[src/tx/TxWitnessSet/TxRedeemer.ts:63](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/TxRedeemer.ts#L63)

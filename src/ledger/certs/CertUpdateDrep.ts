@@ -42,7 +42,7 @@ export class CertUpdateDrep
         
         return new DataConstr(
             5, [
-                this.drepCredential.toData()
+                this.drepCredential.toData( version)
             ]
         );
     }

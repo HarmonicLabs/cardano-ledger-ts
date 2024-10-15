@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / ICertStakeVoteRegistrationDeleg
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / ICertStakeVoteRegistrationDeleg
 
 # Interface: ICertStakeVoteRegistrationDeleg
 
@@ -12,19 +12,19 @@
 
 > **coin**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertStakeVoteRegistrationDeleg.ts:16](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertStakeVoteRegistrationDeleg.ts#L16)
+[src/ledger/certs/CertStakeVoteRegistrationDeleg.ts:19](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertStakeVoteRegistrationDeleg.ts#L19)
 
 ***
 
 ### drep
 
-> **drep**: `DRepLike`
+> **drep**: [`DRepLike`](../type-aliases/DRepLike.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertStakeVoteRegistrationDeleg.ts:15](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertStakeVoteRegistrationDeleg.ts#L15)
+[src/ledger/certs/CertStakeVoteRegistrationDeleg.ts:18](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertStakeVoteRegistrationDeleg.ts#L18)
 
 ***
 
@@ -32,9 +32,9 @@
 
 > **poolKeyHash**: [`CanBeHash28`](../type-aliases/CanBeHash28.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertStakeVoteRegistrationDeleg.ts:14](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertStakeVoteRegistrationDeleg.ts#L14)
+[src/ledger/certs/CertStakeVoteRegistrationDeleg.ts:17](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertStakeVoteRegistrationDeleg.ts#L17)
 
 ***
 
@@ -42,6 +42,6 @@
 
 > **stakeCredential**: [`Credential`](../classes/Credential.md)\<[`CredentialType`](../enumerations/CredentialType.md)\>
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertStakeVoteRegistrationDeleg.ts:13](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertStakeVoteRegistrationDeleg.ts#L13)
+[src/ledger/certs/CertStakeVoteRegistrationDeleg.ts:16](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertStakeVoteRegistrationDeleg.ts#L16)

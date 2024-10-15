@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / ICertRegistrationDrep
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / ICertRegistrationDrep
 
 # Interface: ICertRegistrationDrep
 
@@ -10,11 +10,11 @@
 
 ### anchor?
 
-> **`optional`** **anchor**: `IAnchor`
+> `optional` **anchor**: [`IAnchor`](IAnchor.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertRegistrationDrep.ts:14](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertRegistrationDrep.ts#L14)
+[src/ledger/certs/CertRegistrationDrep.ts:16](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertRegistrationDrep.ts#L16)
 
 ***
 
@@ -22,9 +22,9 @@
 
 > **coin**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertRegistrationDrep.ts:13](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertRegistrationDrep.ts#L13)
+[src/ledger/certs/CertRegistrationDrep.ts:15](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertRegistrationDrep.ts#L15)
 
 ***
 
@@ -32,6 +32,6 @@
 
 > **drepCredential**: [`Credential`](../classes/Credential.md)\<[`CredentialType`](../enumerations/CredentialType.md)\>
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertRegistrationDrep.ts:12](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertRegistrationDrep.ts#L12)
+[src/ledger/certs/CertRegistrationDrep.ts:14](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertRegistrationDrep.ts#L14)

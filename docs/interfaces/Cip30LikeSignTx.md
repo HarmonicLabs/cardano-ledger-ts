@@ -1,14 +1,14 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / Cip30LikeSignTx
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / Cip30LikeSignTx
 
 # Interface: Cip30LikeSignTx
 
 ## Properties
 
-### signTx
+### signTx()
 
 > **signTx**: (`txCbor`, `partial`?) => `string` \| `Promise`\<`string`\>
 
@@ -28,6 +28,6 @@ receives the current transaction (`this`) cbor
 
 the cbor of the `TxWitnessSet` (!!! NOT the cbor of the signe transaction !!!)
 
-#### Source
+#### Defined in
 
-[src/tx/Tx.ts:28](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/Tx.ts#L28)
+[src/tx/Tx.ts:28](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/Tx.ts#L28)

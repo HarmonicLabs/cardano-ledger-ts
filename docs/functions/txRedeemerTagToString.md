@@ -1,16 +1,16 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / txRedeemerTagToString
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / txRedeemerTagToString
 
 # Function: txRedeemerTagToString()
 
 > **txRedeemerTagToString**\<`Tag`\>(`tag`): [`TxRedeemerTagStr`](../type-aliases/TxRedeemerTagStr.md)\<`Tag`\>
 
-## Type parameters
+## Type Parameters
 
-• **Tag** extends [`TxRedeemerTag`](../enumerations/TxRedeemerTag.md)
+• **Tag** *extends* [`TxRedeemerTag`](../enumerations/TxRedeemerTag.md)
 
 ## Parameters
 
@@ -20,6 +20,6 @@
 
 [`TxRedeemerTagStr`](../type-aliases/TxRedeemerTagStr.md)\<`Tag`\>
 
-## Source
+## Defined in
 
-[src/tx/TxWitnessSet/TxRedeemer.ts:50](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/TxRedeemer.ts#L50)
+[src/tx/TxWitnessSet/TxRedeemer.ts:47](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/TxRedeemer.ts#L47)

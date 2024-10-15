@@ -1,4 +1,4 @@
-**@harmoniclabs/cardano-ledger-ts** • Readme \| [API](globals.md)
+**@harmoniclabs/cardano-ledger-ts** • [**Docs**](globals.md)
 
 ***
 

@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / TxOut
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / TxOut
 
 # Class: TxOut
 
@@ -16,7 +16,7 @@
 
 ## Constructors
 
-### new TxOut(txOutput)
+### new TxOut()
 
 > **new TxOut**(`txOutput`): [`TxOut`](TxOut.md)
 
@@ -28,79 +28,79 @@
 
 [`TxOut`](TxOut.md)
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/TxOut.ts:45](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/TxOut.ts#L45)
+[src/tx/body/output/TxOut.ts:46](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/TxOut.ts#L46)
 
 ## Properties
 
 ### address
 
-> **`readonly`** **address**: [`Address`](Address.md)
+> `readonly` **address**: [`Address`](Address.md)
 
 #### Implementation of
 
 [`ITxOut`](../interfaces/ITxOut.md).[`address`](../interfaces/ITxOut.md#address)
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/TxOut.ts:40](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/TxOut.ts#L40)
+[src/tx/body/output/TxOut.ts:41](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/TxOut.ts#L41)
 
 ***
 
 ### datum?
 
-> **`optional`** **`readonly`** **datum**: `Data` \| [`Hash32`](Hash32.md)
+> `readonly` `optional` **datum**: `Data` \| [`Hash32`](Hash32.md)
 
 #### Implementation of
 
 [`ITxOut`](../interfaces/ITxOut.md).[`datum`](../interfaces/ITxOut.md#datum)
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/TxOut.ts:42](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/TxOut.ts#L42)
+[src/tx/body/output/TxOut.ts:43](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/TxOut.ts#L43)
 
 ***
 
 ### refScript?
 
-> **`optional`** **`readonly`** **refScript**: [`Script`](Script.md)\<[`LitteralScriptType`](../type-aliases/LitteralScriptType.md)\>
+> `readonly` `optional` **refScript**: [`Script`](Script.md)\<[`LitteralScriptType`](../type-aliases/LitteralScriptType.md)\>
 
 #### Implementation of
 
 [`ITxOut`](../interfaces/ITxOut.md).[`refScript`](../interfaces/ITxOut.md#refscript)
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/TxOut.ts:43](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/TxOut.ts#L43)
+[src/tx/body/output/TxOut.ts:44](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/TxOut.ts#L44)
 
 ***
 
 ### value
 
-> **`readonly`** **value**: [`Value`](Value.md)
+> `readonly` **value**: [`Value`](Value.md)
 
 #### Implementation of
 
 [`ITxOut`](../interfaces/ITxOut.md).[`value`](../interfaces/ITxOut.md#value)
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/TxOut.ts:41](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/TxOut.ts#L41)
+[src/tx/body/output/TxOut.ts:42](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/TxOut.ts#L42)
 
 ## Accessors
 
 ### fake
 
-> **`get`** **`static`** **fake**(): [`TxOut`](TxOut.md)
+> `get` `static` **fake**(): [`TxOut`](TxOut.md)
 
 #### Returns
 
 [`TxOut`](TxOut.md)
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/TxOut.ts:118](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/TxOut.ts#L118)
+[src/tx/body/output/TxOut.ts:119](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/TxOut.ts#L119)
 
 ## Methods
 
@@ -116,9 +116,9 @@
 
 `Cloneable.clone`
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/TxOut.ts:108](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/TxOut.ts#L108)
+[src/tx/body/output/TxOut.ts:109](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/TxOut.ts#L109)
 
 ***
 
@@ -134,9 +134,9 @@
 
 `ToCbor.toCbor`
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/TxOut.ts:167](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/TxOut.ts#L167)
+[src/tx/body/output/TxOut.ts:168](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/TxOut.ts#L168)
 
 ***
 
@@ -152,9 +152,9 @@
 
 `ToCbor.toCborObj`
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/TxOut.ts:171](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/TxOut.ts#L171)
+[src/tx/body/output/TxOut.ts:172](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/TxOut.ts#L172)
 
 ***
 
@@ -164,7 +164,7 @@
 
 #### Parameters
 
-• **version**: `"v1"` \| `"v2"`= `"v2"`
+• **version**: `ToDataVersion` = `"v2"`
 
 #### Returns
 
@@ -174,23 +174,23 @@
 
 `ToData.toData`
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/TxOut.ts:128](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/TxOut.ts#L128)
+[src/tx/body/output/TxOut.ts:129](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/TxOut.ts#L129)
 
 ***
 
 ### toJson()
 
-> **toJson**(): `Object`
+> **toJson**(): `object`
 
 #### Returns
 
-`Object`
+`object`
 
 ##### address
 
-> **address**: \`addr1${string}\` \| \`addr_test1${string}\`
+> **address**: \`addr1$\{string\}\` \| \`addr\_test1$\{string\}\`
 
 ##### datum
 
@@ -198,7 +198,7 @@
 
 ##### refScript
 
-> **refScript**: `undefined` \| [`ScriptSignature`](../interfaces/ScriptSignature.md) \| [`ScriptAll`](../interfaces/ScriptAll.md) \| [`ScriptAny`](../interfaces/ScriptAny.md) \| [`ScriptAtLeast`](../interfaces/ScriptAtLeast.md) \| [`ScriptAfter`](../interfaces/ScriptAfter.md) \| [`ScriptBefore`](../interfaces/ScriptBefore.md) \| `Object`
+> **refScript**: `undefined` \| [`ScriptSignature`](../interfaces/ScriptSignature.md) \| [`ScriptAll`](../interfaces/ScriptAll.md) \| [`ScriptAny`](../interfaces/ScriptAny.md) \| [`ScriptAtLeast`](../interfaces/ScriptAtLeast.md) \| [`ScriptAfter`](../interfaces/ScriptAfter.md) \| [`ScriptBefore`](../interfaces/ScriptBefore.md) \| `object`
 
 ##### value
 
@@ -208,15 +208,15 @@
 
 `ToJson.toJson`
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/TxOut.ts:332](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/TxOut.ts#L332)
+[src/tx/body/output/TxOut.ts:333](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/TxOut.ts#L333)
 
 ***
 
 ### fromCbor()
 
-> **`static`** **fromCbor**(`cStr`): [`TxOut`](TxOut.md)
+> `static` **fromCbor**(`cStr`): [`TxOut`](TxOut.md)
 
 #### Parameters
 
@@ -226,15 +226,15 @@
 
 [`TxOut`](TxOut.md)
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/TxOut.ts:222](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/TxOut.ts#L222)
+[src/tx/body/output/TxOut.ts:223](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/TxOut.ts#L223)
 
 ***
 
 ### fromCborObj()
 
-> **`static`** **fromCborObj**(`cObj`): [`TxOut`](TxOut.md)
+> `static` **fromCborObj**(`cObj`): [`TxOut`](TxOut.md)
 
 #### Parameters
 
@@ -244,6 +244,6 @@
 
 [`TxOut`](TxOut.md)
 
-#### Source
+#### Defined in
 
-[src/tx/body/output/TxOut.ts:226](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/body/output/TxOut.ts#L226)
+[src/tx/body/output/TxOut.ts:227](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/body/output/TxOut.ts#L227)

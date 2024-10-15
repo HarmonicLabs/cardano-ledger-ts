@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / CertAuthCommitteeHot
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / CertAuthCommitteeHot
 
 # Class: CertAuthCommitteeHot
 
@@ -15,7 +15,7 @@
 
 ## Constructors
 
-### new CertAuthCommitteeHot(__namedParameters)
+### new CertAuthCommitteeHot()
 
 > **new CertAuthCommitteeHot**(`__namedParameters`): [`CertAuthCommitteeHot`](CertAuthCommitteeHot.md)
 
@@ -27,51 +27,51 @@
 
 [`CertAuthCommitteeHot`](CertAuthCommitteeHot.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertAuthCommitteeHot.ts:21](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertAuthCommitteeHot.ts#L21)
+[src/ledger/certs/CertAuthCommitteeHot.ts:23](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertAuthCommitteeHot.ts#L23)
 
 ## Properties
 
 ### certType
 
-> **`readonly`** **certType**: [`AuthCommitteeHot`](../enumerations/CertificateType.md#authcommitteehot)
+> `readonly` **certType**: [`AuthCommitteeHot`](../enumerations/CertificateType.md#authcommitteehot)
 
 #### Implementation of
 
 [`ICert`](../interfaces/ICert.md).[`certType`](../interfaces/ICert.md#certtype)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertAuthCommitteeHot.ts:17](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertAuthCommitteeHot.ts#L17)
+[src/ledger/certs/CertAuthCommitteeHot.ts:19](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertAuthCommitteeHot.ts#L19)
 
 ***
 
 ### coldCredential
 
-> **`readonly`** **coldCredential**: [`Credential`](Credential.md)\<[`CredentialType`](../enumerations/CredentialType.md)\>
+> `readonly` **coldCredential**: [`Credential`](Credential.md)\<[`CredentialType`](../enumerations/CredentialType.md)\>
 
 #### Implementation of
 
 [`ICertAuthCommitteeHot`](../interfaces/ICertAuthCommitteeHot.md).[`coldCredential`](../interfaces/ICertAuthCommitteeHot.md#coldcredential)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertAuthCommitteeHot.ts:18](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertAuthCommitteeHot.ts#L18)
+[src/ledger/certs/CertAuthCommitteeHot.ts:20](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertAuthCommitteeHot.ts#L20)
 
 ***
 
 ### hotCredential
 
-> **`readonly`** **hotCredential**: [`Credential`](Credential.md)\<[`CredentialType`](../enumerations/CredentialType.md)\>
+> `readonly` **hotCredential**: [`Credential`](Credential.md)\<[`CredentialType`](../enumerations/CredentialType.md)\>
 
 #### Implementation of
 
 [`ICertAuthCommitteeHot`](../interfaces/ICertAuthCommitteeHot.md).[`hotCredential`](../interfaces/ICertAuthCommitteeHot.md#hotcredential)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertAuthCommitteeHot.ts:19](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertAuthCommitteeHot.ts#L19)
+[src/ledger/certs/CertAuthCommitteeHot.ts:21](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertAuthCommitteeHot.ts#L21)
 
 ## Methods
 
@@ -87,9 +87,9 @@
 
 [`ICert`](../interfaces/ICert.md).[`getRequiredSigners`](../interfaces/ICert.md#getrequiredsigners)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertAuthCommitteeHot.ts:32](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertAuthCommitteeHot.ts#L32)
+[src/ledger/certs/CertAuthCommitteeHot.ts:52](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertAuthCommitteeHot.ts#L52)
 
 ***
 
@@ -105,9 +105,9 @@
 
 `ToCbor.toCbor`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertAuthCommitteeHot.ts:37](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertAuthCommitteeHot.ts#L37)
+[src/ledger/certs/CertAuthCommitteeHot.ts:57](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertAuthCommitteeHot.ts#L57)
 
 ***
 
@@ -123,19 +123,41 @@
 
 `ToCbor.toCborObj`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertAuthCommitteeHot.ts:41](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertAuthCommitteeHot.ts#L41)
+[src/ledger/certs/CertAuthCommitteeHot.ts:61](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertAuthCommitteeHot.ts#L61)
+
+***
+
+### toData()
+
+> **toData**(`version`?): `DataConstr`
+
+#### Parameters
+
+• **version?**: `ToDataVersion`
+
+#### Returns
+
+`DataConstr`
+
+#### Implementation of
+
+[`ICert`](../interfaces/ICert.md).[`toData`](../interfaces/ICert.md#todata)
+
+#### Defined in
+
+[src/ledger/certs/CertAuthCommitteeHot.ts:34](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertAuthCommitteeHot.ts#L34)
 
 ***
 
 ### toJson()
 
-> **toJson**(): `Object`
+> **toJson**(): `object`
 
 #### Returns
 
-`Object`
+`object`
 
 ##### certType
 
@@ -143,7 +165,7 @@
 
 ##### coldCredential
 
-> **coldCredential**: `Object`
+> **coldCredential**: `object`
 
 ##### coldCredential.credentialType
 
@@ -155,7 +177,7 @@
 
 ##### hotCredential
 
-> **hotCredential**: `Object`
+> **hotCredential**: `object`
 
 ##### hotCredential.credentialType
 
@@ -169,15 +191,15 @@
 
 `ToJson.toJson`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertAuthCommitteeHot.ts:66](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertAuthCommitteeHot.ts#L66)
+[src/ledger/certs/CertAuthCommitteeHot.ts:86](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertAuthCommitteeHot.ts#L86)
 
 ***
 
 ### fromCborObj()
 
-> **`static`** **fromCborObj**(`cbor`): [`CertAuthCommitteeHot`](CertAuthCommitteeHot.md)
+> `static` **fromCborObj**(`cbor`): [`CertAuthCommitteeHot`](CertAuthCommitteeHot.md)
 
 #### Parameters
 
@@ -187,6 +209,6 @@
 
 [`CertAuthCommitteeHot`](CertAuthCommitteeHot.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertAuthCommitteeHot.ts:50](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertAuthCommitteeHot.ts#L50)
+[src/ledger/certs/CertAuthCommitteeHot.ts:70](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertAuthCommitteeHot.ts#L70)

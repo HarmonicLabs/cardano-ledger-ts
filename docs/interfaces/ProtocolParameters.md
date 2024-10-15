@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / ProtocolParameters
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / ProtocolParameters
 
 # Interface: ProtocolParameters
 
@@ -12,9 +12,9 @@
 
 > **collateralPercentage**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:41](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L41)
+[src/ledger/protocol/ProtocolParameters.ts:43](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L43)
 
 ***
 
@@ -22,19 +22,19 @@
 
 > **committeeTermLimit**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:47](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L47)
+[src/ledger/protocol/ProtocolParameters.ts:49](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L49)
 
 ***
 
 ### costModels
 
-> **costModels**: [`CostModels`](CostModels.md)
+> **costModels**: `CostModels`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:30](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L30)
+[src/ledger/protocol/ProtocolParameters.ts:32](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L32)
 
 ***
 
@@ -42,9 +42,9 @@
 
 > **drepActivityPeriod**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:51](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L51)
+[src/ledger/protocol/ProtocolParameters.ts:53](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L53)
 
 ***
 
@@ -52,29 +52,29 @@
 
 > **drepDeposit**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:50](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L50)
+[src/ledger/protocol/ProtocolParameters.ts:52](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L52)
 
 ***
 
 ### drepVotingThresholds
 
-> **drepVotingThresholds**: `PParamsDrepVotingThresholds`
+> **drepVotingThresholds**: [`PParamsDrepVotingThresholds`](PParamsDrepVotingThresholds.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:45](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L45)
+[src/ledger/protocol/ProtocolParameters.ts:47](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L47)
 
 ***
 
 ### executionUnitPrices
 
-> **executionUnitPrices**: [`CborPositiveRational`, `CborPositiveRational`] \| `Object`
+> **executionUnitPrices**: [`CborPositiveRational`, `CborPositiveRational`] \| `object`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:31](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L31)
+[src/ledger/protocol/ProtocolParameters.ts:33](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L33)
 
 ***
 
@@ -82,9 +82,9 @@
 
 > **governanceActionDeposit**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:49](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L49)
+[src/ledger/protocol/ProtocolParameters.ts:51](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L51)
 
 ***
 
@@ -92,9 +92,9 @@
 
 > **governanceActionValidityPeriod**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:48](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L48)
+[src/ledger/protocol/ProtocolParameters.ts:50](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L50)
 
 ***
 
@@ -102,9 +102,9 @@
 
 > **maxBlockBodySize**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:16](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L16)
+[src/ledger/protocol/ProtocolParameters.ts:18](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L18)
 
 ***
 
@@ -112,9 +112,9 @@
 
 > **maxBlockExecutionUnits**: `ExBudget` \| `ExBudgetJson`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:39](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L39)
+[src/ledger/protocol/ProtocolParameters.ts:41](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L41)
 
 ***
 
@@ -122,9 +122,9 @@
 
 > **maxBlockHeaderSize**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:18](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L18)
+[src/ledger/protocol/ProtocolParameters.ts:20](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L20)
 
 ***
 
@@ -132,9 +132,9 @@
 
 > **maxCollateralInputs**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:42](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L42)
+[src/ledger/protocol/ProtocolParameters.ts:44](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L44)
 
 ***
 
@@ -142,9 +142,9 @@
 
 > **maxTxExecutionUnits**: `ExBudget` \| `ExBudgetJson`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:38](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L38)
+[src/ledger/protocol/ProtocolParameters.ts:40](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L40)
 
 ***
 
@@ -152,9 +152,9 @@
 
 > **maxTxSize**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:17](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L17)
+[src/ledger/protocol/ProtocolParameters.ts:19](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L19)
 
 ***
 
@@ -162,9 +162,9 @@
 
 > **maxValueSize**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:40](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L40)
+[src/ledger/protocol/ProtocolParameters.ts:42](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L42)
 
 ***
 
@@ -172,9 +172,9 @@
 
 > **minCommitteSize**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:46](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L46)
+[src/ledger/protocol/ProtocolParameters.ts:48](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L48)
 
 ***
 
@@ -182,39 +182,39 @@
 
 > **minPoolCost**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:28](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L28)
+[src/ledger/protocol/ProtocolParameters.ts:30](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L30)
 
 ***
 
 ### minfeeRefScriptCostPerByte
 
-> **minfeeRefScriptCostPerByte**: `Rational`
+> **minfeeRefScriptCostPerByte**: [`Rational`](../type-aliases/Rational.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:52](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L52)
+[src/ledger/protocol/ProtocolParameters.ts:54](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L54)
 
 ***
 
 ### monetaryExpansion
 
-> **monetaryExpansion**: `Rational`
+> **monetaryExpansion**: [`Rational`](../type-aliases/Rational.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:24](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L24)
+[src/ledger/protocol/ProtocolParameters.ts:26](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L26)
 
 ***
 
 ### poolPledgeInfluence
 
-> **poolPledgeInfluence**: `Rational`
+> **poolPledgeInfluence**: [`Rational`](../type-aliases/Rational.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:23](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L23)
+[src/ledger/protocol/ProtocolParameters.ts:25](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L25)
 
 ***
 
@@ -222,33 +222,33 @@
 
 > **poolRetireMaxEpoch**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:21](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L21)
+[src/ledger/protocol/ProtocolParameters.ts:23](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L23)
 
 ***
 
 ### poolVotingThresholds
 
-> **poolVotingThresholds**: `PParamsPoolVotingThresholds`
+> **poolVotingThresholds**: [`PParamsPoolVotingThresholds`](PParamsPoolVotingThresholds.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:44](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L44)
+[src/ledger/protocol/ProtocolParameters.ts:46](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L46)
 
 ***
 
 ### ~~protocolVersion?~~
 
-> **`optional`** **protocolVersion**: `IProtocolVerision`
+> `optional` **protocolVersion**: [`IProtocolVerision`](../type-aliases/IProtocolVerision.md)
 
 #### Deprecated
 
 protocolVersion removed in conway
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:27](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L27)
+[src/ledger/protocol/ProtocolParameters.ts:29](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L29)
 
 ***
 
@@ -256,9 +256,9 @@ protocolVersion removed in conway
 
 > **stakeAddressDeposit**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:19](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L19)
+[src/ledger/protocol/ProtocolParameters.ts:21](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L21)
 
 ***
 
@@ -266,9 +266,9 @@ protocolVersion removed in conway
 
 > **stakePoolDeposit**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:20](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L20)
+[src/ledger/protocol/ProtocolParameters.ts:22](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L22)
 
 ***
 
@@ -276,19 +276,19 @@ protocolVersion removed in conway
 
 > **stakePoolTargetNum**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:22](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L22)
+[src/ledger/protocol/ProtocolParameters.ts:24](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L24)
 
 ***
 
 ### treasuryCut
 
-> **treasuryCut**: `Rational`
+> **treasuryCut**: [`Rational`](../type-aliases/Rational.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:25](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L25)
+[src/ledger/protocol/ProtocolParameters.ts:27](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L27)
 
 ***
 
@@ -296,9 +296,9 @@ protocolVersion removed in conway
 
 > **txFeeFixed**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:15](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L15)
+[src/ledger/protocol/ProtocolParameters.ts:17](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L17)
 
 ***
 
@@ -306,9 +306,9 @@ protocolVersion removed in conway
 
 > **txFeePerByte**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:14](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L14)
+[src/ledger/protocol/ProtocolParameters.ts:16](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L16)
 
 ***
 
@@ -316,6 +316,6 @@ protocolVersion removed in conway
 
 > **utxoCostPerByte**: `CanBeUInteger`
 
-#### Source
+#### Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:29](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L29)
+[src/ledger/protocol/ProtocolParameters.ts:31](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L31)

@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / PoolParams
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / PoolParams
 
 # Class: PoolParams
 
@@ -12,7 +12,7 @@
 
 ## Constructors
 
-### new PoolParams(params)
+### new PoolParams()
 
 > **new PoolParams**(`params`): [`PoolParams`](PoolParams.md)
 
@@ -24,135 +24,135 @@
 
 [`PoolParams`](PoolParams.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:79](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L79)
+[src/ledger/PoolParams.ts:81](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L81)
 
 ## Properties
 
 ### cost
 
-> **`readonly`** **cost**: `bigint`
+> `readonly` **cost**: `bigint`
 
 #### Implementation of
 
 [`ITypedPoolParams`](../interfaces/ITypedPoolParams.md).[`cost`](../interfaces/ITypedPoolParams.md#cost)
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:72](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L72)
+[src/ledger/PoolParams.ts:74](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L74)
 
 ***
 
 ### margin
 
-> **`readonly`** **margin**: `CborPositiveRational`
+> `readonly` **margin**: `CborPositiveRational`
 
 #### Implementation of
 
 [`ITypedPoolParams`](../interfaces/ITypedPoolParams.md).[`margin`](../interfaces/ITypedPoolParams.md#margin)
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:73](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L73)
+[src/ledger/PoolParams.ts:75](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L75)
 
 ***
 
 ### metadata?
 
-> **`optional`** **`readonly`** **metadata**: [`ITypedPoolParamsMetadata`](../interfaces/ITypedPoolParamsMetadata.md)
+> `readonly` `optional` **metadata**: [`ITypedPoolParamsMetadata`](../interfaces/ITypedPoolParamsMetadata.md)
 
 #### Implementation of
 
 [`ITypedPoolParams`](../interfaces/ITypedPoolParams.md).[`metadata`](../interfaces/ITypedPoolParams.md#metadata)
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:77](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L77)
+[src/ledger/PoolParams.ts:79](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L79)
 
 ***
 
 ### operator
 
-> **`readonly`** **operator**: [`PoolKeyHash`](PoolKeyHash.md)
+> `readonly` **operator**: [`PoolKeyHash`](PoolKeyHash.md)
 
 #### Implementation of
 
 [`ITypedPoolParams`](../interfaces/ITypedPoolParams.md).[`operator`](../interfaces/ITypedPoolParams.md#operator)
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:69](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L69)
+[src/ledger/PoolParams.ts:71](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L71)
 
 ***
 
 ### owners
 
-> **`readonly`** **owners**: [`PubKeyHash`](PubKeyHash.md)[]
+> `readonly` **owners**: [`PubKeyHash`](PubKeyHash.md)[]
 
 #### Implementation of
 
 [`ITypedPoolParams`](../interfaces/ITypedPoolParams.md).[`owners`](../interfaces/ITypedPoolParams.md#owners)
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:75](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L75)
+[src/ledger/PoolParams.ts:77](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L77)
 
 ***
 
 ### pledge
 
-> **`readonly`** **pledge**: `bigint`
+> `readonly` **pledge**: `bigint`
 
 #### Implementation of
 
 [`ITypedPoolParams`](../interfaces/ITypedPoolParams.md).[`pledge`](../interfaces/ITypedPoolParams.md#pledge)
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:71](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L71)
+[src/ledger/PoolParams.ts:73](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L73)
 
 ***
 
 ### relays
 
-> **`readonly`** **relays**: [`PoolRelay`](../type-aliases/PoolRelay.md)[]
+> `readonly` **relays**: [`PoolRelay`](../type-aliases/PoolRelay.md)[]
 
 #### Implementation of
 
 [`ITypedPoolParams`](../interfaces/ITypedPoolParams.md).[`relays`](../interfaces/ITypedPoolParams.md#relays)
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:76](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L76)
+[src/ledger/PoolParams.ts:78](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L78)
 
 ***
 
 ### rewardAccount
 
-> **`readonly`** **rewardAccount**: [`Hash28`](Hash28.md)
+> `readonly` **rewardAccount**: [`StakeAddress`](StakeAddress.md)\<[`StakeAddressType`](../type-aliases/StakeAddressType.md)\>
 
 #### Implementation of
 
 [`ITypedPoolParams`](../interfaces/ITypedPoolParams.md).[`rewardAccount`](../interfaces/ITypedPoolParams.md#rewardaccount)
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:74](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L74)
+[src/ledger/PoolParams.ts:76](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L76)
 
 ***
 
 ### vrfKeyHash
 
-> **`readonly`** **vrfKeyHash**: [`VRFKeyHash`](VRFKeyHash.md)
+> `readonly` **vrfKeyHash**: [`VRFKeyHash`](VRFKeyHash.md)
 
 #### Implementation of
 
 [`ITypedPoolParams`](../interfaces/ITypedPoolParams.md).[`vrfKeyHash`](../interfaces/ITypedPoolParams.md#vrfkeyhash)
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:70](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L70)
+[src/ledger/PoolParams.ts:72](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L72)
 
 ## Methods
 
@@ -164,19 +164,19 @@
 
 `CborObj`[]
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:170](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L170)
+[src/ledger/PoolParams.ts:190](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L190)
 
 ***
 
 ### toJson()
 
-> **toJson**(): `Object`
+> **toJson**(): `object`
 
 #### Returns
 
-`Object`
+`object`
 
 ##### cost
 
@@ -188,7 +188,7 @@
 
 ##### metadata
 
-> **metadata**: `undefined` \| `Object`
+> **metadata**: `undefined` \| `object`
 
 ##### operator
 
@@ -204,25 +204,25 @@
 
 ##### relays
 
-> **relays**: (`Object` \| `Object` \| `Object`)[]
+> **relays**: (`object` \| `object` \| `object`)[]
 
 ##### rewardAccount
 
-> **rewardAccount**: `string`
+> **rewardAccount**: [`StakeAddress`](StakeAddress.md)\<[`StakeAddressType`](../type-aliases/StakeAddressType.md)\>
 
 ##### vrfKeyHash
 
 > **vrfKeyHash**: `string`
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:236](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L236)
+[src/ledger/PoolParams.ts:263](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L263)
 
 ***
 
 ### fromCborObjArray()
 
-> **`static`** **fromCborObjArray**(`__namedParameters`): [`PoolParams`](PoolParams.md)
+> `static` **fromCborObjArray**(`__namedParameters`): [`PoolParams`](PoolParams.md)
 
 #### Parameters
 
@@ -232,6 +232,6 @@
 
 [`PoolParams`](PoolParams.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:190](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L190)
+[src/ledger/PoolParams.ts:210](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L210)

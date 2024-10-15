@@ -109,6 +109,7 @@ export class TxOutRef
 
     toData( version?: ToDataVersion ): DataConstr
     {
+        if( version === "v1" || version === "v2" )
         return new DataConstr(
             0, // PTxOutRef only constructor
             [
@@ -118,7 +119,15 @@ export class TxOutRef
                 ),
                 new DataI( this.index )
             ]
-        )
+        );
+
+        return new DataConstr(
+            0, // PTxOutRef only constructor
+            [
+                new DataB( this.id.toBuffer() ), // tx id is only a byte string in v3
+                new DataI( this.index )
+            ]
+        );
     }
 
     toCbor(): CborString

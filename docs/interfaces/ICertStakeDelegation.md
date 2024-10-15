@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / ICertStakeDelegation
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / ICertStakeDelegation
 
 # Interface: ICertStakeDelegation
 
@@ -12,9 +12,9 @@
 
 > **poolKeyHash**: [`CanBeHash28`](../type-aliases/CanBeHash28.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertStakeDelegation.ts:10](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertStakeDelegation.ts#L10)
+[src/ledger/certs/CertStakeDelegation.ts:13](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertStakeDelegation.ts#L13)
 
 ***
 
@@ -22,6 +22,6 @@
 
 > **stakeCredential**: [`Credential`](../classes/Credential.md)\<[`CredentialType`](../enumerations/CredentialType.md)\>
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertStakeDelegation.ts:9](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertStakeDelegation.ts#L9)
+[src/ledger/certs/CertStakeDelegation.ts:12](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertStakeDelegation.ts#L12)

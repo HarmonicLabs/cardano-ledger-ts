@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / CertStakeDeRegistration
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / CertStakeDeRegistration
 
 # Class: CertStakeDeRegistration
 
@@ -13,7 +13,7 @@
 
 ## Constructors
 
-### new CertStakeDeRegistration(__namedParameters)
+### new CertStakeDeRegistration()
 
 > **new CertStakeDeRegistration**(`__namedParameters`): [`CertStakeDeRegistration`](CertStakeDeRegistration.md)
 
@@ -25,37 +25,37 @@
 
 [`CertStakeDeRegistration`](CertStakeDeRegistration.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertStakeDeRegistration.ts:18](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertStakeDeRegistration.ts#L18)
+[src/ledger/certs/CertStakeDeRegistration.ts:21](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertStakeDeRegistration.ts#L21)
 
 ## Properties
 
 ### certType
 
-> **`readonly`** **certType**: [`StakeDeRegistration`](../enumerations/CertificateType.md#stakederegistration)
+> `readonly` **certType**: [`StakeDeRegistration`](../enumerations/CertificateType.md#stakederegistration)
 
 #### Implementation of
 
 [`ICert`](../interfaces/ICert.md).[`certType`](../interfaces/ICert.md#certtype)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertStakeDeRegistration.ts:15](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertStakeDeRegistration.ts#L15)
+[src/ledger/certs/CertStakeDeRegistration.ts:18](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertStakeDeRegistration.ts#L18)
 
 ***
 
 ### stakeCredential
 
-> **`readonly`** **stakeCredential**: [`Credential`](Credential.md)\<[`CredentialType`](../enumerations/CredentialType.md)\>
+> `readonly` **stakeCredential**: [`Credential`](Credential.md)\<[`CredentialType`](../enumerations/CredentialType.md)\>
 
 #### Implementation of
 
 [`ICertStakeDeRegistration`](../interfaces/ICertStakeDeRegistration.md).[`stakeCredential`](../interfaces/ICertStakeDeRegistration.md#stakecredential)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertStakeDeRegistration.ts:16](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertStakeDeRegistration.ts#L16)
+[src/ledger/certs/CertStakeDeRegistration.ts:19](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertStakeDeRegistration.ts#L19)
 
 ## Methods
 
@@ -71,9 +71,9 @@
 
 [`ICert`](../interfaces/ICert.md).[`getRequiredSigners`](../interfaces/ICert.md#getrequiredsigners)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertStakeDeRegistration.ts:28](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertStakeDeRegistration.ts#L28)
+[src/ledger/certs/CertStakeDeRegistration.ts:55](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertStakeDeRegistration.ts#L55)
 
 ***
 
@@ -85,9 +85,9 @@
 
 `CborString`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertStakeDeRegistration.ts:33](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertStakeDeRegistration.ts#L33)
+[src/ledger/certs/CertStakeDeRegistration.ts:60](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertStakeDeRegistration.ts#L60)
 
 ***
 
@@ -99,19 +99,41 @@
 
 `CborArray`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertStakeDeRegistration.ts:37](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertStakeDeRegistration.ts#L37)
+[src/ledger/certs/CertStakeDeRegistration.ts:64](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertStakeDeRegistration.ts#L64)
+
+***
+
+### toData()
+
+> **toData**(`version`?): `DataConstr`
+
+#### Parameters
+
+• **version?**: `ToDataVersion`
+
+#### Returns
+
+`DataConstr`
+
+#### Implementation of
+
+[`ICert`](../interfaces/ICert.md).[`toData`](../interfaces/ICert.md#todata)
+
+#### Defined in
+
+[src/ledger/certs/CertStakeDeRegistration.ts:31](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertStakeDeRegistration.ts#L31)
 
 ***
 
 ### toJson()
 
-> **toJson**(): `Object`
+> **toJson**(): `object`
 
 #### Returns
 
-`Object`
+`object`
 
 ##### certType
 
@@ -119,7 +141,7 @@
 
 ##### stakeCredential
 
-> **stakeCredential**: `Object`
+> **stakeCredential**: `object`
 
 ##### stakeCredential.credentialType
 
@@ -129,15 +151,15 @@
 
 > **hash**: `string`
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertStakeDeRegistration.ts:60](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertStakeDeRegistration.ts#L60)
+[src/ledger/certs/CertStakeDeRegistration.ts:87](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertStakeDeRegistration.ts#L87)
 
 ***
 
 ### fromCborObj()
 
-> **`static`** **fromCborObj**(`cbor`): [`CertStakeDeRegistration`](CertStakeDeRegistration.md)
+> `static` **fromCborObj**(`cbor`): [`CertStakeDeRegistration`](CertStakeDeRegistration.md)
 
 #### Parameters
 
@@ -147,6 +169,6 @@
 
 [`CertStakeDeRegistration`](CertStakeDeRegistration.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/certs/CertStakeDeRegistration.ts:45](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/CertStakeDeRegistration.ts#L45)
+[src/ledger/certs/CertStakeDeRegistration.ts:72](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/CertStakeDeRegistration.ts#L72)

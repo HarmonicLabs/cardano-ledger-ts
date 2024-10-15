@@ -1,12 +1,12 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / partialProtocolParamsToJson
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / partialProtocolParamsToJson
 
 # Function: partialProtocolParamsToJson()
 
-> **partialProtocolParamsToJson**(`pp`): `Object`
+> **partialProtocolParamsToJson**(`pp`): `object`
 
 ## Parameters
 
@@ -14,83 +14,83 @@
 
 ## Returns
 
-`Object`
+`object`
 
 ### collateralPercentage?
 
-> **`optional`** **collateralPercentage**: `CanBeUInteger`
+> `optional` **collateralPercentage**: `CanBeUInteger`
 
 ### committeeTermLimit?
 
-> **`optional`** **committeeTermLimit**: `CanBeUInteger`
+> `optional` **committeeTermLimit**: `CanBeUInteger`
 
 ### costModels
 
-> **costModels**: `undefined` \| `Object`
+> **costModels**: `undefined` \| `object`
 
 ### drepActivityPeriod?
 
-> **`optional`** **drepActivityPeriod**: `CanBeUInteger`
+> `optional` **drepActivityPeriod**: `CanBeUInteger`
 
 ### drepDeposit?
 
-> **`optional`** **drepDeposit**: `CanBeUInteger`
+> `optional` **drepDeposit**: `CanBeUInteger`
 
 ### drepVotingThresholds?
 
-> **`optional`** **drepVotingThresholds**: `PParamsDrepVotingThresholds`
+> `optional` **drepVotingThresholds**: [`PParamsDrepVotingThresholds`](../interfaces/PParamsDrepVotingThresholds.md)
 
 ### executionUnitPrices
 
-> **executionUnitPrices**: `undefined` \| `Object`
+> **executionUnitPrices**: `undefined` \| `object`
 
 ### governanceActionDeposit?
 
-> **`optional`** **governanceActionDeposit**: `CanBeUInteger`
+> `optional` **governanceActionDeposit**: `CanBeUInteger`
 
 ### governanceActionValidityPeriod?
 
-> **`optional`** **governanceActionValidityPeriod**: `CanBeUInteger`
+> `optional` **governanceActionValidityPeriod**: `CanBeUInteger`
 
 ### maxBlockBodySize?
 
-> **`optional`** **maxBlockBodySize**: `CanBeUInteger`
+> `optional` **maxBlockBodySize**: `CanBeUInteger`
 
 ### maxBlockExecutionUnits
 
-> **maxBlockExecutionUnits**: `undefined` \| `ExBudgetJson` \| `Object`
+> **maxBlockExecutionUnits**: `undefined` \| `ExBudgetJson` \| `object`
 
 ### maxBlockHeaderSize?
 
-> **`optional`** **maxBlockHeaderSize**: `CanBeUInteger`
+> `optional` **maxBlockHeaderSize**: `CanBeUInteger`
 
 ### maxCollateralInputs?
 
-> **`optional`** **maxCollateralInputs**: `CanBeUInteger`
+> `optional` **maxCollateralInputs**: `CanBeUInteger`
 
 ### maxTxExecutionUnits
 
-> **maxTxExecutionUnits**: `undefined` \| `ExBudgetJson` \| `Object`
+> **maxTxExecutionUnits**: `undefined` \| `ExBudgetJson` \| `object`
 
 ### maxTxSize?
 
-> **`optional`** **maxTxSize**: `CanBeUInteger`
+> `optional` **maxTxSize**: `CanBeUInteger`
 
 ### maxValueSize?
 
-> **`optional`** **maxValueSize**: `CanBeUInteger`
+> `optional` **maxValueSize**: `CanBeUInteger`
 
 ### minCommitteSize?
 
-> **`optional`** **minCommitteSize**: `CanBeUInteger`
+> `optional` **minCommitteSize**: `CanBeUInteger`
 
 ### minPoolCost?
 
-> **`optional`** **minPoolCost**: `CanBeUInteger`
+> `optional` **minPoolCost**: `CanBeUInteger`
 
 ### minfeeRefScriptCostPerByte?
 
-> **`optional`** **minfeeRefScriptCostPerByte**: `Rational`
+> `optional` **minfeeRefScriptCostPerByte**: [`Rational`](../type-aliases/Rational.md)
 
 ### monetaryExpansion
 
@@ -102,15 +102,15 @@
 
 ### poolRetireMaxEpoch?
 
-> **`optional`** **poolRetireMaxEpoch**: `CanBeUInteger`
+> `optional` **poolRetireMaxEpoch**: `CanBeUInteger`
 
 ### poolVotingThresholds?
 
-> **`optional`** **poolVotingThresholds**: `PParamsPoolVotingThresholds`
+> `optional` **poolVotingThresholds**: [`PParamsPoolVotingThresholds`](../interfaces/PParamsPoolVotingThresholds.md)
 
 ### ~~protocolVersion?~~
 
-> **`optional`** **protocolVersion**: `IProtocolVerision`
+> `optional` **protocolVersion**: [`IProtocolVerision`](../type-aliases/IProtocolVerision.md)
 
 #### Deprecated
 
@@ -118,15 +118,15 @@ protocolVersion removed in conway
 
 ### stakeAddressDeposit?
 
-> **`optional`** **stakeAddressDeposit**: `CanBeUInteger`
+> `optional` **stakeAddressDeposit**: `CanBeUInteger`
 
 ### stakePoolDeposit?
 
-> **`optional`** **stakePoolDeposit**: `CanBeUInteger`
+> `optional` **stakePoolDeposit**: `CanBeUInteger`
 
 ### stakePoolTargetNum?
 
-> **`optional`** **stakePoolTargetNum**: `CanBeUInteger`
+> `optional` **stakePoolTargetNum**: `CanBeUInteger`
 
 ### treasuryCut
 
@@ -134,16 +134,16 @@ protocolVersion removed in conway
 
 ### txFeeFixed?
 
-> **`optional`** **txFeeFixed**: `CanBeUInteger`
+> `optional` **txFeeFixed**: `CanBeUInteger`
 
 ### txFeePerByte?
 
-> **`optional`** **txFeePerByte**: `CanBeUInteger`
+> `optional` **txFeePerByte**: `CanBeUInteger`
 
 ### utxoCostPerByte?
 
-> **`optional`** **utxoCostPerByte**: `CanBeUInteger`
+> `optional` **utxoCostPerByte**: `CanBeUInteger`
 
-## Source
+## Defined in
 
-[src/ledger/protocol/ProtocolParameters.ts:502](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/protocol/ProtocolParameters.ts#L502)
+[src/ledger/protocol/ProtocolParameters.ts:552](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/protocol/ProtocolParameters.ts#L552)

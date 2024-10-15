@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / Network
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / Network
 
 # Enumeration: Network
 
@@ -12,9 +12,9 @@
 
 > **mainnet**: `"mainnet"`
 
-#### Source
+#### Defined in
 
-[src/ledger/Network.ts:3](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/Network.ts#L3)
+[src/ledger/Network.ts:3](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/Network.ts#L3)
 
 ***
 
@@ -22,6 +22,6 @@
 
 > **testnet**: `"testnet"`
 
-#### Source
+#### Defined in
 
-[src/ledger/Network.ts:4](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/Network.ts#L4)
+[src/ledger/Network.ts:4](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/Network.ts#L4)

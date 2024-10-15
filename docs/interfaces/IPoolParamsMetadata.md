@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / IPoolParamsMetadata
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / IPoolParamsMetadata
 
 # Interface: IPoolParamsMetadata
 
@@ -12,9 +12,9 @@
 
 > **hash**: [`CanBeHash32`](../type-aliases/CanBeHash32.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:18](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L18)
+[src/ledger/PoolParams.ts:20](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L20)
 
 ***
 
@@ -22,6 +22,6 @@
 
 > **poolMetadataUrl**: `string`
 
-#### Source
+#### Defined in
 
-[src/ledger/PoolParams.ts:17](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/PoolParams.ts#L17)
+[src/ledger/PoolParams.ts:19](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/PoolParams.ts#L19)

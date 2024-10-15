@@ -1,12 +1,12 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / canBeTxWithdrawals
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / canBeTxWithdrawals
 
 # Function: canBeTxWithdrawals()
 
-> **canBeTxWithdrawals**(`stuff`): `stuff is ITxWithdrawals | TxWithdrawals`
+> **canBeTxWithdrawals**(`stuff`): stuff is ITxWithdrawals \| TxWithdrawals
 
 ## Parameters
 
@@ -14,8 +14,8 @@
 
 ## Returns
 
-`stuff is ITxWithdrawals | TxWithdrawals`
+stuff is ITxWithdrawals \| TxWithdrawals
 
-## Source
+## Defined in
 
-[src/ledger/TxWithdrawals.ts:207](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/TxWithdrawals.ts#L207)
+[src/ledger/TxWithdrawals.ts:208](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/TxWithdrawals.ts#L208)

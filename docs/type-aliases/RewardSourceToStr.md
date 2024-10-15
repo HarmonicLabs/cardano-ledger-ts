@@ -1,17 +1,17 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / RewardSourceToStr
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / RewardSourceToStr
 
-# Type alias: RewardSourceToStr\<S\>
+# Type Alias: RewardSourceToStr\<S\>
 
-> **RewardSourceToStr**\<`S`\>: `S` extends [`Reserves`](../enumerations/InstantRewardsSource.md#reserves) ? `"Reserves"` : `S` extends [`Treasurery`](../enumerations/InstantRewardsSource.md#treasurery) ? `"Treasurery"` : `never`
+> **RewardSourceToStr**\<`S`\>: `S` *extends* [`Reserves`](../enumerations/InstantRewardsSource.md#reserves) ? `"Reserves"` : `S` *extends* [`Treasurery`](../enumerations/InstantRewardsSource.md#treasurery) ? `"Treasurery"` : `never`
 
-## Type parameters
+## Type Parameters
 
-• **S** extends [`InstantRewardsSource`](../enumerations/InstantRewardsSource.md)
+• **S** *extends* [`InstantRewardsSource`](../enumerations/InstantRewardsSource.md)
 
-## Source
+## Defined in
 
-[src/ledger/certs/MoveInstantRewardsCert.ts:19](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/certs/MoveInstantRewardsCert.ts#L19)
+[src/ledger/certs/MoveInstantRewardsCert.ts:21](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/certs/MoveInstantRewardsCert.ts#L21)

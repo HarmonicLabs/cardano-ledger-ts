@@ -11,6 +11,7 @@ import { nothingData, justData } from "../utils/maybeData";
 import UPLCFlatUtils from "../utils/UPLCFlatUtils";
 import { fromHex, toHex } from "@harmoniclabs/uint8array-utils";
 import { harden, XPrv } from "@harmoniclabs/bip32_ed25519";
+import { ToDataVersion } from "../toData/defaultToDataVersion";
 
 export type AddressStr = `${"addr1"|"addr_test1"}${string}`;
 
@@ -137,15 +138,15 @@ export class Address
         );
     }
 
-    toData(): Data
+    toData( version?: ToDataVersion ): Data
     {
         return new DataConstr(
             0, // export has only 1 constructor,
             [
-                this.paymentCreds.toData(),
+                this.paymentCreds.toData( version ),
                 this.stakeCreds === undefined ?
                     nothingData() :
-                    justData( this.stakeCreds.toData() )
+                    justData( this.stakeCreds.toData( version ) )
             ]
         )
     }
@@ -331,7 +332,7 @@ export class Address
         if(!( buff instanceof CborBytes))
         throw new Error(`Invalid CBOR format for "Address"`);
 
-        return Address.fromBuffer( buff.buffer )
+        return Address.fromBuffer( buff.bytes )
     }
 
     toCbor(): CborString

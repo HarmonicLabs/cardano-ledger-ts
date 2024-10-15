@@ -7,6 +7,7 @@ import { forceBigUInt, CanBeUInteger } from "../../utils/ints";
 import { IValue, isIValue, getEmptyNameQty, getNameQty, IValueAdaEntry, IValueAsset, IValuePolicyEntry, addIValues, subIValues, cloneIValue, IValueToJson, ValueJson, NormalizedIValuePolicyEntry, IValueAssetBI, NormalizedIValueAdaEntry, normalizeIValueAsset, NormalizedIValue, normalizeIValue } from "./IValue";
 import { assert } from "../../utils/assert";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
+import { ToDataVersion } from "../../toData/defaultToDataVersion";
 
 const enum Ord {
     LT = -1,
@@ -289,7 +290,7 @@ export class Value
         return new Value( cloneIValue(this.map ) )
     }
 
-    toData(): DataMap<DataB,DataMap<DataB,DataI>>
+    toData( version?: ToDataVersion ): DataMap<DataB,DataMap<DataB,DataI>>
     {
         return new DataMap<DataB,DataMap<DataB,DataI>>(
             this.map.map( ({ policy, assets }) =>

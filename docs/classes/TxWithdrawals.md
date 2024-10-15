@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / TxWithdrawals
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / TxWithdrawals
 
 # Class: TxWithdrawals
 
@@ -13,7 +13,7 @@
 
 ## Constructors
 
-### new TxWithdrawals(map, network)
+### new TxWithdrawals()
 
 > **new TxWithdrawals**(`map`, `network`): [`TxWithdrawals`](TxWithdrawals.md)
 
@@ -21,25 +21,25 @@
 
 • **map**: [`ITxWithdrawals`](../type-aliases/ITxWithdrawals.md)
 
-• **network**: [`NetworkT`](../type-aliases/NetworkT.md)= `"mainnet"`
+• **network**: [`NetworkT`](../type-aliases/NetworkT.md) = `"mainnet"`
 
 #### Returns
 
 [`TxWithdrawals`](TxWithdrawals.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/TxWithdrawals.ts:69](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/TxWithdrawals.ts#L69)
+[src/ledger/TxWithdrawals.ts:70](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/TxWithdrawals.ts#L70)
 
 ## Properties
 
 ### map
 
-> **`readonly`** **map**: [`TxWithdrawalsMapBigInt`](../type-aliases/TxWithdrawalsMapBigInt.md)
+> `readonly` **map**: [`TxWithdrawalsMapBigInt`](../type-aliases/TxWithdrawalsMapBigInt.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/TxWithdrawals.ts:67](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/TxWithdrawals.ts#L67)
+[src/ledger/TxWithdrawals.ts:68](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/TxWithdrawals.ts#L68)
 
 ## Methods
 
@@ -55,9 +55,9 @@
 
 `ToCbor.toCbor`
 
-#### Source
+#### Defined in
 
-[src/ledger/TxWithdrawals.ts:137](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/TxWithdrawals.ts#L137)
+[src/ledger/TxWithdrawals.ts:138](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/TxWithdrawals.ts#L138)
 
 ***
 
@@ -73,9 +73,9 @@
 
 `ToCbor.toCborObj`
 
-#### Source
+#### Defined in
 
-[src/ledger/TxWithdrawals.ts:141](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/TxWithdrawals.ts#L141)
+[src/ledger/TxWithdrawals.ts:142](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/TxWithdrawals.ts#L142)
 
 ***
 
@@ -85,7 +85,7 @@
 
 #### Parameters
 
-• **version?**: `"v1"` \| `"v2"`
+• **version?**: `ToDataVersion`
 
 #### Returns
 
@@ -95,23 +95,23 @@
 
 `ToData.toData`
 
-#### Source
+#### Defined in
 
-[src/ledger/TxWithdrawals.ts:124](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/TxWithdrawals.ts#L124)
+[src/ledger/TxWithdrawals.ts:125](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/TxWithdrawals.ts#L125)
 
 ***
 
 ### toJson()
 
-> **toJson**(): `Object`
+> **toJson**(): `object`
 
 #### Returns
 
-`Object`
+`object`
 
-#### Source
+#### Defined in
 
-[src/ledger/TxWithdrawals.ts:176](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/TxWithdrawals.ts#L176)
+[src/ledger/TxWithdrawals.ts:177](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/TxWithdrawals.ts#L177)
 
 ***
 
@@ -123,15 +123,15 @@
 
 [`Value`](Value.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/TxWithdrawals.ts:116](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/TxWithdrawals.ts#L116)
+[src/ledger/TxWithdrawals.ts:117](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/TxWithdrawals.ts#L117)
 
 ***
 
 ### fromCbor()
 
-> **`static`** **fromCbor**(`cStr`): [`TxWithdrawals`](TxWithdrawals.md)
+> `static` **fromCbor**(`cStr`): [`TxWithdrawals`](TxWithdrawals.md)
 
 #### Parameters
 
@@ -141,15 +141,15 @@
 
 [`TxWithdrawals`](TxWithdrawals.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/TxWithdrawals.ts:153](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/TxWithdrawals.ts#L153)
+[src/ledger/TxWithdrawals.ts:154](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/TxWithdrawals.ts#L154)
 
 ***
 
 ### fromCborObj()
 
-> **`static`** **fromCborObj**(`cObj`): [`TxWithdrawals`](TxWithdrawals.md)
+> `static` **fromCborObj**(`cObj`): [`TxWithdrawals`](TxWithdrawals.md)
 
 #### Parameters
 
@@ -159,15 +159,15 @@
 
 [`TxWithdrawals`](TxWithdrawals.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/TxWithdrawals.ts:157](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/TxWithdrawals.ts#L157)
+[src/ledger/TxWithdrawals.ts:158](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/TxWithdrawals.ts#L158)
 
 ***
 
 ### fromJson()
 
-> **`static`** **fromJson**(`json`): [`TxWithdrawals`](TxWithdrawals.md)
+> `static` **fromJson**(`json`): [`TxWithdrawals`](TxWithdrawals.md)
 
 #### Parameters
 
@@ -177,6 +177,6 @@
 
 [`TxWithdrawals`](TxWithdrawals.md)
 
-#### Source
+#### Defined in
 
-[src/ledger/TxWithdrawals.ts:190](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/ledger/TxWithdrawals.ts#L190)
+[src/ledger/TxWithdrawals.ts:191](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/ledger/TxWithdrawals.ts#L191)

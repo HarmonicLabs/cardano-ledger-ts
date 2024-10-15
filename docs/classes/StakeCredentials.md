@@ -1,14 +1,14 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / StakeCredentials
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / StakeCredentials
 
 # Class: StakeCredentials\<T\>
 
-## Type parameters
+## Type Parameters
 
-• **T** extends [`StakeCredentialsType`](../type-aliases/StakeCredentialsType.md) = [`StakeCredentialsType`](../type-aliases/StakeCredentialsType.md)
+• **T** *extends* [`StakeCredentialsType`](../type-aliases/StakeCredentialsType.md) = [`StakeCredentialsType`](../type-aliases/StakeCredentialsType.md)
 
 ## Implements
 
@@ -17,7 +17,7 @@
 
 ## Constructors
 
-### new StakeCredentials(type, hash)
+### new StakeCredentials()
 
 > **new StakeCredentials**\<`T`\>(`type`, `hash`): [`StakeCredentials`](StakeCredentials.md)\<`T`\>
 
@@ -31,29 +31,29 @@
 
 [`StakeCredentials`](StakeCredentials.md)\<`T`\>
 
-#### Source
+#### Defined in
 
-[src/credentials/StakeCredentials.ts:26](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/StakeCredentials.ts#L26)
+[src/credentials/StakeCredentials.ts:27](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/StakeCredentials.ts#L27)
 
 ## Properties
 
 ### hash
 
-> **`readonly`** **hash**: [`StakeHash`](../type-aliases/StakeHash.md)\<`T`\>
+> `readonly` **hash**: [`StakeHash`](../type-aliases/StakeHash.md)\<`T`\>
 
-#### Source
+#### Defined in
 
-[src/credentials/StakeCredentials.ts:24](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/StakeCredentials.ts#L24)
+[src/credentials/StakeCredentials.ts:25](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/StakeCredentials.ts#L25)
 
 ***
 
 ### type
 
-> **`readonly`** **type**: `T`
+> `readonly` **type**: `T`
 
-#### Source
+#### Defined in
 
-[src/credentials/StakeCredentials.ts:23](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/StakeCredentials.ts#L23)
+[src/credentials/StakeCredentials.ts:24](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/StakeCredentials.ts#L24)
 
 ## Methods
 
@@ -65,9 +65,9 @@
 
 [`StakeCredentials`](StakeCredentials.md)\<`T`\>
 
-#### Source
+#### Defined in
 
-[src/credentials/StakeCredentials.ts:73](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/StakeCredentials.ts#L73)
+[src/credentials/StakeCredentials.ts:74](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/StakeCredentials.ts#L74)
 
 ***
 
@@ -83,9 +83,9 @@
 
 `ToCbor.toCbor`
 
-#### Source
+#### Defined in
 
-[src/credentials/StakeCredentials.ts:102](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/StakeCredentials.ts#L102)
+[src/credentials/StakeCredentials.ts:112](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/StakeCredentials.ts#L112)
 
 ***
 
@@ -101,15 +101,19 @@
 
 `ToCbor.toCborObj`
 
-#### Source
+#### Defined in
 
-[src/credentials/StakeCredentials.ts:107](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/StakeCredentials.ts#L107)
+[src/credentials/StakeCredentials.ts:117](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/StakeCredentials.ts#L117)
 
 ***
 
 ### toData()
 
-> **toData**(): `DataConstr`
+> **toData**(`version`?): `DataConstr`
+
+#### Parameters
+
+• **version?**: `ToDataVersion`
 
 #### Returns
 
@@ -119,29 +123,29 @@
 
 `ToData.toData`
 
-#### Source
+#### Defined in
 
-[src/credentials/StakeCredentials.ts:81](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/StakeCredentials.ts#L81)
+[src/credentials/StakeCredentials.ts:82](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/StakeCredentials.ts#L82)
 
 ***
 
 ### toJson()
 
-> **toJson**(): `Object` \| `Object`
+> **toJson**(): `object` \| `object`
 
 #### Returns
 
-`Object` \| `Object`
+`object` \| `object`
 
-#### Source
+#### Defined in
 
-[src/credentials/StakeCredentials.ts:154](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/StakeCredentials.ts#L154)
+[src/credentials/StakeCredentials.ts:164](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/StakeCredentials.ts#L164)
 
 ***
 
 ### fromCbor()
 
-> **`static`** **fromCbor**(`cObj`): [`StakeCredentials`](StakeCredentials.md)\<[`StakeCredentialsType`](../type-aliases/StakeCredentialsType.md)\>
+> `static` **fromCbor**(`cObj`): [`StakeCredentials`](StakeCredentials.md)\<[`StakeCredentialsType`](../type-aliases/StakeCredentialsType.md)\>
 
 #### Parameters
 
@@ -151,15 +155,15 @@
 
 [`StakeCredentials`](StakeCredentials.md)\<[`StakeCredentialsType`](../type-aliases/StakeCredentialsType.md)\>
 
-#### Source
+#### Defined in
 
-[src/credentials/StakeCredentials.ts:120](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/StakeCredentials.ts#L120)
+[src/credentials/StakeCredentials.ts:130](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/StakeCredentials.ts#L130)
 
 ***
 
 ### fromCborObj()
 
-> **`static`** **fromCborObj**(`cObj`): [`StakeCredentials`](StakeCredentials.md)\<[`StakeCredentialsType`](../type-aliases/StakeCredentialsType.md)\>
+> `static` **fromCborObj**(`cObj`): [`StakeCredentials`](StakeCredentials.md)\<[`StakeCredentialsType`](../type-aliases/StakeCredentialsType.md)\>
 
 #### Parameters
 
@@ -169,6 +173,6 @@
 
 [`StakeCredentials`](StakeCredentials.md)\<[`StakeCredentialsType`](../type-aliases/StakeCredentialsType.md)\>
 
-#### Source
+#### Defined in
 
-[src/credentials/StakeCredentials.ts:124](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/credentials/StakeCredentials.ts#L124)
+[src/credentials/StakeCredentials.ts:134](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/credentials/StakeCredentials.ts#L134)

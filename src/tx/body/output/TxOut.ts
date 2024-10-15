@@ -138,9 +138,9 @@ export class TxOut
             return new DataConstr(
                 0,
                 [
-                    this.address.toData(),
-                    this.value.toData(),
-                    maybeData( this.datum?.toData() )
+                    this.address.toData( version),
+                    this.value.toData( version),
+                    maybeData( this.datum?.toData( version ) )
                 ]
             )
         }
@@ -149,7 +149,7 @@ export class TxOut
             this.datum === undefined ?
                 new DataConstr( 0, [] ) : 
             this.datum instanceof Hash32 ?
-                new DataConstr( 1, [ this.datum.toData() ]) :
+                new DataConstr( 1, [ this.datum.toData( version ) ]) :
             new DataConstr( // inline
                 2, [ this.datum.clone() ]
             );
@@ -157,10 +157,10 @@ export class TxOut
         return new DataConstr(
             0,
             [
-                this.address.toData(),
-                this.value.toData(),
+                this.address.toData( version ),
+                this.value.toData( version ),
                 datumData,
-                maybeData( this.refScript?.hash.toData() )
+                maybeData( this.refScript?.hash.toData( version ) )
             ]
         )
     }

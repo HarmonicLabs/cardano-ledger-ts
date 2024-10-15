@@ -1,8 +1,8 @@
-**@harmoniclabs/cardano-ledger-ts** • [Readme](../README.md) \| [API](../globals.md)
+[**@harmoniclabs/cardano-ledger-ts**](../README.md) • **Docs**
 
 ***
 
-[@harmoniclabs/cardano-ledger-ts](../README.md) / VKeyWitness
+[@harmoniclabs/cardano-ledger-ts](../globals.md) / VKeyWitness
 
 # Class: VKeyWitness
 
@@ -14,7 +14,7 @@
 
 ## Constructors
 
-### new VKeyWitness(vkey, signature)
+### new VKeyWitness()
 
 > **new VKeyWitness**(`vkey`, `signature`): [`VKeyWitness`](VKeyWitness.md)
 
@@ -28,29 +28,29 @@
 
 [`VKeyWitness`](VKeyWitness.md)
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts:18](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts#L18)
+[src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts:18](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts#L18)
 
 ## Properties
 
 ### signature
 
-> **`readonly`** **signature**: [`Signature`](Signature.md)
+> `readonly` **signature**: [`Signature`](Signature.md)
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts:16](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts#L16)
+[src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts:16](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts#L16)
 
 ***
 
 ### vkey
 
-> **`readonly`** **vkey**: [`VKey`](VKey.md)
+> `readonly` **vkey**: [`VKey`](VKey.md)
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts:15](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts#L15)
+[src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts:15](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts#L15)
 
 ## Methods
 
@@ -66,9 +66,9 @@
 
 `Cloneable.clone`
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts:41](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts#L41)
+[src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts:41](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts#L41)
 
 ***
 
@@ -84,9 +84,9 @@
 
 `ToCbor.toCbor`
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts:49](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts#L49)
+[src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts:49](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts#L49)
 
 ***
 
@@ -102,19 +102,19 @@
 
 `ToCbor.toCborObj`
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts:53](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts#L53)
+[src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts:53](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts#L53)
 
 ***
 
 ### toJson()
 
-> **toJson**(): `Object`
+> **toJson**(): `object`
 
 #### Returns
 
-`Object`
+`object`
 
 ##### signature
 
@@ -128,15 +128,15 @@
 
 `ToJson.toJson`
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts:76](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts#L76)
+[src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts:76](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts#L76)
 
 ***
 
 ### fromCbor()
 
-> **`static`** **fromCbor**(`cStr`): [`VKeyWitness`](VKeyWitness.md)
+> `static` **fromCbor**(`cStr`): [`VKeyWitness`](VKeyWitness.md)
 
 #### Parameters
 
@@ -146,15 +146,15 @@
 
 [`VKeyWitness`](VKeyWitness.md)
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts:61](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts#L61)
+[src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts:61](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts#L61)
 
 ***
 
 ### fromCborObj()
 
-> **`static`** **fromCborObj**(`cObj`): [`VKeyWitness`](VKeyWitness.md)
+> `static` **fromCborObj**(`cObj`): [`VKeyWitness`](VKeyWitness.md)
 
 #### Parameters
 
@@ -164,6 +164,6 @@
 
 [`VKeyWitness`](VKeyWitness.md)
 
-#### Source
+#### Defined in
 
-[src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts:65](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/d1659b0/src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts#L65)
+[src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts:65](https://github.com/HarmonicLabs/cardano-ledger-ts/blob/94dd590ffe94133126b0d8d49920fc7b002e1975/src/tx/TxWitnessSet/VKeyWitness/VKeyWitness.ts#L65)

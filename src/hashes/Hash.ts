@@ -42,48 +42,12 @@ export class Hash
         return Object.getPrototypeOf( bs ) === Hash.prototype
     }
 
-    protected get _bytes(): Uint8Array
-    {
-        const result = (this as any).__bytes;
-        if( result === undefined )
-        {
-            defineReadOnlyProperty(
-                this,
-                "__bytes",
-                fromHex( this._str )
-            );
-            return (this as any).__bytes.slice();
-        }
-        if( !isUint8Array( result ) )
-        {
-            throw new Error(
-                "Hash.__bytes was not a Uint8Array"
-            );
-        }
+    protected _bytes: Uint8Array
 
-        return result;
-    }
-
+    /** @deprecated */
     protected get _str(): string
     {
-        const result = (this as any).__str;
-        if( result === undefined )
-        {
-            defineReadOnlyProperty(
-                this,
-                "__str",
-                toHex( this._bytes )
-            );
-            return (this as any).__str;
-        }
-        if( !(typeof result === "string" && result.length % 2 === 0 ) )
-        {
-            throw new Error(
-                "Hash.__str was not a even string"
-            );
-        }
-
-        return result;
+        return this.toString();
     }
 
     constructor( bs: string | Uint8Array )
@@ -99,12 +63,9 @@ export class Hash
             );
 
             // even length
-            defineReadOnlyProperty(
-                this,
-                "__str",
+            bs = fromHex(
                 (bs.length % 2) === 1 ? "0" + bs : bs
             );
-            return;
         }
 
         assert(
@@ -112,11 +73,7 @@ export class Hash
             "invalid Uint8Array input while constructing a Hash"
         );
 
-        defineReadOnlyProperty(
-            this,
-            "__bytes",
-            bs
-        );
+        this._bytes = bs;
     }
 
     /**
@@ -124,12 +81,12 @@ export class Hash
      */
     get asString(): string
     {
-        return this._str;
+        return this.toString();
     }
 
     toString(): string
     {
-        return this._str;
+        return toHex( this._bytes);
     }
 
     /**
@@ -155,7 +112,7 @@ export class Hash
 
     clone(): Hash
     {
-        return new Hash( this._str );
+        return new Hash( Uint8Array.prototype.slice.call( this._bytes ) );
     }
 
     toCbor(): CborString
@@ -176,7 +133,7 @@ export class Hash
         if(!(cObj instanceof CborBytes ))
         throw new Error(`Invalid CBOR format for "Hash"`);
 
-        return new Hash( cObj.buffer )
+        return new Hash( cObj.bytes );
     }
 
     toData(_version?: ToDataVersion | undefined): Data
