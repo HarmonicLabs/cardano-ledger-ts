@@ -1,5 +1,5 @@
 import { ToCbor, CborString, Cbor, CborObj, CborArray, CborUInt, CanBeCborString, forceCborString, CborBytes } from "@harmoniclabs/cbor";
-import { ToData, DataConstr, DataI } from "@harmoniclabs/plutus-data";
+import { ToData, DataConstr, DataI, Data } from "@harmoniclabs/plutus-data";
 import { Hash28 } from "../hashes/Hash28/Hash28";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../utils/ints";
 import { Credential, CredentialType } from "./Credential";
@@ -107,6 +107,29 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
         );
 
         return credData;
+    }
+
+    static fromData( data: Data ): StakeCredentials
+    {
+        if(!(data instanceof DataConstr))
+        throw new Error("invalid data for stake credential");
+        
+        if( data.constr === BigInt(1) )
+        return new StakeCredentials(
+            "pointer",
+            data.fields.map( d => {
+                if(!(d instanceof DataI))
+                throw new Error("invalid data for stake credential");
+                return d.int;
+            }) as any,
+        );
+        
+        const creds = Credential.fromData( data.fields[0] );
+        
+        return new StakeCredentials(
+            creds.type === CredentialType.KeyHash ? "stakeKey" : "script",
+            creds.hash
+        );
     }
 
     toCbor(): CborString

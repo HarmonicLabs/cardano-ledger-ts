@@ -10,6 +10,7 @@ import { assert } from "../../utils/assert";
 import { BootstrapWitness } from "./BootstrapWitness";
 import { TxRedeemer } from "./TxRedeemer";
 import { VKeyWitness } from "./VKeyWitness";
+import { getCborSet, isCborSet } from "../../utils/getCborSet";
 
 
 export interface ITxWitnessSet {
@@ -337,45 +338,45 @@ export class TxWitnessSet
 
         // redeemer might be either array or map in conway
         if(!(
-            (_vkey === undefined        || _vkey instanceof CborArray)      &&
-            (_native === undefined      || _native instanceof CborArray)    &&
-            (_bootstrap === undefined   || _bootstrap instanceof CborArray) &&
-            (_plutusV1 === undefined    || _plutusV1 instanceof CborArray)  &&
-            (_dats === undefined        || _dats instanceof CborArray)      &&
-            (_plutusV2 === undefined    || _plutusV2 instanceof CborArray)  &&
-            (_plutusV3 === undefined    || _plutusV3 instanceof CborArray)
+            (_vkey === undefined        || isCborSet( _vkey ) )      &&
+            (_native === undefined      || isCborSet( _native ) )    &&
+            (_bootstrap === undefined   || isCborSet( _bootstrap ) ) &&
+            (_plutusV1 === undefined    || isCborSet( _plutusV1 ) )  &&
+            (_dats === undefined        || isCborSet( _dats ) )      &&
+            (_plutusV2 === undefined    || isCborSet( _plutusV2 ) )  &&
+            (_plutusV3 === undefined    || isCborSet( _plutusV3 ) )
         )) throw new InvalidCborFormatError("TxWitnessSet");
 
         return new TxWitnessSet({
-            vkeyWitnesses: _vkey === undefined ? undefined : _vkey.array.map( VKeyWitness.fromCborObj ),
+            vkeyWitnesses: _vkey === undefined ? undefined : getCborSet( _vkey ).map( VKeyWitness.fromCborObj ),
             nativeScripts: _native === undefined ? undefined : 
-                _native.array.map( nativeCborObj => 
+                getCborSet( _native ).map( nativeCborObj => 
                     new Script(
                         ScriptType.NativeScript, 
                         Cbor.encode( nativeCborObj ).toBuffer()
                     )
                 ),
             bootstrapWitnesses: _bootstrap === undefined ? undefined :
-                _bootstrap.array.map( BootstrapWitness.fromCborObj ),
+                getCborSet( _bootstrap ).map( BootstrapWitness.fromCborObj ),
             plutusV1Scripts: _plutusV1 === undefined ? undefined :
-                _plutusV1.array.map( cbor =>
+                getCborSet( _plutusV1 ).map( cbor =>
                     new Script(
                         ScriptType.PlutusV1,
                         Cbor.encode( cbor ).toBuffer()
                     )
                 ),
             datums: _dats === undefined ? undefined :
-                _dats.array.map( dataFromCborObj ),
+                getCborSet( _dats ).map( dataFromCborObj ),
             redeemers: _reds === undefined ? undefined : witnessRedeemersFromCborObj( _reds ),
             plutusV2Scripts: _plutusV2 === undefined ? undefined :
-                _plutusV2.array.map( cbor =>
+                getCborSet( _plutusV2 ).map( cbor =>
                     new Script(
                         ScriptType.PlutusV2,
                         Cbor.encode( cbor ).toBuffer()
                     )
                 ),
             plutusV3Scripts: _plutusV3 === undefined ? undefined :
-                _plutusV3.array.map( cbor =>
+                getCborSet( _plutusV3 ).map( cbor =>
                     new Script(
                         ScriptType.PlutusV3,
                         Cbor.encode( cbor ).toBuffer()

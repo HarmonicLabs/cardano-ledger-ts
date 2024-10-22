@@ -1,4 +1,4 @@
-import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
+import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString, isCborObj } from "@harmoniclabs/cbor";
 import { blake2b_256 } from "@harmoniclabs/crypto";
 import { isObject, hasOwn, defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
 import { PubKeyHash } from "../../credentials";
@@ -11,6 +11,7 @@ import { UTxO, TxOut, isIUTxO, isITxOut, TxOutRef } from "./output";
 import { assert } from "../../utils/assert";
 import { IVotingProcedures, VotingProcedures, isIVotingProceduresEntry } from "../../governance/VotingProcedures";
 import { IProposalProcedure, ProposalProcedure, isIProposalProcedure } from "../../governance/ProposalProcedure";
+import { getCborSet } from "../../utils/getCborSet";
 
 export interface ITxBody {
     inputs: [ UTxO, ...UTxO[] ],
@@ -577,32 +578,36 @@ export class TxBody
         }
 
         const [
-            _ins,
-            _outs,
-            _fee,
-            _ttl,
-            _certs,
-            _withdrawals,
-            _pUp,
-            _auxDataHash,
-            _validityStart,
-            _mint,
-            _10,
-            _scriptDataHash,
-            _12,
-            _collIns,
-            _reqSigs,
-            _net,
-            _collRet,
-            _totColl,
-            _refIns
+            _ins_,                  // 0 // set
+            _outs,                  // 1
+            _fee,                   // 2
+            _ttl,                   // 3
+            _certs_,                // 4
+            _withdrawals,           // 5
+            _pUp,                   // 6
+            _auxDataHash,           // 7
+            _validityStart,         // 8
+            _mint,                  // 9
+            _10,                    // 10
+            _scriptDataHash,        // 11
+            _12,                    // 12
+            _collIns,               // 13 // set
+            _reqSigs,               // 14 // set
+            _net,                   // 15
+            _collRet,               // 16
+            _totColl,               // 17
+            _refIns,                // 18
+            _voting_procedures,     // 19
+            _proposal_procedures,   // 20 // set
+            _current_treasury,      // 21
+            _donation               // 22
         ] = fields;
 
-        if( _ins === undefined || _outs === undefined || _fee === undefined )
+        if( _ins_ === undefined || _outs === undefined || _fee === undefined )
         throw new InvalidCborFormatError("TxBody");
 
         if(!(
-            _ins  instanceof CborArray &&
+            // _ins  instanceof CborArray &&
             _outs instanceof CborArray &&
             _fee  instanceof CborUInt
         ))
@@ -618,23 +623,23 @@ export class TxBody
         }
 
         return new TxBody({
-            inputs: _ins.array.map( txOutRefAsUTxOFromCborObj ) as [UTxO, ...UTxO[]],
+            inputs: getCborSet( _ins_ ).map( txOutRefAsUTxOFromCborObj ) as [UTxO, ...UTxO[]],
             outputs: _outs.array.map( TxOut.fromCborObj ),
             fee: _fee.num,
             ttl,
-            certs:                      _certs instanceof CborArray ? _certs.array.map( certificateFromCborObj ) : undefined,
+            certs:                      _certs_ !== undefined ? getCborSet( _certs_ ).map( certificateFromCborObj ) : undefined,
             withdrawals:                _withdrawals === undefined ? undefined : TxWithdrawals.fromCborObj( _withdrawals ),
             protocolUpdate:             _pUp === undefined ? undefined : LegacyPPUpdateProposalFromCborObj( _pUp ),
             auxDataHash:                _auxDataHash === undefined ? undefined : AuxiliaryDataHash.fromCborObj( _auxDataHash ),
             validityIntervalStart:      _validityStart instanceof CborUInt ? _validityStart.num : undefined,
             mint:                       _mint === undefined ? undefined : Value.fromCborObj( _mint ),
             scriptDataHash:             _scriptDataHash === undefined ? undefined : ScriptDataHash.fromCborObj( _scriptDataHash ),
-            collateralInputs:           _collIns instanceof CborArray ? _collIns.array.map( txOutRefAsUTxOFromCborObj ) : undefined ,
-            requiredSigners:            _reqSigs instanceof CborArray  ? _reqSigs.array.map( PubKeyHash.fromCborObj ) : undefined,
+            collateralInputs:           _collIns !== undefined ? getCborSet( _collIns ).map( txOutRefAsUTxOFromCborObj ) : undefined ,
+            requiredSigners:            _reqSigs !== undefined  ? getCborSet( _reqSigs ).map( PubKeyHash.fromCborObj ) : undefined,
             network:                    _net instanceof CborUInt ? (Number( _net.num ) === 0 ? "testnet": "mainnet") : undefined,
             collateralReturn:           _collRet === undefined ? undefined : TxOut.fromCborObj( _collRet ),
             totCollateral:              _totColl instanceof CborUInt ? _totColl.num : undefined,
-            refInputs:                  _refIns instanceof CborArray ? _refIns.array.map( txOutRefAsUTxOFromCborObj ) : undefined
+            refInputs:                  _refIns !== undefined ? getCborSet( _refIns ).map( txOutRefAsUTxOFromCborObj ) : undefined
         });
     }
 

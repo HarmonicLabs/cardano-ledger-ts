@@ -71,6 +71,23 @@ export class Credential<T extends CredentialType = CredentialType>
         )
     }
 
+    static fromData( data: Data ): Credential
+    {
+        if(!(data instanceof DataConstr))
+        throw new Error("invalid data for credential");
+        
+        const tag = data.constr;
+        const hash = data.fields[0];
+        
+        if(!(hash instanceof DataB))
+        throw new Error("invalid data for credential");
+        
+        return new Credential(
+            tag <= 0 ? CredentialType.KeyHash : CredentialType.Script, 
+            new Hash28( hash.bytes.toBuffer() )
+        );
+    }
+
     /** @deprecated use `keyHash` instead */
     static pubKey( hash: Uint8Array | Hash28 | string ): Credential<CredentialType.KeyHash>
     {

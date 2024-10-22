@@ -151,6 +151,25 @@ export class Address
         )
     }
 
+    static fromData( data: Data, network: NetworkT = "mainnet" ): Address
+    {
+        if(!(data instanceof DataConstr))
+        throw new Error("invalid data for address");
+
+        const [ creds, maybeStakeCreds ] = data.fields;
+      
+        if(!(
+          maybeStakeCreds instanceof DataConstr
+        )) throw new Error("invalid data for address");
+      
+        return new Address(
+            network,
+            Credential.fromData( creds ),
+            maybeStakeCreds.constr >= 1 ? undefined : // nothing
+            StakeCredentials.fromData( maybeStakeCreds.fields[0] )
+        );
+    }
+
     toBytes(): byte[]
     {
         return [(
