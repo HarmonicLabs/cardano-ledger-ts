@@ -14,6 +14,7 @@ import { assert } from "../utils/assert";
 import { Rational, cborFromRational, isRational } from "./protocol/Rational";
 import { StakeAddress } from "./StakeAddress";
 import { Network } from "./Network";
+import { getCborSet } from "../utils/getCborSet";
 
 export interface IPoolParamsMetadata {
     poolMetadataUrl: string,
@@ -222,7 +223,7 @@ export class PoolParams
         if(!(
             _pledge instanceof CborUInt &&
             _cost instanceof CborUInt &&
-            _owners instanceof CborArray &&
+            // _owners instanceof CborArray &&
             _relays instanceof CborArray &&
             _margin instanceof CborTag && _margin.data instanceof CborArray &&
             _rewAccount instanceof CborBytes &&
@@ -245,7 +246,7 @@ export class PoolParams
             cost: _cost.num,
             margin: new CborPositiveRational( margin_num, margin_den ),
             rewardAccount,
-            owners: _owners.array.map( PubKeyHash.fromCborObj ),
+            owners: getCborSet( _owners ).map( PubKeyHash.fromCborObj ),
             relays: _relays.array.map( poolRelayFromCborObj ),
             metadata: (
                 _metadata instanceof CborArray &&

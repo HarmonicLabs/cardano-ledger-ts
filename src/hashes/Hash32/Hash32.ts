@@ -7,6 +7,8 @@ export type CanBeHash32 = string | Uint8Array | Hash32;
 
 export function canBeHash32( stuff: any ): stuff is CanBeHash32
 {
+    if( stuff instanceof Hash32 ) return true;
+    
     if( typeof stuff === "string" )
     {
         return stuff.length === 64 && isHex( stuff )

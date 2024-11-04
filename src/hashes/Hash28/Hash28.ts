@@ -8,6 +8,7 @@ export type CanBeHash28 = string | Uint8Array | Hash28;
 
 export function canBeHash28( stuff: any ): stuff is CanBeHash28
 {
+    if( stuff instanceof Hash28 ) return true;
     if( typeof stuff === "string" )
     {
         return stuff.length === 56 && isHex( stuff )
@@ -51,8 +52,6 @@ export class Hash28 extends Hash
     {
         if(!(cObj instanceof CborBytes ))
         throw new Error(`Invalid CBOR format for "Hash"`);
-
-        console.log( toHex( cObj.bytes ), cObj.bytes.length );
 
         return new Hash28( cObj.bytes )
     }
