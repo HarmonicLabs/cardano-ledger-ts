@@ -1,4 +1,4 @@
-import { CborArray, CborBytes, ToCbor, CborString, Cbor, CborTag, CborMap, CborUInt, CborMapEntry, CanBeCborString, forceCborString, CborObj } from "@harmoniclabs/cbor";
+import { CborArray, CborBytes, ToCbor, CborString, Cbor, CborTag, CborMap, CborUInt, CborMapEntry, CanBeCborString, forceCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { blake2b_256 } from "@harmoniclabs/crypto";
 import { AuxiliaryDataHash } from "../../hashes";
 import { NativeScript, nativeScriptFromCborObj } from "../../script/NativeScript";
@@ -8,6 +8,7 @@ import { TxMetadata } from "../metadata";
 import { hasOwn, defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
 import { assert } from "../../utils/assert";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
+import { getSubCborRef } from "../../utils/getSubCborRef";
 
 export interface IAuxiliaryData {
     metadata?: TxMetadata;
@@ -33,7 +34,10 @@ export class AuxiliaryData
 
     readonly hash!: AuxiliaryDataHash
 
-    constructor( auxData: IAuxiliaryData )
+    constructor(
+        auxData: IAuxiliaryData,
+        readonly subCborRef?: SubCborRef
+    )
     {
         assert(
             hasOwn( auxData, "metadata" ),
@@ -166,6 +170,13 @@ export class AuxiliaryData
     
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborTag
@@ -199,7 +210,7 @@ export class AuxiliaryData
 
     static fromCbor( cStr: CanBeCborString ): AuxiliaryData
     {
-        return AuxiliaryData.fromCborObj( Cbor.parse( forceCborString( cStr ) ) );
+        return AuxiliaryData.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
     static fromCborObj( cObj: CborObj ): AuxiliaryData
     {
@@ -281,9 +292,10 @@ export class AuxiliaryData
                         Cbor.encode( cbor ).toBuffer()
                     )
                 )
-        })
+        }, getSubCborRef( cObj ));
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         return {

@@ -1,8 +1,9 @@
-import { CanBeCborString, Cbor, forceCborString, CborObj, CborBytes } from "@harmoniclabs/cbor";
+import { CanBeCborString, Cbor, forceCborString, CborObj, CborBytes, SubCborRef } from "@harmoniclabs/cbor";
 import { assert } from "../../utils/assert";
 import { Hash, canBeHashInstance } from "../Hash";
 import { isHex } from "../../utils/hex";
 import { toHex } from "@harmoniclabs/uint8array-utils";
+import { getSubCborRef } from "../../utils/getSubCborRef";
 
 export type CanBeHash28 = string | Uint8Array | Hash28;
 
@@ -24,13 +25,16 @@ export function canBeHash28( stuff: any ): stuff is CanBeHash28
 
 export class Hash28 extends Hash
 {
-    constructor( bs: CanBeHash28 , className: string = "Hash28" )
+    constructor(
+        bs: CanBeHash28,
+        readonly subCborRef?: SubCborRef,
+    )
     {
         super( bs instanceof Hash28 ? bs.toBuffer() : bs );
 
         assert(
             this._bytes.length === 28,
-            "'" + className + "' must be an hash of length 28"
+            "'Hash28' must be an hash of length 28"
         );
     }
 
@@ -46,13 +50,16 @@ export class Hash28 extends Hash
 
     static fromCbor( cStr: CanBeCborString ): Hash28
     {
-        return Hash28.fromCborObj( Cbor.parse( forceCborString( cStr ) ) );
+        return Hash28.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
     static fromCborObj( cObj: CborObj ): Hash28
     {
         if(!(cObj instanceof CborBytes ))
         throw new Error(`Invalid CBOR format for "Hash"`);
 
-        return new Hash28( cObj.bytes )
+        return new Hash28(
+            cObj.bytes,
+            getSubCborRef( cObj )
+        );
     }
 }

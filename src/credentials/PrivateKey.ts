@@ -22,6 +22,8 @@ export class PrivateKey extends Hash32
     }
     static fromCborObj( cObj: CborObj )
     {
-        return new PrivateKey( Hash32.fromCborObj( cObj ).toBuffer() )
+        return new PrivateKey(
+            Hash32.fromCborObj( cObj ).toBuffer()
+        )
     }
 }

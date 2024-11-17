@@ -1,10 +1,11 @@
-import { ToCbor, CborString, Cbor, CborBytes, CborObj, CborArray, CborUInt, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
+import { ToCbor, CborString, Cbor, CborBytes, CborObj, CborArray, CborUInt, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { blake2b_224, byte } from "@harmoniclabs/crypto";
 import { fromHex, isUint8Array } from "@harmoniclabs/uint8array-utils";
 import { Hash28 } from "../hashes";
 import { NativeScript, nativeScriptToCbor, nativeScriptFromCbor } from "./NativeScript";
 import { defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
 import { assert } from "../utils/assert";
+import { getSubCborRef } from "../utils/getSubCborRef";
 
 export enum ScriptType {
     NativeScript = "NativeScript",
@@ -12,8 +13,9 @@ export enum ScriptType {
     PlutusV2 = "PlutusScriptV2",
     PlutusV3 = "PlutusScriptV3"
 }
-
 Object.freeze( ScriptType );
+
+export const defaultScriptType = ScriptType.PlutusV3;
 
 export type PlutusScriptType = ScriptType.PlutusV1 | ScriptType.PlutusV2 | ScriptType.PlutusV3 | "PlutusScriptV1" | "PlutusScriptV2" | "PlutusScriptV3"
 
@@ -38,7 +40,11 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
     readonly cbor!: T extends ScriptType.NativeScript ? never : CborString;
     readonly hash!: Hash28;
 
-    constructor( scriptType: T, bytes: Uint8Array | (T extends ScriptType.NativeScript ? NativeScript : PlutusScriptJsonFormat) )
+    constructor(
+        scriptType: T,
+        bytes: Uint8Array | (T extends ScriptType.NativeScript ? NativeScript : PlutusScriptJsonFormat),
+        readonly subCborRef?: SubCborRef
+    )
     {
         assert(
             scriptType === ScriptType.NativeScript  ||
@@ -168,6 +174,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         );
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         if( this.type === ScriptType.NativeScript )
@@ -196,7 +203,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
     {
         const t = json.type;
 
-        if( t === ScriptType.PlutusV1 || t === ScriptType.PlutusV2 )
+        if( t !== ScriptType.NativeScript )
         {
             return new Script( t, fromHex( json.cborHex ) );
         }
@@ -212,6 +219,13 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
     **/
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     /**
@@ -219,6 +233,12 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
     **/
     toCborObj(): CborObj
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.subCborRef.toBuffer() );
+        }
         if( this.type === ScriptType.NativeScript )
         return new CborArray([
             new CborUInt(0),
@@ -237,12 +257,12 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         ]);
     }
 
-    static fromCbor( cbor: CanBeCborString, defType: ScriptType = ScriptType.PlutusV2 ): Script
+    static fromCbor( cbor: CanBeCborString, defType: ScriptType = defaultScriptType ): Script
     {
         return Script.fromCborObj( Cbor.parse( forceCborString( cbor ) ), defType );
     }
 
-    static fromCborObj( cObj: CborObj, defType: ScriptType = ScriptType.PlutusV2 ): Script
+    static fromCborObj( cObj: CborObj, defType: ScriptType = defaultScriptType ): Script
     {
         // read tx_witness_set
         if( cObj instanceof CborBytes )
@@ -271,6 +291,6 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         if(!( cObj.array[1] instanceof CborBytes ))
         throw new Error(`Invalid CBOR format for "Script"`);
 
-        return new Script( t, cObj.array[1].buffer );
+        return new Script( t, cObj.array[1].bytes, getSubCborRef( cObj ) );
     }
 }

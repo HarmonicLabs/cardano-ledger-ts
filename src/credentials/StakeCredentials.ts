@@ -1,16 +1,24 @@
-import { ToCbor, CborString, Cbor, CborObj, CborArray, CborUInt, CanBeCborString, forceCborString, CborBytes } from "@harmoniclabs/cbor";
+import { ToCbor, CborString, Cbor, CborObj, CborArray, CborUInt, CanBeCborString, forceCborString, CborBytes, SubCborRef } from "@harmoniclabs/cbor";
 import { ToData, DataConstr, DataI, Data } from "@harmoniclabs/plutus-data";
 import { Hash28 } from "../hashes/Hash28/Hash28";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../utils/ints";
-import { Credential, CredentialType } from "./Credential";
+import { Credential, CredentialType, ValidatorHash } from "./Credential";
 import { StakeKeyHash } from "./StakeKeyHash";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils"
 import { assert } from "../utils/assert";
 import { ToDataVersion, definitelyToDataVersion } from "../toData/defaultToDataVersion";
+import { getSubCborRef } from "../utils/getSubCborRef";
+import { PubKeyHash } from "./PubKeyHash";
 
 export class StakeValidatorHash extends Hash28 {}
 
-export type StakeCredentialsType = "stakeKey" | "script" | "pointer" ;
+export enum StakeCredentialsType {
+    /** @deprecated use `KeyHash` instead */
+    StakeKey = "stakeKey",
+    KeyHash  = "stakeKey",
+    Script = "script",
+    Pointer = "pointer"
+}
 
 export type StakeHash<T extends StakeCredentialsType> =
     T extends "stakeKey" ? StakeKeyHash :
@@ -24,7 +32,52 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
     readonly type!: T;
     readonly hash!: StakeHash<T>
 
-    constructor( type: T, hash: StakeHash<T> )
+    /** @deprecated use `keyHash` instead */
+    static pubKey( hash: Uint8Array | Hash28 | string ): StakeCredentials<StakeCredentialsType.KeyHash>
+    {
+        return StakeCredentials.keyHash( hash )
+    }
+
+    /** @deprecated use `keyHash` instead */
+    static stakeKey( hash: Uint8Array | Hash28 | string ): StakeCredentials<StakeCredentialsType.KeyHash>
+    {
+        return StakeCredentials.keyHash( hash )
+    }
+
+    static keyHash( hash: Uint8Array | Hash28 | string ): StakeCredentials<StakeCredentialsType.KeyHash>
+    {
+        return new StakeCredentials(
+            StakeCredentialsType.KeyHash,
+            hash instanceof PubKeyHash ?
+                hash :
+                new PubKeyHash( hash )
+        );
+    }
+
+    static script( hash: Uint8Array | Hash28 | string ): StakeCredentials<StakeCredentialsType.Script>
+    {
+        return new StakeCredentials(
+            StakeCredentialsType.Script,
+            hash instanceof ValidatorHash ?
+                hash :
+                new ValidatorHash( hash )
+        );
+    }
+
+    /** @deprecated pointer credentials are deprecated since conway */
+    static pointer( hash: [ CanBeUInteger, CanBeUInteger, CanBeUInteger ] ): StakeCredentials<StakeCredentialsType.Pointer>
+    {
+        return new StakeCredentials(
+            StakeCredentialsType.Pointer,
+            hash
+        );
+    }
+
+    constructor(
+        type: T,
+        hash: StakeHash<T>,
+        readonly subCborRef?: SubCborRef
+    )
     {
         assert(
             hash instanceof Hash28,
@@ -90,14 +143,14 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
 
             return new DataConstr(
                 1, // PStakingPtr
-                ( this.hash as StakeHash<"pointer"> )
+                ( this.hash as StakeHash<StakeCredentialsType.Pointer> )
                 .map( n => new DataI( forceBigUInt( n ) ) )
             );
         }
 
         const credData = new Credential(
             this.type === "stakeKey" ? CredentialType.KeyHash : CredentialType.Script,
-            (this.hash as StakeHash<"script" | "stakeKey">)
+            (this.hash as StakeHash<StakeCredentialsType.KeyHash | StakeCredentialsType.Script>)
         ).toData( version );
 
         if( isOldVersion )
@@ -116,7 +169,7 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
         
         if( data.constr === BigInt(1) )
         return new StakeCredentials(
-            "pointer",
+            StakeCredentialsType.Pointer,
             data.fields.map( d => {
                 if(!(d instanceof DataI))
                 throw new Error("invalid data for stake credential");
@@ -127,18 +180,31 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
         const creds = Credential.fromData( data.fields[0] );
         
         return new StakeCredentials(
-            creds.type === CredentialType.KeyHash ? "stakeKey" : "script",
+            creds.type === CredentialType.KeyHash ? StakeCredentialsType.KeyHash : StakeCredentialsType.Script,
             creds.hash
         );
     }
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
 
     toCborObj(): CborObj
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.subCborRef.toBuffer() );
+        }
         return new CborArray([
             new CborUInt( this.type === "stakeKey" ? 0 : 1 ),
             Array.isArray( this.hash ) ?
@@ -173,17 +239,19 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
             throw new Error(`Invalid CBOR fromat for "StakeCredentials"`);
 
             return new StakeCredentials(
-                "pointer",
+                StakeCredentialsType.Pointer,
                 _creds.array.map( n => (n as CborUInt).num ) as any
             );
         }
 
         return new StakeCredentials(
-            _type.num === BigInt(0) ? "stakeKey" : "script",
-            Hash28.fromCborObj( _creds ) 
+            _type.num === BigInt(0) ? StakeCredentialsType.KeyHash : StakeCredentialsType.Script,
+            Hash28.fromCborObj( _creds ),
+            getSubCborRef( cObj )
         );
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         switch( this.type )

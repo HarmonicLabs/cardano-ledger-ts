@@ -1,4 +1,4 @@
-import { Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt } from "@harmoniclabs/cbor";
+import { Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, SubCborRef } from "@harmoniclabs/cbor";
 import { Credential, PubKeyHash } from "../../credentials";
 import { CanBeHash28, Hash28, canBeHash28 } from "../../hashes";
 import { roDescr } from "../../utils/roDescr";
@@ -7,6 +7,7 @@ import { IDRep } from "./IDRep";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { Data, DataConstr } from "@harmoniclabs/plutus-data";
 import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
+import { getSubCborRef } from "../../utils/getSubCborRef";
 
 export interface IDRepKeyHash {
     hash: CanBeHash28
@@ -23,7 +24,10 @@ export class DRepKeyHash
     readonly drepType: DRepType.KeyHash;
     readonly hash: PubKeyHash;
 
-    constructor({ hash }: IDRepKeyHash)
+    constructor(
+        { hash }: IDRepKeyHash, 
+        readonly subCborRef?: SubCborRef
+    )
     {
         Object.defineProperties(
             this, {
@@ -48,6 +52,13 @@ export class DRepKeyHash
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborArray
@@ -70,9 +81,10 @@ export class DRepKeyHash
 
         return new DRepKeyHash({
             hash: Hash28.fromCborObj( cbor.array[1] )
-        });
+        }, getSubCborRef( cbor ));
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         return {

@@ -1,4 +1,4 @@
-import { CborMap, CborNegInt, CborUInt, CborObj, ToCbor, CborString, Cbor, CborArray } from "@harmoniclabs/cbor";
+import { CborMap, CborNegInt, CborUInt, CborObj, ToCbor, CborString, Cbor, CborArray, SubCborRef } from "@harmoniclabs/cbor";
 import { canBeUInteger, forceBigUInt } from "../../utils/ints";
 import { Coin } from "../Coin";
 import { assert } from "../../utils/assert";
@@ -10,6 +10,7 @@ import { ICert } from "./ICert";
 import { Hash28 } from "../../hashes";
 import { Data, DataConstr } from "@harmoniclabs/plutus-data";
 import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
+import { getSubCborRef } from "../../utils/getSubCborRef";
 
 export enum InstantRewardsSource {
     Reserves = 0,
@@ -99,7 +100,10 @@ export class MoveInstantRewardsCert
      */
     readonly destination!: RewardsMap | Coin
 
-    constructor({ source, destination }: IMoveInstantRewardsCert)
+    constructor(
+        { source, destination }: IMoveInstantRewardsCert,
+        readonly subCborRef?: SubCborRef
+    )
     {
         assert(
             source === InstantRewardsSource.Reserves ||
@@ -159,11 +163,24 @@ export class MoveInstantRewardsCert
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
 
     toCborObj(): CborObj
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.subCborRef.toBuffer() );
+        }
         return new CborArray([
             new CborUInt( this.source ),
             canBeUInteger( this.destination ) ?
@@ -190,9 +207,10 @@ export class MoveInstantRewardsCert
             destination: _dst instanceof CborUInt ?
                 _dst.num :
                 rewardsMapFromCborObj( _dst )
-        });
+        }, getSubCborRef( cObj ));
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         return {

@@ -1,4 +1,4 @@
-import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString, isCborObj } from "@harmoniclabs/cbor";
+import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString, isCborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { isObject, definePropertyIfNotPresent, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { Data, isData, dataToCborObj, dataFromCborObj } from "@harmoniclabs/plutus-data";
@@ -11,6 +11,7 @@ import { BootstrapWitness } from "./BootstrapWitness";
 import { TxRedeemer } from "./TxRedeemer";
 import { VKeyWitness } from "./VKeyWitness";
 import { getCborSet, isCborSet } from "../../utils/getCborSet";
+import { getSubCborRef } from "../../utils/getSubCborRef";
 
 
 export interface ITxWitnessSet {
@@ -113,7 +114,11 @@ export class TxWitnessSet
      */
     readonly isComplete: boolean
 
-    constructor( witnesses: ITxWitnessSet, allRequiredSigners: Hash28[] | undefined = undefined )
+    constructor(
+        witnesses: ITxWitnessSet,
+        readonly subCborRef?: SubCborRef,
+        allRequiredSigners: Hash28[] | undefined = undefined,
+    )
     {
         assert(
             isITxWitnessSet( witnesses ),
@@ -207,6 +212,7 @@ export class TxWitnessSet
         )
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         return {
@@ -223,10 +229,23 @@ export class TxWitnessSet
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.subCborRef.toBuffer() );
+        }
         return new CborMap(
             ([
                 this.vkeyWitnesses === undefined ? undefined :
@@ -305,7 +324,7 @@ export class TxWitnessSet
 
     static fromCbor( cStr: CanBeCborString ): TxWitnessSet
     {
-        return TxWitnessSet.fromCborObj( Cbor.parse( forceCborString( cStr ) ) );
+        return TxWitnessSet.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
     static fromCborObj( cObj: CborObj ): TxWitnessSet
     {
@@ -382,8 +401,7 @@ export class TxWitnessSet
                         Cbor.encode( cbor ).toBuffer()
                     )
                 ),
-            
-        })
+        }, getSubCborRef( cObj ));
     }
 
 }

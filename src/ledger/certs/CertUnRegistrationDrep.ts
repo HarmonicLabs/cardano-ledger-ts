@@ -1,4 +1,4 @@
-import { Cbor, CborArray, CborObj, CborSimple, CborString, CborUInt } from "@harmoniclabs/cbor";
+import { Cbor, CborArray, CborObj, CborSimple, CborString, CborUInt, SubCborRef } from "@harmoniclabs/cbor";
 import { Credential } from "../../credentials"
 import { roDescr } from "../../utils/roDescr";
 import { CertificateType, certTypeToString } from "./CertificateType"
@@ -9,6 +9,7 @@ import { forceBigUInt } from "../../utils/ints";
 import { Hash28 } from "../../hashes";
 import { DataConstr, DataI } from "@harmoniclabs/plutus-data";
 import { ToDataVersion } from "../../toData/defaultToDataVersion";
+import { getSubCborRef } from "../../utils/getSubCborRef";
 
 export interface ICertUnRegistrationDrep {
     drepCredential: Credential,
@@ -23,7 +24,10 @@ export class CertUnRegistrationDrep
     /** refound */
     readonly coin: bigint;
 
-    constructor({ drepCredential, coin }: ICertUnRegistrationDrep)
+    constructor(
+        { drepCredential, coin }: ICertUnRegistrationDrep,
+        readonly subCborRef?: SubCborRef
+    )
     {
         Object.defineProperties(
             this, {
@@ -58,6 +62,13 @@ export class CertUnRegistrationDrep
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborArray
@@ -84,9 +95,10 @@ export class CertUnRegistrationDrep
         return new CertUnRegistrationDrep({
             drepCredential: Credential.fromCborObj( cbor.array[1] ),
             coin: cbor.array[2].num
-        });
+        }, getSubCborRef( cbor ));
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         return {

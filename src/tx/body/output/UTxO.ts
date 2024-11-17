@@ -1,4 +1,4 @@
-import { ToCbor, CborString, Cbor, CborArray, CanBeCborString, forceCborString, CborObj } from "@harmoniclabs/cbor";
+import { ToCbor, CborString, Cbor, CborArray, CanBeCborString, forceCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { ToData, Data, DataConstr } from "@harmoniclabs/plutus-data";
@@ -8,6 +8,7 @@ import { ITxOut, isITxOut, TxOut } from "./TxOut";
 import { ITxOutRef, isITxOutRef, TxOutRef } from "./TxOutRef";
 import { lexCompare } from "@harmoniclabs/uint8array-utils";
 import { ToDataVersion } from "../../../toData/defaultToDataVersion";
+import { getSubCborRef } from "../../../utils/getSubCborRef";
 
 export interface IUTxO {
     utxoRef: ITxOutRef,
@@ -29,8 +30,10 @@ export class UTxO
     readonly utxoRef!: TxOutRef
     readonly resolved!: TxOut
 
-    constructor( utxo: IUTxO )
-    constructor({ utxoRef, resolved }: IUTxO)
+    constructor(
+        { utxoRef, resolved }: IUTxO,
+        readonly subCborRef?: SubCborRef
+    )
     {
         defineReadOnlyProperty(
             this,
@@ -62,10 +65,23 @@ export class UTxO
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() )
     }
-    toCborObj()
+    toCborObj(): CborObj
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.subCborRef.toBuffer() );
+        }
         return new CborArray([
             this.utxoRef.toCborObj(),
             this.resolved.toCborObj()
@@ -74,7 +90,7 @@ export class UTxO
 
     static fromCbor( cStr: CanBeCborString ): UTxO
     {
-        return UTxO.fromCborObj( Cbor.parse( forceCborString( cStr ) ) );
+        return UTxO.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
     static fromCborObj( cObj: CborObj ): UTxO
     {
@@ -101,9 +117,10 @@ export class UTxO
         return new UTxO({
             utxoRef,
             resolved
-        });
+        }, getSubCborRef( cObj ));
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         return {

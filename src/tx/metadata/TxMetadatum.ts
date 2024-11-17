@@ -95,10 +95,23 @@ export class TxMetadatumMap
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.subCborRef.toBuffer() );
+        }
         return new CborMap(
             this.map.map( entry => {
                 return {
@@ -109,6 +122,7 @@ export class TxMetadatumMap
         )
     }
 
+    toJSON() { return this.toJson(); }
     toJson(): { k: any, v: any }[]
     {
         return this.map.map( entry => {
@@ -141,13 +155,27 @@ export class TxMetadatumList
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.subCborRef.toBuffer() );
+        }
         return new CborArray( this.list.map( _ => _.toCborObj() ) );
     }
 
+    toJSON() { return this.toJson(); }
     toJson(): any[]
     {
         return this.list.map( _ => _.toJson() );
@@ -170,13 +198,27 @@ export class TxMetadatumInt
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.subCborRef.toBuffer() );
+        }
         return this.n < BigInt( 0 ) ? new CborNegInt( this.n ) : new CborUInt( this.n )
     }
 
+    toJSON() { return this.toJson(); }
     toJson(): { int: string; }
     {
         return { int: this.n.toString() }
@@ -199,10 +241,23 @@ export class TxMetadatumBytes
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.subCborRef.toBuffer() );
+        }
         if( this.bytes.length > 64 )
         {
             const chunks: CborBytes[] = [];
@@ -222,6 +277,7 @@ export class TxMetadatumBytes
         return new CborBytes( this.bytes );
     }
 
+    toJSON() { return this.toJson(); }
     toJson(): { bytes: string }
     {
         return { bytes: toHex( this.bytes ) }
@@ -249,10 +305,23 @@ export class TxMetadatumText
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.subCborRef.toBuffer() );
+        }
         if( this.text.length > 64 )
         {
             const chunks: CborText[] = [];
@@ -272,6 +341,7 @@ export class TxMetadatumText
         return new CborText( this.text );
     }
 
+    toJSON() { return this.toJson(); }
     toJson(): { text: string }
     {
         return { text: this.text }

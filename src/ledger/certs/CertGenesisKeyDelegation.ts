@@ -1,10 +1,11 @@
-import { Cbor, CborArray, CborObj, CborString, CborUInt } from "@harmoniclabs/cbor";
+import { Cbor, CborArray, CborObj, CborString, CborUInt, SubCborRef } from "@harmoniclabs/cbor";
 import { CanBeHash28, CanBeHash32, Hash28, Hash32 } from "../../hashes";
 import { roDescr } from "../../utils/roDescr";
 import { CertificateType, certTypeToString } from "./CertificateType";
 import { ICert } from "./ICert";
 import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
 import { DataConstr } from "@harmoniclabs/plutus-data";
+import { getSubCborRef } from "../../utils/getSubCborRef";
 
 /** @deprecated */
 export interface ICertGenesisKeyDelegation {
@@ -22,7 +23,10 @@ export class CertGenesisKeyDelegation
     readonly genesisDelegateHash: Hash28;
     readonly vrfKeyHash: Hash32;
 
-    constructor({ genesisHash, genesisDelegateHash, vrfKeyHash }: ICertGenesisKeyDelegation)
+    constructor(
+        { genesisHash, genesisDelegateHash, vrfKeyHash }: ICertGenesisKeyDelegation,
+        readonly subCborRef?: SubCborRef
+    )
     {
         Object.defineProperties(
             this, {
@@ -54,6 +58,13 @@ export class CertGenesisKeyDelegation
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborArray
@@ -80,9 +91,10 @@ export class CertGenesisKeyDelegation
             genesisHash: Hash28.fromCborObj( cbor.array[1] ),
             genesisDelegateHash: Hash28.fromCborObj( cbor.array[2] ),
             vrfKeyHash: Hash32.fromCborObj( cbor.array[2] )
-        });
+        }, getSubCborRef( cbor ));
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         return {

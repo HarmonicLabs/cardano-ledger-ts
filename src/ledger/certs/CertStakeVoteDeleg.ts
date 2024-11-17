@@ -1,4 +1,4 @@
-import { Cbor, CborArray, CborObj, CborString, CborUInt } from "@harmoniclabs/cbor";
+import { Cbor, CborArray, CborObj, CborString, CborUInt, SubCborRef } from "@harmoniclabs/cbor";
 import { Credential } from "../../credentials"
 import { roDescr } from "../../utils/roDescr";
 import { CertificateType, certTypeToString } from "./CertificateType"
@@ -23,7 +23,10 @@ export class CertStakeVoteDeleg
     readonly poolKeyHash: Hash28;
     readonly drep: DRep;
 
-    constructor({ stakeCredential, poolKeyHash, drep }: ICertStakeVoteDeleg)
+    constructor(
+        { stakeCredential, poolKeyHash, drep }: ICertStakeVoteDeleg,
+        readonly subCborRef?: SubCborRef
+    )
     {
         Object.defineProperties(
             this, {
@@ -73,6 +76,13 @@ export class CertStakeVoteDeleg
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborArray
@@ -99,9 +109,10 @@ export class CertStakeVoteDeleg
             stakeCredential: Credential.fromCborObj( cbor.array[1] ),
             poolKeyHash: Hash28.fromCborObj( cbor.array[2] ),
             drep: drepFromCborObj( cbor.array[3] )
-        });
+        }, getSubCborRef( cbor ));
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         return {

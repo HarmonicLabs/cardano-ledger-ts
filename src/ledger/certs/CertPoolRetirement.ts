@@ -1,4 +1,4 @@
-import { Cbor, CborArray, CborObj, CborString, CborUInt } from "@harmoniclabs/cbor";
+import { Cbor, CborArray, CborObj, CborString, CborUInt, SubCborRef } from "@harmoniclabs/cbor";
 import { Credential } from "../../credentials"
 import { roDescr } from "../../utils/roDescr";
 import { CertificateType, certTypeToString } from "./CertificateType"
@@ -8,6 +8,7 @@ import { CanBeHash28, Hash28 } from "../../hashes";
 import { forceBigUInt } from "../../utils/ints";
 import { Data, DataConstr, DataI } from "@harmoniclabs/plutus-data";
 import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
+import { getSubCborRef } from "../../utils/getSubCborRef";
 
 export interface ICertPoolRetirement {
     poolHash: CanBeHash28,
@@ -21,7 +22,10 @@ export class CertPoolRetirement
     readonly poolHash: Hash28;
     readonly epoch: Epoch;
 
-    constructor({ poolHash, epoch }: ICertPoolRetirement)
+    constructor(
+        { poolHash, epoch }: ICertPoolRetirement,
+        readonly subCborRef?: SubCborRef
+    )
     {
         Object.defineProperties(
             this, {
@@ -60,6 +64,13 @@ export class CertPoolRetirement
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborArray
@@ -86,9 +97,10 @@ export class CertPoolRetirement
         return new CertPoolRetirement({
             poolHash: Hash28.fromCborObj( cbor.array[1] ),
             epoch: cbor.array[2].num
-        });
+        }, getSubCborRef( cbor ));
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         return {

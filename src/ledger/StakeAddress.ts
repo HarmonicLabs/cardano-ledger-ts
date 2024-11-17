@@ -1,5 +1,5 @@
 import { NetworkT } from "../ledger/Network";
-import { StakeCredentials, StakeValidatorHash } from "../credentials/StakeCredentials";
+import { StakeCredentials, StakeCredentialsType, StakeValidatorHash } from "../credentials/StakeCredentials";
 import { StakeKeyHash } from "../credentials/StakeKeyHash";
 import { Hash28 } from "../hashes/Hash28/Hash28";
 import { CredentialType, PublicKey } from "../credentials";
@@ -8,7 +8,8 @@ import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { assert } from "../utils/assert";
 import { fromHex } from "@harmoniclabs/uint8array-utils";
 import { Credential } from "../credentials";
-import { CanBeCborString, Cbor, CborBytes, CborObj, forceCborString } from "@harmoniclabs/cbor";
+import { CanBeCborString, Cbor, CborBytes, CborObj, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
+import { getSubCborRef } from "../utils/getSubCborRef";
 
 
 export type StakeAddressBech32 = `stake1${string}` | `stake_test1${string}`;
@@ -26,7 +27,8 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType>
     constructor(
         network: NetworkT,
         credentials: Hash28,
-        type?: T
+        type?: T,
+        readonly subCborRef?: SubCborRef
     )
     {
         const t = type === undefined ? 
@@ -93,6 +95,7 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType>
 
         return StakeAddress.fromBytes(
             creds,
+            undefined,
             hrp === "stake" ? "mainnet" : "testnet",
             type
         )
@@ -105,8 +108,9 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType>
 
     static fromBytes(
         bs: byte[] | string | Uint8Array,
+        subCborRef?: SubCborRef,
         netwok: NetworkT = "mainnet",
-        type: StakeAddressType = "stakeKey"
+        type: StakeAddressType = "stakeKey",
     ): StakeAddress
     {
         bs = Uint8Array.from( typeof bs === "string" ? fromHex( bs ) : bs );
@@ -122,25 +126,35 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType>
         return new StakeAddress(
             netwok,
             bs.length === 28 ? new Hash28( bs ) : new PublicKey( bs ).hash,
-            type
-        )
+            type,
+            subCborRef
+        );
     }
 
     toCborObj(): CborObj
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.subCborRef.toBuffer() );
+        }
         return new CborBytes( this.toBytes() )
     }
 
     static fromCbor( cStr: CanBeCborString ): StakeAddress
     {
-        return StakeAddress.fromCborObj( Cbor.parse( forceCborString( cStr ) ) );
+        return StakeAddress.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
     static fromCborObj( cObj: CborObj ): StakeAddress
     {
         if(!(cObj instanceof CborBytes ))
         throw new Error(`Invalid CBOR format for "Hash"`);
 
-        return StakeAddress.fromBytes( cObj.bytes );
+        return StakeAddress.fromBytes(
+            cObj.bytes,
+            getSubCborRef( cObj )
+        );
     }
 
     toCredential()
@@ -151,11 +165,12 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType>
         );
     }
     
-    toStakeCredentials(): StakeCredentials<T>
+    toStakeCredentials(): StakeCredentials
     {
         return new StakeCredentials(
-            this.type,
-            new Hash28( this.credentials ) as any
+            this.type === "script" ? StakeCredentialsType.Script : StakeCredentialsType.KeyHash,
+            new Hash28( this.credentials ) as any,
+            undefined
         );
     }
 }

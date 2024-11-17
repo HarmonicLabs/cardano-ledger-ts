@@ -1,4 +1,4 @@
-import { Cbor, CborArray, CborObj, CborString, CborUInt } from "@harmoniclabs/cbor";
+import { Cbor, CborArray, CborObj, CborString, CborUInt, SubCborRef } from "@harmoniclabs/cbor";
 import { CanBeHash28, Hash28, canBeHash28 } from "../../hashes";
 import { roDescr } from "../../utils/roDescr";
 import { DRepType, drepTypeToString } from "./DRepType";
@@ -7,6 +7,7 @@ import { Credential, ValidatorHash } from "../../credentials";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { DataConstr } from "@harmoniclabs/plutus-data";
 import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
+import { getSubCborRef } from "../../utils/getSubCborRef";
 
 export interface IDRepScript {
     hash: CanBeHash28
@@ -23,7 +24,10 @@ export class DRepScript
     readonly drepType: DRepType.Script;
     readonly hash: ValidatorHash;
 
-    constructor({ hash }: IDRepScript)
+    constructor(
+        { hash }: IDRepScript,
+        readonly subCborRef?: SubCborRef
+    )
     {
         Object.defineProperties(
             this, {
@@ -49,6 +53,13 @@ export class DRepScript
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborArray
@@ -71,9 +82,10 @@ export class DRepScript
 
         return new DRepScript({
             hash: Hash28.fromCborObj( cbor.array[1] )
-        });
+        }, getSubCborRef( cbor ));
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         return {

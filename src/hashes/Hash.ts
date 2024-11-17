@@ -1,4 +1,4 @@
-import { ToCbor, CborString, Cbor, CborObj, CborBytes, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
+import { ToCbor, CborString, Cbor, CborObj, CborBytes, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { ToData, Data, DataB } from "@harmoniclabs/plutus-data";
 import { fromAscii, fromHex, isUint8Array, toAscii, toHex } from "@harmoniclabs/uint8array-utils";
@@ -6,6 +6,7 @@ import { assert } from "../utils/assert";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { isHex } from "../utils/hex";
 import { ToDataVersion } from "../toData/defaultToDataVersion";
+import { getSubCborRef } from "../utils/getSubCborRef";
 
 export function canBeHashInstance( obj: any ): boolean
 {
@@ -50,7 +51,10 @@ export class Hash
         return this.toString();
     }
 
-    constructor( bs: string | Uint8Array )
+    constructor(
+        bs: string | Uint8Array,
+        readonly subCborRef?: SubCborRef
+    )
     {
         if( typeof bs == "string" )
         {
@@ -117,23 +121,39 @@ export class Hash
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.subCborRef.toBuffer() );
+        }
         return new CborBytes( this.toBuffer() )
     }
 
     static fromCbor( cStr: CanBeCborString ): Hash
     {
-        return Hash.fromCborObj( Cbor.parse( forceCborString( cStr ) ) );
+        return Hash.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
     static fromCborObj( cObj: CborObj ): Hash
     {
         if(!(cObj instanceof CborBytes ))
         throw new Error(`Invalid CBOR format for "Hash"`);
 
-        return new Hash( cObj.bytes );
+        return new Hash(
+            cObj.bytes,
+            getSubCborRef( cObj )
+        );
     }
 
     toData(_version?: ToDataVersion | undefined): Data

@@ -1,4 +1,4 @@
-import { ToCbor, CborObj, CborBytes, CborString, Cbor, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
+import { ToCbor, CborObj, CborBytes, CborString, Cbor, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { byte, encodeBech32, decodeBech32 } from "@harmoniclabs/crypto";
 import { ToData, Data, DataConstr } from "@harmoniclabs/plutus-data";
 import { Credential, StakeCredentials, StakeCredentialsType, CredentialType, PublicKey } from "../credentials";
@@ -12,6 +12,7 @@ import UPLCFlatUtils from "../utils/UPLCFlatUtils";
 import { fromHex, toHex } from "@harmoniclabs/uint8array-utils";
 import { harden, XPrv } from "@harmoniclabs/bip32_ed25519";
 import { ToDataVersion } from "../toData/defaultToDataVersion";
+import { getSubCborRef } from "../utils/getSubCborRef";
 
 export type AddressStr = `${"addr1"|"addr_test1"}${string}`;
 
@@ -77,7 +78,8 @@ export class Address
         network: NetworkT,
         paymentCreds: Credential,
         stakeCreds?: StakeCredentials,
-        type?: AddressType
+        type?: AddressType,
+        readonly subCborRef?: SubCborRef
     )
     {
         type = type === undefined ? 
@@ -209,7 +211,10 @@ export class Address
         );
     }
 
-    static fromBytes( bs: byte[] | string | Uint8Array ): Address
+    static fromBytes(
+        bs: byte[] | string | Uint8Array,
+        subCborRef?: SubCborRef
+    ): Address
     {
         bs = Array.from(
             typeof bs === "string" ? fromHex( bs ) : bs
@@ -232,7 +237,7 @@ export class Address
         let stake: byte[];
 
         const paymentType: CredentialType = (addrType & 0b0001) === 1 ? CredentialType.Script: CredentialType.KeyHash; 
-        const   stakeType: StakeCredentialsType   = (addrType & 0b0010) === 1 ? "script": "stakeKey";
+        const   stakeType: StakeCredentialsType   = (addrType & 0b0010) === 1 ? StakeCredentialsType.Script: StakeCredentialsType.KeyHash;
 
         switch( type )
         {
@@ -282,7 +287,8 @@ export class Address
                     new Hash28( new Uint8Array( stake ) )
                 ):
                 undefined,
-            type
+            type,
+            subCborRef
         );
     };
 
@@ -291,12 +297,16 @@ export class Address
         return new Uint8Array( this.toBytes() )
     }
 
-    static fromBuffer( buff: Uint8Array | string ): Address
+    static fromBuffer(
+        buff: Uint8Array | string,
+        subCborRef?: SubCborRef
+    ): Address
     {
         return Address.fromBytes(
             typeof buff === "string" ?
             buff : 
-            Array.from( buff ) as byte[]
+            Array.from( buff ) as byte[],
+            subCborRef
         )
     }
 
@@ -324,7 +334,7 @@ export class Address
         return new Address(
             network,
             Credential.keyHash( pkh ),
-            new StakeCredentials("stakeKey", stake_pkh)
+            StakeCredentials.keyHash(stake_pkh)
         );
     }
 
@@ -343,6 +353,12 @@ export class Address
 
     toCborObj(): CborObj
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.subCborRef.toBuffer() );
+        }
         return new CborBytes( this.toBuffer() );
     }
 
@@ -351,11 +367,21 @@ export class Address
         if(!( buff instanceof CborBytes ))
         throw new Error(`Invalid CBOR format for "Address"`);
 
-        return Address.fromBuffer( buff.bytes )
+        return Address.fromBuffer(
+            buff.bytes,
+            getSubCborRef( buff )
+        );
     }
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
 
@@ -401,6 +427,7 @@ export class Address
         return _addr;
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         return this.toString();

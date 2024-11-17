@@ -1,4 +1,4 @@
-import { CanBeCborString, Cbor, CborArray, CborObj, CborString, CborUInt, forceCborString } from "@harmoniclabs/cbor";
+import { CanBeCborString, Cbor, CborArray, CborObj, CborString, CborUInt, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { Credential } from "../../credentials"
 import { roDescr } from "../../utils/roDescr";
 import { CertificateType, certTypeToString } from "./CertificateType"
@@ -10,6 +10,7 @@ import { Coin } from "../Coin";
 import { forceBigUInt } from "../../utils/ints";
 import { Data, DataConstr, DataI } from "@harmoniclabs/plutus-data";
 import { ToDataVersion } from "../../toData/defaultToDataVersion";
+import { getSubCborRef } from "../../utils/getSubCborRef";
 
 export interface ICertStakeRegistrationDeleg {
     stakeCredential: Credential,
@@ -25,7 +26,10 @@ export class CertStakeRegistrationDeleg
     readonly poolKeyHash: Hash28;
     readonly coin: bigint;
 
-    constructor({ stakeCredential, poolKeyHash, coin }: ICertStakeRegistrationDeleg)
+    constructor(
+        { stakeCredential, poolKeyHash, coin }: ICertStakeRegistrationDeleg,
+        readonly subCborRef?: SubCborRef
+    )
     {
         Object.defineProperties(
             this, {
@@ -62,6 +66,13 @@ export class CertStakeRegistrationDeleg
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborArray
@@ -74,6 +85,7 @@ export class CertStakeRegistrationDeleg
         ]);
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         return {
@@ -102,6 +114,6 @@ export class CertStakeRegistrationDeleg
             stakeCredential: Credential.fromCborObj( cbor.array[1] ),
             poolKeyHash: PoolKeyHash.fromCborObj( cbor.array[2] ),
             coin: cbor.array[3].num
-        });
+        }, getSubCborRef( cbor ));
     }
 }

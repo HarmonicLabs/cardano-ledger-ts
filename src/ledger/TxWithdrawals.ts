@@ -1,7 +1,7 @@
 import { StakeAddress, StakeAddressBech32 } from "./StakeAddress";
 import { NetworkT } from "./Network";
 import { Address } from "./Address";
-import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
+import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { ToData, DataMap, DataConstr, DataI, DataPair } from "@harmoniclabs/plutus-data";
 import { CanBeHash28, Hash28, canBeHash28 } from "../hashes";
 import { canBeUInteger, forceBigUInt } from "../utils/ints";
@@ -10,6 +10,7 @@ import { Value } from "./Value";
 import { assert } from "../utils/assert";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { ToDataVersion } from "../toData/defaultToDataVersion";
+import { getSubCborRef } from "../utils/getSubCborRef";
 
 export type ITxWithdrawalsEntryBigInt = {
     rewardAccount: StakeAddress,
@@ -67,7 +68,11 @@ export class TxWithdrawals
 {
     readonly map!: TxWithdrawalsMapBigInt
 
-    constructor( map: ITxWithdrawals, network: NetworkT = "mainnet" )
+    constructor(
+        map: ITxWithdrawals,
+        readonly subCborRef?: SubCborRef,
+        network: NetworkT = "mainnet"
+    )
     {
         assert(
             isITxWithdrawals( map ),
@@ -137,10 +142,23 @@ export class TxWithdrawals
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.subCborRef.toBuffer() );
+        }
         return new CborMap(
             this.map.map( entry => {
                 return {
@@ -153,7 +171,7 @@ export class TxWithdrawals
 
     static fromCbor( cStr: CanBeCborString ): TxWithdrawals
     {
-        return TxWithdrawals.fromCborObj( Cbor.parse( forceCborString( cStr ) ) );
+        return TxWithdrawals.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
     static fromCborObj( cObj: CborObj ): TxWithdrawals
     {
@@ -170,10 +188,12 @@ export class TxWithdrawals
                     rewardAccount: StakeAddress.fromCborObj( k ),
                     amount: v.num
                 }
-            })
-        )
+            }),
+            getSubCborRef( cObj )
+        );
     }
 
+    toJSON() { return this.toJson(); }
     toJson(): { [rewardAccount: string]: string }
     {
         const json = {};
@@ -196,11 +216,13 @@ export class TxWithdrawals
 
         const network = StakeAddress.fromString( keys[0] ).network;
 
-        return new TxWithdrawals(
+        return new TxWithdrawals( 
             keys.map( k => ({
                 rewardAccount: StakeAddress.fromString( k ),
                 amount: BigInt( json[k] )
-            }))
+            })),
+            undefined,
+            network
         );
     }
 }

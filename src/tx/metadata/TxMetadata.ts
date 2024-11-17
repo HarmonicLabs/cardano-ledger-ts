@@ -1,9 +1,10 @@
-import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
+import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
 import { assert } from "../../utils/assert";
 import { TxMetadatum, isTxMetadatum, txMetadatumFromCborObj } from "./TxMetadatum";
+import { getSubCborRef } from "../../utils/getSubCborRef";
 
 export type ITxMetadata = {
     [metadatum_label: number | string]: TxMetadatum 
@@ -16,7 +17,10 @@ export class TxMetadata
 {
     readonly metadata!: ITxMetadataStr;
 
-    constructor( metadata: ITxMetadata )
+    constructor(
+        metadata: ITxMetadata,
+        readonly subCborRef?: SubCborRef
+    )
     {
         const _metadata = {};
         
@@ -48,10 +52,23 @@ export class TxMetadata
     
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.subCborRef.toBuffer() );
+        }
         return new CborMap(
             Object.keys( this.metadata ).map( labelStr => {
                 return {
@@ -64,7 +81,7 @@ export class TxMetadata
 
     static fromCbor( cStr: CanBeCborString ): TxMetadata
     {
-        return TxMetadata.fromCborObj( Cbor.parse( forceCborString( cStr ) ) );
+        return TxMetadata.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
     static fromCborObj( cObj: CborObj ): TxMetadata
     {
@@ -86,9 +103,10 @@ export class TxMetadata
             )
         }
 
-        return new TxMetadata( meta )
+        return new TxMetadata( meta, getSubCborRef( cObj ) );
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         const json = {}

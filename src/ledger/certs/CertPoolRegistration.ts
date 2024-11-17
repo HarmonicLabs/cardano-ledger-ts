@@ -1,4 +1,4 @@
-import { Cbor, CborArray, CborObj, CborString, CborUInt } from "@harmoniclabs/cbor";
+import { Cbor, CborArray, CborObj, CborString, CborUInt, SubCborRef } from "@harmoniclabs/cbor";
 import { Credential } from "../../credentials"
 import { roDescr } from "../../utils/roDescr";
 import { CertificateType, certTypeToString } from "./CertificateType"
@@ -7,6 +7,7 @@ import { IPoolParams, PoolParams } from "../PoolParams";
 import { Hash28 } from "../../hashes";
 import { Data, DataConstr } from "@harmoniclabs/plutus-data";
 import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
+import { getSubCborRef } from "../../utils/getSubCborRef";
 
 export interface ICertPoolRegistration {
     poolParams: IPoolParams
@@ -18,7 +19,10 @@ export class CertPoolRegistration
     readonly certType: CertificateType.PoolRegistration;
     readonly poolParams: PoolParams;
 
-    constructor({ poolParams }: ICertPoolRegistration)
+    constructor(
+        { poolParams }: ICertPoolRegistration,
+        readonly subCborRef?: SubCborRef
+    )
     {
         Object.defineProperties(
             this, {
@@ -62,6 +66,13 @@ export class CertPoolRegistration
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborArray
@@ -84,9 +95,10 @@ export class CertPoolRegistration
 
         return new CertPoolRegistration({
             poolParams: PoolParams.fromCborObjArray( cbor.array.slice( 1 ) )
-        });
+        }, getSubCborRef( cbor ));
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         return {

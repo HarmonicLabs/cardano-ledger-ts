@@ -1,7 +1,7 @@
 import { CredentialType, PrivateKey, PubKeyHash } from "../credentials";
 import { Hash28, Hash32, Signature } from "../hashes";
 import { VKeyWitness, VKey, ITxWitnessSet, TxWitnessSet, isITxWitnessSet } from "./TxWitnessSet";
-import { ToCbor, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
+import { ToCbor, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { signEd25519 } from "@harmoniclabs/crypto";
 import { defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
 import { InvalidCborFormatError } from "../utils/InvalidCborFormatError";
@@ -10,6 +10,7 @@ import { assert } from "../utils/assert";
 import { AuxiliaryData } from "./AuxiliaryData";
 import { ITxBody, TxBody, isITxBody } from "./body";
 import { XPrv } from "@harmoniclabs/bip32_ed25519";
+import { getSubCborRef } from "../utils/getSubCborRef";
 
 export interface ITx {
     body: ITxBody
@@ -31,10 +32,10 @@ export interface Cip30LikeSignTx {
 export class Tx
     implements ITx, ToCbor, ToJson
 {
-    readonly body!: TxBody
-    readonly witnesses!: TxWitnessSet
-    readonly isScriptValid!: boolean
-    readonly auxiliaryData?: AuxiliaryData | null
+    readonly body!: TxBody;
+    readonly witnesses!: TxWitnessSet;
+    readonly isScriptValid!: boolean;
+    readonly auxiliaryData?: AuxiliaryData | null | undefined;
 
     /**
      * checks that the signer is needed
@@ -50,15 +51,59 @@ export class Tx
      * if true signs the transaction with the specified key
      * otherwise nothing happens (the signature is not added)
     **/
-    readonly signWith!: ( signer: PrivateKey | XPrv ) => void
+    signWith( signer: PrivateKey | Uint8Array | XPrv ): void
+    {
+        if( signer instanceof Uint8Array && signer.length >= 64 )
+        {
+            signer = XPrv.fromExtended(
+                signer.slice( 0, 64 ),
+                new Uint8Array( 32 )
+            );
+        }
+
+        if( signer instanceof XPrv )
+        {
+            const { pubKey, signature } = signer.sign( this.body.hash.toBuffer() );
+            this.addVKeyWitness(
+                new VKeyWitness(
+                    new VKey( pubKey ),
+                    new Signature( signature )
+                )
+            );
+            return;
+        }
+
+        const { pubKey, signature } = signEd25519(
+            this.body.hash.toBuffer(),
+            signer instanceof Uint8Array ? signer : signer.toBuffer()
+        );
+
+        this.addVKeyWitness(
+            new VKeyWitness(
+                new VKey( pubKey ),
+                new Signature( signature )
+            )
+        );
+    }
 
     /**
      * signs the transaction using any browser wallet 
      * that follows the [CIP-0030 standard]
      * (https://github.com/cardano-foundation/CIPs/tree/master/CIP-0030#apisigntxtx-cbortransaction-partialsign-bool--false-promisecbortransaction_witness_set)
     **/
-    readonly signWithCip30Wallet!: ( cip30wallet: Cip30LikeSignTx ) => Promise<void>
+    async signWithCip30Wallet( cip30: Cip30LikeSignTx ): Promise<void>
+    {
+        const wits = TxWitnessSet.fromCbor(
+            await cip30.signTx(
+                // signTx expects the entire transaction by standard (not only the body ¯\_(ツ)_/¯)
+                this.toCbor().toString(),
+                true
+            )
+        );
 
+        const vkeys = wits.vkeyWitnesses ?? [];
+        for( const wit of vkeys ) this.addVKeyWitness( wit );
+    }
     /**
      * @returns {boolean}
      *  `true` if all the signers needed
@@ -76,7 +121,10 @@ export class Tx
      */
     readonly hash!: Hash32;
 
-    constructor(tx: ITx)
+    constructor(
+        tx: ITx,
+        readonly subCborRef?: SubCborRef
+    )
     {
         const {
             body,
@@ -112,7 +160,8 @@ export class Tx
         defineReadOnlyProperty(
             this,
             "witnesses",
-            new TxWitnessSet( witnesses, getAllRequiredSigners( this.body ) )
+            witnesses instanceof TxWitnessSet ? witnesses :
+            new TxWitnessSet( witnesses, undefined, getAllRequiredSigners( this.body ) )
         );
         defineReadOnlyProperty(
             this,
@@ -139,64 +188,8 @@ export class Tx
         //*
         defineReadOnlyProperty(
             this, "addVKeyWitness",
-            ( vkeyWit: VKeyWitness ) => this.witnesses.addVKeyWitness( vkeyWit )
-        );
-
-        defineReadOnlyProperty(
-            this, "signWith",
-            ( signer: PrivateKey | Uint8Array | XPrv ): void => {
-
-                if( signer instanceof Uint8Array && signer.length >= 64 )
-                {
-                    signer = XPrv.fromExtended(
-                        signer.slice( 0, 64 ),
-                        new Uint8Array( 32 )
-                    );
-                }
-
-                if( signer instanceof XPrv )
-                {
-                    const { pubKey, signature } = signer.sign( this.body.hash.toBuffer() );
-                    this.addVKeyWitness(
-                        new VKeyWitness(
-                            new VKey( pubKey ),
-                            new Signature( signature )
-                        )
-                    );
-                    return;
-                }
-
-                const { pubKey, signature } = signEd25519(
-                    this.body.hash.toBuffer(),
-                    signer instanceof Uint8Array ? signer : signer.toBuffer()
-                );
-
-                this.addVKeyWitness(
-                    new VKeyWitness(
-                        new VKey( pubKey ),
-                        new Signature( signature )
-                    )
-                );
-            }
-        );
-
-        defineReadOnlyProperty(
-            this, "signWithCip30Wallet",
-            async ( cip30: Cip30LikeSignTx ): Promise<void> => {
-                
-                const wits = TxWitnessSet.fromCbor(
-                    await cip30.signTx(
-                        // signTx expects the entire transaction by standard (not only the body ¯\_(ツ)_/¯)
-                        this.toCbor().toString(),
-                        true
-                    )
-                );
-
-                for( const wit of wits.vkeyWitnesses! )
-                {
-                    this.addVKeyWitness( wit );
-                }
-            }
+            addVKeyWitness.bind( this )
+            // ( vkeyWit: VKeyWitness ) => this.witnesses.addVKeyWitness( vkeyWit )
         );
 
         Object.defineProperty(
@@ -214,10 +207,24 @@ export class Tx
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.subCborRef.toBuffer() );
+        }
+
         return new CborArray([
             this.body.toCborObj(),
             this.witnesses.toCborObj(),
@@ -225,12 +232,12 @@ export class Tx
             this.auxiliaryData === undefined || this.auxiliaryData === null ?
                 new CborSimple( null ) :
                 this.auxiliaryData.toCborObj()
-        ])
+        ]);
     }
 
     static fromCbor( cStr: CanBeCborString ): Tx
     {
-        return Tx.fromCborObj( Cbor.parse( forceCborString( cStr ) ) );
+        return Tx.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true }) );
     }
     static fromCborObj( cObj: CborObj ): Tx
     {
@@ -252,9 +259,10 @@ export class Tx
             witnesses: TxWitnessSet.fromCborObj( _wits ),
             isScriptValid: _isValid.simple,
             auxiliaryData: noAuxiliaryData ? undefined : AuxiliaryData.fromCborObj( _aux )
-        })
+        }, getSubCborRef( cObj ))
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         return {
@@ -262,7 +270,7 @@ export class Tx
             witnesses: this.witnesses.toJson(),
             isScriptValid: this.isScriptValid,
             auxiliaryData: this.auxiliaryData?.toJson()
-        }
+        };
     }
 
 }
@@ -315,4 +323,9 @@ export function getNSignersNeeded( body: Readonly<TxBody> ): number
 {
     const n = getAllRequiredSigners( body ).length
     return n === 0 ? 1 : n;
+}
+
+function addVKeyWitness( this: Tx, vkeyWit: VKeyWitness ): void
+{
+    this.witnesses.addVKeyWitness( vkeyWit )
 }

@@ -1,4 +1,4 @@
-import { ToCbor, CborString, Cbor, CborArray, CborUInt, CanBeCborString, forceCborString, CborObj, CborMapEntry } from "@harmoniclabs/cbor";
+import { ToCbor, CborString, Cbor, CborArray, CborUInt, CanBeCborString, forceCborString, CborObj, CborMapEntry, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { isObject, hasOwn, defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
 import { Data, isData, dataToCborObj, dataFromCborObj } from "@harmoniclabs/plutus-data";
@@ -8,6 +8,7 @@ import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
 import { assert } from "../../utils/assert";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../utils/ints";
+import { getSubCborRef } from "../../utils/getSubCborRef";
 
 export enum TxRedeemerTag {
     Spend       = 0,
@@ -81,7 +82,10 @@ export class TxRedeemer
     readonly data!: Data
     execUnits!: ExBudget
 
-    constructor( redeemer: ITxRedeemer )
+    constructor(
+        redeemer: ITxRedeemer,
+        readonly subCborRef?: SubCborRef
+    )
     {
         assert(
             isObject( redeemer ) &&
@@ -199,6 +203,13 @@ export class TxRedeemer
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborArray
@@ -213,7 +224,7 @@ export class TxRedeemer
 
     static fromCbor( cStr: CanBeCborString ): TxRedeemer
     {
-        return TxRedeemer.fromCborObj( Cbor.parse( forceCborString( cStr ) ) );
+        return TxRedeemer.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
     static fromCborObj( cObj: CborObj ): TxRedeemer
     {
@@ -230,9 +241,10 @@ export class TxRedeemer
             index: cObj.array[1].num,
             data: dataFromCborObj( cObj.array[2] ),
             execUnits: ExBudget.fromCborObj( cObj.array[3] )
-        });
+        }, getSubCborRef( cObj ));
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         return {

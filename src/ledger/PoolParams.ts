@@ -261,6 +261,7 @@ export class PoolParams
         })
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         return {

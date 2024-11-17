@@ -1,4 +1,4 @@
-import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString, isCborObj } from "@harmoniclabs/cbor";
+import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString, isCborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { blake2b_256 } from "@harmoniclabs/crypto";
 import { isObject, hasOwn, defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
 import { PubKeyHash } from "../../credentials";
@@ -12,6 +12,7 @@ import { assert } from "../../utils/assert";
 import { IVotingProcedures, VotingProcedures, isIVotingProceduresEntry } from "../../governance/VotingProcedures";
 import { IProposalProcedure, ProposalProcedure, isIProposalProcedure } from "../../governance/ProposalProcedure";
 import { getCborSet } from "../../utils/getCborSet";
+import { getSubCborRef } from "../../utils/getSubCborRef";
 
 export interface ITxBody {
     inputs: [ UTxO, ...UTxO[] ],
@@ -140,7 +141,10 @@ export class TxBody
      * @throws only if the the `body` parameter does not respect the `ITxBody` interface
      *      **DOES NOT THROW** if the transaction is unbalanced; that needs to be checked using `TxBody.isValueConserved` static method
      */
-    constructor( body: ITxBody )
+    constructor(
+        body: ITxBody,
+        readonly subCborRef?: SubCborRef
+    )
     {
         assert(
             (hasOwn( body, "inputs" ) as any) &&
@@ -465,10 +469,23 @@ export class TxBody
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.subCborRef.toBuffer() );
+        }
         return new CborMap(([
             {
                 k: new CborUInt( 0 ),
@@ -557,7 +574,7 @@ export class TxBody
 
     static fromCbor( cStr: CanBeCborString ): TxBody
     {
-        return TxBody.fromCborObj( Cbor.parse( forceCborString( cStr ) ) );
+        return TxBody.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
     static fromCborObj( cObj: CborObj ): TxBody
     {
@@ -640,9 +657,10 @@ export class TxBody
             collateralReturn:           _collRet === undefined ? undefined : TxOut.fromCborObj( _collRet ),
             totCollateral:              _totColl instanceof CborUInt ? _totColl.num : undefined,
             refInputs:                  _refIns !== undefined ? getCborSet( _refIns ).map( txOutRefAsUTxOFromCborObj ) : undefined
-        });
+        }, getSubCborRef( cObj ));
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         return {

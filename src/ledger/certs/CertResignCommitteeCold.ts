@@ -1,4 +1,4 @@
-import { Cbor, CborArray, CborObj, CborSimple, CborString, CborUInt } from "@harmoniclabs/cbor";
+import { Cbor, CborArray, CborObj, CborSimple, CborString, CborUInt, SubCborRef } from "@harmoniclabs/cbor";
 import { Credential } from "../../credentials"
 import { roDescr } from "../../utils/roDescr";
 import { CertificateType, certTypeToString } from "./CertificateType"
@@ -7,6 +7,7 @@ import { Anchor, IAnchor, isIAnchor } from "../../governance/Anchor";
 import { Hash28 } from "../../hashes";
 import { DataConstr } from "@harmoniclabs/plutus-data";
 import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
+import { getSubCborRef } from "../../utils/getSubCborRef";
 
 export interface ICertResignCommitteeCold {
     coldCredential: Credential,
@@ -20,7 +21,10 @@ export class CertResignCommitteeCold
     readonly coldCredential: Credential;
     readonly anchor: Anchor | undefined;
 
-    constructor({ coldCredential, anchor }: ICertResignCommitteeCold)
+    constructor(
+        { coldCredential, anchor }: ICertResignCommitteeCold,
+        readonly subCborRef?: SubCborRef
+    )
     {
         Object.defineProperties(
             this, {
@@ -54,6 +58,13 @@ export class CertResignCommitteeCold
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborArray
@@ -78,9 +89,10 @@ export class CertResignCommitteeCold
         return new CertResignCommitteeCold({
             coldCredential: Credential.fromCborObj( cbor.array[1] ),
             anchor: cbor.array[2] instanceof CborSimple ? undefined : Anchor.fromCborObj( cbor.array[2] )
-        });
+        }, getSubCborRef( cbor ));
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         return {

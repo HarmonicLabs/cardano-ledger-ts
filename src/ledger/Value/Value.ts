@@ -1,5 +1,5 @@
 import { ByteString } from "@harmoniclabs/bytestring";
-import { ToCbor, CborString, Cbor, CborObj, CborUInt, CborMap, CborBytes, CborNegInt, CborArray, CanBeCborString, forceCborString, CborMapEntry } from "@harmoniclabs/cbor";
+import { ToCbor, CborString, Cbor, CborObj, CborUInt, CborMap, CborBytes, CborNegInt, CborArray, CanBeCborString, forceCborString, CborMapEntry, SubCborRef } from "@harmoniclabs/cbor";
 import { ToData, DataMap, DataB, DataI, DataPair } from "@harmoniclabs/plutus-data";
 import { lexCompare, toHex, fromHex } from "@harmoniclabs/uint8array-utils";
 import { Hash28 } from "../../hashes";
@@ -8,6 +8,7 @@ import { IValue, isIValue, getEmptyNameQty, getNameQty, IValueAdaEntry, IValueAs
 import { assert } from "../../utils/assert";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { ToDataVersion } from "../../toData/defaultToDataVersion";
+import { getSubCborRef } from "../../utils/getSubCborRef";
 
 const enum Ord {
     LT = -1,
@@ -45,7 +46,10 @@ export class Value
         return;
     }
 
-    constructor( map: IValue )
+    constructor(
+        map: IValue,
+        readonly subCborRef?: SubCborRef
+    )
     {
         assert(
             isIValue( map ),
@@ -313,10 +317,23 @@ export class Value
     
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.subCborRef.toBuffer() );
+        }
         if( Value.isAdaOnly( this ) ) return new CborUInt( this.lovelaces );
 
         const multiasset = new CborMap(
@@ -350,7 +367,7 @@ export class Value
 
     static fromCbor( cStr: CanBeCborString ): Value
     {
-        return Value.fromCborObj( Cbor.parse( forceCborString( cStr ) ) )
+        return Value.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) )
     }
     static fromCborObj( cObj: CborObj ): Value
     {
@@ -444,9 +461,10 @@ export class Value
             } as NormalizedIValuePolicyEntry | NormalizedIValueAdaEntry;
         }
 
-        return new Value(valueMap);
+        return new Value(valueMap, getSubCborRef( cObj ));
     }
 
+    toJSON() { return this.toJson(); }
     toJson(): ValueJson
     {
         return IValueToJson( this.map );

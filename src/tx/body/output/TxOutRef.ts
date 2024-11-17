@@ -1,5 +1,5 @@
 import { ByteString } from "@harmoniclabs/bytestring";
-import { ToCbor, CborString, Cbor, CborObj, CborArray, CborUInt, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
+import { ToCbor, CborString, Cbor, CborObj, CborArray, CborUInt, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
 import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { ToData, DataConstr, DataB, DataI } from "@harmoniclabs/plutus-data";
@@ -10,6 +10,7 @@ import { ToJson } from "../../../utils/ToJson";
 import { assert } from "../../../utils/assert";
 import { lexCompare } from "@harmoniclabs/uint8array-utils";
 import { ToDataVersion } from "../../../toData/defaultToDataVersion";
+import { getSubCborRef } from "../../../utils/getSubCborRef";
 
 export type TxOutRefStr = `${string}#${number}`;
 
@@ -70,7 +71,10 @@ export class TxOutRef
     readonly id!: Hash32
     readonly index!: number
 
-    constructor({ id, index }: ITxOutRef)
+    constructor(
+        { id, index }: ITxOutRef,
+        readonly subCborRef?: SubCborRef
+    )
     {
         assert(
             (typeof id === "string" && ByteString.isValidHexValue( id ) && (id.length === 64)) ||
@@ -132,10 +136,23 @@ export class TxOutRef
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.subCborRef.toBuffer() );
+        }
         return new CborArray([
             this.id.toCborObj(),
             new CborUInt( this.index )
@@ -144,7 +161,7 @@ export class TxOutRef
 
     static fromCbor( cStr: CanBeCborString ): TxOutRef
     {
-        return TxOutRef.fromCborObj( Cbor.parse( forceCborString( cStr ) ) );
+        return TxOutRef.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
     static fromCborObj( cObj: CborObj ): TxOutRef
     {
@@ -161,9 +178,10 @@ export class TxOutRef
         return new TxOutRef({
             id: idRes,
             index: Number( _index.num )
-        });
+        }, getSubCborRef( cObj ));
     }
 
+    toJSON() { return this.toJson(); }
     toJson(): UTxORefJson
     {
         return {

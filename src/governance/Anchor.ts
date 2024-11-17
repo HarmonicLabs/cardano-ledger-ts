@@ -1,7 +1,8 @@
-import { Cbor, CborArray, CborBytes, CborObj, CborString, CborText } from "@harmoniclabs/cbor";
+import { Cbor, CborArray, CborBytes, CborObj, CborString, CborText, SubCborRef } from "@harmoniclabs/cbor";
 import { CanBeHash32, Hash32, canBeHash32 } from "../hashes";
 import { roDescr } from "../utils/roDescr";
 import { isObject } from "@harmoniclabs/obj-utils";
+import { getSubCborRef } from "../utils/getSubCborRef";
 
 export interface IAnchor {
     url: string,
@@ -23,7 +24,7 @@ export class Anchor
     readonly url: string;
     readonly anchorDataHash: Hash32;
 
-    constructor({ url, anchorDataHash }: IAnchor)
+    constructor({ url, anchorDataHash }: IAnchor, readonly subCborRef?: SubCborRef)
     {
         Object.defineProperties(
             this, {
@@ -35,10 +36,23 @@ export class Anchor
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() )
     }
     toCborObj(): CborObj
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.subCborRef.toBuffer() );
+        }
         return new CborArray([
             new CborText( this.url ),
             this.anchorDataHash.toCborObj()
@@ -56,9 +70,10 @@ export class Anchor
         return new Anchor({
             url: cbor.array[0].text,
             anchorDataHash: Hash32.fromCborObj( cbor.array[1] )
-        });
+        }, getSubCborRef( cbor ));
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         return {

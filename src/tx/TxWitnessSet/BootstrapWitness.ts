@@ -1,4 +1,4 @@
-import { ToCbor, CborString, Cbor, CborObj, CborArray, CborBytes, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
+import { ToCbor, CborString, Cbor, CborObj, CborArray, CborBytes, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { Hash32 } from "../../hashes/Hash32/Hash32";
@@ -8,6 +8,7 @@ import { ToJson } from "../../utils/ToJson";
 import { assert } from "../../utils/assert";
 import { VKey } from "./VKeyWitness/VKey";
 import { isUint8Array, toHex } from "@harmoniclabs/uint8array-utils";
+import { getSubCborRef } from "../../utils/getSubCborRef";
 
 export class BootstrapWitness
     implements ToCbor, Cloneable<BootstrapWitness>, ToJson
@@ -17,7 +18,13 @@ export class BootstrapWitness
     readonly chainCode!: Hash32;
     readonly attributes!: Uint8Array;
 
-    constructor( pubKey: Hash32, signature: Signature, chainCode: Hash32, attributes: Uint8Array )
+    constructor(
+        pubKey: Hash32,
+        signature: Signature,
+        chainCode: Hash32,
+        attributes: Uint8Array,
+        readonly subCborRef?: SubCborRef
+    )
     {
         assert(
             pubKey instanceof Hash32,
@@ -72,10 +79,23 @@ export class BootstrapWitness
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.subCborRef.toBuffer() );
+        }
         return new CborArray([
             this.pubKey.toCborObj(),
             this.signature.toCborObj(),
@@ -86,7 +106,7 @@ export class BootstrapWitness
 
     static fromCbor( cStr: CanBeCborString ): BootstrapWitness
     {
-        return BootstrapWitness.fromCborObj( Cbor.parse( forceCborString( cStr ) ) );
+        return BootstrapWitness.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
     static fromCborObj( cObj: CborObj ): BootstrapWitness
     {
@@ -100,10 +120,12 @@ export class BootstrapWitness
             Hash32.fromCborObj( cObj.array[0] ),
             Signature.fromCborObj( cObj.array[1] ),
             Hash32.fromCborObj( cObj.array[2] ),
-            cObj.array[3].buffer
-        )
+            cObj.array[3].bytes,
+            getSubCborRef( cObj )
+        );
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         this.chainCode;

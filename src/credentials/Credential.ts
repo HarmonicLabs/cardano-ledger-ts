@@ -1,10 +1,11 @@
-import { ToCbor, CborString, Cbor, CborObj, CborArray, CborUInt, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
+import { ToCbor, CborString, Cbor, CborObj, CborArray, CborUInt, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { ToData, Data, DataConstr, DataB } from "@harmoniclabs/plutus-data";
-import { Hash28 } from "../hashes/Hash28/Hash28";
+import { canBeHash28, CanBeHash28, Hash28 } from "../hashes/Hash28/Hash28";
 import { PubKeyHash } from "./PubKeyHash";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils"
 import { assert } from "../utils/assert";
+import { getSubCborRef } from "../utils/getSubCborRef";
 
 export class ValidatorHash extends Hash28 {}
 
@@ -21,10 +22,14 @@ export class Credential<T extends CredentialType = CredentialType>
     readonly type!: T;
     readonly hash!: T extends CredentialType.KeyHash ? PubKeyHash : ValidatorHash
 
-    constructor( type: T, hash: Hash28 )
+    constructor(
+        type: T,
+        hash: CanBeHash28,
+        readonly subCborRef?: SubCborRef
+    )
     {
         assert(
-            hash instanceof Hash28,
+            canBeHash28( hash ),
             "can't construct 'Credential'; hash must be instance of an 'Hash28'"
         );
         assert(
@@ -42,8 +47,8 @@ export class Credential<T extends CredentialType = CredentialType>
             this,
             "hash",
             type === CredentialType.KeyHash ? 
-                ( hash instanceof PubKeyHash ? hash : new PubKeyHash( hash.toBuffer() ) ) :
-                ( hash instanceof ValidatorHash ? hash : new ValidatorHash( hash.toBuffer() ) )
+                ( hash instanceof PubKeyHash ? hash : new PubKeyHash( new Hash28( hash ).toBuffer() ) ) :
+                ( hash instanceof ValidatorHash ? hash : new ValidatorHash( new Hash28( hash ).toBuffer() ) )
         );
     }
 
@@ -116,10 +121,23 @@ export class Credential<T extends CredentialType = CredentialType>
 
     toCbor(): CborString
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.subCborRef.toBuffer() );
+        }
+        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
+        if( this.subCborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.subCborRef.toBuffer() );
+        }
         return new CborArray([
             new CborUInt( this.type ),
             this.hash.toCborObj()
@@ -128,7 +146,7 @@ export class Credential<T extends CredentialType = CredentialType>
 
     static fromCbor( cStr: CanBeCborString ): Credential
     {
-        return Credential.fromCborObj( Cbor.parse( forceCborString( cStr ) ) );
+        return Credential.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
     static fromCborObj( cObj: CborObj ): Credential
     {
@@ -141,10 +159,12 @@ export class Credential<T extends CredentialType = CredentialType>
 
         return new Credential(
             Number( cObj.array[0].num ),
-            Hash28.fromCborObj( cObj.array[1] )
+            Hash28.fromCborObj( cObj.array[1] ),
+            getSubCborRef( cObj )
         );
     }
 
+    toJSON() { return this.toJson(); }
     toJson()
     {
         return {
