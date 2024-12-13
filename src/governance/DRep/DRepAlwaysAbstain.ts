@@ -1,4 +1,4 @@
-import { Cbor, CborArray, CborString, CborUInt } from "@harmoniclabs/cbor";
+import { Cbor, CborArray, CborString, CborUInt, SubCborRef } from "@harmoniclabs/cbor";
 import { roDescr } from "../../utils/roDescr";
 import { DRepType, drepTypeToString } from "./DRepType";
 import { IDRep } from "./IDRep";
@@ -15,7 +15,10 @@ export class DRepAlwaysAbstain
     readonly drepType: DRepType.AlwaysAbstain;
     readonly hash?: undefined;
 
-    constructor( _info?: IDRepAlwaysAbstain )
+    constructor(
+        _info?: IDRepAlwaysAbstain,
+        readonly subCborRef?: SubCborRef
+    )
     {
         Object.defineProperties(
             this, {

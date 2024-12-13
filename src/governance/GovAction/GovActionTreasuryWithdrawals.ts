@@ -1,4 +1,4 @@
-import { Cbor, CborArray, CborSimple, CborString, CborUInt, ToCbor } from "@harmoniclabs/cbor";
+import { Cbor, CborArray, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { CanBeHash28, Hash28, canBeHash28 } from "../../hashes";
 import { ITxWithdrawals, TxWithdrawals, isITxWithdrawals } from "../../ledger";
 import { IGovAction } from "./IGovAction";
@@ -29,7 +29,10 @@ export class GovActionTreasuryWithdrawals
     readonly withdrawals: TxWithdrawals;
     readonly policyHash: Hash28 | undefined;
 
-    constructor({ withdrawals, policyHash }: IGovActionTreasuryWithdrawals)
+    constructor(
+        { withdrawals, policyHash }: IGovActionTreasuryWithdrawals,
+        readonly subCborRef?: SubCborRef
+    )
     {
         Object.defineProperties(
             this, {

@@ -1,4 +1,4 @@
-import { Cbor, CborArray, CborSimple, CborString, ToCbor } from "@harmoniclabs/cbor";
+import { Cbor, CborArray, CborSimple, CborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { CanBeHash28, Hash28, canBeHash28 } from "../hashes";
 import { Anchor, IAnchor, isIAnchor } from "./Anchor";
 import { GovActionType } from "./GovAction/GovActionType";
@@ -27,7 +27,10 @@ export class Constitution
     readonly anchor: Anchor;
     readonly scriptHash: Hash28 | undefined;
 
-    constructor({ anchor, scriptHash }: IConstitution)
+    constructor(
+        { anchor, scriptHash }: IConstitution,
+        readonly subCborRef?: SubCborRef
+    )
     {
         Object.defineProperties(
             this, {

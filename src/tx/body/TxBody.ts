@@ -170,7 +170,11 @@ export class TxBody
             network,
             collateralReturn,
             totCollateral,
-            refInputs
+            refInputs,
+            votingProcedures,
+            proposalProcedures,
+            currentTreasuryValue,
+            donation
         } = body;
 
         let _isHashValid: boolean = false;
@@ -442,6 +446,110 @@ export class TxBody
             refInputs?.length === 0 ? undefined : Object.freeze( refInputs )
         );
 
+        // -------------------------------------- votingProcedures -------------------------------------- //
+
+        if( votingProcedures !== undefined )
+        {
+            if( votingProcedures instanceof VotingProcedures )
+            {
+                defineReadOnlyProperty(
+                    this,
+                    "votingProcedures",
+                    votingProcedures
+                );
+            }
+            else
+            {
+                assert(
+                    Array.isArray( votingProcedures ) &&
+                    votingProcedures.length > 0 &&
+                    votingProcedures.every( isIVotingProceduresEntry ),
+                    "invalid 'votingProcedures' while constructing a 'Tx'"
+                );
+
+                defineReadOnlyProperty(
+                    this,
+                    "votingProcedures",
+                    new VotingProcedures( votingProcedures )
+                );
+            }
+        }
+        else defineReadOnlyProperty(
+            this,
+            "votingProcedures",
+            undefined
+        );
+
+        // -------------------------------------- proposalProcedures -------------------------------------- //
+
+        if( proposalProcedures !== undefined )
+        {
+            assert(
+                Array.isArray( proposalProcedures ) &&
+                proposalProcedures.every( elem =>
+                    elem instanceof ProposalProcedure ||
+                    isIProposalProcedure( elem )
+                ),
+                "invalid 'proposalProcedures' while constructing a 'Tx'"
+            )
+
+            defineReadOnlyProperty(
+                this,
+                "proposalProcedures",
+                proposalProcedures.map( elem =>
+                    elem instanceof ProposalProcedure ? elem : new ProposalProcedure( elem )
+                )
+            );
+        }
+        else defineReadOnlyProperty(
+            this,
+            "proposalProcedures",
+            undefined
+        );
+
+        // -------------------------------------- currentTreasuryValue -------------------------------------- //
+
+        if( currentTreasuryValue !== undefined )
+        {
+            assert(
+                canBeUInteger( currentTreasuryValue ),
+                "invalid 'currentTreasuryValue' while constructing a 'Tx'"
+            );
+
+            defineReadOnlyProperty(
+                this,
+                "currentTreasuryValue",
+                forceBigUInt( currentTreasuryValue )
+            );
+        }
+        else defineReadOnlyProperty(
+            this,
+            "currentTreasuryValue",
+            undefined
+        );
+
+        // -------------------------------------- donation -------------------------------------- //
+
+        if( donation !== undefined )
+        {
+            assert(
+                canBeUInteger( donation ),
+                "invalid 'donation' while constructing a 'Tx'"
+            );
+
+            defineReadOnlyProperty(
+                this,
+                "donation",
+                forceBigUInt( donation )
+            );
+        }
+        else defineReadOnlyProperty(
+            this,
+            "donation",
+            undefined
+        );
+
+
         // -------------------------------------- hash -------------------------------------- //  
 
         definePropertyIfNotPresent(
@@ -568,6 +676,26 @@ export class TxBody
             {
                 k: new CborUInt( 18 ),
                 v: new CborArray( this.refInputs.map( refIn => refIn.utxoRef.toCborObj() ) )
+            },
+            this.votingProcedures === undefined ? undefined :
+            {
+                k: new CborUInt( 19 ),
+                v: this.votingProcedures.toCborObj()
+            },
+            this.proposalProcedures === undefined || this.proposalProcedures.length === 0 ? undefined :
+            {
+                k: new CborUInt( 20 ),
+                v: new CborArray( this.proposalProcedures.map( prop => prop.toCborObj() ) )
+            },
+            this.currentTreasuryValue === undefined ? undefined :
+            {
+                k: new CborUInt( 21 ),
+                v: new CborUInt( this.currentTreasuryValue )
+            },
+            this.donation === undefined ? undefined :
+            {
+                k: new CborUInt( 22 ),
+                v: new CborUInt( this.donation )
             }
         ].filter( entry => entry !== undefined ) as CborMapEntry[]))
     }

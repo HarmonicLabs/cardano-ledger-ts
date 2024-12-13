@@ -398,6 +398,10 @@ export class Address
         ) as AddressStr;
     }
 
+    static fromBech32( addr: AddressStr ): Address
+    {
+        return Address.fromString( addr );
+    }
     static fromString( addr: string ): Address
     {
         const [ hrp, bytes ] = decodeBech32( addr );

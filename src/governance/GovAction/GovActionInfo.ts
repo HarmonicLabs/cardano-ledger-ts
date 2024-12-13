@@ -1,4 +1,4 @@
-import { Cbor, CborArray, CborObj, CborSimple, CborString, CborUInt, ToCbor } from "@harmoniclabs/cbor";
+import { Cbor, CborArray, CborObj, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { IGovAction } from "./IGovAction";
 import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx";
 import { Constitution, IConstitution } from "../Constitution";
@@ -10,14 +10,20 @@ import { DataConstr } from "@harmoniclabs/plutus-data";
 
 export interface IGovActionInfo {}
 
-export const isIGovActionInfo = isObject as ( stuff: any ) => stuff is IGovActionInfo;
+export function isIGovActionInfo( stuff: any ): stuff is IGovActionInfo
+{
+    return isObject( stuff );
+}
  
 export class GovActionInfo
     implements IGovAction, IGovActionInfo, ToCbor
 {
     readonly govActionType: GovActionType.Info
 
-    constructor( _info?: IGovActionInfo )
+    constructor(
+        _info?: IGovActionInfo,
+        readonly subCborRef?: SubCborRef
+    )
     {
         Object.defineProperties(
             this, {

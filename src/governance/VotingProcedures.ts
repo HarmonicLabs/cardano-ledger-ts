@@ -1,4 +1,4 @@
-import { CborString, Cbor, CborObj, CborArray, CborText, CborBytes, CborUInt, CborSimple, CborMap } from "@harmoniclabs/cbor";
+import { CborString, Cbor, CborObj, CborArray, CborText, CborBytes, CborUInt, CborSimple, CborMap, SubCborRef } from "@harmoniclabs/cbor";
 import { roDescr } from "../utils/roDescr";
 import { Anchor, IAnchor } from "./Anchor";
 import { Vote, voteToCborObj } from "./Vote";
@@ -47,7 +47,10 @@ export class VotingProcedures
 {
     readonly procedures: ITypedVotingProcedures
 
-    constructor( procedures: IVotingProcedures)
+    constructor(
+        procedures: IVotingProcedures,
+        readonly subCborRef?: SubCborRef
+    )
     {
         Object.defineProperty(
             this, "procedures", {

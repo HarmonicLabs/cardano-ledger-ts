@@ -1,4 +1,4 @@
-import { CanBeCborString, CborObj } from "@harmoniclabs/cbor";
+import { CanBeCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { blake2b_224 } from "@harmoniclabs/crypto";
 import { Hash32 } from "../hashes/Hash32/Hash32";
 import { PubKeyHash } from "./PubKeyHash";
@@ -8,9 +8,12 @@ export class PublicKey extends Hash32
 {
     readonly hash!: PubKeyHash;
 
-    constructor( pubKey: string | Uint8Array | Hash32 )
+    constructor(
+        pubKey: string | Uint8Array | Hash32,
+        readonly subCborRef?: SubCborRef
+    )
     {
-        super( pubKey, "PublicKey" );
+        super( pubKey);
 
         let _hash: PubKeyHash | undefined = undefined;
         definePropertyIfNotPresent(

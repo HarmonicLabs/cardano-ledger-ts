@@ -116,10 +116,8 @@ export class Tx
      *  - additional spefified in the `requiredSigners` field
      */
     readonly isComplete!: boolean
-    /**
-     * getter
-     */
-    readonly hash!: Hash32;
+    
+    get hash(): Hash32 { return this.body.hash; }
 
     constructor(
         tx: ITx,
@@ -172,17 +170,6 @@ export class Tx
             this,
             "auxiliaryData",
             auxiliaryData
-        );
-
-        definePropertyIfNotPresent(
-            this, "hash",
-            {
-                // needs to be a getter because `this.body.hash` is a getter
-                get: (): Hash32 => this.body.hash,
-                set: () => {},
-                enumerable: true,
-                configurable: false
-            }
         );
 
         //*

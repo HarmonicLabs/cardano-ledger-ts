@@ -1,4 +1,4 @@
-import { Cbor, CborArray, CborSimple, CborString, CborUInt, ToCbor } from "@harmoniclabs/cbor";
+import { Cbor, CborArray, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { CanBeHash28, Hash28, canBeHash28, canBeHash32 } from "../../hashes";
 import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx";
 import { roDescr } from "../../utils/roDescr";
@@ -33,7 +33,10 @@ export class GovActionParameterChange
     readonly protocolParamsUpdate: Partial<ProtocolParameters>;
     readonly policyHash: Hash28 | undefined;
 
-    constructor({ govActionId, protocolParamsUpdate, policyHash }: IGovActionParameterChange )
+    constructor(
+        { govActionId, protocolParamsUpdate, policyHash }: IGovActionParameterChange,
+        readonly subCborRef?: SubCborRef
+    )
     {
         Object.defineProperties(
             this, {

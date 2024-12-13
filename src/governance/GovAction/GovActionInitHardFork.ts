@@ -1,4 +1,4 @@
-import { Cbor, CborArray, CborObj, CborSimple, CborString, CborUInt, ToCbor } from "@harmoniclabs/cbor";
+import { Cbor, CborArray, CborObj, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { IGovAction } from "./IGovAction";
 import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx";
 import { IProtocolVerision, IProtocolVerisionObj, isIProtocolVersion, protocolVersionAsObj, protocolVersionToCborObj } from "../../ledger/protocol/protocolVersion";
@@ -31,7 +31,10 @@ export class GovActionInitHardFork
     readonly govActionId: TxOutRef | undefined;
     readonly protocolVersion: IProtocolVerisionObj;
 
-    constructor({ govActionId, protocolVersion }: IGovActionInitHardFork)
+    constructor(
+        { govActionId, protocolVersion }: IGovActionInitHardFork,
+        readonly subCborRef?: SubCborRef
+    )
     {
         Object.defineProperties(
             this, {

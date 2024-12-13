@@ -1,4 +1,4 @@
-import { Cbor, CborArray, CborString, CborUInt, ToCbor } from "@harmoniclabs/cbor";
+import { Cbor, CborArray, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { Coin, StakeAddress } from "../ledger";
 import { Anchor, IAnchor, isIAnchor } from "./Anchor";
 import { GovActionLike, isGovActionLike, toRealGovAction } from "./GovAction/GovActionLike";
@@ -35,7 +35,10 @@ export class ProposalProcedure
     readonly govAction: GovAction;
     readonly anchor: Anchor;
 
-    constructor({ deposit, rewardAccount, govAction, anchor }: IProposalProcedure)
+    constructor(
+        { deposit, rewardAccount, govAction, anchor }: IProposalProcedure,
+        readonly subCborRef?: SubCborRef
+    )
     {
         Object.defineProperties(
             this, {

@@ -40,15 +40,15 @@ export function isGovActionLike( stuff: any ): stuff is GovActionLike
         isGovActionType( stuff.govActionType )
     )) return false;
 
-    switch( stuff.govAcitonType as GovActionType )
-    {
-        case GovActionType.ParameterChange:     return isIGovActionParameterChange( stuff );
-        case GovActionType.InitHardFork:        return isIGovActionInitHardFork( stuff );
-        case GovActionType.TreasuryWithdrawals: return isIGovActionTreasuryWithdrawals( stuff );
-        case GovActionType.NoConfidence:        return isIGovActionNoConfidence( stuff );
-        case GovActionType.UpdateCommittee:     return isIGovActionUpdateCommittee( stuff );
-        case GovActionType.NewConstitution:     return isIGovActionNewConstitution( stuff );
-        case GovActionType.Info:                return isIGovActionInfo( stuff );
-        default: throw new Error("unknown govAcitonType")
-    }
+    const govActionType = stuff.govActionType;
+
+    if( govActionType === GovActionType.ParameterChange )       return isIGovActionParameterChange( stuff );
+    if( govActionType === GovActionType.InitHardFork )          return isIGovActionInitHardFork( stuff );
+    if( govActionType === GovActionType.TreasuryWithdrawals )   return isIGovActionTreasuryWithdrawals( stuff );
+    if( govActionType === GovActionType.NoConfidence )          return isIGovActionNoConfidence( stuff );
+    if( govActionType === GovActionType.UpdateCommittee )       return isIGovActionUpdateCommittee( stuff );
+    if( govActionType === GovActionType.NewConstitution )       return isIGovActionNewConstitution( stuff );
+    if( govActionType === GovActionType.Info )                  return isIGovActionInfo( stuff );
+
+    throw new Error("unknown govAcitonType: " + stuff.govActionType)
 }

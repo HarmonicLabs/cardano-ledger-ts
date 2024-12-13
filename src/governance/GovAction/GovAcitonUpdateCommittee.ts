@@ -1,4 +1,4 @@
-import { Cbor, CborArray, CborMap, CborPositiveRational, CborSimple, CborString, CborUInt, ToCbor } from "@harmoniclabs/cbor";
+import { Cbor, CborArray, CborMap, CborPositiveRational, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { Epoch } from "../../ledger";
 import { Rational, cborFromRational, isRational } from "../../ledger/protocol/Rational";
 import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx";
@@ -61,7 +61,10 @@ export class GovActionUpdateCommittee
     readonly toAdd: INewCommitteeEntryBI[];
     readonly threshold: CborPositiveRational;
 
-    constructor({ govActionId, toRemove, toAdd, threshold }: IGovActionUpdateCommittee)
+    constructor(
+        { govActionId, toRemove, toAdd, threshold }: IGovActionUpdateCommittee,
+        readonly subCborRef?: SubCborRef
+    )
     {
         Object.defineProperties(
             this, {

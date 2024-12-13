@@ -8,6 +8,7 @@ import { DRep, drepFromCborObj } from "../../governance/DRep/DRep";
 import { CanBeHash28, Hash28 } from "../../hashes";
 import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
 import { DataConstr } from "@harmoniclabs/plutus-data";
+import { getSubCborRef } from "../../utils/getSubCborRef";
 
 export interface ICertStakeVoteDeleg {
     stakeCredential: Credential,

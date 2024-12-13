@@ -1,4 +1,4 @@
-import { Cbor, CborArray, CborObj, CborSimple, CborString, CborUInt, ToCbor } from "@harmoniclabs/cbor";
+import { Cbor, CborArray, CborObj, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { IGovAction } from "./IGovAction";
 import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx";
 import { Constitution, IConstitution, isIConstitution } from "../Constitution";
@@ -29,7 +29,10 @@ export class GovActionNewConstitution
     readonly govActionId: TxOutRef | undefined;
     readonly constitution: Constitution;
 
-    constructor({ govActionId, constitution }: IGovActionNewConstitution)
+    constructor(
+        { govActionId, constitution }: IGovActionNewConstitution,
+        readonly subCborRef?: SubCborRef
+    )
     {
         Object.defineProperties(
             this, {

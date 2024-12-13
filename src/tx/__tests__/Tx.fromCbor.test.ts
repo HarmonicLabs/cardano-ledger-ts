@@ -1,21 +1,59 @@
-import { logJson } from "../../utils/ToJson";
+import { TxBody, TxOut, UTxO } from "..";
+import { Address, Value } from "../../ledger";
 import { Tx } from "../Tx"
 
 describe("Tx.fromCbor", () => {
 
-    test("parses simple IO tx", () => {
+    test.only("parses simple IO tx", () => {
 
         const str = "84a30081825820d11531780938f9fc6110c968b8cd571c3b88aa8981bb52c296090958fe27848f000182825839000456f170a8ee5d0fb93458a394ba3a4d043db096e58c8a1f33a6681dcb15713c952715df00f231200e7a208ddeb718d05fcd34c5f0bfdb801b00000045d952e577825839000456f170a8ee5d0fb93458a394ba3a4d043db096e58c8a1f33a6681dcb15713c952715df00f231200e7a208ddeb718d05fcd34c5f0bfdb801a000f4240021a00029049a0f5f6";
 
         let tx!: Tx;
         expect(
-            () => 
-            tx = Tx.fromCbor( str ),
+            () => tx = Tx.fromCbor( str ),
         ).not.toThrow();
-        
-        // console.log(JSON.stringify(tx.toJson(), null, 2));
 
+        // console.log( JSON.stringify(tx.toJSON(), null, 2) );
+
+        const sameTx = new Tx({
+            ...tx,
+            body: {
+                inputs: [
+                    new UTxO({
+                        utxoRef: {
+                            id: "d11531780938f9fc6110c968b8cd571c3b88aa8981bb52c296090958fe27848f",
+                            index: 0
+                        },
+                        resolved: TxOut.fake
+                    })
+                ],
+                outputs: [
+                    new TxOut({
+                        address: Address.fromString("addr_test1qqz9duts4rh96raex3v289968fxsg0dsjmjcezslxwnxs8wtz4cne9f8zh0spu33yq885gydm6m335zle56vtu9lmwqq04se2u"),
+                        value: Value.lovelaces( 299998831991 )
+                    }),
+                    new TxOut({
+                        address: Address.fromString("addr_test1qqz9duts4rh96raex3v289968fxsg0dsjmjcezslxwnxs8wtz4cne9f8zh0spu33yq885gydm6m335zle56vtu9lmwqq04se2u"),
+                        value: Value.lovelaces( 1_000_000 )
+                    })
+                ],
+                fee: 168009,
+            },
+        });
+
+        // expect same tx
+        expect( JSON.stringify(tx.toJSON()) )
+        .toEqual(JSON.stringify(sameTx.toJSON()));
+        
+        // expect different cbor
         expect( tx.toCbor().toString() ).toEqual(str)
+        expect( sameTx.toCbor().toString() ).not.toEqual(str)
+
+        // console.log( tx.hash.toString() );
+        // console.log( sameTx.hash.toString() );
+        
+        // expect different hash
+        expect( tx.hash.toString() ).not.toEqual( sameTx.hash.toString() )
 
     });
 

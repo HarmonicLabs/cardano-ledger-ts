@@ -1,5 +1,5 @@
 import { ByteString } from "@harmoniclabs/bytestring";
-import { CborObj, CborMap, CborArray, CborUInt, CborNegInt, CborBytes, CborText, ToCbor, CborString, Cbor } from "@harmoniclabs/cbor";
+import { CborObj, CborMap, CborArray, CborUInt, CborNegInt, CborBytes, CborText, ToCbor, CborString, Cbor, SubCborRef } from "@harmoniclabs/cbor";
 import { has_n_determined_keys, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { isUint8Array, toHex } from "@harmoniclabs/uint8array-utils";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
@@ -79,7 +79,10 @@ export class TxMetadatumMap
 {
     readonly map!: TxMetadatumMapEntry[];
 
-    constructor( map: TxMetadatumMapEntry[] )
+    constructor(
+        map: TxMetadatumMapEntry[],
+        readonly subCborRef?: SubCborRef
+    )
     {
         assert(
             map.every( isTxMetadatumMapEntry ),
@@ -139,7 +142,10 @@ export class TxMetadatumList
 {
     readonly list!: TxMetadatum[];
 
-    constructor( map: TxMetadatum[] )
+    constructor(
+        map: TxMetadatum[],
+        readonly subCborRef?: SubCborRef
+    )
     {
         assert(
             map.every( isTxMetadatum ),
@@ -187,7 +193,10 @@ export class TxMetadatumInt
 {
     readonly n!: bigint;
 
-    constructor( n: number | bigint )
+    constructor(
+        n: number | bigint,
+        readonly subCborRef?: SubCborRef
+    )
     {
         defineReadOnlyProperty(
             this,
@@ -230,7 +239,10 @@ export class TxMetadatumBytes
 {
     readonly bytes!: Uint8Array
 
-    constructor( bytes: Uint8Array | ByteString )
+    constructor(
+        bytes: Uint8Array | ByteString,
+        readonly subCborRef?: SubCborRef
+    )
     {
         defineReadOnlyProperty(
             this,
@@ -289,7 +301,10 @@ export class TxMetadatumText
 {
     readonly text!: string
 
-    constructor( text: string )
+    constructor(
+        text: string,
+        readonly subCborRef?: SubCborRef
+    )
     {
         assert(
             typeof text === "string",

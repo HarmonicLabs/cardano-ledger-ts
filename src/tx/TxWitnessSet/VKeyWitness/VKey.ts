@@ -12,7 +12,7 @@ export class VKey extends Hash32
 
     constructor( bs: string | Uint8Array | Hash32 )
     {
-        super( bs , "VKey" );
+        super( bs );
 
         let _hash: PubKeyHash = undefined as any;
         definePropertyIfNotPresent(
