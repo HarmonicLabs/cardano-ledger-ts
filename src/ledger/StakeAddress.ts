@@ -1,4 +1,4 @@
-import { NetworkT } from "../ledger/Network";
+import { NetworkT } from "./Network";
 import { StakeCredentials, StakeCredentialsType, StakeValidatorHash } from "../credentials/StakeCredentials";
 import { StakeKeyHash } from "../credentials/StakeKeyHash";
 import { Hash28 } from "../hashes/Hash28/Hash28";
@@ -119,7 +119,7 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType>
         {
             const header = bs[0];
             bs = bs.slice(1);
-            type = Boolean(header && 0b0001_0000) ? "script" : "stakeKey";
+            type = Boolean(header & 0b0001_0000) ? "script" : "stakeKey";
             netwok = Boolean(header & 0b1111) ? "mainnet" : "testnet";
         }
 
