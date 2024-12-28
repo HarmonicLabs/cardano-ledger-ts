@@ -316,18 +316,18 @@ export class Address
      * payment key at path "m/1852'/1815'/0'/0/0"
      * stake key at path   "m/1852'/1815'/0'/2/0"
     */
-    static fromXPrv( xprv: XPrv, network: NetworkT = "mainnet" ): Address
+    static fromXPrv( xprv: XPrv, network: NetworkT = "mainnet", AccountIndex: number = 0, AddressIndex: number = 0 ): Address
     {
         const account = xprv
         .derive( harden(1852) )
         .derive( harden(1815) )
-        .derive( harden(0) );
+        .derive( harden(AccountIndex) );
 
-        const prv = account.derive( 0 ).derive( 0 );
+        const prv = account.derive( 0 ).derive( AddressIndex );
         const pub = new PublicKey( prv.public().toPubKeyBytes() );
         const pkh = pub.hash;
 
-        const stake_prv = account.derive( 2 ).derive( 0 );
+        const stake_prv = account.derive( 2 ).derive( AddressIndex );
         const stake_pub = new PublicKey( stake_prv.public().toPubKeyBytes() );
         const stake_pkh = stake_pub.hash;
 
@@ -346,9 +346,11 @@ export class Address
      * payment key at path "m/1852'/1815'/0'/0/0"
      * stake key at path   "m/1852'/1815'/0'/2/0"
     */
-    static fromEntropy( entropy: Uint8Array | string, network: NetworkT = "mainnet" ): Address
+    static fromEntropy( entropy: Uint8Array | string, network: NetworkT = "mainnet", AccountIndex: number = 0, AddressIndex: number = 0 ): Address
+    
     {
-        return Address.fromXPrv( XPrv.fromEntropy( entropy ), network );
+        console.log("Address.fromEntropy Index", AccountIndex, AddressIndex);
+        return Address.fromXPrv( XPrv.fromEntropy( entropy ), network, AccountIndex, AddressIndex );
     }
 
     toCborObj(): CborObj
