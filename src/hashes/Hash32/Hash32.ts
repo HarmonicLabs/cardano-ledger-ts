@@ -44,7 +44,7 @@ export class Hash32 extends Hash
     }
     static fromCborObj( cObj: CborObj ): Hash32
     {
-        if(!(cObj instanceof CborBytes ))
+        if(!( cObj instanceof CborBytes ))
         throw new Error(`Invalid CBOR fromat for "Hash"`);
 
         return new Hash32(
