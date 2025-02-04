@@ -8,8 +8,7 @@ import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { assert } from "../utils/assert";
 import { fromHex } from "@harmoniclabs/uint8array-utils";
 import { Credential } from "../credentials";
-import { CanBeCborString, Cbor, CborBytes, CborObj, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
-import { getSubCborRef } from "../utils/getSubCborRef";
+import { CanBeCborString, Cbor, CborBytes, CborObj, forceCborString } from "@harmoniclabs/cbor";
 
 
 export type StakeAddressBech32 = `stake1${string}` | `stake_test1${string}`;
@@ -27,8 +26,7 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType>
     constructor(
         network: NetworkT,
         credentials: Hash28,
-        type?: T,
-        readonly subCborRef?: SubCborRef
+        type?: T
     )
     {
         const t = type === undefined ? 
@@ -78,8 +76,8 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType>
     {
         return encodeBech32(
             this.network === "mainnet" ? "stake" : "stake_test",
-            this.credentials.toBuffer()
-        ) as any;
+            this.toBytes()
+        ) as StakeAddressBech32;
     }
 
     static fromString( str: string ): StakeAddress
@@ -95,22 +93,36 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType>
 
         return StakeAddress.fromBytes(
             creds,
-            undefined,
             hrp === "stake" ? "mainnet" : "testnet",
             type
         )
     }
 
-    toBytes(): Uint8Array
+    toBuffer(): Uint8Array
     {
-        return this.credentials.toBuffer();
+        return new Uint8Array( this.toBytes() )
+    }
+
+    toBytes(): byte[]
+    {
+        return [(
+            // header byte
+            // second nubble = network
+            ( this.network === "mainnet" ? 0b0000_0001 : 0b0000_0000 ) |
+            // first nibble infos  
+            (
+                this.type === "script" ?        0b1111_0000 : 0b1110_0000
+            ) 
+        ) as byte]
+        .concat(
+            Array.from( this.credentials.toBuffer() ) as byte[]
+        );
     }
 
     static fromBytes(
         bs: byte[] | string | Uint8Array,
-        subCborRef?: SubCborRef,
         netwok: NetworkT = "mainnet",
-        type: StakeAddressType = "stakeKey",
+        type: StakeAddressType = "stakeKey"
     ): StakeAddress
     {
         bs = Uint8Array.from( typeof bs === "string" ? fromHex( bs ) : bs );
@@ -119,42 +131,32 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType>
         {
             const header = bs[0];
             bs = bs.slice(1);
-            type = Boolean(header && 0b0001_0000) ? "script" : "stakeKey";
+            type = Boolean(header & 0b0001_0000) ? "script" : "stakeKey";
             netwok = Boolean(header & 0b1111) ? "mainnet" : "testnet";
         }
 
         return new StakeAddress(
             netwok,
             bs.length === 28 ? new Hash28( bs ) : new PublicKey( bs ).hash,
-            type,
-            subCborRef
-        );
+            type
+        )
     }
 
     toCborObj(): CborObj
     {
-        if( this.subCborRef instanceof SubCborRef )
-        {
-            // TODO: validate cbor structure
-            // we assume correctness here
-            return Cbor.parse( this.subCborRef.toBuffer() );
-        }
-        return new CborBytes( this.toBytes() )
+        return new CborBytes( this.toBuffer() )
     }
 
     static fromCbor( cStr: CanBeCborString ): StakeAddress
     {
-        return StakeAddress.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
+        return StakeAddress.fromCborObj( Cbor.parse( forceCborString( cStr ) ) );
     }
     static fromCborObj( cObj: CborObj ): StakeAddress
     {
         if(!(cObj instanceof CborBytes ))
         throw new Error(`Invalid CBOR format for "Hash"`);
 
-        return StakeAddress.fromBytes(
-            cObj.bytes,
-            getSubCborRef( cObj )
-        );
+        return StakeAddress.fromBytes( cObj.bytes );
     }
 
     toCredential()
