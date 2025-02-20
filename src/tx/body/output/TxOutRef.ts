@@ -1,4 +1,3 @@
-import { ByteString } from "@harmoniclabs/bytestring";
 import { ToCbor, CborString, Cbor, CborObj, CborArray, CborUInt, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
 import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
@@ -11,6 +10,7 @@ import { assert } from "../../../utils/assert";
 import { lexCompare } from "@harmoniclabs/uint8array-utils";
 import { ToDataVersion } from "../../../toData/defaultToDataVersion";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
+import { isHex } from "../../../utils/hex";
 
 export type TxOutRefStr = `${string}#${number}`;
 
@@ -24,7 +24,7 @@ export function isITxOutRef( stuff: any ): stuff is ITxOutRef
     return (
         isObject( stuff ) &&
         hasOwn( stuff, "id" ) && (
-            (typeof stuff.id === "string" && ByteString.isValidHexValue( stuff.id ) && (stuff.id.length === 64)) ||
+            (typeof stuff.id === "string" && isHex( stuff.id ) && (stuff.id.length === 64)) ||
             (stuff.id instanceof Hash32)
         ) &&
         hasOwn( stuff, "index" ) && (
@@ -77,7 +77,7 @@ export class TxOutRef
     )
     {
         assert(
-            (typeof id === "string" && ByteString.isValidHexValue( id ) && (id.length === 64)) ||
+            (typeof id === "string" && isHex( id ) && (id.length === 64)) ||
             (id instanceof Hash32),
             "tx output id (tx hash) invalid while constructing a 'UTxO'"
         );

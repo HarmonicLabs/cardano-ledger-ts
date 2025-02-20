@@ -4,7 +4,6 @@ import { PubKeyHash } from "../credentials/PubKeyHash";
 import { CanBeHash32, Hash32, canBeHash32 } from "../hashes/Hash32/Hash32";
 import { PoolKeyHash } from "../hashes/Hash28/PoolKeyHash";
 import { VRFKeyHash } from "../hashes/Hash32/VRFKeyHash";
-import { ByteString } from "@harmoniclabs/bytestring";
 import { CborPositiveRational, CborObj, CborUInt, CborArray, CborSimple, CborText, CborTag, CborBytes } from "@harmoniclabs/cbor";
 import { CanBeHash28, Hash28, canBeHash28 } from "../hashes";
 import { canBeUInteger, forceBigUInt } from "../utils/ints";

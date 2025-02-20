@@ -1,7 +1,6 @@
-import { ByteString } from "@harmoniclabs/bytestring";
 import { CborObj, CborMap, CborArray, CborUInt, CborNegInt, CborBytes, CborText, ToCbor, CborString, Cbor, SubCborRef } from "@harmoniclabs/cbor";
 import { has_n_determined_keys, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
-import { isUint8Array, toHex } from "@harmoniclabs/uint8array-utils";
+import { fromHex, isUint8Array, toHex } from "@harmoniclabs/uint8array-utils";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
 import { assert } from "../../utils/assert";
@@ -240,15 +239,11 @@ export class TxMetadatumBytes
     readonly bytes!: Uint8Array
 
     constructor(
-        bytes: Uint8Array | ByteString,
+        bytes: Uint8Array | string,
         readonly subCborRef?: SubCborRef
     )
     {
-        defineReadOnlyProperty(
-            this,
-            "bytes",
-            isUint8Array( bytes ) ? bytes : bytes.toBuffer()
-        );
+        this.bytes = bytes instanceof Uint8Array ? bytes : fromHex( bytes );
     }
 
     toCbor(): CborString

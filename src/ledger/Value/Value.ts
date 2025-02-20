@@ -1,4 +1,3 @@
-import { ByteString } from "@harmoniclabs/bytestring";
 import { ToCbor, CborString, Cbor, CborObj, CborUInt, CborMap, CborBytes, CborNegInt, CborArray, CanBeCborString, forceCborString, CborMapEntry, SubCborRef } from "@harmoniclabs/cbor";
 import { ToData, DataMap, DataB, DataI, DataPair } from "@harmoniclabs/plutus-data";
 import { lexCompare, toHex, fromHex } from "@harmoniclabs/uint8array-utils";
@@ -299,13 +298,11 @@ export class Value
         return new DataMap<DataB,DataMap<DataB,DataI>>(
             this.map.map( ({ policy, assets }) =>
                 new DataPair(
-                    new DataB( new ByteString( policy === "" ? "" : policy.toBuffer() ) ),
+                    new DataB( policy === "" ? "" : policy.toBuffer() ),
                     new DataMap(
                         assets.map( ({ name: assetName }) =>
                             new DataPair(
-                                new DataB(
-                                    new ByteString( assetName )
-                                ),
+                                new DataB( assetName ), 
                                 new DataI( getNameQty( assets, assetName ) ?? 0 )
                             )
                         )
