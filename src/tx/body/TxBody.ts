@@ -2,17 +2,17 @@ import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMa
 import { blake2b_256 } from "@harmoniclabs/crypto";
 import { isObject, hasOwn, defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
 import { PubKeyHash } from "../../credentials";
-import { AuxiliaryDataHash, ScriptDataHash, Hash32 } from "../../hashes";
-import { Coin, TxWithdrawals, ITxWithdrawals, LegacyPPUpdateProposal, Value, NetworkT, Certificate, canBeTxWithdrawals, isLegacyPPUpdateProposal, forceTxWithdrawals, LegacyPPUpdateProposalToCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, isCertificate, certificateFromCborObj, certificatesToDepositLovelaces } from "../../ledger";
+import { AuxiliaryDataHash, ScriptDataHash, Hash32, CanBeHash28, canBeHash28 } from "../../hashes";
+import { Coin, TxWithdrawals, ITxWithdrawals, LegacyPPUpdateProposal, Value, NetworkT, Certificate, canBeTxWithdrawals, isLegacyPPUpdateProposal, forceTxWithdrawals, LegacyPPUpdateProposalToCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, isCertificate, certificateFromCborObj, certificatesToDepositLovelaces, isIValue } from "../../ledger";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
-import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../utils/ints";
+import { CanBeUInteger, canBeUInteger, forceBigUInt, maybeBigUint } from "../../utils/ints";
 import { UTxO, TxOut, isIUTxO, isITxOut, TxOutRef } from "./output";
 import { assert } from "../../utils/assert";
 import { IVotingProcedures, VotingProcedures, isIVotingProceduresEntry } from "../../governance/VotingProcedures";
 import { IProposalProcedure, ProposalProcedure, isIProposalProcedure } from "../../governance/ProposalProcedure";
 import { getCborSet } from "../../utils/getCborSet";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 export interface ITxBody {
     inputs: [ UTxO, ...UTxO[] ],
@@ -27,7 +27,7 @@ export interface ITxBody {
     mint?: Value,
     scriptDataHash?: ScriptDataHash, // hash 32
     collateralInputs?: UTxO[], 
-    requiredSigners?: PubKeyHash[],
+    requiredSigners?: CanBeHash28[],
     network?: NetworkT,
     collateralReturn?: TxOut,
     totCollateral?: Coin,
@@ -133,7 +133,26 @@ export class TxBody
     /**
      * getter
      */
-    readonly hash!: Hash32;
+    get hash(): Hash32
+    {
+        if(
+            this._isHashValid === true
+            && this._hash !== undefined
+            && this._hash instanceof Hash32
+        ) return this._hash;
+
+        this._hash = new Hash32(
+            new Uint8Array(
+                blake2b_256( this.toCbor().toBuffer() )
+            )
+        );
+        this._isHashValid = true;
+
+        return this._hash;
+    }
+
+    private _isHashValid = false;
+    private _hash: Hash32 | undefined = undefined;
 
     /**
      * 
@@ -146,13 +165,6 @@ export class TxBody
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
-            (hasOwn( body, "inputs" ) as any) &&
-            hasOwn( body, "outputs" ) &&
-            hasOwn( body, "fee" ),
-            "can't construct a 'TxBody' if 'inputs', 'outputs' and 'fee' fields aren't present"
-        );
-        
         const {
             inputs,
             outputs,
@@ -177,273 +189,182 @@ export class TxBody
             donation
         } = body;
 
-        let _isHashValid: boolean = false;
-        let _hash: Hash32;
-
         // -------------------------------------- inputs -------------------------------------- //
-        assert(
+        if(!(
             Array.isArray( inputs )  &&
             inputs.length > 0 &&
-            inputs.every( input => input instanceof UTxO ),
-            "invald 'inputs' field"
-        );
-        defineReadOnlyProperty(
-            this,
-            "inputs",
-            Object.freeze(
-                inputs.map( i => i instanceof UTxO ? i : new UTxO( i ) )
-            )
-        );
+            inputs.every( isIUTxO )
+        )) throw new Error("invalid 'inputs' field");
+
+        this.inputs = inputs.map( i => i instanceof UTxO ? i : new UTxO( i ) ) as [ UTxO, ...UTxO[] ];
 
         // -------------------------------------- outputs -------------------------------------- //
-        assert(
+
+        if(!(
             Array.isArray( outputs )  &&
             outputs.length > 0 &&
-            outputs.every( out => out instanceof TxOut ),
-            "invald 'outputs' field"
-        );
-        defineReadOnlyProperty(
-            this,
-            "outputs",
-            Object.freeze( outputs )
-        );
+            outputs.every( isITxOut )
+        )) throw new Error("invald 'outputs' field");
+
+        this.outputs = outputs.map( out => out instanceof TxOut ? out : new TxOut( out ) );
 
         // -------------------------------------- fee -------------------------------------- //
-        assert(
-            (typeof fee === "number" && fee === Math.round( Math.abs( fee ) ) ) ||
-            (typeof fee === "bigint" && fee >= BigInt( 0 ) ),
-            "invald 'fee' field"
-        );
-        let _fee = forceBigUInt( fee );
-        definePropertyIfNotPresent(
-            this,
-            "fee",
-            {
-                get: () => _fee,
-                set: ( ...whatever: any[] ) => {},
-                enumerable: true,
-                configurable: false
-            }
-        );
+        if( !canBeUInteger( fee ) ) throw new Error("invald 'fee' field");
 
-        defineReadOnlyProperty(
-            this,
-            "ttl",
-            ttl === undefined ? undefined : forceBigUInt( ttl )
-        );
+        this.fee = forceBigUInt( fee );
+
+        // -------------------------------------- ttl -------------------------------------- //
+
+        this.ttl = ttl === undefined ? undefined : forceBigUInt( ttl );
 
         // -------------------------------------- certs -------------------------------------- //
-        if( certs !== undefined )
-        {
-            assert(
-                Array.isArray( certs )  &&
-                certs.every( isCertificate ),
-                "invalid 'certs' field"
-            );
+        if(!(
+            certs === undefined ||
+            (
+                Array.isArray( certs )
+                && certs.every( isCertificate )
+            )
+        )) throw new Error("invalid 'certs' field");
 
-            if( certs.length <= 0 )
-            {
-                defineReadOnlyProperty(
-                    this,
-                    "certs",
-                    undefined
-                );
-            }
-
-            defineReadOnlyProperty(
-                this,
-                "certs",
-                Object.freeze( certs )
-            );
-        }
-        else defineReadOnlyProperty(
-            this,
-            "certs",
-            undefined
-        );
+        if(
+            certs === undefined
+            || certs.length <= 0
+        ) this.certs = undefined
+        else this.certs = certs;
 
         // -------------------------------------- withdrawals -------------------------------------- //
         
-        if( withdrawals !== undefined )
-        assert(
-            canBeTxWithdrawals( withdrawals ),
-            "withdrawals was not undefined nor an instance of 'TxWithdrawals'"
-        )
+        if(!(
+            withdrawals === undefined ||
+            canBeTxWithdrawals( withdrawals )
+        )) throw new Error("invalid 'withdrawals' field");
 
-        defineReadOnlyProperty(
-            this,
-            "withdrawals",
-            withdrawals === undefined ? undefined : forceTxWithdrawals( withdrawals )
-        );
+        this.withdrawals = (
+            withdrawals === undefined ? undefined :
+            forceTxWithdrawals( withdrawals )
+        ); 
         
         // -------------------------------------- protocolUpdate -------------------------------------- //
         
-        if( protocolUpdate !== undefined )
-        {
-            assert(
-                isLegacyPPUpdateProposal( protocolUpdate ),
-                "invalid 'protocolUpdate' while constructing a 'Tx'"
-            )
-        }
+        if(!(
+            protocolUpdate === undefined ||
+            isLegacyPPUpdateProposal( protocolUpdate )
+        ))
 
-        defineReadOnlyProperty(
-            this,
-            "protocolUpdate",
-            protocolUpdate
-        );
+        this.protocolUpdate = protocolUpdate;
         
         // -------------------------------------- auxDataHash -------------------------------------- //
         
-        if( auxDataHash !== undefined )
-        {
-            assert(
-                auxDataHash instanceof Hash32,
-                "invalid 'auxDataHash' while constructing a 'Tx'"
-            )
-        }
+        if(!(
+            auxDataHash === undefined ||
+            auxDataHash instanceof Hash32
+        )) throw new Error("invalid 'auxDataHash' field");
 
-        defineReadOnlyProperty(
-            this,
-            "auxDataHash",
-            auxDataHash === undefined ? undefined : new AuxiliaryDataHash( auxDataHash )
-        );
+        this.auxDataHash = auxDataHash === undefined ? undefined : new AuxiliaryDataHash( auxDataHash );
         
         // -------------------------------------- validityIntervalStart -------------------------------------- //
                 
-        if( validityIntervalStart !== undefined )
-        {
-            assert(
-                canBeUInteger( validityIntervalStart ),
-                "invalid 'validityIntervalStart' while constructing a 'Tx'"
-            )
-        }
+        if(!(
+            validityIntervalStart === undefined ||
+            canBeUInteger( validityIntervalStart )
+        )) throw new Error("invalid 'validityIntervalStart' field");
 
-        defineReadOnlyProperty(
-            this,
-            "validityIntervalStart",
-            validityIntervalStart === undefined ? undefined : forceBigUInt( validityIntervalStart )
-        );
+        this.validityIntervalStart = validityIntervalStart === undefined ? undefined : forceBigUInt( validityIntervalStart );
         
         // -------------------------------------- mint -------------------------------------- //
-        
-        if( mint !== undefined )
-        {
-            assert(
-                mint instanceof Value,
-                "invalid 'mint' while constructing a 'Tx'"
-            )
-        }
 
-        defineReadOnlyProperty(
-            this,
-            "mint",
-            mint
-        );
+        if(!(
+            mint === undefined
+            || mint instanceof Value
+            || isIValue( mint )
+        )) throw new Error("invalid 'mint' field");
+        
+        if( mint === undefined ) this.mint = undefined;
+        else if( mint instanceof Value ) this.mint = mint;
+        else this.mint = new Value( mint );
         
         // -------------------------------------- scriptDataHash -------------------------------------- //
         
-        if( scriptDataHash !== undefined )
-        {
-            assert(
-                scriptDataHash instanceof Hash32,
-                "invalid 'scriptDataHash' while constructing a 'Tx'"
-            )
-        }
+        if(!(
+            scriptDataHash === undefined ||
+            scriptDataHash instanceof Hash32
+        )) throw new Error("invalid 'scriptDataHash' field");
 
-        defineReadOnlyProperty(
-            this,
-            "scriptDataHash",
-            scriptDataHash === undefined ? undefined : new ScriptDataHash( scriptDataHash )
-        );
+        this.scriptDataHash = scriptDataHash === undefined ? undefined : new ScriptDataHash( scriptDataHash );
 
         // -------------------------------------- collateral inputs -------------------------------------- //
 
-        if( collateralInputs !== undefined )
-        {
-            assert(
+        if(!(
+            collateralInputs === undefined ||
+            (
                 Array.isArray( collateralInputs ) &&
-                collateralInputs.every( input => input instanceof UTxO ),
-                "invalid 'collateralInputs' while constructing a 'Tx'"
-            );
-        }
+                collateralInputs.every( isIUTxO )
+            )
+        )) throw new Error("invalid 'collateralInputs' field");
 
-        defineReadOnlyProperty(
-            this,
-            "collateralInputs",
-            collateralInputs?.length === 0 ? undefined : Object.freeze( collateralInputs )
+        this.collateralInputs = collateralInputs?.map( collateral =>
+            collateral instanceof UTxO ? collateral :
+            new UTxO( collateral )
         );
-        
         // -------------------------------------- requiredSigners -------------------------------------- //
-        if( requiredSigners !== undefined )
-        {
-            assert(
+        if(!(
+            requiredSigners === undefined ||
+            (
                 Array.isArray( requiredSigners ) &&
-                requiredSigners.every( sig => sig instanceof PubKeyHash ),
-                "invalid 'requiredSigners' while constructing a 'Tx'"
-            );
-        }
+                requiredSigners.every( canBeHash28 )
+            )
+        )) throw new Error("invalid 'requiredSigners' field");
 
-        defineReadOnlyProperty(
-            this,
-            "requiredSigners",
-            requiredSigners?.length === 0 ? undefined : Object.freeze( requiredSigners )
+        this.requiredSigners = requiredSigners?.map( signer =>
+            signer instanceof PubKeyHash ? signer :
+            new PubKeyHash( signer )
         );
 
         // -------------------------------------- network -------------------------------------- //
         
-        if( network !== undefined )
-        assert(
+        if(!(
+            network === undefined ||
             network === "mainnet" ||
-            network === "testnet",
-            "invalid 'network' while constructing 'Tx'"
-        )
-        
-        defineReadOnlyProperty(
-            this,
-            "network",
-            network
-        );
+            network === "testnet"
+        )) throw new Error("invalid 'network' field");
+
+        this.network = network;
 
         // -------------------------------------- collateralReturn -------------------------------------- //
         
-        if( collateralReturn !== undefined )
-        assert(
-            collateralReturn instanceof TxOut,
-            "invalid 'collateralReturn' while constructing 'Tx'"
+        if(!(
+            collateralReturn === undefined ||
+            collateralReturn instanceof TxOut ||
+            isITxOut( collateralReturn )
+        )) throw new Error("invalid 'collateralReturn' field");
+
+        this.collateralReturn = (
+            collateralReturn === undefined ? undefined :
+            collateralReturn instanceof TxOut ? collateralReturn :
+            new TxOut( collateralReturn )
         )
-        
-        defineReadOnlyProperty(
-            this,
-            "collateralReturn",
-            collateralReturn
-        );
         // -------------------------------------- totCollateral -------------------------------------- //
 
-        if( totCollateral !== undefined )
-        assert(
-            canBeUInteger( totCollateral ),
-            "invalid 'collateralReturn' while constructing 'Tx'"
-        )
-        
-        defineReadOnlyProperty(
-            this,
-            "collateralReturn",
-            totCollateral === undefined ? undefined : forceBigUInt( totCollateral )
-        );
+        if(!(
+            totCollateral === undefined ||
+            canBeUInteger( totCollateral )
+        ))
+
+        this.totCollateral = maybeBigUint( totCollateral );
 
         // -------------------------------------- reference inputs -------------------------------------- //  
 
-        if( refInputs !== undefined )
-        assert(
-            Array.isArray( refInputs ) &&
-            refInputs.every( input => input instanceof UTxO ),
-            "invalid 'refInputs' while constructing a 'Tx'"
-        );
+        if(!(
+            refInputs === undefined ||
+            (
+                Array.isArray( refInputs ) &&
+                refInputs.every( isIUTxO )
+            )
+        )) throw new Error("invalid 'refInputs' field");
 
-        defineReadOnlyProperty(
-            this,
-            "refInputs",
-            refInputs?.length === 0 ? undefined : Object.freeze( refInputs )
+        this.refInputs = refInputs?.map( refIn =>
+            refIn instanceof UTxO ? refIn :
+            new UTxO( refIn )
         );
 
         // -------------------------------------- votingProcedures -------------------------------------- //
@@ -549,30 +470,7 @@ export class TxBody
             undefined
         );
 
-
-        // -------------------------------------- hash -------------------------------------- //  
-
-        definePropertyIfNotPresent(
-            this, "hash",
-            {
-                get: (): Hash32 => {
-                    if( _isHashValid === true && _hash !== undefined && _hash instanceof Hash32 ) return _hash.clone();
-
-                    _hash = new Hash32(
-                        new Uint8Array(
-                            blake2b_256( this.toCbor().toBuffer() )
-                        )
-                    );
-                    _isHashValid = true;
-
-                    return _hash.clone()
-                },
-                set: () => {},
-                enumerable: true,
-                configurable: false
-            }
-        );
-        
+        this.cborRef = cborRef ?? subCborRefOrUndef( body );
     }
 
     toCborBytes(): Uint8Array

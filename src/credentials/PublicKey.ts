@@ -6,38 +6,31 @@ import { definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
 
 export class PublicKey extends Hash32
 {
-    readonly hash!: PubKeyHash;
+    private _hash: PubKeyHash | undefined = undefined;
+    get hash(): PubKeyHash
+    {
+        if(
+            this._hash !== undefined
+            && this._hash instanceof PubKeyHash
+        ) return this._hash;
+
+        this._hash = new PubKeyHash(
+            new Uint8Array(
+                blake2b_224(
+                    this.toBuffer()
+                )
+            )
+        );
+
+        return this._hash;
+    }
 
     constructor(
         pubKey: string | Uint8Array | Hash32,
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        super( pubKey);
-
-        let _hash: PubKeyHash | undefined = undefined;
-        definePropertyIfNotPresent(
-            this, "hash",
-            {
-                get: () => {
-                    if( _hash !== undefined && _hash instanceof PubKeyHash ) return _hash.clone();
-
-                    _hash = new PubKeyHash(
-                        new Uint8Array(
-                            blake2b_224(
-                                this.toBuffer()
-                            )
-                        )
-                    );
-
-                    return _hash.clone();
-                },
-                set: () => {},
-                configurable: false,
-                enumerable: true
-            }
-        );
-        
+        super( pubKey );
     }
 
     static fromCbor(cStr: CanBeCborString)

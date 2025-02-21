@@ -12,6 +12,11 @@ export function canBeUInteger( something: any ): something is (number | bigint)
     );
 }
 
+export function maybeBigUint( toForce: CanBeUInteger | undefined ): bigint | undefined
+{
+    return toForce === undefined ? undefined : forceBigUInt( toForce );
+}
+
 export function forceBigUInt( toForce: CanBeUInteger ): bigint
 {
     return typeof toForce === "number" ? BigInt( toForce >>> 0 ) : (

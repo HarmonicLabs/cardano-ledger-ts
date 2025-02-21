@@ -11,7 +11,7 @@ import { assert } from "../../../utils/assert";
 import { maybeData } from "../../../utils/maybeData";
 import { BasePlutsError } from "../../../utils/BasePlutsError";
 import { ToDataVersion } from "../../../toData/defaultToDataVersion";
-import { getSubCborRef } from "../../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
 
 
 export interface ITxOut {
@@ -108,6 +108,8 @@ export class TxOut
             "refScript",
             refScript
         );
+
+        this.cborRef = cborRef ?? subCborRefOrUndef( txOutput );
     }
 
     clone(): TxOut

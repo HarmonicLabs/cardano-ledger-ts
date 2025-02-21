@@ -97,25 +97,18 @@ export class Value
             "map",
             Object.freeze( _map )
         );
-
-        Object.defineProperty(
-            this, "lovelaces",
-            {
-                get: (): bigint => BigInt(
-                    getEmptyNameQty(
-                        this.map
-                        .find( ({ policy }) => policy === "" )
-                        ?.assets
-                    ) ?? 0 
-                ),
-                set: () => {},
-                enumerable: true,
-                configurable: false
-            }
-        );
     }
 
-    readonly lovelaces!: bigint;
+    get lovelaces(): bigint
+    {
+        return BigInt(
+            getEmptyNameQty(
+                this.map
+                .find( ({ policy }) => policy === "" )
+                ?.assets
+            ) ?? 0 
+        );
+    }
 
     get( policy: Hash28 | Uint8Array | string , assetName: Uint8Array ): bigint
     {
