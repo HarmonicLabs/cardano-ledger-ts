@@ -79,7 +79,7 @@ export class Address
         paymentCreds: Credential,
         stakeCreds?: StakeCredentials,
         type?: AddressType,
-        readonly subCborRef?: SubCborRef
+        readonly cborRef: SubCborRef | undefined = undefined
     )
     {
         type = type === undefined ? 
@@ -213,7 +213,7 @@ export class Address
 
     static fromBytes(
         bs: byte[] | string | Uint8Array,
-        subCborRef?: SubCborRef
+        cborRef: SubCborRef | undefined = undefined
     ): Address
     {
         bs = Array.from(
@@ -288,7 +288,7 @@ export class Address
                 ):
                 undefined,
             type,
-            subCborRef
+            cborRef
         );
     };
 
@@ -299,14 +299,14 @@ export class Address
 
     static fromBuffer(
         buff: Uint8Array | string,
-        subCborRef?: SubCborRef
+        cborRef: SubCborRef | undefined = undefined
     ): Address
     {
         return Address.fromBytes(
             typeof buff === "string" ?
             buff : 
             Array.from( buff ) as byte[],
-            subCborRef
+            cborRef
         )
     }
 
@@ -355,11 +355,11 @@ export class Address
 
     toCborObj(): CborObj
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return Cbor.parse( this.subCborRef.toBuffer() );
+            return Cbor.parse( this.cborRef.toBuffer() );
         }
         return new CborBytes( this.toBuffer() );
     }
@@ -375,13 +375,18 @@ export class Address
         );
     }
 
+    toCborBytes(): Uint8Array
+    {
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
+        return this.toCbor().toBuffer();
+    }
     toCbor(): CborString
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.subCborRef.toBuffer() );
+            return new CborString( this.cborRef.toBuffer() );
         }
         
         return Cbor.encode( this.toCborObj() );

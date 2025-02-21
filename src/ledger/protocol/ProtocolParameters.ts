@@ -8,7 +8,7 @@ import { freezeAll, isObject } from "@harmoniclabs/obj-utils";
 import { Rational, cborFromRational, isRational, isRationalOrUndefined, tryCborFromRational } from "./Rational";
 import { PParamsPoolVotingThresholds, isPParamsPoolVotingThresholds, poolVotingThresholdsToCborObj, tryGetPParamsPoolVotingThresholdsFromCborObj } from "./PParamsPoolVotingThresholds";
 import { PParamsDrepVotingThresholds, drepVotingThresholdsToCborObj, isPParamsDrepVotingThresholds, tryGetPParamsDrepVotingThresholdsFromCborObj } from "./PParamsDrepVotingThresholds";
-import { IProtocolVerision, isIProtocolVersion, protocolVersionToCborObj, tryIProtocolVersionFromCborObj } from "./protocolVersion";
+import { IProtocolVersion, isIProtocolVersion, protocolVersionToCborObj, tryIProtocolVersionFromCborObj } from "../../eras/common/protocolVersion";
 import { Data, DataB, DataConstr, DataI, DataList, DataMap, DataPair } from "@harmoniclabs/plutus-data";
 import { fromUtf8 } from "@harmoniclabs/uint8array-utils";
 
@@ -26,7 +26,7 @@ export interface ProtocolParameters {
     monetaryExpansion: Rational,
     treasuryCut: Rational,
     /** @deprecated protocolVersion removed in conway */
-    protocolVersion?: IProtocolVerision,
+    protocolVersion?: IProtocolVersion,
     minPoolCost: Coin,
     utxoCostPerByte: Coin,
     costModels: CostModels,

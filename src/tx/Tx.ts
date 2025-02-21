@@ -2,7 +2,7 @@ import { CredentialType, PrivateKey, PubKeyHash } from "../credentials";
 import { Hash28, Hash32, Signature } from "../hashes";
 import { VKeyWitness, VKey, ITxWitnessSet, TxWitnessSet, isITxWitnessSet } from "./TxWitnessSet";
 import { ToCbor, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
-import { signEd25519 } from "@harmoniclabs/crypto";
+import { signEd25519, signEd25519_sync } from "@harmoniclabs/crypto";
 import { defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
 import { InvalidCborFormatError } from "../utils/InvalidCborFormatError";
 import { ToJson } from "../utils/ToJson";
@@ -73,7 +73,7 @@ export class Tx
             return;
         }
 
-        const { pubKey, signature } = signEd25519(
+        const { pubKey, signature } = signEd25519_sync(
             this.body.hash.toBuffer(),
             signer instanceof Uint8Array ? signer : signer.toBuffer()
         );
@@ -121,7 +121,7 @@ export class Tx
 
     constructor(
         tx: ITx,
-        readonly subCborRef?: SubCborRef
+        readonly cborRef: SubCborRef | undefined = undefined
     )
     {
         const {
@@ -192,24 +192,28 @@ export class Tx
         //*/
     }
 
+    toCborBytes(): Uint8Array
+    {
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
+        return this.toCbor().toBuffer();
+    }
     toCbor(): CborString
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.subCborRef.toBuffer() );
+            return new CborString( this.cborRef.toBuffer() );
         }
         
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
-            // TODO: validate cbor structure
-            // we assume correctness here
-            return Cbor.parse( this.subCborRef.toBuffer() );
+            // keeps cbor ref
+            return Cbor.parse( this.cborRef.toBuffer() );
         }
 
         return new CborArray([

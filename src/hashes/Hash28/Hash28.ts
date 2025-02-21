@@ -27,7 +27,7 @@ export class Hash28 extends Hash
 {
     constructor(
         bs: CanBeHash28,
-        readonly subCborRef?: SubCborRef,
+        readonly cborRef: SubCborRef | undefined = undefined,
     )
     {
         super( bs instanceof Hash28 ? bs.toBuffer() : bs );

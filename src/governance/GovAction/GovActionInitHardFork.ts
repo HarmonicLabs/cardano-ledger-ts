@@ -1,7 +1,7 @@
 import { Cbor, CborArray, CborObj, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { IGovAction } from "./IGovAction";
 import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx";
-import { IProtocolVerision, IProtocolVerisionObj, isIProtocolVersion, protocolVersionAsObj, protocolVersionToCborObj } from "../../ledger/protocol/protocolVersion";
+import { IProtocolVersion, IProtocolVersion, isIProtocolVersion, protocolVersionAsObj, protocolVersionToCborObj } from "../../eras/common/protocolVersion";
 import { GovActionType } from "./GovActionType";
 import { roDescr } from "../../utils/roDescr";
 import { isObject } from "@harmoniclabs/obj-utils";
@@ -13,7 +13,7 @@ import { maybeData } from "../../utils/maybeData";
 
 export interface IGovActionInitHardFork {
     govActionId?: ITxOutRef | undefined,
-    protocolVersion: IProtocolVerision
+    protocolVersion: IProtocolVersion
 }
 
 export function isIGovActionInitHardFork( stuff: any ): stuff is IGovActionInitHardFork
@@ -29,11 +29,11 @@ export class GovActionInitHardFork
 {
     readonly govActionType: GovActionType.InitHardFork;
     readonly govActionId: TxOutRef | undefined;
-    readonly protocolVersion: IProtocolVerisionObj;
+    readonly protocolVersion: IProtocolVersion;
 
     constructor(
         { govActionId, protocolVersion }: IGovActionInitHardFork,
-        readonly subCborRef?: SubCborRef
+        readonly cborRef: SubCborRef | undefined = undefined
     )
     {
         Object.defineProperties(
@@ -45,13 +45,18 @@ export class GovActionInitHardFork
         );
     }
 
+    toCborBytes(): Uint8Array
+    {
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
+        return this.toCbor().toBuffer();
+    }
     toCbor(): CborString
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.subCborRef.toBuffer() );
+            return new CborString( this.cborRef.toBuffer() );
         }
         
         return Cbor.encode( this.toCborObj() )

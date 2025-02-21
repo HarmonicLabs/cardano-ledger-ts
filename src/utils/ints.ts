@@ -2,23 +2,21 @@ export type CanBeUInteger
     = bigint
     | number;
 
+const _0n = BigInt( 0 );
+
 export function canBeUInteger( something: any ): something is (number | bigint)
 {
     return (
-        (typeof something === "bigint" && something >= BigInt( 0 ) ) ||
-        (typeof something === "number" && something === Math.round( Math.abs( something ) ) )
+        (typeof something === "number" && something === ( something >>> 0 ) )
+        || (typeof something === "bigint" && something >= _0n )
     );
 }
 
 export function forceBigUInt( toForce: CanBeUInteger ): bigint
 {
-    if( !canBeUInteger( toForce ) )
-    {
-        // console.error( toForce );
-        throw new Error( "trying to convert an integer to an unsigned Integer, the number was negative" );
-    }
-
-    return BigInt( toForce );
+    return typeof toForce === "number" ? BigInt( toForce >>> 0 ) : (
+        toForce >= _0n ? toForce : -toForce
+    );
 };
 
 export function unsafeForceUInt( toForce: CanBeUInteger ): number
@@ -30,4 +28,9 @@ export function unsafeForceUInt( toForce: CanBeUInteger ): number
     }
 
     return Number( toForce ); 
+}
+
+export function u32( uint: CanBeUInteger ): number
+{
+    return Number( uint ) >>> 0;
 }

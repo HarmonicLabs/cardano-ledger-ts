@@ -10,7 +10,7 @@ export class PublicKey extends Hash32
 
     constructor(
         pubKey: string | Uint8Array | Hash32,
-        readonly subCborRef?: SubCborRef
+        readonly cborRef: SubCborRef | undefined = undefined
     )
     {
         super( pubKey);

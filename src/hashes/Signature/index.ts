@@ -7,7 +7,7 @@ export class Signature extends Hash
 {
     constructor(
         bs: string | Uint8Array | Signature | Hash,
-        readonly subCborRef?: SubCborRef
+        readonly cborRef: SubCborRef | undefined = undefined
     )
     {
         super( bs instanceof Hash ? bs.toBuffer() : bs );
@@ -20,7 +20,7 @@ export class Signature extends Hash
 
     clone(): Signature
     {
-        return new Signature( this.toBuffer(), this.subCborRef?.clone() );
+        return new Signature( this.toBuffer(), this.cborRef?.clone() );
     }
 
     valueOf(): string
