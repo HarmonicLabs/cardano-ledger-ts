@@ -1,14 +1,14 @@
 import { Cbor, CborArray, CborObj, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { IGovAction } from "./IGovAction";
 import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx";
-import { IProtocolVersion, IProtocolVersion, isIProtocolVersion, protocolVersionAsObj, protocolVersionToCborObj } from "../../eras/common/protocolVersion";
 import { GovActionType } from "./GovActionType";
 import { roDescr } from "../../utils/roDescr";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { DataConstr, DataI, ToData } from "@harmoniclabs/plutus-data";
-import { partialProtocolParametersToData } from "../../ledger";
+import { IProtocolVersion, isIProtocolVersion, partialProtocolParametersToData } from "../../ledger";
 import { ToDataVersion } from "../../toData/defaultToDataVersion";
 import { maybeData } from "../../utils/maybeData";
+import { subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 
 export interface IGovActionInitHardFork {
@@ -32,17 +32,15 @@ export class GovActionInitHardFork
     readonly protocolVersion: IProtocolVersion;
 
     constructor(
-        { govActionId, protocolVersion }: IGovActionInitHardFork,
+        init: IGovActionInitHardFork,
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        Object.defineProperties(
-            this, {
-                govActionType: { value: GovActionType.InitHardFork, ...roDescr },
-                govActionId: { value: govActionId ? new TxOutRef( govActionId ) : undefined, ...roDescr },
-                protocolVersion: { value: protocolVersionAsObj( protocolVersion ), ...roDescr }
-            }
-        );
+        const { govActionId, protocolVersion } = init;
+        this.govActionType = GovActionType.InitHardFork;
+        this.govActionId = govActionId ? new TxOutRef( govActionId ) : undefined;
+        this.protocolVersion = protocolVersion;
+        this.cborRef = cborRef ?? subCborRefOrUndef( init );
     }
 
     toCborBytes(): Uint8Array

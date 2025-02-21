@@ -7,6 +7,7 @@ import { isObject } from "@harmoniclabs/obj-utils";
 import { DataConstr } from "@harmoniclabs/plutus-data";
 import { ToDataVersion } from "../toData/defaultToDataVersion";
 import { maybeData } from "../utils/maybeData";
+import { subCborRefOrUndef } from "../utils/getSubCborRef";
 
 export interface IConstitution {
     anchor: IAnchor,
@@ -28,16 +29,14 @@ export class Constitution
     readonly scriptHash: Hash28 | undefined;
 
     constructor(
-        { anchor, scriptHash }: IConstitution,
+        consti: IConstitution,
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        Object.defineProperties(
-            this, {
-                anchor: { value: new Anchor( anchor ), ...roDescr },
-                scriptHash: { value: canBeHash28( scriptHash ) ? new Hash28( scriptHash ) : undefined, ...roDescr }
-            }
-        );
+        const { anchor, scriptHash } = consti;
+        this.anchor = new Anchor( anchor );
+        this.scriptHash = canBeHash28( scriptHash ) ? new Hash28( scriptHash ) : undefined;
+        this.cborRef = cborRef ?? subCborRefOrUndef( consti );
     }
 
     toCborBytes(): Uint8Array

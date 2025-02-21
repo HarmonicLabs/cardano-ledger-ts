@@ -2,7 +2,7 @@ import { Cbor, CborArray, CborBytes, CborObj, CborString, CborText, SubCborRef }
 import { CanBeHash32, Hash32, canBeHash32 } from "../hashes";
 import { roDescr } from "../utils/roDescr";
 import { isObject } from "@harmoniclabs/obj-utils";
-import { getSubCborRef } from "../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../utils/getSubCborRef";
 
 export interface IAnchor {
     url: string,
@@ -24,14 +24,15 @@ export class Anchor
     readonly url: string;
     readonly anchorDataHash: Hash32;
 
-    constructor({ url, anchorDataHash }: IAnchor, readonly cborRef: SubCborRef | undefined = undefined)
+    constructor(
+        anchor: IAnchor,
+        readonly cborRef: SubCborRef | undefined = undefined
+    )
     {
-        Object.defineProperties(
-            this, {
-                url: { value: String( url ), ...roDescr },
-                anchorDataHash: { value: new Hash32( anchorDataHash ), ...roDescr }
-            }
-        );
+        const { url, anchorDataHash } = anchor;
+        this.url = String( url );
+        this.anchorDataHash = new Hash32( anchorDataHash );
+        this.cborRef = cborRef ?? subCborRefOrUndef( anchor );
     }
 
     toCborBytes(): Uint8Array
@@ -63,7 +64,6 @@ export class Anchor
             this.anchorDataHash.toCborObj()
         ]);
     }
-
     static fromCborObj( cbor: CborObj ): Anchor
     {
         if(!(
