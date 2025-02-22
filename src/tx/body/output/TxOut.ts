@@ -49,12 +49,19 @@ export class TxOut
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
+        if(!(
+            isObject( txOutput ) &&
+            hasOwn( txOutput, "address" ) &&
+            hasOwn( txOutput, "value" )
+        )) throw new Error("txOutput is missing some necessary fields");
+        /*
         assert(
             isObject( txOutput ) &&
             hasOwn( txOutput, "address" ) &&
             hasOwn( txOutput, "value" ),
             "txOutput is missing some necessary fields"
         );
+        */
 
         let {
             address,
@@ -62,20 +69,30 @@ export class TxOut
             datum,
             refScript
         } = txOutput;
-
-        if( typeof address === "string" )
+        
+        if (isAddressStr(address))
         {
             address = Address.fromString(address);
         }
+        if(!(
+            address instanceof Address
+        )) throw new Error("invlaid 'address' while constructing 'TxOut'");
+        /*
         assert(
             address instanceof Address,
             "invlaid 'address' while constructing 'TxOut'" 
         );
+        */
+
+        if(!(
+            value instanceof Value
+        )) throw new Error("invlaid 'value' while constructing 'TxOut'");
+        /*
         assert(
             value instanceof Value,
             "invlaid 'value' while constructing 'TxOut'" 
         );
-
+        */
         defineReadOnlyProperty(
             this,
             "address",
