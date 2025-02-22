@@ -91,7 +91,7 @@ export class Credential<T extends CredentialType = CredentialType>
                 : new ValidatorHash(new Hash28(hash).toBuffer())
         );
 
-        this.cborRef = cborRef ?? subCborRefOrUndef();
+        this.cborRef = cborRef ?? subCborRefOrUndef( this );
     }
 
     clone(): Credential<T> {
