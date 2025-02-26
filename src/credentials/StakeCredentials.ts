@@ -7,8 +7,9 @@ import { StakeKeyHash } from "./StakeKeyHash";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils"
 import { assert } from "../utils/assert";
 import { ToDataVersion, definitelyToDataVersion } from "../toData/defaultToDataVersion";
-import { getSubCborRef } from "../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../utils/getSubCborRef";
 import { PubKeyHash } from "./PubKeyHash";
+
 
 export class StakeValidatorHash extends Hash28 {}
 
@@ -79,14 +80,13 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
-            hash instanceof Hash28,
-            "can't construct 'StakeCredentials'; hash must be instance of an 'Hash28'"
-        );
-        assert(
-            type === "stakeKey" || type ==="script" || type === "pointer",
-            "can't construct 'Credential'; specified type is nor 'addres' nor 'script'"
-        );
+        if(!(
+            hash instanceof Hash28
+        )) throw new Error("can't construct 'StakeCredentials'; hash must be instance of an 'Hash28'");
+    
+        if(!(
+            type === "stakeKey" || type ==="script" || type === "pointer"
+        )) throw new Error("can't construct 'Credential'; specified type is nor 'addres' nor 'script'");
 
         defineReadOnlyProperty( this, "type", type );
 
@@ -96,32 +96,25 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
                 Array.isArray( hash ) &&
                 hash.length === 3 &&
                 hash.every( canBeUInteger )
-            ))
-            throw new Error(
-                "invalid argument for stake credentials of type " + type
-            );
+            )) throw new Error( "invalid argument for stake credentials of type " + type );
 
-            defineReadOnlyProperty(
-                this,
-                "hash",
-                hash.map( forceBigUInt )
-            );
-        }
-        else
-        {
-            if( !( hash instanceof Hash28 ) )
-            throw new Error(
-                "invalid argument for stake credentials of type " + type
-            );
+            this.hash = hash.map( forceBigUInt ) as StakeHash<T>;
+        } else {
+            if(!( 
+                hash instanceof Hash28 
+            ))throw new Error("invalid argument for stake credentials of type " + type);
 
+            /* TO DO: change this.hash = type === "stakeKey" ? */
             defineReadOnlyProperty(
                 this,
                 "hash",
                 type === "stakeKey" ? 
                     ( hash instanceof StakeKeyHash ? hash : new StakeKeyHash( hash.toBuffer() ) ) :
                     ( hash instanceof StakeValidatorHash ? hash : new StakeValidatorHash( hash.toBuffer() ) )
-            );
+            )
         }
+        /* TO DO: Change the arguments and create an IStakeCredential? */
+        this.cborRef = cborRef ?? subCborRefOrUndef( this );
     }
 
     clone(): StakeCredentials<T>

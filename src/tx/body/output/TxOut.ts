@@ -54,15 +54,8 @@ export class TxOut
             hasOwn( txOutput, "address" ) &&
             hasOwn( txOutput, "value" )
         )) throw new Error("txOutput is missing some necessary fields");
-        /*
-        assert(
-            isObject( txOutput ) &&
-            hasOwn( txOutput, "address" ) &&
-            hasOwn( txOutput, "value" ),
-            "txOutput is missing some necessary fields"
-        );
-        */
 
+        /* TO DO as if change this to const */
         let {
             address,
             value,
@@ -77,54 +70,28 @@ export class TxOut
         if(!(
             address instanceof Address
         )) throw new Error("invlaid 'address' while constructing 'TxOut'");
-        /*
-        assert(
-            address instanceof Address,
-            "invlaid 'address' while constructing 'TxOut'" 
-        );
-        */
 
         if(!(
             value instanceof Value
         )) throw new Error("invlaid 'value' while constructing 'TxOut'");
-        /*
-        assert(
-            value instanceof Value,
-            "invlaid 'value' while constructing 'TxOut'" 
-        );
-        */
-        defineReadOnlyProperty(
-            this,
-            "address",
-            address
-        );
-        defineReadOnlyProperty(
-            this,
-            "value",
-            value
-        );
+
+        this.address = address;
+
+        this.value = value;
 
         if( datum !== undefined )
-            assert(
-                datum instanceof Hash32 || isData( datum ),
-                "invalid 'datum' field"
-            );
-        defineReadOnlyProperty(
-            this,
-            "datum",
-            datum
-        );
+            if(!(
+                datum instanceof Hash32 || isData( datum )
+            ))throw new Error("invalid 'datum' field")
+        
+        this.datum = datum;
 
         if( refScript !== undefined )
-            assert(
-                refScript instanceof Script,
-                "invalid 'refScript' field"
-            );
-        defineReadOnlyProperty(
-            this,
-            "refScript",
-            refScript
-        );
+            if(!(
+                refScript instanceof Script
+            )) throw new Error("invalid 'refScript' field");
+        
+        this.refScript = refScript;
 
         this.cborRef = cborRef ?? subCborRefOrUndef( txOutput );
     }

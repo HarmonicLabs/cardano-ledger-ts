@@ -1,14 +1,4 @@
-import {
-    ToCbor,
-    CborString,
-    Cbor,
-    CborObj,
-    CborArray,
-    CborUInt,
-    CanBeCborString,
-    forceCborString,
-    SubCborRef,
-} from "@harmoniclabs/cbor";
+import { ToCbor, CborString, Cbor, CborObj, CborArray, CborUInt, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { ToData, Data, DataConstr, DataB } from "@harmoniclabs/plutus-data";
 import { canBeHash28, CanBeHash28, Hash28 } from "../hashes/Hash28/Hash28";
@@ -32,6 +22,7 @@ export class Credential<T extends CredentialType = CredentialType>
     readonly type!: T;
     readonly hash!: T extends CredentialType.KeyHash ? PubKeyHash : ValidatorHash;
 
+
     constructor(
         type: T, 
         hash: CanBeHash28, 
@@ -41,35 +32,16 @@ export class Credential<T extends CredentialType = CredentialType>
         if (!(
             canBeHash28(hash)
         )) throw new Error("can't construct 'Credential'; hash must be instance of an 'Hash28'");
-        /*
-        assert(
-            canBeHash28( hash ),
-            "can't construct 'Credential'; hash must be instance of an 'Hash28'"
-        );
-        */
 
         if (!(
             type === CredentialType.KeyHash || 
             type === CredentialType.Script
         ))throw new Error("can't construct 'Credential'; specified type is nor 'key hash' nor 'script'");
-        /*
-        assert(
-            type === CredentialType.KeyHash || type === CredentialType.Script,
-            "can't construct 'Credential'; specified type is nor 'key hash' nor 'script'"
-        );
-        */
+
         
         this.type = type;
-        /*
-        defineReadOnlyProperty(
-            this,
-            "type",
-            type
-        );
-        */
 
-        /* TODO */
-        /* come back to this */
+        /* TODO: come back to this */
         /*
         this.hash = type === CredentialType.KeyHash
             ? hash instanceof PubKeyHash
@@ -90,7 +62,7 @@ export class Credential<T extends CredentialType = CredentialType>
                 ? hash
                 : new ValidatorHash(new Hash28(hash).toBuffer())
         );
-
+    /* TO DO: Change the arguments and create an ICredential */
         this.cborRef = cborRef ?? subCborRefOrUndef( this );
     }
 
@@ -139,7 +111,7 @@ export class Credential<T extends CredentialType = CredentialType>
     }
     toCbor(): CborString {
         if (this.cborRef instanceof SubCborRef) {
-            // TODO: validate cbor structure
+            /* TODO: validate cbor structure */
             // we assume correctness here
             return new CborString(this.cborRef.toBuffer());
         }

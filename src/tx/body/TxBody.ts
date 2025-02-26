@@ -381,18 +381,14 @@ export class TxBody
             }
             else
             {
-                assert(
+                if(!(
                     Array.isArray( votingProcedures ) &&
                     votingProcedures.length > 0 &&
-                    votingProcedures.every( isIVotingProceduresEntry ),
-                    "invalid 'votingProcedures' while constructing a 'Tx'"
-                );
+                    votingProcedures.every( isIVotingProceduresEntry )
+                )) throw new Error("invalid 'votingProcedures' while constructing a 'Tx'")
 
-                defineReadOnlyProperty(
-                    this,
-                    "votingProcedures",
-                    new VotingProcedures( votingProcedures )
-                );
+                this.votingProcedures = new VotingProcedures( votingProcedures )
+
             }
         }
         else defineReadOnlyProperty(
@@ -405,70 +401,47 @@ export class TxBody
 
         if( proposalProcedures !== undefined )
         {
-            assert(
+            if(!(
                 Array.isArray( proposalProcedures ) &&
                 proposalProcedures.every( elem =>
                     elem instanceof ProposalProcedure ||
                     isIProposalProcedure( elem )
-                ),
-                "invalid 'proposalProcedures' while constructing a 'Tx'"
-            )
-
-            defineReadOnlyProperty(
-                this,
-                "proposalProcedures",
-                proposalProcedures.map( elem =>
-                    elem instanceof ProposalProcedure ? elem : new ProposalProcedure( elem )
                 )
-            );
+            )) throw new Error("invalid 'proposalProcedures' while constructing a 'Tx'")
+
+            this.proposalProcedures = proposalProcedures.map( elem =>
+                elem instanceof ProposalProcedure ? elem : new ProposalProcedure( elem )
+            )
         }
-        else defineReadOnlyProperty(
-            this,
-            "proposalProcedures",
-            undefined
-        );
+        else this.proposalProcedures = undefined
+
 
         // -------------------------------------- currentTreasuryValue -------------------------------------- //
 
         if( currentTreasuryValue !== undefined )
         {
-            assert(
-                canBeUInteger( currentTreasuryValue ),
-                "invalid 'currentTreasuryValue' while constructing a 'Tx'"
-            );
+            if(!(
+                canBeUInteger( currentTreasuryValue )
+            
+            )) throw new Error("invalid 'currentTreasuryValue' field");
 
-            defineReadOnlyProperty(
-                this,
-                "currentTreasuryValue",
-                forceBigUInt( currentTreasuryValue )
-            );
+            this.currentTreasuryValue = forceBigUInt( currentTreasuryValue );
+
         }
-        else defineReadOnlyProperty(
-            this,
-            "currentTreasuryValue",
-            undefined
-        );
+        else this.currentTreasuryValue = undefined;
+    
 
         // -------------------------------------- donation -------------------------------------- //
 
         if( donation !== undefined )
         {
-            assert(
-                canBeUInteger( donation ),
-                "invalid 'donation' while constructing a 'Tx'"
-            );
+            if(!(
+                canBeUInteger( donation )
+            ))throw new Error("invalid 'donation' while constructing a 'Tx'")
 
-            defineReadOnlyProperty(
-                this,
-                "donation",
-                forceBigUInt( donation )
-            );
+            this.donation = forceBigUInt( donation )
         }
-        else defineReadOnlyProperty(
-            this,
-            "donation",
-            undefined
-        );
+        else this.donation = undefined
 
         this.cborRef = cborRef ?? subCborRefOrUndef( body );
     }

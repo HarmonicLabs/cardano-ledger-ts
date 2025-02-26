@@ -1,7 +1,7 @@
 import { CanBeCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { assert } from "../../utils/assert";
 import { Hash } from "../Hash";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 export class Signature extends Hash
 {
@@ -12,10 +12,12 @@ export class Signature extends Hash
     {
         super( bs instanceof Hash ? bs.toBuffer() : bs );
 
-        assert(
-            this._bytes.length === 64,
-            "'Signature' must be an hash of length 64"
-        );
+        if(!(
+            this._bytes.length === 64
+        ))throw new Error("'Signature' must be an hash of length 64");
+
+        /* TO DO: Change the arguments and create an hash32? */
+        this.cborRef = cborRef ?? subCborRefOrUndef( this );
     }
 
     clone(): Signature
