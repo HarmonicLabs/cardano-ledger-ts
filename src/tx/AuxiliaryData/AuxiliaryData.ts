@@ -89,15 +89,13 @@ export class AuxiliaryData
 
         // -------------------------------- plutus v1 -------------------------------- //
         if( plutusV1Scripts !== undefined )
-        {
-            assert(
+        {   
+            if(!(
                 Array.isArray( plutusV1Scripts ) &&
                 plutusV1Scripts.every( script => {
-
                     return true;
-                }),
-                "invalid plutusV1Scripts field"
-            );
+                })
+            ))throw new Error("invalid plutusV1Scripts field");
 
             this.plutusV1Scripts = plutusV1Scripts?.map( plutusScript =>
                 plutusScript instanceof Script
@@ -114,24 +112,20 @@ export class AuxiliaryData
         }
         else
         {
-            defineReadOnlyProperty(
-                this,
-                "plutusV1Scripts",
-                undefined
-            );
+            this.plutusV1Scripts = undefined;
         }
 
         // -------------------------------- plutus v2 -------------------------------- //
         if( plutusV2Scripts !== undefined )
         {
-            assert(
+            if(!(
+
                 Array.isArray( plutusV2Scripts ) &&
                 plutusV2Scripts.every( script => {
 
                     return true;
-                }),
-                "invalid plutusV2Scripts field"
-            );
+                })
+            ))throw new Error("invalid plutusV2Scripts field");
 
             defineReadOnlyProperty(
                 this,
@@ -141,11 +135,7 @@ export class AuxiliaryData
         }
         else
         {
-            defineReadOnlyProperty(
-                this,
-                "plutusV2Scripts",
-                undefined
-            );
+            this.plutusV2Scripts = undefined;
         }
 
         // --------- hash ---- //
