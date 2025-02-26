@@ -83,11 +83,13 @@ export class TxMetadatumMap
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
-            map.every( isTxMetadatumMapEntry ),
-            "invalid entries for TxMetadatumMap"
-        );
+        if(!(
+            map.every( isTxMetadatumMapEntry )
+        ))throw new Error("invalid entries for TxMetadatumMap");
 
+        /* TO DO: double check about Object.freeze */
+        this.map = map
+        
         defineReadOnlyProperty(
             this,
             "map",

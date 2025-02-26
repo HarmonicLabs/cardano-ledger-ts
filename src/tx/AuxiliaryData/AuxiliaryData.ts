@@ -59,6 +59,7 @@ export class AuxiliaryData
         
 
         // -------------------------------- native scripts -------------------------------- //
+        /* TO DO  wait for reply from Michele*/
         if( nativeScripts !== undefined )
         {
             if(!(
@@ -122,7 +123,6 @@ export class AuxiliaryData
 
                 Array.isArray( plutusV2Scripts ) &&
                 plutusV2Scripts.every( script => {
-
                     return true;
                 })
             ))throw new Error("invalid plutusV2Scripts field");

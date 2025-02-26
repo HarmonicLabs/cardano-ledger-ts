@@ -4,7 +4,7 @@ import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
 import { assert } from "../../utils/assert";
 import { TxMetadatum, isTxMetadatum, txMetadatumFromCborObj } from "./TxMetadatum";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 export type ITxMetadata = {
     [metadatum_label: number | string]: TxMetadatum 
@@ -26,7 +26,7 @@ export class TxMetadata
         
         Object.keys( metadata )
         .forEach( k =>
-
+            /* TO DO: how to handle this :grin: */
             defineReadOnlyProperty(
                 _metadata,
                 BigInt( k ).toString(),
@@ -43,11 +43,8 @@ export class TxMetadata
 
         );
 
-        defineReadOnlyProperty(
-            this,
-            "metadata",
-            _metadata
-        );
+        this.metadata = _metadata;
+        this.cborRef = cborRef ?? subCborRefOrUndef( _metadata );
     }
     
     toCborBytes(): Uint8Array

@@ -29,7 +29,13 @@ export class BootstrapWitness
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        const { pubKey, signature, chainCode, attributes } = witness;
+        const { 
+            pubKey, 
+            signature, 
+            chainCode, 
+            attributes 
+        } = witness;
+        
         if(!(
             pubKey instanceof Hash32
         ))throw new Error("invalid 'pubKey' constructing 'BootstrapWitness'");

@@ -84,7 +84,12 @@ function portCheck( something: any ): boolean
     );
 }
 
-export function isIpPoolRelay<T extends object>( something: T ): something is (T & IpPoolRelay)
+/* TO DO: 
+    export function isIpPoolRelay<T extends object>( something: T ): something is (T & IpPoolRelay)
+    [12:19 PM]Michele | Harmonic: make it just 
+    export function isIpPoolRelay( something: any ): something is IpPoolRelay
+*/
+export function isIpPoolRelay( something: any ): something is IpPoolRelay
 {
     const {
         ipv4,
@@ -136,7 +141,7 @@ export function isPoolRelay<T extends object>( something: T ): something is (T &
 
 export function poolRelayToCborObj( poolRelay: PoolRelay ): CborObj
 {
-    /* TO DO: ask if this needs cborRef */
+    /* TO DO: ask if this needs cborRef  */
     if(!(
         isPoolRelay( poolRelay )
     ))throw new Error("can't convert ot CborObj using 'poolRelayToCborObj' if the input is not a 'PoolRelay'")

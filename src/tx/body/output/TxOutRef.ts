@@ -9,7 +9,7 @@ import { ToJson } from "../../../utils/ToJson";
 import { assert } from "../../../utils/assert";
 import { lexCompare } from "@harmoniclabs/uint8array-utils";
 import { ToDataVersion } from "../../../toData/defaultToDataVersion";
-import { getSubCborRef } from "../../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
 import { isHex } from "../../../utils/hex";
 
 export type TxOutRefStr = `${string}#${number}`;
@@ -76,22 +76,17 @@ export class TxOutRef
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
+        if(!(
             (typeof id === "string" && isHex( id ) && (id.length === 64)) ||
-            (id instanceof Hash32),
-            "tx output id (tx hash) invalid while constructing a 'UTxO'"
-        );
+            (id instanceof Hash32)           
+        ))throw new Error("tx output id (tx hash) invalid while constructing a 'UTxO'")
+        
+        this.id = id instanceof Hash32 ? id : new Hash32( id )
 
-        defineReadOnlyProperty(
-            this,
-            "id",
-            id instanceof Hash32 ? id : new Hash32( id )
-        );
-        defineReadOnlyProperty(
-            this,
-            "index",
-            Number( forceBigUInt( index ) )
-        );
+        this.index = Number( forceBigUInt( index ));
+
+        /* TO DO: done is passing these as an object since alreadt decl;ared ok or re do it so its more uniform with the others? */
+        this.cborRef = cborRef ?? subCborRefOrUndef( { id, index } );
     }
 
     toString(): TxOutRefStr
