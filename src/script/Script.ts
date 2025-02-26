@@ -5,7 +5,7 @@ import { Hash28 } from "../hashes";
 import { NativeScript, nativeScriptToCbor, nativeScriptFromCbor } from "./NativeScript";
 import { defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
 import { assert } from "../utils/assert";
-import { getSubCborRef } from "../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../utils/getSubCborRef";
 
 export enum ScriptType {
     NativeScript = "NativeScript",
@@ -46,19 +46,14 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
+        if(!(
             scriptType === ScriptType.NativeScript  ||
             scriptType === ScriptType.PlutusV1      ||
             scriptType === ScriptType.PlutusV2      ||
-            scriptType === ScriptType.PlutusV3,
-            "invalid 'scriptType'"
-        );
+            scriptType === ScriptType.PlutusV3
+        ))throw new Error("invalid 'scriptType'")
+        this.type = scriptType;
 
-        defineReadOnlyProperty(
-            this,
-            "type",
-            scriptType
-        );
 
         if( !( bytes instanceof Uint8Array ) )
         {
@@ -101,11 +96,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
             catch {}
         }
 
-        defineReadOnlyProperty(
-            this,
-            "bytes",
-            bytes
-        );
+        this.bytes = bytes;
 
         defineReadOnlyProperty(
             this,
@@ -164,6 +155,8 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
                 configurable: false
             }
         )
+        /* TO DO cborRef Change the arguments and create an IScript */
+        this.cborRef = cborRef ?? subCborRefOrUndef( this );
     }
 
     clone(): Script<T>

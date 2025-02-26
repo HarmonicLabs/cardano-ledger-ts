@@ -373,11 +373,7 @@ export class TxBody
         {
             if( votingProcedures instanceof VotingProcedures )
             {
-                defineReadOnlyProperty(
-                    this,
-                    "votingProcedures",
-                    votingProcedures
-                );
+                this.votingProcedures = votingProcedures;
             }
             else
             {
@@ -391,11 +387,7 @@ export class TxBody
 
             }
         }
-        else defineReadOnlyProperty(
-            this,
-            "votingProcedures",
-            undefined
-        );
+        else this.votingProcedures = undefined
 
         // -------------------------------------- proposalProcedures -------------------------------------- //
 

@@ -7,7 +7,7 @@ import { IValue, isIValue, getEmptyNameQty, getNameQty, IValueAdaEntry, IValueAs
 import { assert } from "../../utils/assert";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { ToDataVersion } from "../../toData/defaultToDataVersion";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 const enum Ord {
     LT = -1,
@@ -50,10 +50,10 @@ export class Value
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
-            isIValue( map ),
-            "invalid value interface passed to contruct a 'value' instance"
-        );
+        if(!(
+            isIValue( map )
+        ))throw new Error("invalid value interface passed to contruct a 'value' instance");
+
 
         const _map = normalizeIValue( map );
 
@@ -92,11 +92,15 @@ export class Value
             return lexCompare( a.policy.toBuffer(), b.policy.toBuffer() );
         });
 
+        this.map = _map;
         defineReadOnlyProperty(
             this,
             "map",
             Object.freeze( _map )
         );
+        
+        /* TO DO cborRef Change the arguments and create an IValue */
+        this.cborRef = cborRef ?? subCborRefOrUndef( this );        
     }
 
     get lovelaces(): bigint

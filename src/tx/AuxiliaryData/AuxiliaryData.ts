@@ -8,7 +8,7 @@ import { TxMetadata } from "../metadata";
 import { hasOwn, defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
 import { assert } from "../../utils/assert";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 export interface IAuxiliaryData {
     metadata?: TxMetadata;
@@ -39,10 +39,9 @@ export class AuxiliaryData
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
-            hasOwn( auxData, "metadata" ),
-            "'AuxiliaryData' is missing 'metadata' field"
-        );
+        if(!(
+            hasOwn( auxData, "metadata" )
+        ))throw new Error("'AuxiliaryData' is missing 'metadata' field");
 
         const {
             metadata,
@@ -52,41 +51,40 @@ export class AuxiliaryData
         } = auxData;
 
         // -------------------------------- native scripts -------------------------------- //
-        assert(
-            metadata === undefined || metadata instanceof TxMetadata,
-            "'AuxiliaryData' :: 'metadata' field was not instance of 'TxMetadata'"
-        );
-        defineReadOnlyProperty(
-            this,
-            "metadata",
-            metadata
-        );
+        if(!(
+            metadata === undefined || 
+            metadata instanceof TxMetadata
+        ))throw new Error("'AuxiliaryData' :: 'metadata' field was not instance of 'TxMetadata'");
+        this.metadata = metadata
+        
 
         // -------------------------------- native scripts -------------------------------- //
         if( nativeScripts !== undefined )
         {
-            assert(
+            if(!(
                 Array.isArray( nativeScripts ) &&
                 nativeScripts.every( script => {
-
                     return true;
-                }),
-                "invalid nativeScripts field"
+                })
+            ))throw new Error("invalid nativeScripts field");
+            
+            this.nativeScripts = nativeScripts?.map( nativeScript =>
+                nativeScript instanceof Script
+                    ? nativeScript :
+                    new Script( ScriptType.NativeScript, nativeScript )
+                    
             );
-
+            /*
             defineReadOnlyProperty(
                 this,
                 "nativeScripts",
                 nativeScripts.length === 0 ? undefined : Object.freeze( nativeScripts )
             );
+            */
         }
         else
         {
-            defineReadOnlyProperty(
-                this,
-                "nativeScripts",
-                undefined
-            );
+            this.nativeScripts = undefined;
         }
 
         // -------------------------------- plutus v1 -------------------------------- //
@@ -101,11 +99,18 @@ export class AuxiliaryData
                 "invalid plutusV1Scripts field"
             );
 
+            this.plutusV1Scripts = plutusV1Scripts?.map( plutusScript =>
+                plutusScript instanceof Script
+                    ? plutusScript :
+                    new Script( ScriptType.PlutusV1, plutusScript )
+            )
+            /*
             defineReadOnlyProperty(
                 this,
                 "plutusV1Scripts",
                 plutusV1Scripts.length === 0 ? undefined : Object.freeze( plutusV1Scripts )
             );
+            */
         }
         else
         {
@@ -144,6 +149,7 @@ export class AuxiliaryData
         }
 
         // --------- hash ---- //
+        /* TO DO  definePropertyIfNotPresent see example from video */
         let _hash: AuxiliaryDataHash = undefined as any;
         definePropertyIfNotPresent(
             this, "hash",
@@ -165,7 +171,7 @@ export class AuxiliaryData
             }
         );
 
-
+        this.cborRef = cborRef ?? subCborRefOrUndef( auxData );
     }
     
     toCborBytes(): Uint8Array

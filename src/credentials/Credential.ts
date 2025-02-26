@@ -62,7 +62,7 @@ export class Credential<T extends CredentialType = CredentialType>
                 ? hash
                 : new ValidatorHash(new Hash28(hash).toBuffer())
         );
-    /* TO DO: cborRef Change the arguments and create an ICredential */
+        /* TO DO: cborRef Change the arguments and create an ICredential */
         this.cborRef = cborRef ?? subCborRefOrUndef( this );
     }
 

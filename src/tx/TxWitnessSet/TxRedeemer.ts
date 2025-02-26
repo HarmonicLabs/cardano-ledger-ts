@@ -126,6 +126,7 @@ export class TxRedeemer
 
         let _exUnits = execUnits.clone();
 
+        /* TO DO: ask about optimizing definePropertyIfNotPresent */
         definePropertyIfNotPresent(
             this,
             "execUnits",

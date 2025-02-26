@@ -8,7 +8,7 @@ import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 import { VKey } from "./VKey";
 import { assert } from "../../../utils/assert";
-import { getSubCborRef } from "../../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
 
 export class VKeyWitness
     implements ToCbor, Cloneable<VKeyWitness>, ToJson
@@ -22,25 +22,18 @@ export class VKeyWitness
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
-            vkey instanceof Hash32,
-            "can't construct 'VKeyWitness' without a 'VKey' as first argument"
-        );
-        defineReadOnlyProperty(
-            this,
-            "vkey",
-            vkey
-        );
+        if(!(
+            vkey instanceof Hash32
+        ))throw new Error("can't construct 'VKeyWitness' without a 'VKey' as first argument");
+        this.vkey = new VKey( vkey )
 
-        assert(
-            signature instanceof Signature,
-            "can't construct 'VKeyWitness' without a 'Signature' as second argument"
-        );
-        defineReadOnlyProperty(
-            this,
-            "signature",
-            signature
-        );
+        if(!(
+            signature instanceof Signature
+        ))throw new Error("can't construct 'VKeyWitness' without a 'Signature' as second argument");
+
+        this.signature = signature;
+        /* TO DO: cborRef Change the arguments and create an IVKeyWitness */
+        this.cborRef = cborRef ?? subCborRefOrUndef( this );
     }
 
     clone(): VKeyWitness

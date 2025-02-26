@@ -11,7 +11,7 @@ import { BootstrapWitness } from "./BootstrapWitness";
 import { TxRedeemer } from "./TxRedeemer";
 import { VKeyWitness } from "./VKeyWitness";
 import { getCborSet, isCborSet } from "../../utils/getCborSet";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 
 export interface ITxWitnessSet {
@@ -120,10 +120,10 @@ export class TxWitnessSet
         allRequiredSigners: Hash28[] | undefined = undefined,
     )
     {
-        assert(
-            isITxWitnessSet( witnesses ),
-            "invalid witnesses passed"
-        );
+        if(!(
+            isITxWitnessSet( witnesses )
+        )) throw new Error("invalid witnesses passed");
+
 
         const defGetter = ( name: keyof ITxWitnessSet, get: () => any ) =>
         {
@@ -197,19 +197,11 @@ export class TxWitnessSet
             }
         );
 
-        defineReadOnlyProperty(
-            this, "addVKeyWitness",
-            ( vkeyWit: VKeyWitness ) => {
-                // if(
-                //     noRequiredSigs ||
-                //     _reqSigs.includes( vkeyWit.vkey.hash.toString() )
-                // )
-                // {
-                //     _vkeyWits.push( vkeyWit.clone() );
-                // }
-                _vkeyWits.push( vkeyWit.clone() );
-            }
-        )
+        this.addVKeyWitness = ( vkeyWit: VKeyWitness ) => {_vkeyWits.push( vkeyWit.clone() );
+        }
+
+        /* TO DO: cborRef Change the arguments and create an IVKeyWitness */
+        this.cborRef = cborRef ?? subCborRefOrUndef( this );
     }
 
     toJSON() { return this.toJson(); }
