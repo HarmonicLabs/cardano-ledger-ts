@@ -74,10 +74,9 @@ export class TxWithdrawals
         network: NetworkT = "mainnet"
     )
     {
-        assert(
-            isITxWithdrawals( map ),
-            "invalid 'ITxWithdrawalsMap' passed to construct a 'TxWithdrawals'"
-        );
+        if(!(
+            isITxWithdrawals( map )
+        ))throw new Error("invalid 'ITxWithdrawalsMap' passed to construct a 'TxWithdrawals'")
 
         if( Array.isArray( map ) )
         {
@@ -91,31 +90,26 @@ export class TxWithdrawals
                         ),
                 amount: forceBigUInt( entry.amount )
             }));
-
+            this.map = _map
+            /*
             defineReadOnlyProperty(
                 this,
                 "map",
                 Object.freeze( _map )
             );
+            */
         }
         else
         {
-            assert(
-                typeof map === "object",
-                "invalid object passed as 'ITxWithdrawalsMap' to construct a 'TxWithdrawals'"
-            );
+            if(!(
+                typeof map === "object"
+            ))throw new Error("invalid object passed as 'ITxWithdrawalsMap' to construct a 'TxWithdrawals'")
 
-            defineReadOnlyProperty(
-                this,
-                "map",
-                Object.freeze(
-                    Object.keys( map )
-                    .map( rewAccount => Object.freeze({
-                        rewardAccount: StakeAddress.fromString( rewAccount ),
-                        amount: forceBigUInt( (map as any)[rewAccount] )
-                    }))
-                )
-            );
+            this.map = Object.keys( map )
+            .map( rewAccount => Object.freeze({
+                rewardAccount: StakeAddress.fromString( rewAccount ),
+                amount: forceBigUInt( (map as any)[rewAccount] )
+            }))
         }
     }
 

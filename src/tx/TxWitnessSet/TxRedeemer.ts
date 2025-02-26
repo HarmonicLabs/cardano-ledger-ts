@@ -8,7 +8,7 @@ import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
 import { assert } from "../../utils/assert";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../utils/ints";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 export enum TxRedeemerTag {
     Spend       = 0,
@@ -87,14 +87,13 @@ export class TxRedeemer
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
+        if(!(
             isObject( redeemer ) &&
             hasOwn( redeemer, "tag" ) &&
             hasOwn( redeemer, "index" ) &&
             hasOwn( redeemer, "data" ) &&
-            hasOwn( redeemer, "execUnits" ),
-            "invalid object passed to construct a 'TxRedeemer'"
-        );
+            hasOwn( redeemer, "execUnits" )
+        ))throw new Error( "invalid object passed to construct a 'TxRedeemer'");
 
         const {
             tag,
@@ -103,40 +102,27 @@ export class TxRedeemer
             execUnits
         } = redeemer;
 
-        assert(
-            tag === 0 || tag === 1 || tag === 2 || tag === 3,
-            "invalid redeemer tag"
-        );
-        defineReadOnlyProperty(
-            this,
-            "tag",
-            tag
-        );
+        if(!(
+            tag === 0 || 
+            tag === 1 || 
+            tag === 2 || 
+            tag === 3
+        ))throw new Error("invalid redeemer tag");
+        this.tag = tag;
 
-        assert(
-            canBeUInteger( index ),
-            "invlaid redeemer index"
-        );
-        defineReadOnlyProperty(
-            this,
-            "index",
-            Number( forceBigUInt( index ) )
-        );
+        if(!(
+            canBeUInteger( index )
+        ))throw new Error("invlaid redeemer index");
+        this.index = Number( forceBigUInt( index ) );
 
-        assert(
-            isData( data ),
-            "redeemer's data was not 'Data'"
-        );
-        defineReadOnlyProperty(
-            this,
-            "data",
-            data
-        );
+        if(!(
+            isData( data )
+        ))throw new Error("redeemer's data was not 'Data'");
+        this.data = data;
 
-        assert(
-            execUnits instanceof ExBudget,
-            "invalid 'execUnits' constructing 'TxRedeemer'"
-        );
+        if(!( 
+            execUnits instanceof ExBudget
+         ))throw new Error("invalid 'execUnits' constructing 'TxRedeemer'");
 
         let _exUnits = execUnits.clone();
 
@@ -156,6 +142,7 @@ export class TxRedeemer
                 configurable: false
             }
         );
+        this.cborRef = cborRef ?? subCborRefOrUndef( redeemer );
     }
 
     clone(): TxRedeemer

@@ -136,11 +136,11 @@ export function isPoolRelay<T extends object>( something: T ): something is (T &
 
 export function poolRelayToCborObj( poolRelay: PoolRelay ): CborObj
 {
-    assert(
-        isPoolRelay( poolRelay ),
-        "can't convert ot CborObj using 'poolRelayToCborObj' if the input is not a 'PoolRelay'"
-    );
-
+    /* TO DO: ask if this needs cborRef */
+    if(!(
+        isPoolRelay( poolRelay )
+    ))throw new Error("can't convert ot CborObj using 'poolRelayToCborObj' if the input is not a 'PoolRelay'")
+    
     const type = poolRelay.type;
 
     if( type === "ip" )
