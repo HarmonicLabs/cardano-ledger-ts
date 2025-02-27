@@ -34,7 +34,7 @@ const _0n = BigInt( 0 );
 export class Value
     implements ToCbor, ToData
 {
-    readonly map!: NormalizedIValue
+    readonly map!: Readonly<NormalizedIValue>
 
     *[Symbol.iterator]()
     {
@@ -50,6 +50,7 @@ export class Value
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
+        
         if(!(
             isIValue( map )
         ))throw new Error("invalid value interface passed to contruct a 'value' instance");
@@ -92,12 +93,8 @@ export class Value
             return lexCompare( a.policy.toBuffer(), b.policy.toBuffer() );
         });
 
-        this.map = _map;
-        defineReadOnlyProperty(
-            this,
-            "map",
-            Object.freeze( _map )
-        );
+        this.map = Object.freeze( _map );
+
         
         /* TO DO cborRef Change the arguments and create an IValue */
         this.cborRef = cborRef ?? subCborRefOrUndef( this );        
@@ -277,17 +274,17 @@ export class Value
 
     static add( a: Value, b: Value ): Value
     {
-        return new Value( addIValues( a.map, b.map ) );
+        return new Value( addIValues( a.map as IValue, b.map as IValue ) );
     }
 
     static sub( a: Value, b: Value ): Value
     {
-        return new Value( subIValues( a.map, b.map ) );
+        return new Value( subIValues( a.map as IValue, b.map as IValue ) );
     }
 
     clone(): Value
     {
-        return new Value( cloneIValue(this.map ) )
+        return new Value( cloneIValue(this.map as IValue) )
     }
 
     toData( version?: ToDataVersion ): DataMap<DataB,DataMap<DataB,DataI>>
@@ -466,7 +463,7 @@ export class Value
     toJSON() { return this.toJson(); }
     toJson(): ValueJson
     {
-        return IValueToJson( this.map );
+        return IValueToJson( this.map as IValue  );
     }
 
     /**

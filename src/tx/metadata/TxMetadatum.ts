@@ -4,7 +4,7 @@ import { fromHex, isUint8Array, toHex } from "@harmoniclabs/uint8array-utils";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
 import { assert } from "../../utils/assert";
-
+import { subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 export type TxMetadatum
     = TxMetadatumMap
@@ -76,7 +76,7 @@ function isTxMetadatumMapEntry( something: any ): something is TxMetadatumMapEnt
 export class TxMetadatumMap
     implements ToCbor, ToJson
 {
-    readonly map!: TxMetadatumMapEntry[];
+    readonly map!: Readonly<TxMetadatumMapEntry[]>;
 
     constructor(
         map: TxMetadatumMapEntry[],
@@ -87,14 +87,10 @@ export class TxMetadatumMap
             map.every( isTxMetadatumMapEntry )
         ))throw new Error("invalid entries for TxMetadatumMap");
 
-        /* TO DO: double check about Object.freeze */
-        this.map = map
-        
-        defineReadOnlyProperty(
-            this,
-            "map",
-            Object.freeze( map )
-        );
+        this.map = Object.freeze( map );
+
+        /* TO DO: thios.cborref params */
+        this.cborRef = cborRef ?? subCborRefOrUndef( this );
     }
 
     toCborBytes(): Uint8Array
@@ -146,23 +142,21 @@ export class TxMetadatumMap
 export class TxMetadatumList
     implements ToCbor, ToJson
 {
-    readonly list!: TxMetadatum[];
+    readonly list!: Readonly<TxMetadatum[]>;
 
     constructor(
         map: TxMetadatum[],
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
-            map.every( isTxMetadatum ),
-            "invalid entries for TxMetadatumList"
-        );
+        if(!(
+            map.every( isTxMetadatum )
+        ))throw new Error("invalid entries for TxMetadatumList");
+        
+        this.list = Object.freeze( map );
 
-        defineReadOnlyProperty(
-            this,
-            "list",
-            Object.freeze( map )
-        );
+        /* TO DO: thios.cborref params */
+        this.cborRef = cborRef ?? subCborRefOrUndef( this );        
     }
 
     toCborBytes(): Uint8Array
@@ -250,6 +244,7 @@ export class TxMetadatumInt
     }
 }
 
+/* TO DO : ask if even no changes to assert do I still need to add: this.cborRef = cborRef ?? subCborRefOrUndef( tx ); */
 export class TxMetadatumBytes
     implements ToCbor, ToJson
 {
@@ -323,16 +318,12 @@ export class TxMetadatumText
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
-            typeof text === "string",
-            "invalid text"
-        );
+        if(!(
+            typeof text === "string"
+        ))throw new Error("invalid text");
 
-        defineReadOnlyProperty(
-            this,
-            "text",
-            text
-        );
+        this.text = text;
+    /* TO DO: this.cboRef params eg: this.cborRef = cborRef ?? subCborRefOrUndef( tx ); */
     }
 
     toCborBytes(): Uint8Array

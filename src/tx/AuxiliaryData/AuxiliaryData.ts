@@ -15,6 +15,7 @@ export interface IAuxiliaryData {
     nativeScripts?: (NativeScript | Script<ScriptType.NativeScript>)[];
     plutusV1Scripts?: (PlutusScriptJsonFormat<ScriptType.PlutusV1 | "PlutusScriptV1"> | Script<ScriptType.PlutusV1>)[];
     plutusV2Scripts?: (PlutusScriptJsonFormat<ScriptType.PlutusV2 | "PlutusScriptV2"> | Script<ScriptType.PlutusV2>)[];
+    plutusV3Scripts?: (PlutusScriptJsonFormat<ScriptType.PlutusV3 | "PlutusScriptV2"> | Script<ScriptType.PlutusV3>)[];
 }
 
 function scriptArrToCbor( scripts: Script[] ): CborArray
@@ -31,6 +32,7 @@ export class AuxiliaryData
     readonly nativeScripts?: Script<ScriptType.NativeScript>[];
     readonly plutusV1Scripts?: Script<ScriptType.PlutusV1>[];
     readonly plutusV2Scripts?: Script<ScriptType.PlutusV2>[];
+    readonly plutusV3Scripts?: Script<ScriptType.PlutusV3>[];
 
     readonly hash!: AuxiliaryDataHash
 
@@ -47,7 +49,8 @@ export class AuxiliaryData
             metadata,
             nativeScripts,
             plutusV1Scripts,
-            plutusV2Scripts
+            plutusV2Scripts,
+            plutusV3Scripts
         } = auxData;
 
         // -------------------------------- native scripts -------------------------------- //
@@ -75,13 +78,6 @@ export class AuxiliaryData
                     new Script( ScriptType.NativeScript, nativeScript )
                     
             );
-            /*
-            defineReadOnlyProperty(
-                this,
-                "nativeScripts",
-                nativeScripts.length === 0 ? undefined : Object.freeze( nativeScripts )
-            );
-            */
         }
         else
         {
@@ -103,13 +99,6 @@ export class AuxiliaryData
                     ? plutusScript :
                     new Script( ScriptType.PlutusV1, plutusScript )
             )
-            /*
-            defineReadOnlyProperty(
-                this,
-                "plutusV1Scripts",
-                plutusV1Scripts.length === 0 ? undefined : Object.freeze( plutusV1Scripts )
-            );
-            */
         }
         else
         {
@@ -120,24 +109,43 @@ export class AuxiliaryData
         if( plutusV2Scripts !== undefined )
         {
             if(!(
-
                 Array.isArray( plutusV2Scripts ) &&
                 plutusV2Scripts.every( script => {
                     return true;
                 })
             ))throw new Error("invalid plutusV2Scripts field");
 
-            defineReadOnlyProperty(
-                this,
-                "plutusV2Scripts",
-                plutusV2Scripts.length === 0 ? undefined : Object.freeze( plutusV2Scripts )
-            );
+            this.plutusV2Scripts = plutusV2Scripts?.map( plutusScript =>
+                plutusScript instanceof Script
+                    ? plutusScript :
+                    new Script( ScriptType.PlutusV2, plutusScript )
+            )
         }
         else
         {
             this.plutusV2Scripts = undefined;
         }
-
+        // -------------------------------- plutus v3 -------------------------------- //
+        if( plutusV3Scripts !== undefined )
+            {
+                if(!(
+                    Array.isArray( plutusV3Scripts ) &&
+                    plutusV3Scripts.every( script => {
+                        return true;
+                    })
+                ))throw new Error("invalid plutusV3Scripts field");
+    
+                this.plutusV3Scripts = plutusV3Scripts?.map( plutusScript =>
+                    plutusScript instanceof Script
+                        ? plutusScript :
+                        new Script( ScriptType.PlutusV3, plutusScript )
+                )
+            }
+            else
+            {
+                this.plutusV3Scripts = undefined;
+            }
+            
         // --------- hash ---- //
         /* TO DO  definePropertyIfNotPresent see example from video */
         let _hash: AuxiliaryDataHash = undefined as any;
