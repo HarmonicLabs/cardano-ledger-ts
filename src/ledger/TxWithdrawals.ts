@@ -66,7 +66,7 @@ export function isITxWithdrawals( stuff: any ): stuff is ITxWithdrawals
 export class TxWithdrawals
     implements ToCbor, ToData
 {
-    readonly map!: TxWithdrawalsMapBigInt
+    readonly map!: Readonly<TxWithdrawalsMapBigInt>
 
     constructor(
         map: ITxWithdrawals,
@@ -90,14 +90,8 @@ export class TxWithdrawals
                         ),
                 amount: forceBigUInt( entry.amount )
             }));
-            this.map = _map
-            /*
-            defineReadOnlyProperty(
-                this,
-                "map",
-                Object.freeze( _map )
-            );
-            */
+            this.map =  Object.freeze(_map)
+
         }
         else
         {
