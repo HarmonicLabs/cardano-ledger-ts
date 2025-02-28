@@ -200,7 +200,7 @@ export class TxWitnessSet
         this.addVKeyWitness = ( vkeyWit: VKeyWitness ) => {_vkeyWits.push( vkeyWit.clone() );
         }
 
-        /* TO DO: cborRef Change the arguments and create an IVKeyWitness */
+        /* TO DO: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef( this );
     }
 

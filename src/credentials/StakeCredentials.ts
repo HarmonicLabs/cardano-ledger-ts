@@ -113,7 +113,7 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
                     ( hash instanceof StakeValidatorHash ? hash : new StakeValidatorHash( hash.toBuffer() ) )
             )
         }
-        /* TO DO: Change the arguments and create an IStakeCredential? */
+         /* TO DO: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef( this );
     }
 

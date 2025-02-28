@@ -55,7 +55,6 @@ export class TxOut
             hasOwn( txOutput, "value" )
         )) throw new Error("txOutput is missing some necessary fields");
 
-        /* TO DO as if change this to const */
         let {
             address,
             value,

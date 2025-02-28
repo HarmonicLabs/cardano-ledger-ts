@@ -142,6 +142,7 @@ export function isPoolRelay<T extends object>( something: T ): something is (T &
 export function poolRelayToCborObj( poolRelay: PoolRelay ): CborObj
 {
     /* TO DO: ask if this needs cborRef  */
+    /* TO DO: It would make sense to make IpPoolRelay DnsPoolRelay and MultiHostPoolRelay calsses */
     if(!(
         isPoolRelay( poolRelay )
     ))throw new Error("can't convert ot CborObj using 'poolRelayToCborObj' if the input is not a 'PoolRelay'")

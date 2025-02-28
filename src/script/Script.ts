@@ -155,7 +155,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
                 configurable: false
             }
         )
-        /* TO DO cborRef Change the arguments and create an IScript */
+         /* TO DO: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef( this );
     }
 

@@ -32,7 +32,8 @@ export class VKeyWitness
         ))throw new Error("can't construct 'VKeyWitness' without a 'Signature' as second argument");
 
         this.signature = signature;
-        /* TO DO: cborRef Change the arguments and create an IVKeyWitness */
+        
+        /* TO DO: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef( this );
     }
 

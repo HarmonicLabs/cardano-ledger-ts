@@ -62,7 +62,6 @@ export class AuxiliaryData
         
 
         // -------------------------------- native scripts -------------------------------- //
-        /* TO DO  wait for reply from Michele*/
         if( nativeScripts !== undefined )
         {
             if(!(

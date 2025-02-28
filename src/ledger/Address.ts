@@ -113,7 +113,7 @@ export class Address
 
         this.stakeCreds = stakeCreds?.clone()
 
-        /* TO DO: Change the arguments and create an ? */
+        /* TO DO: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef( this );
     }   
 

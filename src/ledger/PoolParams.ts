@@ -171,7 +171,6 @@ export class PoolParams
 
         this.metadata = metadata === undefined ? undefined : typedPoolParamsMetadata( metadata )
         
-        /* TO DO: Ask about this */
         this.cborRef = cborRef ?? subCborRefOrUndef( params );
         
     }

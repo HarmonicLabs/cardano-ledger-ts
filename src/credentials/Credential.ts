@@ -16,19 +16,29 @@ export enum CredentialType {
 
 Object.freeze(CredentialType);
 
+export interface ICredentials {
+    type: CredentialType, 
+    hash: CanBeHash28, 
+}
+
+
 export class Credential<T extends CredentialType = CredentialType> 
-    implements ToCbor, ToData, Cloneable<Credential<T>> 
+    implements ICredentials, ToCbor, ToData, Cloneable<Credential<T>> 
 {
     readonly type!: T;
     readonly hash!: T extends CredentialType.KeyHash ? PubKeyHash : ValidatorHash;
 
 
     constructor(
-        type: T, 
-        hash: CanBeHash28, 
+        credential: ICredentials,
+        // type: T, 
+        // hash: CanBeHash28, 
         readonly cborRef: SubCborRef | undefined = undefined
     ) 
     {
+
+        const { type, hash } = credential;
+
         if (!(
             canBeHash28(hash)
         )) throw new Error("can't construct 'Credential'; hash must be instance of an 'Hash28'");
@@ -42,7 +52,7 @@ export class Credential<T extends CredentialType = CredentialType>
         this.type = type;
 
         /* TODO: come back to this */
-        /*
+        
         this.hash = type === CredentialType.KeyHash
             ? hash instanceof PubKeyHash
                 ? hash
@@ -50,7 +60,7 @@ export class Credential<T extends CredentialType = CredentialType>
             : hash instanceof ValidatorHash
                 ? hash
                 : new ValidatorHash( new Hash28( hash ).toBuffer() );
-        */
+        /*   
         defineReadOnlyProperty(
             this,
             "hash",
@@ -62,7 +72,9 @@ export class Credential<T extends CredentialType = CredentialType>
                 ? hash
                 : new ValidatorHash(new Hash28(hash).toBuffer())
         );
-        /* TO DO: cborRef Change the arguments and create an ICredential */
+        */
+
+         /* TO DO: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef( this );
     }
 

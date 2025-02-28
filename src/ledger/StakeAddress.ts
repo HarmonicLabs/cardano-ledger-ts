@@ -23,14 +23,21 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType> {
     readonly type!: T;
     readonly credentials!: StakeAddressCredentials<T>;
 
-    constructor(network: NetworkT, credentials: Hash28, type?: T) {
-        const t =
-            this.type === undefined ? (credentials instanceof StakeValidatorHash ? "script" : "stakeKey") : this.type;
+    constructor(
+        network: NetworkT, 
+        credentials: Hash28, 
+        type?: T
+    ) 
+    {
+        const t = this.type === undefined ? (credentials instanceof StakeValidatorHash ? "script" : "stakeKey") : this.type;
 
-        if (!(t === "script" || t === "stakeKey")) throw new Error("invalid address type");
+        if(!(
+            t === "script" || 
+            t === "stakeKey"
+        ))throw new Error("invalid address type");
 
         
-        /* TO DO: Change the arguments and create an ? */
+        /* TO DO: */
         // this.type = type;
         defineReadOnlyProperty(this, "type", type);
 
@@ -38,18 +45,17 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType> {
 
         this.network = network;
 
-        if (
-            !(
-                credentials instanceof Hash28 &&
-                ((t === "stakeKey" && !(credentials instanceof StakeValidatorHash)) ||
-                    (t === "script" && !(credentials instanceof StakeKeyHash)))
+        if(!(
+            credentials instanceof Hash28 &&
+            (
+                (t === "stakeKey" && !(credentials instanceof StakeValidatorHash)) ||
+                (t === "script" && !(credentials instanceof StakeKeyHash))
             )
-        )
-            throw new Error("invalid stake credentials");
+        )) throw new Error("invalid stake credentials");
 
         this.credentials = t === "stakeKey" ? new StakeKeyHash(credentials) : new StakeValidatorHash(credentials);
 
-        /* TO DO: Change the arguments and create an ? */
+        /* TO DO: this.cboRref params */
         // this.cborRef = cborRef ?? subCborRefOrUndef(this);
     }
 

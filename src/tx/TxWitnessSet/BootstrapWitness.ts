@@ -56,7 +56,6 @@ export class BootstrapWitness
         ))throw new Error("invalid 'attributes' constructing 'BootstrapWitness'");
         this.attributes = Uint8Array.from( attributes );
 
-        /* TO DO: done */
         this.cborRef = cborRef ?? subCborRefOrUndef( witness );
     }
 
