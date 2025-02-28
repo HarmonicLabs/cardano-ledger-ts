@@ -16,29 +16,19 @@ export enum CredentialType {
 
 Object.freeze(CredentialType);
 
-export interface ICredentials {
-    type: CredentialType, 
-    hash: CanBeHash28, 
-}
-
-
 export class Credential<T extends CredentialType = CredentialType> 
-    implements ICredentials, ToCbor, ToData, Cloneable<Credential<T>> 
+    implements ToCbor, ToData, Cloneable<Credential<T>> 
 {
     readonly type!: T;
     readonly hash!: T extends CredentialType.KeyHash ? PubKeyHash : ValidatorHash;
 
 
     constructor(
-        credential: ICredentials,
-        // type: T, 
-        // hash: CanBeHash28, 
+        type: T, 
+        hash: CanBeHash28,
         readonly cborRef: SubCborRef | undefined = undefined
     ) 
     {
-
-        const { type, hash } = credential;
-
         if (!(
             canBeHash28(hash)
         )) throw new Error("can't construct 'Credential'; hash must be instance of an 'Hash28'");
@@ -48,34 +38,24 @@ export class Credential<T extends CredentialType = CredentialType>
             type === CredentialType.Script
         ))throw new Error("can't construct 'Credential'; specified type is nor 'key hash' nor 'script'");
 
-        
+      
+        /* TODO: come back to this */
         this.type = type;
 
-        /* TODO: come back to this */
-        
-        this.hash = type === CredentialType.KeyHash
-            ? hash instanceof PubKeyHash
-                ? hash
-                : new PubKeyHash( new Hash28( hash ).toBuffer() )
-            : hash instanceof ValidatorHash
-                ? hash
-                : new ValidatorHash( new Hash28( hash ).toBuffer() );
-        /*   
+        this.hash = type === CredentialType.KeyHash ? 
+            ( hash instanceof PubKeyHash ? hash : new PubKeyHash( new Hash28( hash ).toBuffer() ) ) :
+            ( hash instanceof ValidatorHash ? hash : new ValidatorHash( new Hash28( hash ).toBuffer() ) )
+
         defineReadOnlyProperty(
             this,
             "hash",
-            type === CredentialType.KeyHash
-                ? hash instanceof PubKeyHash
-                    ? hash
-                    : new PubKeyHash(new Hash28(hash).toBuffer())
-                : hash instanceof ValidatorHash
-                ? hash
-                : new ValidatorHash(new Hash28(hash).toBuffer())
+            type === CredentialType.KeyHash ? 
+                ( hash instanceof PubKeyHash ? hash : new PubKeyHash( new Hash28( hash ).toBuffer() ) ) :
+                ( hash instanceof ValidatorHash ? hash : new ValidatorHash( new Hash28( hash ).toBuffer() ) )
         );
-        */
-
+        
          /* TO DO: this.cboRref params */
-        this.cborRef = cborRef ?? subCborRefOrUndef( this );
+        // this.cborRef = cborRef ?? subCborRefOrUndef( this );
     }
 
     clone(): Credential<T> {
