@@ -109,7 +109,7 @@ export function isIpPoolRelay( something: any ): something is IpPoolRelay
     );
 }
 
-export function isDnsPoolRelay<T extends object>( something: T ): something is (T & DnsPoolRelay)
+export function isDnsPoolRelay( something: any ): something is  DnsPoolRelay
 {
     return (
         minimumPoolRelayCheck( something ) &&
@@ -120,7 +120,7 @@ export function isDnsPoolRelay<T extends object>( something: T ): something is (
     );
 }
 
-export function isMultiHostPoolRelay<T extends object>( something: T ): something is (T & MultiHostPoolRelay)
+export function isMultiHostPoolRelay( something: any ): something is MultiHostPoolRelay
 {
     return (
         minimumPoolRelayCheck( something ) &&
@@ -130,7 +130,7 @@ export function isMultiHostPoolRelay<T extends object>( something: T ): somethin
     );
 }
 
-export function isPoolRelay<T extends object>( something: T ): something is (T & PoolRelay)
+export function isPoolRelay( something: any ): something is PoolRelay
 {
     return (
         isIpPoolRelay( something )        ||
@@ -142,7 +142,7 @@ export function isPoolRelay<T extends object>( something: T ): something is (T &
 export function poolRelayToCborObj( poolRelay: PoolRelay ): CborObj
 {
     /* TO DO: ask if this needs cborRef  */
-    /* TO DO: It would make sense to make IpPoolRelay DnsPoolRelay and MultiHostPoolRelay calsses */
+    /* TO DO: It would make sense to make IpPoolRelay, DnsPoolRelay, and MultiHostPoolRelay calsses */
     if(!(
         isPoolRelay( poolRelay )
     ))throw new Error("can't convert ot CborObj using 'poolRelayToCborObj' if the input is not a 'PoolRelay'")

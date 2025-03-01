@@ -17,7 +17,7 @@ export class Signature extends Hash
         ))throw new Error("'Signature' must be an hash of length 64");
 
          /* TO DO: this.cboRref params */
-        this.cborRef = cborRef ?? subCborRefOrUndef( this );
+        this.cborRef = cborRef ?? subCborRefOrUndef( bs );
     }
 
     clone(): Signature

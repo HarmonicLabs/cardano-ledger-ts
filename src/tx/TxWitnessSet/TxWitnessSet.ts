@@ -201,7 +201,7 @@ export class TxWitnessSet
         }
 
         /* TO DO: this.cboRref params */
-        this.cborRef = cborRef ?? subCborRefOrUndef( this );
+        this.cborRef = cborRef ?? subCborRefOrUndef( witnesses );
     }
 
     toJSON() { return this.toJson(); }

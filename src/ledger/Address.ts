@@ -114,7 +114,7 @@ export class Address
         this.stakeCreds = stakeCreds?.clone()
 
         /* TO DO: this.cboRref params */
-        this.cborRef = cborRef ?? subCborRefOrUndef( this );
+        this.cborRef = cborRef ?? subCborRefOrUndef({ network, paymentCreds, stakeCreds, type} );
     }   
 
     clone(): Address

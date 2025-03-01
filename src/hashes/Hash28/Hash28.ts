@@ -37,7 +37,7 @@ export class Hash28 extends Hash
         ))throw new Error("'Hash28' must be an hash of length 28");
 
          /* TO DO: this.cboRref params */
-        this.cborRef = cborRef ?? subCborRefOrUndef( this );
+        this.cborRef = cborRef ?? subCborRefOrUndef( bs );
     }
 
     valueOf(): string

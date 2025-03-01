@@ -55,7 +55,7 @@ export class Credential<T extends CredentialType = CredentialType>
         );
         
          /* TO DO: this.cboRref params */
-        // this.cborRef = cborRef ?? subCborRefOrUndef( this );
+        this.cborRef = cborRef ?? subCborRefOrUndef({ type, hash });
     }
 
     clone(): Credential<T> {

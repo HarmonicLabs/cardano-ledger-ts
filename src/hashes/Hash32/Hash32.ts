@@ -51,7 +51,7 @@ export class Hash32 extends Hash
         ))throw new Error("'Hash32' must be an hash of length 32; length was: " + this._bytes.length);
         
         /* TO DO: this.cboRref params */
-        this.cborRef = cborRef ?? subCborRefOrUndef( this );
+        this.cborRef = cborRef ?? subCborRefOrUndef( bs );
     }
 
     static fromCbor( cStr: CanBeCborString ): Hash32

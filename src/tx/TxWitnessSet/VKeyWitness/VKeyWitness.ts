@@ -34,7 +34,7 @@ export class VKeyWitness
         this.signature = signature;
         
         /* TO DO: this.cboRref params */
-        this.cborRef = cborRef ?? subCborRefOrUndef( this );
+        this.cborRef = cborRef ?? subCborRefOrUndef({ vkey, signature });
     }
 
     clone(): VKeyWitness

@@ -97,7 +97,8 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         }
 
         this.bytes = bytes;
-
+        
+        /* TO DO: find out why it's unhappy */
         defineReadOnlyProperty(
             this,
             "cbor",
@@ -113,6 +114,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
             )
         );
 
+        /* TO DO: definePropertyIfNotPresent */
         let _hash: Hash28 = undefined as any;
 
         definePropertyIfNotPresent(
@@ -156,7 +158,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
             }
         )
          /* TO DO: this.cboRref params */
-        this.cborRef = cborRef ?? subCborRefOrUndef( this );
+        this.cborRef = cborRef ?? subCborRefOrUndef( { scriptType, bytes } );
     }
 
     clone(): Script<T>

@@ -8,7 +8,9 @@ import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { assert } from "../utils/assert";
 import { fromHex } from "@harmoniclabs/uint8array-utils";
 import { Credential } from "../credentials";
-import { CanBeCborString, Cbor, CborBytes, CborObj, forceCborString } from "@harmoniclabs/cbor";
+import { CanBeCborString, Cbor, CborBytes, CborObj, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
+import { getSubCborRef, subCborRefOrUndef } from "../utils/getSubCborRef";
+
 
 export type StakeAddressBech32 = `stake1${string}` | `stake_test1${string}`;
 
@@ -26,7 +28,8 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType> {
     constructor(
         network: NetworkT, 
         credentials: Hash28, 
-        type?: T
+        type?: T,
+        readonly cborRef: SubCborRef | undefined = undefined
     ) 
     {
         const t = this.type === undefined ? (credentials instanceof StakeValidatorHash ? "script" : "stakeKey") : this.type;
@@ -56,7 +59,7 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType> {
         this.credentials = t === "stakeKey" ? new StakeKeyHash(credentials) : new StakeValidatorHash(credentials);
 
         /* TO DO: this.cboRref params */
-        // this.cborRef = cborRef ?? subCborRefOrUndef(this);
+        this.cborRef = cborRef ?? subCborRefOrUndef({ network, credentials, type });
     }
 
     clone(): StakeAddress<T> {

@@ -90,7 +90,7 @@ export class TxMetadatumMap
         this.map = Object.freeze( map );
 
         /* TO DO: this.cboRref params */
-        this.cborRef = cborRef ?? subCborRefOrUndef( this );
+        this.cborRef = cborRef ?? subCborRefOrUndef( map );
     }
 
     toCborBytes(): Uint8Array
@@ -156,7 +156,7 @@ export class TxMetadatumList
         this.list = Object.freeze( map );
 
          /* TO DO: this.cboRref params */
-        this.cborRef = cborRef ?? subCborRefOrUndef( this );        
+        this.cborRef = cborRef ?? subCborRefOrUndef( map );        
     }
 
     toCborBytes(): Uint8Array
@@ -243,8 +243,6 @@ export class TxMetadatumInt
         return { int: this.n.toString() }
     }
 }
-
-/* TO DO : ask if even no changes to assert do I still need to add: this.cborRef = cborRef ?? subCborRefOrUndef( tx ); */
 export class TxMetadatumBytes
     implements ToCbor, ToJson
 {
@@ -256,6 +254,8 @@ export class TxMetadatumBytes
     )
     {
         this.bytes = bytes instanceof Uint8Array ? bytes : fromHex( bytes );
+        /* TO DO: this.cboRref params */
+        this.cborRef = cborRef ?? subCborRefOrUndef( bytes );
     }
 
     toCborBytes(): Uint8Array

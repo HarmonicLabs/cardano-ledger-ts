@@ -88,7 +88,8 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
             type === "stakeKey" || type ==="script" || type === "pointer"
         )) throw new Error("can't construct 'Credential'; specified type is nor 'addres' nor 'script'");
 
-        defineReadOnlyProperty( this, "type", type );
+        this.type = type;
+        // defineReadOnlyProperty( this, "type", type );
 
         if( type === "pointer" )
         {
@@ -114,7 +115,7 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
             )
         }
          /* TO DO: this.cboRref params */
-        this.cborRef = cborRef ?? subCborRefOrUndef( this );
+        this.cborRef = cborRef ?? subCborRefOrUndef({ type, hash });
     }
 
     clone(): StakeCredentials<T>

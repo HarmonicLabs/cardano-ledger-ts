@@ -97,7 +97,7 @@ export class Value
 
         
         /* TO DO cborRef Change the arguments and create an IValue */
-        this.cborRef = cborRef ?? subCborRefOrUndef( this );        
+        this.cborRef = cborRef ?? subCborRefOrUndef( map );        
     }
 
     get lovelaces(): bigint
