@@ -38,7 +38,47 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
      * for standard ledger format (as defined in CDDL) use `toCbor` method
     **/
     readonly cbor!: T extends ScriptType.NativeScript ? never : CborString;
-    readonly hash!: Hash28;
+    
+    /* TO DO: definePropertyIfNotPresent */
+    // readonly hash!: Hash28;
+    private _hash: Hash28 | undefined = undefined;
+
+    get hash(): Hash28 
+    {
+        if( 
+            this._hash !== undefined 
+            && this._hash instanceof Hash28 
+        ) return this._hash;
+
+        let scriptDataToBeHashed = [] as number[];
+
+        if( this.type === ScriptType.NativeScript )
+            scriptDataToBeHashed = [ 0x00 ].concat( Array.from( this.bytes ) );
+        else
+        {
+            const singleCbor = Array.from(
+                Cbor.encode(
+                    new CborBytes(
+                        this.bytes
+                    )
+                ).toBuffer()
+            );
+
+            scriptDataToBeHashed = [
+                this.type === ScriptType.PlutusV1 ? 0x01 :
+                this.type === ScriptType.PlutusV2 ? 0x02 :
+                0x03
+            ].concat( singleCbor );
+        }
+
+        this._hash = new Hash28(
+            Uint8Array.from(
+                blake2b_224( scriptDataToBeHashed as byte[] )
+            )
+        );
+
+        return this._hash;
+    }
 
     constructor(
         scriptType: T,
@@ -115,8 +155,8 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         );
 
         /* TO DO: definePropertyIfNotPresent */
-        let _hash: Hash28 = undefined as any;
-
+        /*
+        // let _hash: Hash28 = undefined as any;
         definePropertyIfNotPresent(
             this, "hash",
             {
@@ -157,6 +197,8 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
                 configurable: false
             }
         )
+        */
+
          /* TO DO: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef( { scriptType, bytes } );
     }
