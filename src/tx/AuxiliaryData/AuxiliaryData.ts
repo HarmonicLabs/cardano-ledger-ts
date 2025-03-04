@@ -34,7 +34,49 @@ export class AuxiliaryData
     readonly plutusV2Scripts?: Script<ScriptType.PlutusV2>[];
     readonly plutusV3Scripts?: Script<ScriptType.PlutusV3>[];
 
+    // --------- hash ---- //
+    /* TO DO  definePropertyIfNotPresent see example from video */
+    private _hash!: AuxiliaryDataHash
+    
+    get hash(): AuxiliaryDataHash
+    {
+        if( 
+            this._hash instanceof AuxiliaryDataHash 
+        ) return this._hash;
+
+        this._hash = new AuxiliaryDataHash(
+            new Uint8Array(
+                blake2b_256( this.toCbor().toBuffer() )
+            )
+        );
+
+        return this._hash
+    }
+
+    /*
     readonly hash!: AuxiliaryDataHash
+
+    let _hash: AuxiliaryDataHash = undefined as any;
+    definePropertyIfNotPresent(
+        this, "hash",
+        {
+            get: (): AuxiliaryDataHash => {
+                if( _hash instanceof AuxiliaryDataHash ) return _hash.clone();
+
+                _hash = new AuxiliaryDataHash(
+                    new Uint8Array(
+                        blake2b_256( this.toCbor().toBuffer() )
+                    )
+                );
+
+                return _hash.clone()
+            },
+            set: () => {},
+            enumerable: true,
+            configurable: false
+        }
+    );
+    */
 
     constructor(
         auxData: IAuxiliaryData,
@@ -144,29 +186,7 @@ export class AuxiliaryData
             {
                 this.plutusV3Scripts = undefined;
             }
-            
-        // --------- hash ---- //
-        /* TO DO  definePropertyIfNotPresent see example from video */
-        let _hash: AuxiliaryDataHash = undefined as any;
-        definePropertyIfNotPresent(
-            this, "hash",
-            {
-                get: (): AuxiliaryDataHash => {
-                    if( _hash instanceof AuxiliaryDataHash ) return _hash.clone();
-
-                    _hash = new AuxiliaryDataHash(
-                        new Uint8Array(
-                            blake2b_256( this.toCbor().toBuffer() )
-                        )
-                    );
-
-                    return _hash.clone()
-                },
-                set: () => {},
-                enumerable: true,
-                configurable: false
-            }
-        );
+        
 
         this.cborRef = cborRef ?? subCborRefOrUndef( auxData );
     }

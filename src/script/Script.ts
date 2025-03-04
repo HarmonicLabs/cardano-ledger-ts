@@ -155,52 +155,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
                 )
             )
         );
-
-        /* TO DO: definePropertyIfNotPresent */
-        /*
-        // let _hash: Hash28 = undefined as any;
-        definePropertyIfNotPresent(
-            this, "hash",
-            {
-                get: () => {
-                    if( _hash !== undefined && _hash instanceof Hash28 ) return _hash.clone();
-
-                    let scriptDataToBeHashed = [] as number[];
-
-                    if( this.type === ScriptType.NativeScript )
-                        scriptDataToBeHashed = [ 0x00 ].concat( Array.from( this.bytes ) );
-                    else
-                    {
-                        const singleCbor = Array.from(
-                            Cbor.encode(
-                                new CborBytes(
-                                    this.bytes
-                                )
-                            ).toBuffer()
-                        );
-
-                        scriptDataToBeHashed = [
-                            this.type === ScriptType.PlutusV1 ? 0x01 :
-                            this.type === ScriptType.PlutusV2 ? 0x02 :
-                            0x03
-                        ].concat( singleCbor );
-                    }
-
-                    _hash = new Hash28(
-                        Uint8Array.from(
-                            blake2b_224( scriptDataToBeHashed as byte[] )
-                        )
-                    );
-
-                    return _hash.clone();
-                },
-                set: () => {},
-                enumerable: true,
-                configurable: false
-            }
-        )
-        */
-
+        
          /* TO DO: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef( { scriptType, bytes } );
     }
