@@ -16,6 +16,10 @@ export enum CredentialType {
 
 Object.freeze(CredentialType);
 
+export interface ICredential<T extends CredentialType = CredentialType> {
+    type: T;
+    hash: CanBeHash28;
+}
 export class Credential<T extends CredentialType = CredentialType> 
     implements ToCbor, ToData, Cloneable<Credential<T>> 
 {
@@ -24,11 +28,15 @@ export class Credential<T extends CredentialType = CredentialType>
 
 
     constructor(
-        type: T, 
-        hash: CanBeHash28,
+        credential: ICredential<T>,
         readonly cborRef: SubCborRef | undefined = undefined
     ) 
     {
+        const { 
+            type, 
+            hash 
+        } = credential;
+
         if (!(
             canBeHash28(hash)
         )) throw new Error("can't construct 'Credential'; hash must be instance of an 'Hash28'");
@@ -45,29 +53,30 @@ export class Credential<T extends CredentialType = CredentialType>
         this.hash = type === CredentialType.KeyHash ? 
             ( hash instanceof PubKeyHash ? hash : new PubKeyHash( new Hash28( hash ).toBuffer() ) ) :
             ( hash instanceof ValidatorHash ? hash : new ValidatorHash( new Hash28( hash ).toBuffer() ) )
-
-        defineReadOnlyProperty(
-            this,
-            "hash",
-            type === CredentialType.KeyHash ? 
-                ( hash instanceof PubKeyHash ? hash : new PubKeyHash( new Hash28( hash ).toBuffer() ) ) :
-                ( hash instanceof ValidatorHash ? hash : new ValidatorHash( new Hash28( hash ).toBuffer() ) )
-        );
         
          /* TO DO: this.cboRref params */
-        this.cborRef = cborRef ?? subCborRefOrUndef({ type, hash });
+         this.cborRef = cborRef ?? subCborRefOrUndef(credential);
     }
 
     clone(): Credential<T> {
-        return new Credential(this.type, this.hash.clone());
+        return new Credential({ 
+            type: this.type, 
+            hash: this.hash.clone() 
+        }, this.cborRef?.clone());
     }
 
     static get fake(): Credential<CredentialType.KeyHash> {
-        return new Credential(CredentialType.KeyHash, new Hash28("ff".repeat(28)));
+        return new Credential({ 
+            type: CredentialType.KeyHash, 
+            hash: new Hash28("ff".repeat(28)) 
+        });
     }
 
     toData(_v?: any): DataConstr {
-        return new DataConstr(this.type, [new DataB(this.hash.toBuffer())]); // PCredential
+        return new DataConstr(
+            this.type,
+            [new DataB(this.hash.toBuffer())]
+        ); // PCredential
     }
 
     static fromData(data: Data): Credential {
@@ -78,10 +87,10 @@ export class Credential<T extends CredentialType = CredentialType>
 
         if (!(hash instanceof DataB)) throw new Error("invalid data for credential");
 
-        return new Credential(
-            tag <= 0 ? CredentialType.KeyHash : CredentialType.Script,
-            new Hash28(hash.bytes.toBuffer())
-        );
+        return new Credential({ 
+            type: tag <= 0 ? CredentialType.KeyHash : CredentialType.Script, 
+            hash: new Hash28(hash.bytes.toBuffer()) 
+        });
     }
 
     /** @deprecated use `keyHash` instead */
@@ -90,11 +99,17 @@ export class Credential<T extends CredentialType = CredentialType>
     }
 
     static keyHash(hash: Uint8Array | Hash28 | string): Credential<CredentialType.KeyHash> {
-        return new Credential(CredentialType.KeyHash, hash instanceof PubKeyHash ? hash : new PubKeyHash(hash));
+        return new Credential({ 
+            type: CredentialType.KeyHash, 
+            hash: hash instanceof PubKeyHash ? hash : new PubKeyHash(hash) 
+        });
     }
 
     static script(hash: Uint8Array | Hash28 | string): Credential<CredentialType.Script> {
-        return new Credential(CredentialType.Script, hash instanceof ValidatorHash ? hash : new ValidatorHash(hash));
+        return new Credential({
+            type: CredentialType.Script, 
+            hash: hash instanceof ValidatorHash ? hash : new ValidatorHash(hash)
+    });
     }
 
     toCborBytes(): Uint8Array {
@@ -122,6 +137,7 @@ export class Credential<T extends CredentialType = CredentialType>
     static fromCbor(cStr: CanBeCborString): Credential {
         return Credential.fromCborObj(Cbor.parse(forceCborString(cStr), { keepRef: true }));
     }
+
     static fromCborObj(cObj: CborObj): Credential {
         if (
             !(
@@ -132,7 +148,11 @@ export class Credential<T extends CredentialType = CredentialType>
         )
             throw new Error(`Invalid CBOR format for "Credential"`);
 
-        return new Credential(Number(cObj.array[0].num), Hash28.fromCborObj(cObj.array[1]), getSubCborRef(cObj));
+        return new Credential({ 
+                type: Number(cObj.array[0].num) as CredentialType, 
+                hash: Hash28.fromCborObj(cObj.array[1]) 
+            }, getSubCborRef(cObj)
+        );
     }
 
     toJSON() {

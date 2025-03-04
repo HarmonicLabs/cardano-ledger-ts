@@ -16,7 +16,7 @@ export class Signature extends Hash
             this._bytes.length === 64
         ))throw new Error("'Signature' must be an hash of length 64");
 
-         /* TO DO: this.cboRref params */
+         /* Done: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef( bs );
     }
 

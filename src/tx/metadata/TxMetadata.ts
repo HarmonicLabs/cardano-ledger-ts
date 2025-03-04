@@ -44,7 +44,8 @@ export class TxMetadata
         );
 
         this.metadata = _metadata;
-        this.cborRef = cborRef ?? subCborRefOrUndef( _metadata );
+         /* Done: this.cboRref params */
+        this.cborRef = cborRef ?? subCborRefOrUndef( metadata );
     }
     
     toCborBytes(): Uint8Array

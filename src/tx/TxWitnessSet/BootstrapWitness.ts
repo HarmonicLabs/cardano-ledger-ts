@@ -61,14 +61,12 @@ export class BootstrapWitness
 
     clone(): BootstrapWitness
     {
-        return new BootstrapWitness(
-            {
+        return new BootstrapWitness({
                 pubKey: this.pubKey.clone(),
                 signature: this.signature.clone(),
                 chainCode: this.chainCode.clone(),
                 attributes: this.attributes.slice()
-            }
-        )
+            }, this.cborRef?.clone())
     }
 
     toCborBytes(): Uint8Array

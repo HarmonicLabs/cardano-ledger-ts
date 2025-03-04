@@ -143,7 +143,7 @@ export class TxRedeemer
                 configurable: false
             }
         );
-        
+         /* Done: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef( redeemer );
     }
 

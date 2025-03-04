@@ -36,7 +36,7 @@ export class Hash28 extends Hash
             this._bytes instanceof Uint8Array
         ))throw new Error("'Hash28' must be an hash of length 28");
 
-         /* TO DO: this.cboRref params */
+         /* Done: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef( bs );
     }
 

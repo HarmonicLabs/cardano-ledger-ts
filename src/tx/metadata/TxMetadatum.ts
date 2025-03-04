@@ -89,7 +89,7 @@ export class TxMetadatumMap
 
         this.map = Object.freeze( map );
 
-        /* TO DO: this.cboRref params */
+        /* Done: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef( map );
     }
 
@@ -155,7 +155,7 @@ export class TxMetadatumList
         
         this.list = Object.freeze( map );
 
-         /* TO DO: this.cboRref params */
+         /* Done: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef( map );        
     }
 
@@ -254,7 +254,7 @@ export class TxMetadatumBytes
     )
     {
         this.bytes = bytes instanceof Uint8Array ? bytes : fromHex( bytes );
-        /* TO DO: this.cboRref params */
+        /* Done: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef( bytes );
     }
 
@@ -324,7 +324,8 @@ export class TxMetadatumText
 
         this.text = text;
         
-     /* TO DO: this.cboRref params */
+     /* Done: this.cboRref params */
+     this.cborRef = cborRef ?? subCborRefOrUndef( text );
     }
 
     toCborBytes(): Uint8Array
