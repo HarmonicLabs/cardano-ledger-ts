@@ -52,8 +52,10 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
 
         let scriptDataToBeHashed = [] as number[];
 
-        if( this.type === ScriptType.NativeScript )
-            scriptDataToBeHashed = [ 0x00 ].concat( Array.from( this.bytes ) );
+        if( 
+            this.type === ScriptType.NativeScript )
+            scriptDataToBeHashed = [ 0x00 ].concat( Array.from( this.bytes ) 
+        );
         else
         {
             const singleCbor = Array.from(
