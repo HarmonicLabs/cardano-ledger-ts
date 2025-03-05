@@ -2,11 +2,11 @@ import { CanBeCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { blake2b_224 } from "@harmoniclabs/crypto";
 import { Hash32 } from "../hashes/Hash32/Hash32";
 import { PubKeyHash } from "./PubKeyHash";
-import { definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
-
 export class PublicKey extends Hash32
 {
+    // --------- hash ---- //
     private _hash: PubKeyHash | undefined = undefined;
+    
     get hash(): PubKeyHash
     {
         if(

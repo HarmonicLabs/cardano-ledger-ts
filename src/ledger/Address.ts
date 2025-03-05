@@ -12,7 +12,7 @@ import UPLCFlatUtils from "../utils/UPLCFlatUtils";
 import { fromHex, toHex } from "@harmoniclabs/uint8array-utils";
 import { harden, XPrv } from "@harmoniclabs/bip32_ed25519";
 import { ToDataVersion } from "../toData/defaultToDataVersion";
-import { getSubCborRef, subCborRefOrUndef } from "../utils/getSubCborRef";
+import { getSubCborRef } from "../utils/getSubCborRef";
 
 export type AddressStr = `${"addr1"|"addr_test1"}${string}`;
 
@@ -85,37 +85,42 @@ export class Address
         type = type === undefined ? 
             (stakeCreds === undefined ? "enterprise" : "base")
             : type;
-            if(!(
-                type === "base"         ||
-                type === "enterprise"   ||
-                type === "bootstrap"    ||
-                type === "pointer"
-            ))throw new Error("invalid address type");
+        assert(
+            type === "base"         ||
+            type === "enterprise"   ||
+            type === "bootstrap"    ||
+            type === "pointer",
+            "invalid address type"
+        );
+        defineReadOnlyProperty(
+            this, "type", type
+        );
 
-        this.type = type;
-        
-        if(!(
-            network === "mainnet" || 
-            network === "testnet"
-        ))throw new Error("invalid network")
+        assert(
+            network === "mainnet" || network === "testnet",
+            "invalid network"
+        );
+        defineReadOnlyProperty(
+            this, "network", network
+        );
 
-        this.network = network;
+        assert(
+            paymentCreds instanceof Credential,
+            "invalid payment credentials"
+        );
+        defineReadOnlyProperty(
+            this, "paymentCreds", paymentCreds.clone()
+        );
 
-        if(!(
-            paymentCreds instanceof Credential
-        ))throw new Error ("invalid payment credentials")
+        assert(
+            stakeCreds === undefined || stakeCreds instanceof StakeCredentials,
+            "invalid stake credentials"
+        );
+        defineReadOnlyProperty(
+            this, "stakeCreds", stakeCreds?.clone()
+        );
 
-        this.paymentCreds = paymentCreds.clone()
-
-        if(!(
-            stakeCreds === undefined || stakeCreds instanceof StakeCredentials
-        ))throw new Error("invalid stake credentials")
-
-        this.stakeCreds = stakeCreds?.clone()
-
-        /* TO DO: this.cboRref params */
-        this.cborRef = cborRef ?? subCborRefOrUndef({ network, paymentCreds, stakeCreds, type} );
-    }   
+    }
 
     clone(): Address
     {

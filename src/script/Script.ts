@@ -3,8 +3,7 @@ import { blake2b_224, byte } from "@harmoniclabs/crypto";
 import { fromHex, isUint8Array } from "@harmoniclabs/uint8array-utils";
 import { Hash28 } from "../hashes";
 import { NativeScript, nativeScriptToCbor, nativeScriptFromCbor } from "./NativeScript";
-import { defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
-import { assert } from "../utils/assert";
+import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { getSubCborRef, subCborRefOrUndef } from "../utils/getSubCborRef";
 
 export enum ScriptType {
@@ -39,23 +38,19 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
     **/
     readonly cbor!: T extends ScriptType.NativeScript ? never : CborString;
     
-    /* TO DO: definePropertyIfNotPresent */
-    // readonly hash!: Hash28;
-    private _hash: Hash28 | undefined = undefined;
+    // --------- hash ---- //
+    private _hash!: Hash28;
 
-    get hash(): Hash28 
+    get hash(): Hash28
     {
-        if( 
-            this._hash !== undefined 
-            && this._hash instanceof Hash28 
+        if(
+            this. _hash !== undefined && this._hash instanceof Hash28 
         ) return this._hash;
 
         let scriptDataToBeHashed = [] as number[];
 
-        if( 
-            this.type === ScriptType.NativeScript )
-            scriptDataToBeHashed = [ 0x00 ].concat( Array.from( this.bytes ) 
-        );
+        if( this.type === ScriptType.NativeScript )
+            scriptDataToBeHashed = [ 0x00 ].concat( Array.from( this.bytes ) );
         else
         {
             const singleCbor = Array.from(
@@ -88,6 +83,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
+
         if(!(
             scriptType === ScriptType.NativeScript  ||
             scriptType === ScriptType.PlutusV1      ||
@@ -155,7 +151,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
                 )
             )
         );
-        
+
          /* TO DO: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef( { scriptType, bytes } );
     }

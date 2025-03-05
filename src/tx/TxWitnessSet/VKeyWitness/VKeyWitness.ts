@@ -10,6 +10,11 @@ import { VKey } from "./VKey";
 import { assert } from "../../../utils/assert";
 import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
 
+export interface IVkey {
+    vkey: Hash32,
+    signature: Signature
+}
+
 export class VKeyWitness
     implements ToCbor, Cloneable<VKeyWitness>, ToJson
 {
@@ -17,11 +22,15 @@ export class VKeyWitness
     readonly signature!: Signature
 
     constructor(
-        vkey: Hash32,
-        signature: Signature,
+        vkeys: IVkey,
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
+        const { 
+            vkey, 
+            signature 
+        } = vkeys;
+
         if(!(
             vkey instanceof Hash32
         ))throw new Error("can't construct 'VKeyWitness' without a 'VKey' as first argument");
@@ -33,16 +42,16 @@ export class VKeyWitness
 
         this.signature = signature;
         
-        /* TO DO: this.cboRref params */
-        this.cborRef = cborRef ?? subCborRefOrUndef({ vkey, signature });
+        /* Done: this.cboRref params */
+        this.cborRef = cborRef ?? subCborRefOrUndef(vkeys);
     }
 
     clone(): VKeyWitness
     {
-        return new VKeyWitness(
-            new VKey( this.vkey ),
-            new Signature( this.signature )
-        )
+        return new VKeyWitness({
+            vkey: new VKey( this.vkey ),
+            signature: new Signature( this.signature )
+        }, this.cborRef?.clone());
     }
     
     toCborBytes(): Uint8Array
@@ -84,11 +93,10 @@ export class VKeyWitness
         if(!(cObj instanceof CborArray))
         throw new InvalidCborFormatError("VKeyWitness");
 
-        return new VKeyWitness(
-            Hash32.fromCborObj( cObj.array[0] ),
-            Signature.fromCborObj( cObj.array[1] ),
-            getSubCborRef( cObj )
-        );
+        return new VKeyWitness({
+            vkey: Hash32.fromCborObj( cObj.array[0] ),
+            signature: Signature.fromCborObj( cObj.array[1] ),
+        }, getSubCborRef( cObj ));
     }
 
     toJSON() { return this.toJson(); }

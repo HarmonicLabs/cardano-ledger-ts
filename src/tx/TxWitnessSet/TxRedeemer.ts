@@ -1,6 +1,6 @@
 import { ToCbor, CborString, Cbor, CborArray, CborUInt, CanBeCborString, forceCborString, CborObj, CborMapEntry, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
-import { isObject, hasOwn, defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
+import { isObject, hasOwn, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
 import { Data, isData, dataToCborObj, dataFromCborObj } from "@harmoniclabs/plutus-data";
 import { ExBudget } from "@harmoniclabs/plutus-machine";
 import { BasePlutsError } from "../../utils/BasePlutsError";
@@ -81,6 +81,45 @@ export class TxRedeemer
     **/
     readonly data!: Data
     execUnits!: ExBudget
+    
+    private _exUnits = this.execUnits;
+
+    get(): ExBudget 
+    { 
+        return this._exUnits; 
+    }
+
+    set( newExUnits: ExBudget )
+    {
+        if(!(
+            newExUnits instanceof ExBudget
+        ))throw new Error("invalid 'execUnits' constructing 'TxRedeemer'");
+        
+        this._exUnits = newExUnits;
+    }
+
+    /*
+        let _exUnits = execUnits.clone();
+
+        /* TO DO: ask about optimizing definePropertyIfNotPresent 
+        definePropertyIfNotPresent(
+            this,
+            "execUnits",
+            {
+                get: () => _exUnits,
+                set: ( newExUnits: ExBudget ) => {
+                    assert(
+                        newExUnits instanceof ExBudget,
+                        "invalid 'execUnits' constructing 'TxRedeemer'"
+                    );
+                    _exUnits = newExUnits.clone();
+                },
+                enumerable: true,
+                configurable: false
+            }
+        );
+        */
+
 
     constructor(
         redeemer: ITxRedeemer,
@@ -124,25 +163,6 @@ export class TxRedeemer
             execUnits instanceof ExBudget
          ))throw new Error("invalid 'execUnits' constructing 'TxRedeemer'");
 
-        let _exUnits = execUnits.clone();
-
-        /* TO DO: ask about optimizing definePropertyIfNotPresent */
-        definePropertyIfNotPresent(
-            this,
-            "execUnits",
-            {
-                get: () => _exUnits,
-                set: ( newExUnits: ExBudget ) => {
-                    assert(
-                        newExUnits instanceof ExBudget,
-                        "invalid 'execUnits' constructing 'TxRedeemer'"
-                    );
-                    _exUnits = newExUnits.clone();
-                },
-                enumerable: true,
-                configurable: false
-            }
-        );
          /* Done: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef( redeemer );
     }

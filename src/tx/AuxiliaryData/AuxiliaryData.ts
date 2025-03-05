@@ -6,7 +6,6 @@ import { PlutusScriptJsonFormat, Script, ScriptType } from "../../script/Script"
 import { ToJson } from "../../utils/ToJson";
 import { TxMetadata } from "../metadata";
 import { hasOwn, defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
-import { assert } from "../../utils/assert";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 

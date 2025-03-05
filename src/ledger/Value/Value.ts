@@ -96,7 +96,7 @@ export class Value
         this.map = Object.freeze( _map );
 
         
-        /* TO DO cborRef Change the arguments and create an IValue */
+        /* DONE: this.cborRef */
         this.cborRef = cborRef ?? subCborRefOrUndef( map );        
     }
 

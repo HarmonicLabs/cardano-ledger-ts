@@ -72,10 +72,16 @@ export class TxOutRef
     readonly index!: number
 
     constructor(
-        { id, index }: ITxOutRef,
+        
+        iTxOutRef: ITxOutRef,
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
+        const { 
+            id, 
+            index 
+        } = iTxOutRef;    
+
         if(!(
             (typeof id === "string" && isHex( id ) && (id.length === 64)) ||
             (id instanceof Hash32)           
@@ -85,8 +91,8 @@ export class TxOutRef
 
         this.index = Number( forceBigUInt( index ));
 
-        /* TO DO: done is passing these as an object since alreadt decl;ared ok or re do it so its more uniform with the others? */
-        this.cborRef = cborRef ?? subCborRefOrUndef( { id, index } );
+        /* Done: cborRef */
+        this.cborRef = cborRef ?? subCborRefOrUndef( iTxOutRef );
     }
 
     toString(): TxOutRefStr
