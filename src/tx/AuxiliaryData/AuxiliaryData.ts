@@ -34,7 +34,6 @@ export class AuxiliaryData
     readonly plutusV3Scripts?: Script<ScriptType.PlutusV3>[];
 
     // --------- hash ---- //
-    /* TO DO  definePropertyIfNotPresent see example from video */
     private _hash!: AuxiliaryDataHash
     
     get hash(): AuxiliaryDataHash

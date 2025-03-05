@@ -1,6 +1,6 @@
 import { ToCbor, CborString, Cbor, CborArray, CborUInt, CanBeCborString, forceCborString, CborObj, CborMapEntry, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
-import { isObject, hasOwn, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
+import { isObject, hasOwn } from "@harmoniclabs/obj-utils";
 import { Data, isData, dataToCborObj, dataFromCborObj } from "@harmoniclabs/plutus-data";
 import { ExBudget } from "@harmoniclabs/plutus-machine";
 import { BasePlutsError } from "../../utils/BasePlutsError";
@@ -82,11 +82,11 @@ export class TxRedeemer
     readonly data!: Data
     execUnits!: ExBudget
     
-    private _exUnits = this.execUnits;
+    private _exUnits = this.execUnits.clone();
 
     get(): ExBudget 
     { 
-        return this._exUnits; 
+        return this._exUnits.clone(); 
     }
 
     set( newExUnits: ExBudget )
@@ -95,7 +95,7 @@ export class TxRedeemer
             newExUnits instanceof ExBudget
         ))throw new Error("invalid 'execUnits' constructing 'TxRedeemer'");
         
-        this._exUnits = newExUnits;
+        this._exUnits = newExUnits.clone();
     }
 
     /*

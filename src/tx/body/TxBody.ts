@@ -1,6 +1,6 @@
 import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString, isCborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { blake2b_256 } from "@harmoniclabs/crypto";
-import { isObject, hasOwn, defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
+import { isObject, hasOwn } from "@harmoniclabs/obj-utils";
 import { PubKeyHash } from "../../credentials";
 import { AuxiliaryDataHash, ScriptDataHash, Hash32, CanBeHash28, canBeHash28 } from "../../hashes";
 import { Coin, TxWithdrawals, ITxWithdrawals, LegacyPPUpdateProposal, Value, NetworkT, Certificate, canBeTxWithdrawals, isLegacyPPUpdateProposal, forceTxWithdrawals, LegacyPPUpdateProposalToCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, isCertificate, certificateFromCborObj, certificatesToDepositLovelaces, isIValue } from "../../ledger";
