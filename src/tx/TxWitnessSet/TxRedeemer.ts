@@ -82,11 +82,11 @@ export class TxRedeemer
     readonly data!: Data
     execUnits!: ExBudget
     
-    private _exUnits = this.execUnits.clone();
+    private _exUnits = this.execUnits;
 
     get(): ExBudget 
     { 
-        return this._exUnits.clone(); 
+        return this._exUnits; 
     }
 
     set( newExUnits: ExBudget )
@@ -95,7 +95,7 @@ export class TxRedeemer
             newExUnits instanceof ExBudget
         ))throw new Error("invalid 'execUnits' constructing 'TxRedeemer'");
         
-        this._exUnits = newExUnits.clone();
+        this._exUnits = newExUnits;
     }
 
     /*
