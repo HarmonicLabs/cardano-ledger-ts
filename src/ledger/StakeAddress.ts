@@ -68,7 +68,6 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType> {
 
         this.credentials = t === "stakeKey" ? new StakeKeyHash(credentials) : new StakeValidatorHash(credentials);
 
-        /* Done: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef(stakeAddress);
     }
 

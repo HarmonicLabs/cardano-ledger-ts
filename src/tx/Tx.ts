@@ -82,6 +82,7 @@ export class Tx
         );
         this.isScriptValid = isScriptValid === undefined ? true : isScriptValid;
         this.auxiliaryData = auxiliaryData;
+        
         this.cborRef = cborRef ?? subCborRefOrUndef( tx );
     }
 

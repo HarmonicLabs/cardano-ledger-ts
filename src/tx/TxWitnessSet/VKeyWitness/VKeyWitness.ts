@@ -42,7 +42,6 @@ export class VKeyWitness
 
         this.signature = signature;
         
-        /* Done: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef(vkeys);
     }
 

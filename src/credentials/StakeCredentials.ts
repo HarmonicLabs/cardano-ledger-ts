@@ -75,7 +75,7 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
         return new StakeCredentials({
             type: StakeCredentialsType.Pointer,
             hash
-    });
+        });
     }
     
 
@@ -84,7 +84,6 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-
         const { 
             type, 
             hash 
@@ -115,7 +114,11 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
                 hash instanceof Hash28 
             ))throw new Error("invalid argument for stake credentials of type " + type);
 
-            /* TO DO: change this.hash = type === "stakeKey" ? */
+            this.hash = (type === "stakeKey" ? 
+                ( hash instanceof StakeKeyHash ? hash : new StakeKeyHash( hash.toBuffer() ) ) :
+                ( hash instanceof StakeValidatorHash ? hash : new StakeValidatorHash( hash.toBuffer() )) 
+            ) as StakeHash<T>;
+            /*
             defineReadOnlyProperty(
                 this,
                 "hash",
@@ -123,8 +126,9 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
                     ( hash instanceof StakeKeyHash ? hash : new StakeKeyHash( hash.toBuffer() ) ) :
                     ( hash instanceof StakeValidatorHash ? hash : new StakeValidatorHash( hash.toBuffer() ) )
             )
+            */
         }
-         /* DONE: this.cboRref params */
+
         this.cborRef = cborRef ?? subCborRefOrUndef(stakeCreds);
     }
 

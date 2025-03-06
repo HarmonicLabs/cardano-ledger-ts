@@ -36,6 +36,7 @@ export class Constitution
         const { anchor, scriptHash } = consti;
         this.anchor = new Anchor( anchor );
         this.scriptHash = canBeHash28( scriptHash ) ? new Hash28( scriptHash ) : undefined;
+        
         this.cborRef = cborRef ?? subCborRefOrUndef( consti );
     }
 
