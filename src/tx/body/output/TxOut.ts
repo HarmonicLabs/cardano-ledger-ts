@@ -317,7 +317,10 @@ export class TxOut
             ))
             throw new InvalidCborFormatError("TxOut");
 
-            refScript = new Script( ScriptType.PlutusV2, _refScript.data.buffer );
+            refScript = new Script( {
+                scriptType: ScriptType.PlutusV2, 
+                bytes: _refScript.data.buffer 
+            });
         }
 
         if( _addr === undefined || _amt === undefined )

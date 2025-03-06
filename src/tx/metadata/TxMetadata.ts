@@ -32,10 +32,9 @@ export class TxMetadata
                 BigInt( k ).toString(),
                 (() => {
                     const v = metadata[k];
-                    assert(
-                        isTxMetadatum( v ),
-                        "metatdatum with label " + k + " was not instace of 'TxMetadatum'"
-                    );
+                    if(!(
+                        isTxMetadatum( v )
+                    ))throw new Error("metatdatum with label " + k + " was not instace of 'TxMetadatum'")
 
                     return v;
                 })()
@@ -102,7 +101,9 @@ export class TxMetadata
             throw new InvalidCborFormatError("TxMetadata")
 
             defineReadOnlyProperty(
-                meta, k.num.toString(), txMetadatumFromCborObj( v )
+                meta, 
+                k.num.toString(), 
+                txMetadatumFromCborObj( v )
             )
         }
 

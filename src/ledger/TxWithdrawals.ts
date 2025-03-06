@@ -84,10 +84,11 @@ export class TxWithdrawals
                 rewardAccount:
                     entry.rewardAccount instanceof StakeAddress ?
                         entry.rewardAccount.clone() :
-                        new StakeAddress(
+                        new StakeAddress({
                             network,
-                            new Hash28( entry.rewardAccount )
-                        ),
+                            credentials: new Hash28( entry.rewardAccount ),
+                            type: "stakeKey"
+                        }),
                 amount: forceBigUInt( entry.amount )
             }));
             this.map =  Object.freeze(_map)

@@ -98,7 +98,6 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
         )) throw new Error("can't construct 'Credential'; specified type is nor 'addres' nor 'script'");
 
         this.type = type;
-        // defineReadOnlyProperty( this, "type", type );
 
         if( type === "pointer" )
         {
@@ -118,15 +117,6 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
                 ( hash instanceof StakeKeyHash ? hash : new StakeKeyHash( hash.toBuffer() ) ) :
                 ( hash instanceof StakeValidatorHash ? hash : new StakeValidatorHash( hash.toBuffer() )) 
             ) as StakeHash<T>;
-            /*
-            defineReadOnlyProperty(
-                this,
-                "hash",
-                type === "stakeKey" ? 
-                    ( hash instanceof StakeKeyHash ? hash : new StakeKeyHash( hash.toBuffer() ) ) :
-                    ( hash instanceof StakeValidatorHash ? hash : new StakeValidatorHash( hash.toBuffer() ) )
-            )
-            */
         }
 
         this.cborRef = cborRef ?? subCborRefOrUndef(stakeCreds);
@@ -156,10 +146,10 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
             );
         }
 
-        const credData = new Credential(
-            this.type === "stakeKey" ? CredentialType.KeyHash : CredentialType.Script,
-            (this.hash as StakeHash<StakeCredentialsType.KeyHash | StakeCredentialsType.Script>)
-        ).toData( version );
+        const credData = new Credential({
+            type: this.type === "stakeKey" ? CredentialType.KeyHash : CredentialType.Script,
+            hash: (this.hash as StakeHash<StakeCredentialsType.KeyHash | StakeCredentialsType.Script>)
+        }).toData( version );
 
         if( isOldVersion )
         return new DataConstr(

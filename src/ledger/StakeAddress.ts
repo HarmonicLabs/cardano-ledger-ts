@@ -142,10 +142,10 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType> {
     }
 
     toCredential() {
-        return new Credential(
-            this.type === "script" ? CredentialType.Script : CredentialType.KeyHash,
-            new Hash28(this.credentials)
-        );
+        return new Credential({
+            type: this.type === "script" ? CredentialType.Script : CredentialType.KeyHash,
+            hash: new Hash28(this.credentials)
+        });
     }
 
     toStakeCredentials(): StakeCredentials {

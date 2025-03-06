@@ -27,7 +27,6 @@ export interface BitStreamPadToByteOptions {
  */
 export default class UPLCFlatUtils
 {
-    /* To Do: find out about this.cborRef = cborRef ?? subCborRefOrUndef( tx ); for static class */
     /**
      * @deprecated this is a @static class, it is not supposed to have instances
      */

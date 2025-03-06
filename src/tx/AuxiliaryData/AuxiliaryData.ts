@@ -89,7 +89,10 @@ export class AuxiliaryData
             this.nativeScripts = nativeScripts?.map( nativeScript =>
                 nativeScript instanceof Script
                     ? nativeScript :
-                    new Script( ScriptType.NativeScript, nativeScript )
+                    new Script({
+                        scriptType: ScriptType.NativeScript, 
+                        bytes: nativeScript 
+                    })
                     
             );
         }
@@ -111,7 +114,10 @@ export class AuxiliaryData
             this.plutusV1Scripts = plutusV1Scripts?.map( plutusScript =>
                 plutusScript instanceof Script
                     ? plutusScript :
-                    new Script( ScriptType.PlutusV1, plutusScript )
+                    new Script({
+                        scriptType: ScriptType.PlutusV1, 
+                        bytes: plutusScript 
+                    })
             )
         }
         else
@@ -132,7 +138,11 @@ export class AuxiliaryData
             this.plutusV2Scripts = plutusV2Scripts?.map( plutusScript =>
                 plutusScript instanceof Script
                     ? plutusScript :
-                    new Script( ScriptType.PlutusV2, plutusScript )
+                    new Script({ 
+                        scriptType: ScriptType.PlutusV2, 
+                        bytes: plutusScript 
+
+                    })
             )
         }
         else
@@ -152,7 +162,10 @@ export class AuxiliaryData
                 this.plutusV3Scripts = plutusV3Scripts?.map( plutusScript =>
                     plutusScript instanceof Script
                         ? plutusScript :
-                        new Script( ScriptType.PlutusV3, plutusScript )
+                        new Script({
+                            scriptType: ScriptType.PlutusV3, 
+                            bytes: plutusScript 
+                        })
                 )
             }
             else
@@ -204,6 +217,11 @@ export class AuxiliaryData
                 {
                     k: new CborUInt( 3 ),
                     v: scriptArrToCbor( this.plutusV2Scripts )
+                },
+                this.plutusV3Scripts === undefined || this.plutusV3Scripts.length === 0 ? undefined :
+                {
+                    k: new CborUInt( 4 ),
+                    v: scriptArrToCbor( this.plutusV3Scripts )
                 }
             ].filter( elem => elem !== undefined ) as CborMapEntry[])
         )
@@ -260,13 +278,15 @@ export class AuxiliaryData
             _metadata,
             _native,
             _pV1,
-            _pV2
+            _pV2,
+            _pV3
         ] = fields;
 
         if(!(
             _native instanceof CborArray &&
             _pV1 instanceof CborArray &&
-            _pV2 instanceof CborArray
+            _pV2 instanceof CborArray &&
+            _pV3 instanceof CborArray
         ))
         throw new InvalidCborFormatError("AuxiliaryData")
 
@@ -274,25 +294,32 @@ export class AuxiliaryData
             metadata: _metadata === undefined ? undefined : TxMetadata.fromCborObj( _metadata ),
             nativeScripts:_native === undefined ? undefined : 
                 _native.array.map( nativeCborObj => 
-                    new Script(
-                        ScriptType.NativeScript, 
-                        Cbor.encode( nativeCborObj ).toBuffer()
-                    )
+                    new Script({
+                        scriptType: ScriptType.NativeScript, 
+                        bytes: Cbor.encode( nativeCborObj ).toBuffer()
+                    })
                 ),
             plutusV1Scripts: _pV1 === undefined ? undefined :
                 _pV1.array.map( cbor =>
-                    new Script(
-                        ScriptType.PlutusV1,
-                        Cbor.encode( cbor ).toBuffer()
-                    )
+                    new Script({
+                        scriptType: ScriptType.PlutusV1,
+                        bytes: Cbor.encode( cbor ).toBuffer()
+                    })
                 ),
             plutusV2Scripts: _pV2 === undefined ? undefined :
                 _pV2.array.map( cbor =>
-                    new Script(
-                        ScriptType.PlutusV2,
-                        Cbor.encode( cbor ).toBuffer()
-                    )
-                )
+                    new Script({
+                        scriptType: ScriptType.PlutusV2,
+                        bytes: Cbor.encode( cbor ).toBuffer()
+                    })
+                ),
+            plutusV3Scripts: _pV3 === undefined ? undefined :
+                _pV3.array.map( cbor =>
+                    new Script({
+                        scriptType: ScriptType.PlutusV3,
+                        bytes: Cbor.encode( cbor ).toBuffer()
+                    })
+                )                
         }, getSubCborRef( cObj ));
     }
 
@@ -304,6 +331,7 @@ export class AuxiliaryData
             nativeScripts: this.nativeScripts?.map( s => s.toJson() ),
             plutusV1Scripts: this.plutusV1Scripts?.map( s => s.toJson() ),
             plutusV2Scripts: this.plutusV2Scripts?.map( s => s.toJson() ),
+            plutusV3Scripts: this.plutusV2Scripts?.map( s => s.toJson() )
         }
     }
 }

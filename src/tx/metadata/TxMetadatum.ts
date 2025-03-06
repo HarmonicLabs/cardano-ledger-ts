@@ -203,11 +203,7 @@ export class TxMetadatumInt
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        defineReadOnlyProperty(
-            this,
-            "n",
-            BigInt( n )
-        );
+        this.n = BigInt( n );
     }
 
     toCborBytes(): Uint8Array

@@ -136,10 +136,11 @@ export class PoolParams
 
         if( canBeHash28( rewardAccount ) )
         {
-            this.rewardAccount = new StakeAddress(
-                "mainnet",
-                new Hash28( rewardAccount )
-            );
+            this.rewardAccount = new StakeAddress({
+                network: "mainnet",
+                credentials: new Hash28( rewardAccount ),
+                type: "stakeKey"
+            });
         }
         else
         {
@@ -147,14 +148,14 @@ export class PoolParams
                 rewardAccount instanceof StakeAddress
             ))throw new Error("invalid 'rewardAccount' constructing 'PoolParams'")
             this.rewardAccount = rewardAccount.clone();
-
         }
+        
         if(!(
             Array.isArray( owners ) &&
             owners.every( canBeHash28 )
         ))throw new Error("invalid 'owners' constructing 'PoolParams'")
+
         this.owners = owners.map( hash => new Hash28( hash ) ) 
-        // defineReadOnlyProperty( this, "owners", Object.freeze( owners.map( hash => new Hash28( hash ) ) ) );
 
         if(!(
             Array.isArray( relays ) &&
@@ -162,7 +163,6 @@ export class PoolParams
         ))throw new Error("invalid 'relays' constructing 'PoolParams'")
 
         this.relays = relays 
-        // defineReadOnlyProperty( this, "relays", Object.freeze( relays ) );
 
         if(!(
             metadata === undefined ||

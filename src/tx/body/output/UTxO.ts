@@ -35,16 +35,9 @@ export class UTxO
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        defineReadOnlyProperty(
-            this,
-            "utxoRef",
-            utxoRef instanceof TxOutRef ? utxoRef : new TxOutRef( utxoRef )
-        );
-        defineReadOnlyProperty(
-            this,
-            "resolved",
-            resolved instanceof TxOut ? resolved : new TxOut( resolved )
-        );
+        this.utxoRef = utxoRef instanceof TxOutRef ? utxoRef : new TxOutRef( utxoRef );
+
+        this.resolved = resolved instanceof TxOut ? resolved : new TxOut( resolved );
     }
 
     clone(): UTxO

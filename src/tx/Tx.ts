@@ -117,10 +117,10 @@ export class Tx
         {
             const { pubKey, signature } = signer.sign( this.body.hash.toBuffer() );
             this.addVKeyWitness(
-                new VKeyWitness(
-                    new VKey( pubKey ),
-                    new Signature( signature )
-                )
+                new VKeyWitness({
+                    vkey: new VKey( pubKey ),
+                    signature: new Signature( signature )
+                })
             );
             return;
         }
@@ -131,10 +131,10 @@ export class Tx
         );
 
         this.addVKeyWitness(
-            new VKeyWitness(
-                new VKey( pubKey ),
-                new Signature( signature )
-            )
+            new VKeyWitness({
+                vkey: new VKey( pubKey ),
+                signature: new Signature( signature )
+            })
         );
     }
 

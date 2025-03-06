@@ -26,11 +26,17 @@ export interface PlutusScriptJsonFormat<T extends PlutusScriptType = PlutusScrip
     cborHex: string
 }
 
+export interface IScript<T extends LitteralScriptType = LitteralScriptType> {
+    scriptType: T,
+    bytes: Uint8Array | (T extends ScriptType.NativeScript ? NativeScript : PlutusScriptJsonFormat)
+}
+
 export class Script<T extends LitteralScriptType = LitteralScriptType>
     implements ToCbor
 {
     readonly type!: T;
     readonly bytes!: Uint8Array;
+
     /**
      * format expected by `cardano-cli`
      * 
@@ -78,11 +84,16 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
     }
 
     constructor(
-        scriptType: T,
-        bytes: Uint8Array | (T extends ScriptType.NativeScript ? NativeScript : PlutusScriptJsonFormat),
+        script: IScript<T>,
         readonly cborRef: SubCborRef | undefined = undefined
     )
+    
     {
+        // console.log("type: ", this.type);
+        let { 
+            scriptType, 
+            bytes 
+        } = script;
 
         if(!(
             scriptType === ScriptType.NativeScript  ||
@@ -90,8 +101,8 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
             scriptType === ScriptType.PlutusV2      ||
             scriptType === ScriptType.PlutusV3
         ))throw new Error("invalid 'scriptType'")
+        
         this.type = scriptType;
-
 
         if( !( bytes instanceof Uint8Array ) )
         {
@@ -135,33 +146,28 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         }
 
         this.bytes = bytes;
-        
-        /* TO DO: find out why it's unhappy */
-        defineReadOnlyProperty(
-            this,
-            "cbor",
-            this.type === ScriptType.NativeScript ? new CborString( bytes ) :
-            Cbor.encode(
+        /** TO DO: check for accuracy */
+        if (this.type !== ScriptType.NativeScript) {
+            (this as any).cbor = Cbor.encode(
                 new CborBytes(
                     Cbor.encode(
                         new CborBytes(
-                            Uint8Array.prototype.slice.call( bytes )
+                            Uint8Array.prototype.slice.call(bytes)
                         )
                     ).toBuffer()
                 )
-            )
-        );
+            );
+        };
 
-         /* TO DO: this.cboRref params */
-        this.cborRef = cborRef ?? subCborRefOrUndef( { scriptType, bytes } );
+        this.cborRef = cborRef ?? subCborRefOrUndef( script );
     }
 
     clone(): Script<T>
     {
-        return new Script(
-            this.type as any,
-            Uint8Array.prototype.slice.call( this.bytes )
-        );
+        return new Script({
+            scriptType: this.type as any,
+            bytes: Uint8Array.prototype.slice.call( this.bytes )
+        });
     }
 
     toJSON() { return this.toJson(); }
@@ -195,13 +201,16 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
 
         if( t !== ScriptType.NativeScript )
         {
-            return new Script( t, fromHex( json.cborHex ) );
+            return new Script({ 
+                scriptType: t, 
+                bytes: fromHex( json.cborHex ) 
+            });
         }
 
-        return new Script(
-            ScriptType.NativeScript,
-            json as NativeScript
-        );
+        return new Script({
+            scriptType: ScriptType.NativeScript,
+            bytes: json as NativeScript
+        });
     }
 
     /**
@@ -262,10 +271,10 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         // read tx_witness_set
         if( cObj instanceof CborBytes )
         {
-            return new Script(
-                defType,
-                Cbor.encode( cObj ).toBuffer()
-            );
+            return new Script({
+                scriptType: defType,
+                bytes: Cbor.encode( cObj ).toBuffer()
+            });
         }
 
         if(!(
@@ -281,11 +290,18 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
             ScriptType.PlutusV2;
 
         if( t === ScriptType.NativeScript )
-        return new Script( t, Cbor.encode( cObj.array[1] ).toBuffer() );
+        return new Script({
+            scriptType: t, 
+            bytes: Cbor.encode( cObj.array[1] ).toBuffer() 
+    });
 
         if(!( cObj.array[1] instanceof CborBytes ))
         throw new Error(`Invalid CBOR format for "Script"`);
 
-        return new Script( t, cObj.array[1].bytes, getSubCborRef( cObj ) );
+        return new Script({
+            scriptType: t, 
+            bytes:cObj.array[1].bytes
+        }, 
+        getSubCborRef( cObj ) );
     }
 }
