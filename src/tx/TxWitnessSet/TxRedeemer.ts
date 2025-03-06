@@ -80,22 +80,17 @@ export class TxRedeemer
      * the actual value of the redeemer
     **/
     readonly data!: Data
-    execUnits!: ExBudget
-    
-    private _exUnits = this.execUnits;
+    private _execUnits!: ExBudget
 
-    get(): ExBudget 
-    { 
-        return this._exUnits; 
+    get execUnits(): ExBudget {
+        return this._execUnits;
     }
 
-    set( newExUnits: ExBudget )
-    {
-        if(!(
-            newExUnits instanceof ExBudget
-        ))throw new Error("invalid 'execUnits' constructing 'TxRedeemer'");
-        
-        this._exUnits = newExUnits;
+    set execUnits(newExUnits: ExBudget) {
+        if (!(newExUnits instanceof ExBudget)) {
+            throw new Error("invalid 'execUnits' setting 'TxRedeemer'");
+        }
+        this._execUnits = newExUnits;
     }
 
     /*
@@ -118,7 +113,7 @@ export class TxRedeemer
                 configurable: false
             }
         );
-        */
+    */
 
 
     constructor(
@@ -161,7 +156,8 @@ export class TxRedeemer
 
         if(!( 
             execUnits instanceof ExBudget
-         ))throw new Error("invalid 'execUnits' constructing 'TxRedeemer'");
+        ))throw new Error("invalid 'execUnits' constructing 'TxRedeemer'");
+        this._execUnits = execUnits.clone();
 
          /* Done: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef( redeemer );
