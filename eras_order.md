@@ -10,6 +10,10 @@ Order of eras to respect:
 7) Byron (DON'T DO THIS)
 
 - Copy class definiton from outside the `eras` directory.
+- reaname class as 
+    ```ts
+    `${Era}${LedgerType}`
+    ```
 - open the `cddl` of that era and look for the definition.
 - check all the fileds are there, remove any fields that are NOT supposed to be there (new era fields)
 - check `toCborObj` has correct encoding (IMPORTANT pay attention to CDDL)
