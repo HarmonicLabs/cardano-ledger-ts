@@ -6,7 +6,8 @@ Order of eras to respect:
 4) Mary
 5) Allegra
 6) Shelley
-7) Byron (?)
+
+7) Byron (DON'T DO THIS)
 
 - Copy class definiton from outside the `eras` directory.
 - open the `cddl` of that era and look for the definition.
