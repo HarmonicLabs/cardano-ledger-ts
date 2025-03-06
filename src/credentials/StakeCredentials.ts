@@ -26,6 +26,10 @@ export type StakeHash<T extends StakeCredentialsType> =
     T extends "script" ? StakeValidatorHash :
     T extends "pointer" ? [ CanBeUInteger, CanBeUInteger, CanBeUInteger ] :
     never;
+export interface IStakeCredentials<T extends StakeCredentialsType = StakeCredentialsType> {
+    type: T;
+    hash:  StakeHash<T>;
+}
 
 export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsType>
     implements ToCbor, ToData
@@ -47,39 +51,45 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
 
     static keyHash( hash: Uint8Array | Hash28 | string ): StakeCredentials<StakeCredentialsType.KeyHash>
     {
-        return new StakeCredentials(
-            StakeCredentialsType.KeyHash,
-            hash instanceof PubKeyHash ?
+        return new StakeCredentials({
+            type: StakeCredentialsType.KeyHash,
+            hash: hash instanceof PubKeyHash ?
                 hash :
                 new PubKeyHash( hash )
-        );
+    });
     }
 
     static script( hash: Uint8Array | Hash28 | string ): StakeCredentials<StakeCredentialsType.Script>
     {
-        return new StakeCredentials(
-            StakeCredentialsType.Script,
-            hash instanceof ValidatorHash ?
+        return new StakeCredentials({
+            type: StakeCredentialsType.Script,
+            hash: hash instanceof ValidatorHash ?
                 hash :
                 new ValidatorHash( hash )
-        );
+        });
     }
 
     /** @deprecated pointer credentials are deprecated since conway */
     static pointer( hash: [ CanBeUInteger, CanBeUInteger, CanBeUInteger ] ): StakeCredentials<StakeCredentialsType.Pointer>
     {
-        return new StakeCredentials(
-            StakeCredentialsType.Pointer,
+        return new StakeCredentials({
+            type: StakeCredentialsType.Pointer,
             hash
-        );
+    });
     }
+    
 
     constructor(
-        type: T,
-        hash: StakeHash<T>,
+        stakeCreds: IStakeCredentials<T>,
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
+
+        const { 
+            type, 
+            hash 
+        } = stakeCreds;
+
         if(!(
             hash instanceof Hash28
         )) throw new Error("can't construct 'StakeCredentials'; hash must be instance of an 'Hash28'");
@@ -114,16 +124,16 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
                     ( hash instanceof StakeValidatorHash ? hash : new StakeValidatorHash( hash.toBuffer() ) )
             )
         }
-         /* TO DO: this.cboRref params */
-        this.cborRef = cborRef ?? subCborRefOrUndef({ type, hash });
+         /* DONE: this.cboRref params */
+        this.cborRef = cborRef ?? subCborRefOrUndef(stakeCreds);
     }
 
     clone(): StakeCredentials<T>
     {
-        return new StakeCredentials(
-            this.type,
-            this.hash
-        );
+        return new StakeCredentials({
+            type: this.type,
+            hash: this.hash
+    });
     }
 
     toData( version?: ToDataVersion ): DataConstr
@@ -162,21 +172,21 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
         throw new Error("invalid data for stake credential");
         
         if( data.constr === BigInt(1) )
-        return new StakeCredentials(
-            StakeCredentialsType.Pointer,
-            data.fields.map( d => {
+        return new StakeCredentials({
+            type: StakeCredentialsType.Pointer,
+            hash: data.fields.map( d => {
                 if(!(d instanceof DataI))
                 throw new Error("invalid data for stake credential");
                 return d.int;
             }) as any,
-        );
+    });
         
         const creds = Credential.fromData( data.fields[0] );
         
-        return new StakeCredentials(
-            creds.type === CredentialType.KeyHash ? StakeCredentialsType.KeyHash : StakeCredentialsType.Script,
-            creds.hash
-        );
+        return new StakeCredentials({
+            type: creds.type === CredentialType.KeyHash ? StakeCredentialsType.KeyHash : StakeCredentialsType.Script,
+            hash: creds.hash
+        });
     }
 
     toCborBytes(): Uint8Array
@@ -237,17 +247,16 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
             if(!_creds.array.every( n => n instanceof CborUInt ))
             throw new Error(`Invalid CBOR fromat for "StakeCredentials"`);
 
-            return new StakeCredentials(
-                StakeCredentialsType.Pointer,
-                _creds.array.map( n => (n as CborUInt).num ) as any
-            );
+            return new StakeCredentials({
+                type: StakeCredentialsType.Pointer,
+                hash: _creds.array.map( n => (n as CborUInt).num ) as any
+        });
         }
 
-        return new StakeCredentials(
-            _type.num === BigInt(0) ? StakeCredentialsType.KeyHash : StakeCredentialsType.Script,
-            Hash28.fromCborObj( _creds ),
-            getSubCborRef( cObj )
-        );
+        return new StakeCredentials({
+            type: _type.num === BigInt(0) ? StakeCredentialsType.KeyHash : StakeCredentialsType.Script,
+            hash: Hash28.fromCborObj( _creds ),
+        }, getSubCborRef( cObj ));
     }
 
     toJSON() { return this.toJson(); }

@@ -20,18 +20,28 @@ export type StakeAddressCredentials<T extends StakeAddressType> = T extends "sta
     ? StakeKeyHash
     : StakeValidatorHash;
 
+export interface IStakeAddress<T extends StakeAddressType = StakeAddressType> {
+    network: NetworkT;
+    credentials: StakeAddressCredentials<T>;
+    type: StakeAddressType;
+}
 export class StakeAddress<T extends StakeAddressType = StakeAddressType> {
     readonly network!: NetworkT;
-    readonly type!: T;
     readonly credentials!: StakeAddressCredentials<T>;
+    readonly type!: T;
 
     constructor(
-        network: NetworkT, 
-        credentials: Hash28, 
-        type?: T,
+        stakeAddress: IStakeAddress<T>,
         readonly cborRef: SubCborRef | undefined = undefined
     ) 
     {
+
+        const { 
+            network,
+            credentials,
+            type
+        } = stakeAddress;
+
         const t = this.type === undefined ? (credentials instanceof StakeValidatorHash ? "script" : "stakeKey") : this.type;
 
         if(!(
@@ -39,12 +49,12 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType> {
             t === "stakeKey"
         ))throw new Error("invalid address type");
 
-        
-        /* TO DO: */
-        // this.type = type;
-        defineReadOnlyProperty(this, "type", type);
+        this.type = type as T;
 
-        if (!(network === "mainnet" || network === "testnet")) throw new Error("invalid network");
+        if (!(
+            network === "mainnet" || 
+            network === "testnet"
+        )) throw new Error("invalid network");
 
         this.network = network;
 
@@ -58,12 +68,16 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType> {
 
         this.credentials = t === "stakeKey" ? new StakeKeyHash(credentials) : new StakeValidatorHash(credentials);
 
-        /* TO DO: this.cboRref params */
-        this.cborRef = cborRef ?? subCborRefOrUndef({ network, credentials, type });
+        /* Done: this.cboRref params */
+        this.cborRef = cborRef ?? subCborRefOrUndef(stakeAddress);
     }
 
     clone(): StakeAddress<T> {
-        return new StakeAddress(this.network, this.credentials, this.type);
+        return new StakeAddress({
+            network: this.network, 
+            credentials: this.credentials,
+            type: this.type
+        });
     }
 
     toString(): StakeAddressBech32 {
@@ -108,7 +122,11 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType> {
             netwok = Boolean(header & 0b1111) ? "mainnet" : "testnet";
         }
 
-        return new StakeAddress(netwok, bs.length === 28 ? new Hash28(bs) : new PublicKey(bs).hash, type);
+        return new StakeAddress({
+            network: netwok, 
+            credentials: bs.length === 28 ? new Hash28(bs) : new PublicKey(bs).hash, 
+            type
+        });
     }
 
     toCborObj(): CborObj {
@@ -132,10 +150,9 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType> {
     }
 
     toStakeCredentials(): StakeCredentials {
-        return new StakeCredentials(
-            this.type === "script" ? StakeCredentialsType.Script : StakeCredentialsType.KeyHash,
-            new Hash28(this.credentials) as any,
-            undefined
-        );
+        return new StakeCredentials({
+            type: this.type === "script" ? StakeCredentialsType.Script : StakeCredentialsType.KeyHash,
+            hash: new Hash28(this.credentials) as any
+        });
     }
 }

@@ -282,10 +282,10 @@ export class Address
                 new Hash28( new Uint8Array( payment ) )
             ),
             stake.length === 28 ?
-                new StakeCredentials(
-                    stakeType,
-                    new Hash28( new Uint8Array( stake ) )
-                ):
+                new StakeCredentials({
+                    type: stakeType,
+                    hash: new Hash28( new Uint8Array( stake ) )
+                }):
                 undefined,
             type,
             cborRef
