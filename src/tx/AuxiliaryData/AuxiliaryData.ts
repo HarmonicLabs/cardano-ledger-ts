@@ -5,7 +5,7 @@ import { NativeScript, nativeScriptFromCborObj } from "../../script/NativeScript
 import { PlutusScriptJsonFormat, Script, ScriptType } from "../../script/Script";
 import { ToJson } from "../../utils/ToJson";
 import { TxMetadata } from "../metadata";
-import { hasOwn, defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
+import { hasOwn } from "@harmoniclabs/obj-utils";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
@@ -50,31 +50,6 @@ export class AuxiliaryData
 
         return this._hash
     }
-
-    /*
-    readonly hash!: AuxiliaryDataHash
-
-    let _hash: AuxiliaryDataHash = undefined as any;
-    definePropertyIfNotPresent(
-        this, "hash",
-        {
-            get: (): AuxiliaryDataHash => {
-                if( _hash instanceof AuxiliaryDataHash ) return _hash.clone();
-
-                _hash = new AuxiliaryDataHash(
-                    new Uint8Array(
-                        blake2b_256( this.toCbor().toBuffer() )
-                    )
-                );
-
-                return _hash.clone()
-            },
-            set: () => {},
-            enumerable: true,
-            configurable: false
-        }
-    );
-    */
 
     constructor(
         auxData: IAuxiliaryData,

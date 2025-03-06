@@ -1,6 +1,6 @@
 import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString, isCborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
-import { isObject, definePropertyIfNotPresent, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
+import { isObject } from "@harmoniclabs/obj-utils";
 import { Data, isData, dataToCborObj, dataFromCborObj } from "@harmoniclabs/plutus-data";
 import { Hash28 } from "../../hashes";
 import { Script, ScriptType, nativeScriptToCborObj } from "../../script";
@@ -125,8 +125,16 @@ export class TxWitnessSet
         )) throw new Error("invalid witnesses passed");
 
 
+        
         const defGetter = ( name: keyof ITxWitnessSet, get: () => any ) =>
         {
+            Object.defineProperty(this, name, {
+                get,
+                set: () => {},
+                enumerable: true,
+                configurable: false
+            });   
+            /*
             definePropertyIfNotPresent(
                 this, name,
                 {
@@ -136,8 +144,8 @@ export class TxWitnessSet
                     configurable: false
                 }
             )
+            */
         };
-
         function cloneArr<Stuff extends Cloneable<any>>( arr?: Stuff[] ): Stuff[]
         {
             return arr?.map( element => element.clone() ) ?? [];

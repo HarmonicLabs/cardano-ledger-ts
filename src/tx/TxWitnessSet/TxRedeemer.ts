@@ -93,29 +93,6 @@ export class TxRedeemer
         this._execUnits = newExUnits;
     }
 
-    /*
-        let _exUnits = execUnits.clone();
-
-        /* TO DO: ask about optimizing definePropertyIfNotPresent 
-        definePropertyIfNotPresent(
-            this,
-            "execUnits",
-            {
-                get: () => _exUnits,
-                set: ( newExUnits: ExBudget ) => {
-                    assert(
-                        newExUnits instanceof ExBudget,
-                        "invalid 'execUnits' constructing 'TxRedeemer'"
-                    );
-                    _exUnits = newExUnits.clone();
-                },
-                enumerable: true,
-                configurable: false
-            }
-        );
-    */
-
-
     constructor(
         redeemer: ITxRedeemer,
         readonly cborRef: SubCborRef | undefined = undefined
