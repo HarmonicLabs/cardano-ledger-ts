@@ -1,7 +1,23 @@
+Order of eras to respect:
+
 1) Conway
 2) Babbage
 3) Alonzo
-4) Mary - missing header
-5) Allegra - missing header
+4) Mary
+5) Allegra
 6) Shelley
-7) Byron - missing header
+
+7) Byron (DON'T DO THIS)
+
+- Copy class definiton from outside the `eras` directory.
+- reaname class as 
+    ```ts
+    `${Era}${LedgerType}`
+    ```
+- open the `cddl` of that era and look for the definition.
+- check all the fileds are there, remove any fields that are NOT supposed to be there (new era fields)
+- check `toCborObj` has correct encoding (IMPORTANT pay attention to CDDL)
+- ensure `if( this.cborRef instanceof SubCborRef )` is present BEFORE on `toCborObj`.
+- check `fromCborObj` has correct decoding (IMPORTANT pay attention to CDDL)
+
+Repeat for all classes outside of `eras`.

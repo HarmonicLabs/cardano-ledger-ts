@@ -1,6 +1,6 @@
 import { XPrv } from "@harmoniclabs/bip32_ed25519"
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborString, forceCborString } from "@harmoniclabs/cbor"
-import { signEd25519 } from "@harmoniclabs/crypto"
+import { signEd25519_sync } from "@harmoniclabs/crypto"
 import { PrivateKey, CredentialType, PubKeyHash } from "../../../credentials"
 import { Signature, Hash32, Hash28 } from "../../../hashes"
 import { IConwayTxBody, IConwayTxWitnessSet, AuxiliaryData, ConwayTxBody, ConwayTxWitnessSet, isIConwayTxBody, isIConwayTxWitnessSet, VKeyWitness, VKey } from "../../../tx"
@@ -79,7 +79,7 @@ export class ConwayTx
         );
         this.isScriptValid = isScriptValid === undefined ? true : isScriptValid;
         this.auxiliaryData = auxiliaryData;
-        
+
         this.cborRef = cborRef ?? subCborRefOrUndef( tx );
     }
 
@@ -122,7 +122,7 @@ export class ConwayTx
             return;
         }
 
-        const { pubKey, signature } = signEd25519(
+        const { pubKey, signature } = signEd25519_sync(
             this.body.hash.toBuffer(),
             signer instanceof Uint8Array ? signer : signer.toBuffer()
         );
