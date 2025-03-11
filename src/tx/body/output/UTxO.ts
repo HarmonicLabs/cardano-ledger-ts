@@ -31,7 +31,11 @@ export class UTxO
     readonly resolved!: TxOut
 
     constructor(
-        { utxoRef, resolved }: IUTxO,
+        { 
+            utxoRef, 
+            resolved 
+        }: IUTxO,
+        
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
