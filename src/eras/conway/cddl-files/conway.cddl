@@ -129,7 +129,8 @@ bootstrap_witness = [public_key : $vkey
 ; 
 bounded_bytes = bytes .size (0 .. 64)
 
-certificate = [stake_registration
+certificate = [
+                  stake_registration
                // stake_deregistration
                // stake_delegation
                // pool_registration
@@ -145,7 +146,8 @@ certificate = [stake_registration
                // resign_committee_cold_cert
                // reg_drep_cert
                // unreg_drep_cert
-               // update_drep_cert]
+               // update_drep_cert
+               ]
 
 certificates = nonempty_set<certificate>
 
@@ -512,12 +514,15 @@ slot_no = uint .size 8
 
 stake_credential = credential
 
-transaction = [transaction_body
+transaction = [
+                transaction_body
               , transaction_witness_set
               , bool
-              , auxiliary_data / nil]
+              , auxiliary_data / nil
+              ]
 
-transaction_body = {0 : set<transaction_input>
+transaction_body = {
+                     0 : set<transaction_input>
                    , 1 : [* transaction_output]
                    , 2 : coin
                    , ? 3 : slot_no
@@ -536,7 +541,8 @@ transaction_body = {0 : set<transaction_input>
                    , ? 19 : voting_procedures
                    , ? 20 : proposal_procedures
                    , ? 21 : coin
-                   , ? 22 : positive_coin}
+                   , ? 22 : positive_coin
+                   }
 
 transaction_index = uint .size 2
 

@@ -1,17 +1,19 @@
-import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString, isCborObj, SubCborRef } from "@harmoniclabs/cbor";
+import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
+import { CanBeUInteger, canBeUInteger, forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
 import { blake2b_256 } from "@harmoniclabs/crypto";
-import { isObject, hasOwn } from "@harmoniclabs/obj-utils";
-import { PubKeyHash } from "../../credentials";
-import { AuxiliaryDataHash, ScriptDataHash, Hash32, CanBeHash28, canBeHash28 } from "../../hashes";
-import { Coin, TxWithdrawals, ITxWithdrawals, LegacyPPUpdateProposal, Value, NetworkT, Certificate, canBeTxWithdrawals, isLegacyPPUpdateProposal, forceTxWithdrawals, LegacyPPUpdateProposalToCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, isCertificate, certificateFromCborObj, certificatesToDepositLovelaces, isIValue } from "../../ledger";
-import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
-import { ToJson } from "../../utils/ToJson";
-import { CanBeUInteger, canBeUInteger, forceBigUInt, maybeBigUint } from "../../utils/ints";
-import { UTxO, TxOut, isIUTxO, isITxOut, TxOutRef } from "./output";
-import { IVotingProcedures, VotingProcedures, isIVotingProceduresEntry } from "../../governance/VotingProcedures";
-import { IProposalProcedure, ProposalProcedure, isIProposalProcedure } from "../../governance/ProposalProcedure";
-import { getCborSet } from "../../utils/getCborSet";
-import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
+import { hasOwn, isObject } from "@harmoniclabs/obj-utils";
+import { Certificate } from "crypto";
+import { PubKeyHash } from "../../../credentials";
+import { IVotingProcedures, VotingProcedures, ProposalProcedure, IProposalProcedure, isIVotingProceduresEntry, isIProposalProcedure } from "../../../governance";
+import { AuxiliaryDataHash, ScriptDataHash, CanBeHash28, Hash32, canBeHash28 } from "../../../hashes";
+import { Coin, TxWithdrawals, ITxWithdrawals, LegacyPPUpdateProposal, Value, NetworkT, isCertificate, canBeTxWithdrawals, isLegacyPPUpdateProposal, forceTxWithdrawals, isIValue, LegacyPPUpdateProposalToCborObj, certificateFromCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, certificatesToDepositLovelaces } from "../../../ledger";
+import { UTxO, TxOut, isIUTxO, isITxOut, TxOutRef } from "../../../tx";
+import { getCborSet } from "../../../utils/getCborSet";
+import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
+import { maybeBigUint } from "../../../utils/ints";
+import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
+import { ToJson } from "../../../utils/ToJson";
+
 
 export interface ITxBody {
     inputs: [ UTxO, ...UTxO[] ],
@@ -651,7 +653,7 @@ export class TxBody
             network:                    _net instanceof CborUInt ? (Number( _net.num ) === 0 ? "testnet": "mainnet") : undefined,
             collateralReturn:           _collRet === undefined ? undefined : TxOut.fromCborObj( _collRet ),
             totCollateral:              _totColl instanceof CborUInt ? _totColl.num : undefined,
-            refInputs:                  _refIns !== undefined ? getCborSet( _refIns ).map( txOutRefAsUTxOFromCborObj ) : undefined,
+            refInputs:                  _refIns !== undefined ? getCborSet( _refIns ).map( txOutRefAsUTxOFromCborObj ) : undefined
         }, getSubCborRef( cObj ));
     }
 
@@ -668,12 +670,12 @@ export class TxBody
             protocolUpdate: 
                 this.protocolUpdate === undefined ? undefined :
                 protocolUpdateToJson( this.protocolUpdate ),
-            auxDataHash: this.auxDataHash?.toString() , // hash 32
+            auxDataHash: this.auxDataHash?.asString , // hash 32
             validityIntervalStart: this.validityIntervalStart?.toString(),
             mint: this.mint?.toJson(),
-            scriptDataHash: this.scriptDataHash?.toString(), // hash 32
+            scriptDataHash: this.scriptDataHash?.asString, // hash 32
             collateralInputs: this.collateralInputs?.map( i => i.toJson() ), 
-            requiredSigners: this.requiredSigners?.map( sig => sig.toString() ),
+            requiredSigners: this.requiredSigners?.map( sig => sig.asString ),
             network: this.network,
             collateralReturn: this.collateralReturn?.toJson(),
             totCollateral: this.totCollateral?.toString(),

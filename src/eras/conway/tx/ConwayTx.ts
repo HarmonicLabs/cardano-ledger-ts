@@ -1,48 +1,45 @@
-import { CredentialType, PrivateKey, PubKeyHash } from "../credentials";
-import { Hash28, Hash32, Signature } from "../hashes";
-import { VKeyWitness, VKey, ITxWitnessSet, TxWitnessSet, isITxWitnessSet } from "./TxWitnessSet";
-import { ToCbor, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
-import { signEd25519 } from "@harmoniclabs/crypto";
-import { InvalidCborFormatError } from "../utils/InvalidCborFormatError";
-import { ToJson } from "../utils/ToJson";
-import { assert } from "../utils/assert";
-import { AuxiliaryData } from "./AuxiliaryData";
-import { ITxBody, TxBody, isITxBody } from "./body";
-import { XPrv } from "@harmoniclabs/bip32_ed25519";
-import { getSubCborRef, subCborRefOrUndef } from "../utils/getSubCborRef";
+import { XPrv } from "@harmoniclabs/bip32_ed25519"
+import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborString, forceCborString } from "@harmoniclabs/cbor"
+import { signEd25519 } from "@harmoniclabs/crypto"
+import { PrivateKey, CredentialType, PubKeyHash } from "../../../credentials"
+import { Signature, Hash32, Hash28 } from "../../../hashes"
+import { IConwayTxBody, IConwayTxWitnessSet, AuxiliaryData, ConwayTxBody, ConwayTxWitnessSet, isIConwayTxBody, isIConwayTxWitnessSet, VKeyWitness, VKey } from "../../../tx"
+import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef"
+import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError"
+import { ToJson } from "../../../utils/ToJson"
 
-export interface ITx {
-    body: ITxBody
-    witnesses: ITxWitnessSet
+export interface IConwayTx {
+    body: IConwayTxBody
+    witnesses: IConwayTxWitnessSet
     isScriptValid?: boolean
     auxiliaryData?: AuxiliaryData | null
 }
 
-export interface Cip30LikeSignTx {
+export interface Cip30LikeSignConwayTx {
     /**
      * 
      * @param {string} txCbor receives the current transaction (`this`) cbor
      * @param {boolean} partial (standard parameter) wheather to throw or not if the wallet can not sign the entire transaction (`true` always passed)
-     * @returns {string} the cbor of the `TxWitnessSet` (!!! NOT the cbor of the signe transaction !!!)
+     * @returns {string} the cbor of the `ConwayTxWitnessSet` (!!! NOT the cbor of the signe transaction !!!)
      */
     signTx: ( txCbor: string, partial?: boolean ) => ( string | Promise<string> )
 }
 
-export class Tx
-    implements ITx, ToCbor, ToJson
+export class ConwayTx
+    implements IConwayTx, ToCbor, ToJson
 {
-    readonly body!: TxBody;
-    readonly witnesses!: TxWitnessSet;
+    readonly body!: ConwayTxBody;
+    readonly witnesses!: ConwayTxWitnessSet;
     readonly isScriptValid!: boolean;
     readonly auxiliaryData?: AuxiliaryData | null | undefined;
 
-    clone(): Tx
+    clone(): ConwayTx
     {
-        return new Tx( this );
+        return new ConwayTx( this );
     }
 
     constructor(
-        tx: ITx,
+        tx: IConwayTx,
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
@@ -54,19 +51,19 @@ export class Tx
         } = tx;
 
         if(!(
-            body instanceof TxBody ||
-            isITxBody( body )
-        )) throw new Error("invalid transaction body; must be instance of 'TxBody'");
+            body instanceof ConwayTxBody ||
+            isIConwayTxBody( body )
+        )) throw new Error("invalid transaction body; must be instance of 'ConwayTxBody'");
 
         if(!(
-            witnesses instanceof TxWitnessSet ||
-            isITxWitnessSet( witnesses )
-        )) throw new Error("invalid wintesses; must be instance of 'TxWitnessSet'");
+            witnesses instanceof ConwayTxWitnessSet ||
+            isIConwayTxWitnessSet( witnesses )
+        )) throw new Error("invalid wintesses; must be instance of 'ConwayTxWitnessSet'");
 
         if(!(
             isScriptValid === undefined ||
             typeof isScriptValid === "boolean"
-        )) throw new Error("'isScriptValid' ('Tx' third paramter) must be a boolean");
+        )) throw new Error("'isScriptValid' ('ConwayTx' third paramter) must be a boolean");
         
         if(!(
             auxiliaryData === undefined ||
@@ -74,8 +71,8 @@ export class Tx
             auxiliaryData instanceof AuxiliaryData
         )) throw new Error("invalid transaction auxiliray data; must be instance of 'AuxiliaryData'");
 
-        this.body = new TxBody( body );
-        this.witnesses = new TxWitnessSet(
+        this.body = new ConwayTxBody( body );
+        this.witnesses = new ConwayTxWitnessSet(
             witnesses,
             subCborRefOrUndef( witnesses ),
             getAllRequiredSigners( this.body )
@@ -94,7 +91,7 @@ export class Tx
      * one might prefer to use this method instead of `signWith`
      * when signature is provided by a third party (example CIP30 wallet)
     **/
-    addVKeyWitness( this: Tx, vkeyWit: VKeyWitness ): void
+    addVKeyWitness( this: ConwayTx, vkeyWit: VKeyWitness ): void
     {
         this.witnesses.addVKeyWitness( vkeyWit )
     }
@@ -143,11 +140,11 @@ export class Tx
      * that follows the [CIP-0030 standard]
      * (https://github.com/cardano-foundation/CIPs/tree/master/CIP-0030#apisigntxtx-cbortransaction-partialsign-bool--false-promisecbortransaction_witness_set)
     **/
-    async signWithCip30Wallet( cip30: Cip30LikeSignTx ): Promise<void>
+    async signWithCip30Wallet( cip30: Cip30LikeSignConwayTx ): Promise<void>
     {
-        const wits = TxWitnessSet.fromCbor(
+        const wits = ConwayTxWitnessSet.fromCbor(
             await cip30.signTx(
-                // signTx expects the entire transaction by standard (not only the body ¯\_(ツ)_/¯)
+                // signConwayTx expects the entire transaction by standard (not only the body ¯\_(ツ)_/¯)
                 this.toCbor().toString(),
                 true
             )
@@ -172,7 +169,10 @@ export class Tx
         return this.witnesses.isComplete
     }
     
-    get hash(): Hash32 { return this.body.hash; }
+    get hash(): Hash32 
+    { 
+        return this.body.hash; 
+    }
 
     toCborBytes(): Uint8Array
     {
@@ -208,36 +208,37 @@ export class Tx
         ]);
     }
 
-    static fromCbor( cStr: CanBeCborString ): Tx
+    static fromCbor( cStr: CanBeCborString ): ConwayTx
     {
-        return Tx.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true }) );
+        return ConwayTx.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true }) );
     }
-    static fromCborObj( cObj: CborObj ): Tx
+    static fromCborObj( cObj: CborObj ): ConwayTx
     {
-        if( !(
+        if(!(
             cObj instanceof CborArray
-        ) )
-        throw new InvalidCborFormatError("Tx");
+            && cObj.array.length >= 4
+        ))throw new InvalidCborFormatError("ConwayTx");
         
         const [ _body, _wits, _isValid, _aux ] = cObj.array;
 
         if(!(
             _isValid instanceof CborSimple &&
             typeof (_isValid.simple) === "boolean"
-        ))
-        throw new InvalidCborFormatError("Tx","isScriptValid is not a boolean")
+        ))throw new InvalidCborFormatError("ConwayTx","isScriptValid is not a boolean")
 
         const noAuxiliaryData = _aux instanceof CborSimple && (_aux.simple === null || _aux.simple === undefined);
 
-        return new Tx({
-            body: TxBody.fromCborObj( _body ),
-            witnesses: TxWitnessSet.fromCborObj( _wits ),
+        return new ConwayTx({
+            body: ConwayTxBody.fromCborObj( _body ),
+            witnesses: ConwayTxWitnessSet.fromCborObj( _wits ),
             isScriptValid: _isValid.simple,
             auxiliaryData: noAuxiliaryData ? undefined : AuxiliaryData.fromCborObj( _aux )
         }, getSubCborRef( cObj ))
     }
 
-    toJSON() { return this.toJson(); }
+    toJSON() { 
+        return this.toJson(); 
+    }
     toJson()
     {
         return {
@@ -257,7 +258,7 @@ export class Tx
  *  - required by withdrawals
  *  - additional specified in the `requiredSigners` field
  */
-export function getAllRequiredSigners( body: Readonly<TxBody> ): Hash28[]
+export function getAllRequiredSigners( body: Readonly<ConwayTxBody> ): Hash28[]
 {
     return (
         // required for spending pubKey utxo
@@ -294,7 +295,7 @@ export function getAllRequiredSigners( body: Readonly<TxBody> ): Hash28[]
     ).filter( ( elem, i, thisArr ) => thisArr.indexOf( elem ) === i );
 }
 
-export function getNSignersNeeded( body: Readonly<TxBody> ): number
+export function getNSignersNeeded( body: Readonly<ConwayTxBody> ): number
 {
     const n = getAllRequiredSigners( body ).length
     return n === 0 ? 1 : n;
