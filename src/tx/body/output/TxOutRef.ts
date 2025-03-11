@@ -9,7 +9,7 @@ import { ToJson } from "../../../utils/ToJson";
 import { assert } from "../../../utils/assert";
 import { lexCompare } from "@harmoniclabs/uint8array-utils";
 import { ToDataVersion } from "../../../toData/defaultToDataVersion";
-import { getSubCborRef } from "../../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
 import { isHex } from "../../../utils/hex";
 
 export type TxOutRefStr = `${string}#${number}`;
@@ -72,26 +72,27 @@ export class TxOutRef
     readonly index!: number
 
     constructor(
-        { id, index }: ITxOutRef,
+        
+        iTxOutRef: ITxOutRef,
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
-            (typeof id === "string" && isHex( id ) && (id.length === 64)) ||
-            (id instanceof Hash32),
-            "tx output id (tx hash) invalid while constructing a 'UTxO'"
-        );
+        const { 
+            id, 
+            index 
+        } = iTxOutRef;    
 
-        defineReadOnlyProperty(
-            this,
-            "id",
-            id instanceof Hash32 ? id : new Hash32( id )
-        );
-        defineReadOnlyProperty(
-            this,
-            "index",
-            Number( forceBigUInt( index ) )
-        );
+        if(!(
+            (typeof id === "string" && isHex( id ) && (id.length === 64)) ||
+            (id instanceof Hash32)           
+        ))throw new Error("tx output id (tx hash) invalid while constructing a 'UTxO'")
+        
+        this.id = id instanceof Hash32 ? id : new Hash32( id )
+
+        this.index = Number( forceBigUInt( index ));
+
+        /* Done: cborRef */
+        this.cborRef = cborRef ?? subCborRefOrUndef( iTxOutRef );
     }
 
     toString(): TxOutRefStr

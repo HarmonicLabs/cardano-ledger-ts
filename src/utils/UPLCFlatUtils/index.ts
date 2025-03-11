@@ -66,17 +66,17 @@ export default class UPLCFlatUtils
      */
     static encodeBigIntAsVariableLengthBitStream( integer: Readonly<bigint> ) : BitStream
     {
-        assert(
-            typeof integer === "bigint",
-            "expected a bigint as input; got instance of type: " + typeof integer
-        );
+        if(!(
+            typeof integer === "bigint"
+        )) throw new Error("expected a bigint as input; got instance of type: " + typeof integer);
+
 
         if( integer === BigInt( 0 ) ) return BitStream.fromBinStr( "00000000" );
 
-        assert(
-            integer > BigInt( 0 ),
-            "'UPLCFlatUtils.encodeBigIntAsVariableLengthBitStream' can only encode non-negative integers; the given input was: " + integer.toString()
-        )
+        if(!(
+            integer > BigInt( 0 )
+        ))throw new Error("'UPLCFlatUtils.encodeBigIntAsVariableLengthBitStream' can only encode non-negative integers; the given input was: " + integer.toString())
+
 
         // store binary string for easy BitStream creation
         const chunks: string[] = [];
@@ -121,10 +121,10 @@ export default class UPLCFlatUtils
 
     static getPadBitStream( n: InByteOffset ): BitStream
     {
-        assert(
-            isInByteOffset( n ),
-            "addPadTo only works for pads from 0 inclusive to 7 inclusive"
-        );
+        if(!(
+            isInByteOffset( n )
+        ))throw new Error("addPadTo only works for pads from 0 inclusive to 7 inclusive")
+
 
         if( n === 0 )
         {
@@ -147,10 +147,10 @@ export default class UPLCFlatUtils
      */
     static addPadTo( toPad: BitStream, n: InByteOffset ): void
     {
-        assert(
-            BitStream.isStrictInstance( toPad ),
-            "BitStream strict instance expected as first argument in 'UPLCFlatUtils.addPadTo'"
-        );
+        if(!(
+            BitStream.isStrictInstance( toPad )
+        ))throw new Error("BitStream strict instance expected as first argument in 'UPLCFlatUtils.addPadTo'");
+
         
         toPad.append(
             UPLCFlatUtils.getPadBitStream( n )

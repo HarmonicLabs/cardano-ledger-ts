@@ -1,6 +1,6 @@
 import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString, isCborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { blake2b_256 } from "@harmoniclabs/crypto";
-import { isObject, hasOwn, defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
+import { isObject, hasOwn } from "@harmoniclabs/obj-utils";
 import { PubKeyHash } from "../../credentials";
 import { AuxiliaryDataHash, ScriptDataHash, Hash32, CanBeHash28, canBeHash28 } from "../../hashes";
 import { Coin, TxWithdrawals, ITxWithdrawals, LegacyPPUpdateProposal, Value, NetworkT, Certificate, canBeTxWithdrawals, isLegacyPPUpdateProposal, forceTxWithdrawals, LegacyPPUpdateProposalToCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, isCertificate, certificateFromCborObj, certificatesToDepositLovelaces, isIValue } from "../../ledger";
@@ -8,7 +8,6 @@ import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
 import { CanBeUInteger, canBeUInteger, forceBigUInt, maybeBigUint } from "../../utils/ints";
 import { UTxO, TxOut, isIUTxO, isITxOut, TxOutRef } from "./output";
-import { assert } from "../../utils/assert";
 import { IVotingProcedures, VotingProcedures, isIVotingProceduresEntry } from "../../governance/VotingProcedures";
 import { IProposalProcedure, ProposalProcedure, isIProposalProcedure } from "../../governance/ProposalProcedure";
 import { getCborSet } from "../../utils/getCborSet";
@@ -373,102 +372,67 @@ export class TxBody
         {
             if( votingProcedures instanceof VotingProcedures )
             {
-                defineReadOnlyProperty(
-                    this,
-                    "votingProcedures",
-                    votingProcedures
-                );
+                this.votingProcedures = votingProcedures;
             }
             else
             {
-                assert(
+                if(!(
                     Array.isArray( votingProcedures ) &&
                     votingProcedures.length > 0 &&
-                    votingProcedures.every( isIVotingProceduresEntry ),
-                    "invalid 'votingProcedures' while constructing a 'Tx'"
-                );
+                    votingProcedures.every( isIVotingProceduresEntry )
+                )) throw new Error("invalid 'votingProcedures' while constructing a 'Tx'")
 
-                defineReadOnlyProperty(
-                    this,
-                    "votingProcedures",
-                    new VotingProcedures( votingProcedures )
-                );
+                this.votingProcedures = new VotingProcedures( votingProcedures )
+
             }
         }
-        else defineReadOnlyProperty(
-            this,
-            "votingProcedures",
-            undefined
-        );
+        else this.votingProcedures = undefined
 
         // -------------------------------------- proposalProcedures -------------------------------------- //
 
         if( proposalProcedures !== undefined )
         {
-            assert(
+            if(!(
                 Array.isArray( proposalProcedures ) &&
                 proposalProcedures.every( elem =>
                     elem instanceof ProposalProcedure ||
                     isIProposalProcedure( elem )
-                ),
-                "invalid 'proposalProcedures' while constructing a 'Tx'"
-            )
-
-            defineReadOnlyProperty(
-                this,
-                "proposalProcedures",
-                proposalProcedures.map( elem =>
-                    elem instanceof ProposalProcedure ? elem : new ProposalProcedure( elem )
                 )
-            );
+            )) throw new Error("invalid 'proposalProcedures' while constructing a 'Tx'")
+
+            this.proposalProcedures = proposalProcedures.map( elem =>
+                elem instanceof ProposalProcedure ? elem : new ProposalProcedure( elem )
+            )
         }
-        else defineReadOnlyProperty(
-            this,
-            "proposalProcedures",
-            undefined
-        );
+        else this.proposalProcedures = undefined
+
 
         // -------------------------------------- currentTreasuryValue -------------------------------------- //
 
         if( currentTreasuryValue !== undefined )
         {
-            assert(
-                canBeUInteger( currentTreasuryValue ),
-                "invalid 'currentTreasuryValue' while constructing a 'Tx'"
-            );
+            if(!(
+                canBeUInteger( currentTreasuryValue )
+            
+            )) throw new Error("invalid 'currentTreasuryValue' field");
 
-            defineReadOnlyProperty(
-                this,
-                "currentTreasuryValue",
-                forceBigUInt( currentTreasuryValue )
-            );
+            this.currentTreasuryValue = forceBigUInt( currentTreasuryValue );
+
         }
-        else defineReadOnlyProperty(
-            this,
-            "currentTreasuryValue",
-            undefined
-        );
+        else this.currentTreasuryValue = undefined;
+    
 
         // -------------------------------------- donation -------------------------------------- //
 
         if( donation !== undefined )
         {
-            assert(
-                canBeUInteger( donation ),
-                "invalid 'donation' while constructing a 'Tx'"
-            );
+            if(!(
+                canBeUInteger( donation )
+            ))throw new Error("invalid 'donation' while constructing a 'Tx'")
 
-            defineReadOnlyProperty(
-                this,
-                "donation",
-                forceBigUInt( donation )
-            );
+            this.donation = forceBigUInt( donation )
         }
-        else defineReadOnlyProperty(
-            this,
-            "donation",
-            undefined
-        );
+        else this.donation = undefined
 
         this.cborRef = cborRef ?? subCborRefOrUndef( body );
     }
@@ -612,9 +576,9 @@ export class TxBody
         if(!(cObj instanceof CborMap))
         throw new InvalidCborFormatError("TxBody")
 
-        let fields: (CborObj | undefined)[] = new Array( 19 ).fill( undefined );
+        let fields: (CborObj | undefined)[] = new Array( 23 ).fill( undefined );
 
-        for( let i = 0; i < 19; i++)
+        for( let i = 0; i < 23; i++)
         {
             const { v } = cObj.map.find(
                 ({ k }) => k instanceof CborUInt && Number( k.num ) === i
@@ -687,7 +651,7 @@ export class TxBody
             network:                    _net instanceof CborUInt ? (Number( _net.num ) === 0 ? "testnet": "mainnet") : undefined,
             collateralReturn:           _collRet === undefined ? undefined : TxOut.fromCborObj( _collRet ),
             totCollateral:              _totColl instanceof CborUInt ? _totColl.num : undefined,
-            refInputs:                  _refIns !== undefined ? getCborSet( _refIns ).map( txOutRefAsUTxOFromCborObj ) : undefined
+            refInputs:                  _refIns !== undefined ? getCborSet( _refIns ).map( txOutRefAsUTxOFromCborObj ) : undefined,
         }, getSubCborRef( cObj ));
     }
 
@@ -704,12 +668,12 @@ export class TxBody
             protocolUpdate: 
                 this.protocolUpdate === undefined ? undefined :
                 protocolUpdateToJson( this.protocolUpdate ),
-            auxDataHash: this.auxDataHash?.asString , // hash 32
+            auxDataHash: this.auxDataHash?.toString() , // hash 32
             validityIntervalStart: this.validityIntervalStart?.toString(),
             mint: this.mint?.toJson(),
-            scriptDataHash: this.scriptDataHash?.asString, // hash 32
+            scriptDataHash: this.scriptDataHash?.toString(), // hash 32
             collateralInputs: this.collateralInputs?.map( i => i.toJson() ), 
-            requiredSigners: this.requiredSigners?.map( sig => sig.asString ),
+            requiredSigners: this.requiredSigners?.map( sig => sig.toString() ),
             network: this.network,
             collateralReturn: this.collateralReturn?.toJson(),
             totCollateral: this.totCollateral?.toString(),

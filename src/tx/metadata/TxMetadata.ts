@@ -4,7 +4,7 @@ import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
 import { assert } from "../../utils/assert";
 import { TxMetadatum, isTxMetadatum, txMetadatumFromCborObj } from "./TxMetadatum";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 export type ITxMetadata = {
     [metadatum_label: number | string]: TxMetadatum 
@@ -26,16 +26,15 @@ export class TxMetadata
         
         Object.keys( metadata )
         .forEach( k =>
-
+            /* TO DO: how to handle this :grin: */
             defineReadOnlyProperty(
                 _metadata,
                 BigInt( k ).toString(),
                 (() => {
                     const v = metadata[k];
-                    assert(
-                        isTxMetadatum( v ),
-                        "metatdatum with label " + k + " was not instace of 'TxMetadatum'"
-                    );
+                    if(!(
+                        isTxMetadatum( v )
+                    ))throw new Error("metatdatum with label " + k + " was not instace of 'TxMetadatum'")
 
                     return v;
                 })()
@@ -43,11 +42,9 @@ export class TxMetadata
 
         );
 
-        defineReadOnlyProperty(
-            this,
-            "metadata",
-            _metadata
-        );
+        this.metadata = _metadata;
+         /* Done: this.cboRref params */
+        this.cborRef = cborRef ?? subCborRefOrUndef( metadata );
     }
     
     toCborBytes(): Uint8Array
@@ -104,7 +101,9 @@ export class TxMetadata
             throw new InvalidCborFormatError("TxMetadata")
 
             defineReadOnlyProperty(
-                meta, k.num.toString(), txMetadatumFromCborObj( v )
+                meta, 
+                k.num.toString(), 
+                txMetadatumFromCborObj( v )
             )
         }
 

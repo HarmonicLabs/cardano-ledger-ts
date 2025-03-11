@@ -1,6 +1,6 @@
 import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString, isCborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
-import { isObject, definePropertyIfNotPresent, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
+import { isObject } from "@harmoniclabs/obj-utils";
 import { Data, isData, dataToCborObj, dataFromCborObj } from "@harmoniclabs/plutus-data";
 import { Hash28 } from "../../hashes";
 import { Script, ScriptType, nativeScriptToCborObj } from "../../script";
@@ -11,7 +11,7 @@ import { BootstrapWitness } from "./BootstrapWitness";
 import { TxRedeemer } from "./TxRedeemer";
 import { VKeyWitness } from "./VKeyWitness";
 import { getCborSet, isCborSet } from "../../utils/getCborSet";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 
 export interface ITxWitnessSet {
@@ -120,13 +120,21 @@ export class TxWitnessSet
         allRequiredSigners: Hash28[] | undefined = undefined,
     )
     {
-        assert(
-            isITxWitnessSet( witnesses ),
-            "invalid witnesses passed"
-        );
+        if(!(
+            isITxWitnessSet( witnesses )
+        )) throw new Error("invalid witnesses passed");
 
+
+        
         const defGetter = ( name: keyof ITxWitnessSet, get: () => any ) =>
         {
+            Object.defineProperty(this, name, {
+                get,
+                set: () => {},
+                enumerable: true,
+                configurable: false
+            });   
+            /*
             definePropertyIfNotPresent(
                 this, name,
                 {
@@ -136,8 +144,8 @@ export class TxWitnessSet
                     configurable: false
                 }
             )
+            */
         };
-
         function cloneArr<Stuff extends Cloneable<any>>( arr?: Stuff[] ): Stuff[]
         {
             return arr?.map( element => element.clone() ) ?? [];
@@ -197,19 +205,11 @@ export class TxWitnessSet
             }
         );
 
-        defineReadOnlyProperty(
-            this, "addVKeyWitness",
-            ( vkeyWit: VKeyWitness ) => {
-                // if(
-                //     noRequiredSigs ||
-                //     _reqSigs.includes( vkeyWit.vkey.hash.toString() )
-                // )
-                // {
-                //     _vkeyWits.push( vkeyWit.clone() );
-                // }
-                _vkeyWits.push( vkeyWit.clone() );
-            }
-        )
+        this.addVKeyWitness = ( vkeyWit: VKeyWitness ) => {_vkeyWits.push( vkeyWit.clone() );
+        }
+
+        /* DONE: this.cboRref params */
+        this.cborRef = cborRef ?? subCborRefOrUndef( witnesses );
     }
 
     toJSON() { return this.toJson(); }
@@ -375,36 +375,36 @@ export class TxWitnessSet
             vkeyWitnesses: _vkey === undefined ? undefined : getCborSet( _vkey ).map( VKeyWitness.fromCborObj ),
             nativeScripts: _native === undefined ? undefined : 
                 getCborSet( _native ).map( nativeCborObj => 
-                    new Script(
-                        ScriptType.NativeScript, 
-                        Cbor.encode( nativeCborObj ).toBuffer()
-                    )
+                    new Script({
+                        scriptType: ScriptType.NativeScript, 
+                        bytes: Cbor.encode( nativeCborObj ).toBuffer()
+                    })
                 ),
             bootstrapWitnesses: _bootstrap === undefined ? undefined :
                 getCborSet( _bootstrap ).map( BootstrapWitness.fromCborObj ),
             plutusV1Scripts: _plutusV1 === undefined ? undefined :
                 getCborSet( _plutusV1 ).map( cbor =>
-                    new Script(
-                        ScriptType.PlutusV1,
-                        Cbor.encode( cbor ).toBuffer()
-                    )
+                    new Script({
+                        scriptType: ScriptType.PlutusV1,
+                        bytes: Cbor.encode( cbor ).toBuffer()
+                    })
                 ),
             datums: _dats === undefined ? undefined :
                 getCborSet( _dats ).map( dataFromCborObj ),
             redeemers: _reds === undefined ? undefined : witnessRedeemersFromCborObj( _reds ),
             plutusV2Scripts: _plutusV2 === undefined ? undefined :
                 getCborSet( _plutusV2 ).map( cbor =>
-                    new Script(
-                        ScriptType.PlutusV2,
-                        Cbor.encode( cbor ).toBuffer()
-                    )
+                    new Script({
+                        scriptType: ScriptType.PlutusV2,
+                        bytes: Cbor.encode( cbor ).toBuffer()
+                    })
                 ),
             plutusV3Scripts: _plutusV3 === undefined ? undefined :
                 getCborSet( _plutusV3 ).map( cbor =>
-                    new Script(
-                        ScriptType.PlutusV3,
-                        Cbor.encode( cbor ).toBuffer()
-                    )
+                    new Script({
+                        scriptType: ScriptType.PlutusV3,
+                        bytes: Cbor.encode( cbor ).toBuffer()
+                    })
                 ),
         }, getSubCborRef( cObj ));
     }

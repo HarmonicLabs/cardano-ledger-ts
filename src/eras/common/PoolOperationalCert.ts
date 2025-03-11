@@ -58,6 +58,7 @@ export class PoolOperationalCert
         this.sequenceNumber = forceBigUInt( cert.sequenceNumber );
         this.kesPeriod      = forceBigUInt( cert.kesPeriod );
         this.signature = cert.signature;
+        
         this.cborRef = cborRef ?? subCborRefOrUndef( cert );
     }
 

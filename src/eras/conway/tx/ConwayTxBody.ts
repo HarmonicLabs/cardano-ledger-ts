@@ -1,8 +1,7 @@
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
 import { blake2b_256 } from "@harmoniclabs/crypto";
-import { hasOwn, defineReadOnlyProperty, isObject } from "@harmoniclabs/obj-utils";
-import assert from "assert";
+import { hasOwn, isObject } from "@harmoniclabs/obj-utils";
 import { Certificate } from "crypto";
 import { PubKeyHash } from "../../../credentials";
 import { IVotingProcedures, VotingProcedures, ProposalProcedure, IProposalProcedure, isIVotingProceduresEntry, isIProposalProcedure } from "../../../governance";
@@ -15,7 +14,8 @@ import { maybeBigUint } from "../../../utils/ints";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 
-export interface IConwayTxBody {
+
+export interface ITxBody {
     inputs: [ UTxO, ...UTxO[] ],
     outputs: TxOut[],
     fee: Coin,
@@ -40,12 +40,12 @@ export interface IConwayTxBody {
     donation?: CanBeUInteger; // Coin (positive)
 }
 
-export function isIConwayTxBody( body: Readonly<object> ): body is IConwayTxBody
+export function isITxBody( body: Readonly<object> ): body is ITxBody
 {
     if( !isObject( body ) ) return false;
 
     const fields = Object.keys( body );
-    const b = body as IConwayTxBody;
+    const b = body as ITxBody;
 
     return (
         fields.length >= 3 &&
@@ -105,8 +105,8 @@ export function isIConwayTxBody( body: Readonly<object> ): body is IConwayTxBody
     )
 }
 
-export class ConwayTxBody
-    implements IConwayTxBody, ToCbor, ToJson
+export class TxBody
+    implements ITxBody, ToCbor, ToJson
 {
     readonly inputs!: [ UTxO, ...UTxO[] ];
     readonly outputs!: TxOut[];
@@ -158,11 +158,11 @@ export class ConwayTxBody
     /**
      * 
      * @param body object describing the transaction
-     * @throws only if the the `body` parameter does not respect the `IConwayTxBody` interface
-     *      **DOES NOT THROW** if the transaction is unbalanced; that needs to be checked using `ConwayTxBody.isValueConserved` static method
+     * @throws only if the the `body` parameter does not respect the `ITxBody` interface
+     *      **DOES NOT THROW** if the transaction is unbalanced; that needs to be checked using `TxBody.isValueConserved` static method
      */
     constructor(
-        body: IConwayTxBody,
+        body: ITxBody,
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
@@ -374,102 +374,67 @@ export class ConwayTxBody
         {
             if( votingProcedures instanceof VotingProcedures )
             {
-                defineReadOnlyProperty(
-                    this,
-                    "votingProcedures",
-                    votingProcedures
-                );
+                this.votingProcedures = votingProcedures;
             }
             else
             {
-                assert(
+                if(!(
                     Array.isArray( votingProcedures ) &&
                     votingProcedures.length > 0 &&
-                    votingProcedures.every( isIVotingProceduresEntry ),
-                    "invalid 'votingProcedures' while constructing a 'Tx'"
-                );
+                    votingProcedures.every( isIVotingProceduresEntry )
+                )) throw new Error("invalid 'votingProcedures' while constructing a 'Tx'")
 
-                defineReadOnlyProperty(
-                    this,
-                    "votingProcedures",
-                    new VotingProcedures( votingProcedures )
-                );
+                this.votingProcedures = new VotingProcedures( votingProcedures )
+
             }
         }
-        else defineReadOnlyProperty(
-            this,
-            "votingProcedures",
-            undefined
-        );
+        else this.votingProcedures = undefined
 
         // -------------------------------------- proposalProcedures -------------------------------------- //
 
         if( proposalProcedures !== undefined )
         {
-            assert(
+            if(!(
                 Array.isArray( proposalProcedures ) &&
                 proposalProcedures.every( elem =>
                     elem instanceof ProposalProcedure ||
                     isIProposalProcedure( elem )
-                ),
-                "invalid 'proposalProcedures' while constructing a 'Tx'"
-            )
-
-            defineReadOnlyProperty(
-                this,
-                "proposalProcedures",
-                proposalProcedures.map( elem =>
-                    elem instanceof ProposalProcedure ? elem : new ProposalProcedure( elem )
                 )
-            );
+            )) throw new Error("invalid 'proposalProcedures' while constructing a 'Tx'")
+
+            this.proposalProcedures = proposalProcedures.map( elem =>
+                elem instanceof ProposalProcedure ? elem : new ProposalProcedure( elem )
+            )
         }
-        else defineReadOnlyProperty(
-            this,
-            "proposalProcedures",
-            undefined
-        );
+        else this.proposalProcedures = undefined
+
 
         // -------------------------------------- currentTreasuryValue -------------------------------------- //
 
         if( currentTreasuryValue !== undefined )
         {
-            assert(
-                canBeUInteger( currentTreasuryValue ),
-                "invalid 'currentTreasuryValue' while constructing a 'Tx'"
-            );
+            if(!(
+                canBeUInteger( currentTreasuryValue )
+            
+            )) throw new Error("invalid 'currentTreasuryValue' field");
 
-            defineReadOnlyProperty(
-                this,
-                "currentTreasuryValue",
-                forceBigUInt( currentTreasuryValue )
-            );
+            this.currentTreasuryValue = forceBigUInt( currentTreasuryValue );
+
         }
-        else defineReadOnlyProperty(
-            this,
-            "currentTreasuryValue",
-            undefined
-        );
+        else this.currentTreasuryValue = undefined;
+    
 
         // -------------------------------------- donation -------------------------------------- //
 
         if( donation !== undefined )
         {
-            assert(
-                canBeUInteger( donation ),
-                "invalid 'donation' while constructing a 'Tx'"
-            );
+            if(!(
+                canBeUInteger( donation )
+            ))throw new Error("invalid 'donation' while constructing a 'Tx'")
 
-            defineReadOnlyProperty(
-                this,
-                "donation",
-                forceBigUInt( donation )
-            );
+            this.donation = forceBigUInt( donation )
         }
-        else defineReadOnlyProperty(
-            this,
-            "donation",
-            undefined
-        );
+        else this.donation = undefined
 
         this.cborRef = cborRef ?? subCborRefOrUndef( body );
     }
@@ -604,18 +569,18 @@ export class ConwayTxBody
         ].filter( entry => entry !== undefined ) as CborMapEntry[]))
     }
 
-    static fromCbor( cStr: CanBeCborString ): ConwayTxBody
+    static fromCbor( cStr: CanBeCborString ): TxBody
     {
-        return ConwayTxBody.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
+        return TxBody.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
-    static fromCborObj( cObj: CborObj ): ConwayTxBody
+    static fromCborObj( cObj: CborObj ): TxBody
     {
         if(!(cObj instanceof CborMap))
-        throw new InvalidCborFormatError("ConwayTxBody")
+        throw new InvalidCborFormatError("TxBody")
 
         let fields: (CborObj | undefined)[] = new Array( 23 ).fill( undefined );
 
-        for( let i = 0; i < 19; i++)
+        for( let i = 0; i < 23; i++)
         {
             const { v } = cObj.map.find(
                 ({ k }) => k instanceof CborUInt && Number( k.num ) === i
@@ -653,25 +618,25 @@ export class ConwayTxBody
         ] = fields;
 
         if( _ins_ === undefined || _outs === undefined || _fee === undefined )
-        throw new InvalidCborFormatError("ConwayTxBody");
+        throw new InvalidCborFormatError("TxBody");
 
         if(!(
             // _ins  instanceof CborArray &&
             _outs instanceof CborArray &&
             _fee  instanceof CborUInt
         ))
-        throw new InvalidCborFormatError("ConwayTxBody");
+        throw new InvalidCborFormatError("TxBody");
 
         let ttl: bigint | undefined = undefined;
         if( _ttl !== undefined )
         {
             if(!( _ttl instanceof CborUInt ))
-            throw new InvalidCborFormatError("ConwayTxBody");
+            throw new InvalidCborFormatError("TxBody");
 
             ttl = _ttl.num;
         }
 
-        return new ConwayTxBody({
+        return new TxBody({
             inputs: getCborSet( _ins_ ).map( txOutRefAsUTxOFromCborObj ) as [UTxO, ...UTxO[]],
             outputs: _outs.array.map( TxOut.fromCborObj ),
             fee: _fee.num,
@@ -725,7 +690,7 @@ export class ConwayTxBody
      * @todo add mints and burns
      * @deprecated until mints and burns are added
      */
-    static isValueConserved( tx: ConwayTxBody ): boolean
+    static isValueConserved( tx: TxBody ): boolean
     {
         const {
             inputs,

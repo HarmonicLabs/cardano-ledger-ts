@@ -4,7 +4,7 @@ import { PubKeyHash } from "../credentials/PubKeyHash";
 import { CanBeHash32, Hash32, canBeHash32 } from "../hashes/Hash32/Hash32";
 import { PoolKeyHash } from "../hashes/Hash28/PoolKeyHash";
 import { VRFKeyHash } from "../hashes/Hash32/VRFKeyHash";
-import { CborPositiveRational, CborObj, CborUInt, CborArray, CborSimple, CborText, CborTag, CborBytes } from "@harmoniclabs/cbor";
+import { CborPositiveRational, CborObj, CborUInt, CborArray, CborSimple, CborText, CborTag, CborBytes, SubCborRef } from "@harmoniclabs/cbor";
 import { CanBeHash28, Hash28, canBeHash28 } from "../hashes";
 import { canBeUInteger, forceBigUInt } from "../utils/ints";
 import { PoolRelay, isPoolRelay, poolRelayToCborObj, poolRelayFromCborObj, poolRelayToJson } from "./PoolRelay";
@@ -14,6 +14,7 @@ import { Rational, cborFromRational, isRational } from "./protocol/Rational";
 import { StakeAddress } from "./StakeAddress";
 import { Network } from "./Network";
 import { getCborSet } from "../utils/getCborSet";
+import { getSubCborRef, subCborRefOrUndef } from "../utils/getSubCborRef";
 
 export interface IPoolParamsMetadata {
     poolMetadataUrl: string,
@@ -78,9 +79,12 @@ export class PoolParams
     readonly relays!: PoolRelay[];
     readonly metadata?: ITypedPoolParamsMetadata;
 
-    constructor( params: IPoolParams )
+    constructor( 
+        params: IPoolParams,
+        readonly cborRef: SubCborRef | undefined = undefined
+     )
     {
-        assert(
+        if(!(
             isObject( params ) &&
             hasOwn( params, "operator" ) &&
             hasOwn( params, "vrfKeyHash" ) &&
@@ -89,9 +93,9 @@ export class PoolParams
             hasOwn( params, "margin" ) &&
             hasOwn( params, "rewardAccount" ) &&
             hasOwn( params, "owners" ) &&
-            hasOwn( params, "relays" ),
-            "invalid pool parameters passed to construct a 'PoopParams' instance"
-        );
+            hasOwn( params, "relays" )
+        ))throw new Error("invalid pool parameters passed to construct a 'PoopParams' instance")
+
 
         const {
             operator,
@@ -105,86 +109,70 @@ export class PoolParams
             metadata 
         } = params;
 
-        assert(
-            canBeHash28( operator ),
-            "invalid 'operator' constructing 'PoolParams'"
-        );
-        defineReadOnlyProperty( this, "operator", new PoolKeyHash( operator ) );
+        if(!(
+            canBeHash28( operator )
+        ))throw new Error("invalid 'operator' constructing 'PoolParams'");
+        this.operator = new PoolKeyHash( operator );
 
-        assert(
-            canBeHash32( vrfKeyHash ),
-            "invalid 'vrfKeyHash' constructing 'PoolParams'"
-        );
-        defineReadOnlyProperty( this, "vrfKeyHash", new VRFKeyHash( vrfKeyHash ) );
+        if(!(
+            canBeHash32( vrfKeyHash )
+        ))throw new Error("invalid 'vrfKeyHash' constructing 'PoolParams'");
+        this.vrfKeyHash =  new VRFKeyHash( vrfKeyHash );
 
-        assert(
-            canBeUInteger( pledge ),
-            "invalid 'pledge' constructing 'PoolParams'"
-        );
-        defineReadOnlyProperty( this, "pledge", forceBigUInt( pledge ) );
-        
-        assert(
-            canBeUInteger( cost ),
-            "invalid 'cost' constructing 'PoolParams'"
-        );
-        defineReadOnlyProperty( this, "cost", forceBigUInt( cost ) );
+        if(!(
+            canBeUInteger( pledge )
+        ))throw new Error("invalid 'pledge' constructing 'PoolParams'");
+        this.pledge = forceBigUInt( pledge );
 
-        assert(
-            isRational( margin ),
-            "invalid 'margin' constructing 'PoolParams'"
-        );
-        defineReadOnlyProperty( this, "margin", cborFromRational( margin ) );
+        if(!(
+            canBeUInteger( cost )
+        ))throw new Error("invalid 'cost' constructing 'PoolParams'");
+        this.cost = forceBigUInt( cost )
+
+        if(!(
+            isRational( margin )
+        ))throw new Error("invalid 'margin' constructing 'PoolParams'");
+        this.margin = cborFromRational( margin )
 
         if( canBeHash28( rewardAccount ) )
         {
-            defineReadOnlyProperty(
-                this,
-                "rewardAccount",
-                new StakeAddress(
-                    "mainnet",
-                    new Hash28( rewardAccount )
-                )
-            );
+            this.rewardAccount = new StakeAddress({
+                network: "mainnet",
+                credentials: new Hash28( rewardAccount ),
+                type: "stakeKey"
+            });
         }
         else
         {
-            assert(
-                rewardAccount instanceof StakeAddress,
-                "invalid 'rewardAccount' constructing 'PoolParams'"
-            );
-            defineReadOnlyProperty(
-                this,
-                "rewardAccount",
-                rewardAccount.clone()
-            );
+            if(!(
+                rewardAccount instanceof StakeAddress
+            ))throw new Error("invalid 'rewardAccount' constructing 'PoolParams'")
+            this.rewardAccount = rewardAccount.clone();
         }
-
-        assert(
+        
+        if(!(
             Array.isArray( owners ) &&
-            owners.every( canBeHash28 ),
-            "invalid 'owners' constructing 'PoolParams'"
-        );
-        defineReadOnlyProperty( this, "owners", Object.freeze( owners.map( hash => new Hash28( hash ) ) ) );
+            owners.every( canBeHash28 )
+        ))throw new Error("invalid 'owners' constructing 'PoolParams'")
 
-        assert(
+        this.owners = owners.map( hash => new Hash28( hash ) ) 
+
+        if(!(
             Array.isArray( relays ) &&
-            relays.every( isPoolRelay ),
-            "invalid 'relays' constructing 'PoolParams'"
-        );
-        defineReadOnlyProperty( this, "relays", Object.freeze( relays ) );
+            relays.every( isPoolRelay )
+        ))throw new Error("invalid 'relays' constructing 'PoolParams'")
 
-        assert(
+        this.relays = relays 
+
+        if(!(
             metadata === undefined ||
-            isIPoolParamsMetadata( metadata ),
-            "invalid 'metadata' filed for 'PoolParams'"
-        );
-        defineReadOnlyProperty(
-            this,
-            "metadata",
-            metadata === undefined ? undefined:
-            typedPoolParamsMetadata( metadata )
-        );
+            isIPoolParamsMetadata( metadata )
+        ))throw new Error("invalid 'metadata' filed for 'PoolParams'")
 
+        this.metadata = metadata === undefined ? undefined : typedPoolParamsMetadata( metadata )
+        
+        this.cborRef = cborRef ?? subCborRefOrUndef( params );
+        
     }
 
     toCborObjArray(): CborObj[]

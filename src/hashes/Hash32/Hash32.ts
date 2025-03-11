@@ -2,7 +2,7 @@ import { CanBeCborString, Cbor, forceCborString, CborObj, CborBytes, SubCborRef 
 import { assert } from "../../utils/assert";
 import { isHex } from "../../utils/hex";
 import { canBeHashInstance, Hash } from "../Hash";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 import { U8Arr } from "../../utils/U8Arr";
 import { fromHex } from "@harmoniclabs/uint8array-utils";
 
@@ -46,11 +46,12 @@ export class Hash32 extends Hash
     )
     {
         super( bs instanceof Hash32 ? bs.toBuffer() : bs );
-
-        assert(
-            this._bytes.length === 32,
-            "'Hash32' must be an hash of length 32; length was: " + this._bytes.length
-        );
+        if(!(
+            this._bytes.length === 32
+        ))throw new Error("'Hash32' must be an hash of length 32; length was: " + this._bytes.length);
+        
+        /* Done: this.cboRref params */
+        this.cborRef = cborRef ?? subCborRefOrUndef( bs );
     }
 
     static fromCbor( cStr: CanBeCborString ): Hash32

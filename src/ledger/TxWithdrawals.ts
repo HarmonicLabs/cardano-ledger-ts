@@ -66,7 +66,7 @@ export function isITxWithdrawals( stuff: any ): stuff is ITxWithdrawals
 export class TxWithdrawals
     implements ToCbor, ToData
 {
-    readonly map!: TxWithdrawalsMapBigInt
+    readonly map!: Readonly<TxWithdrawalsMapBigInt>
 
     constructor(
         map: ITxWithdrawals,
@@ -74,10 +74,9 @@ export class TxWithdrawals
         network: NetworkT = "mainnet"
     )
     {
-        assert(
-            isITxWithdrawals( map ),
-            "invalid 'ITxWithdrawalsMap' passed to construct a 'TxWithdrawals'"
-        );
+        if(!(
+            isITxWithdrawals( map )
+        ))throw new Error("invalid 'ITxWithdrawalsMap' passed to construct a 'TxWithdrawals'")
 
         if( Array.isArray( map ) )
         {
@@ -85,37 +84,27 @@ export class TxWithdrawals
                 rewardAccount:
                     entry.rewardAccount instanceof StakeAddress ?
                         entry.rewardAccount.clone() :
-                        new StakeAddress(
+                        new StakeAddress({
                             network,
-                            new Hash28( entry.rewardAccount )
-                        ),
+                            credentials: new Hash28( entry.rewardAccount ),
+                            type: "stakeKey"
+                        }),
                 amount: forceBigUInt( entry.amount )
             }));
+            this.map =  Object.freeze(_map)
 
-            defineReadOnlyProperty(
-                this,
-                "map",
-                Object.freeze( _map )
-            );
         }
         else
         {
-            assert(
-                typeof map === "object",
-                "invalid object passed as 'ITxWithdrawalsMap' to construct a 'TxWithdrawals'"
-            );
+            if(!(
+                typeof map === "object"
+            ))throw new Error("invalid object passed as 'ITxWithdrawalsMap' to construct a 'TxWithdrawals'")
 
-            defineReadOnlyProperty(
-                this,
-                "map",
-                Object.freeze(
-                    Object.keys( map )
-                    .map( rewAccount => Object.freeze({
-                        rewardAccount: StakeAddress.fromString( rewAccount ),
-                        amount: forceBigUInt( (map as any)[rewAccount] )
-                    }))
-                )
-            );
+            this.map = Object.keys( map )
+            .map( rewAccount => Object.freeze({
+                rewardAccount: StakeAddress.fromString( rewAccount ),
+                amount: forceBigUInt( (map as any)[rewAccount] )
+            }))
         }
     }
 

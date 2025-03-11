@@ -105,12 +105,12 @@ export class MoveInstantRewardsCert
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
-            source === InstantRewardsSource.Reserves ||
-            source === InstantRewardsSource.Treasurery,
-            "invalid 'source' while constructing 'MoveInstantRewardsCert'"
-        );
-        assert(
+        if(!(
+            source === InstantRewardsSource.Reserves || 
+            source === InstantRewardsSource.Treasurery
+        )) throw new Error("invalid 'source' while constructing 'MoveInstantRewardsCert'");
+        
+        if(!(
             canBeUInteger( destination ) ||
             (
                 Array.isArray( destination ) &&
@@ -123,25 +123,17 @@ export class MoveInstantRewardsCert
                     )  &&
                     entry.stakeCredentials instanceof Credential
                 ))
-            ),
-            "invalid 'destintaiton' while constructing 'MoveInstantRewardsCert'"
-        );
+            )
+        ))throw new Error("invalid 'destintaiton' while constructing 'MoveInstantRewardsCert'");
 
-        defineReadOnlyProperty(
-            this,
-            "certType",
-            CertificateType.MoveInstantRewards
-        );
-        defineReadOnlyProperty(
-            this,
-            "source",
-            source
-        );
-        defineReadOnlyProperty(
-            this,
-            "destination",
-            destination
-        );
+        this.certType = CertificateType.MoveInstantRewards;
+
+        this.source = source;
+
+        this.destination = destination;
+
+        /* TODO: deprecated */
+        // this.cborRef = cborRef ?? getSubCborRef( this );
     }
 
     toData( version?: ToDataVersion | undefined): DataConstr

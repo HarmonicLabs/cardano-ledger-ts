@@ -7,13 +7,13 @@ describe("new Value", () => {
 
     test("only TOKEN", () => {
 
-        const mint1 = new Script(
-            ScriptType.NativeScript,
-            {
+        const mint1 = new Script({
+            scriptType: ScriptType.NativeScript,
+            bytes: {
                 type: "sig",
                 keyHash: "ff".repeat(28)
             }
-        );
+        });
         
         new Value([
             {

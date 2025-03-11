@@ -2,7 +2,7 @@ import { CredentialType, PrivateKey, PubKeyHash } from "../credentials";
 import { Hash28, Hash32, Signature } from "../hashes";
 import { VKeyWitness, VKey, ITxWitnessSet, TxWitnessSet, isITxWitnessSet } from "./TxWitnessSet";
 import { ToCbor, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
-import { signEd25519, signEd25519_sync } from "@harmoniclabs/crypto";
+import { signEd25519 } from "@harmoniclabs/crypto";
 import { InvalidCborFormatError } from "../utils/InvalidCborFormatError";
 import { ToJson } from "../utils/ToJson";
 import { assert } from "../utils/assert";
@@ -82,6 +82,7 @@ export class Tx
         );
         this.isScriptValid = isScriptValid === undefined ? true : isScriptValid;
         this.auxiliaryData = auxiliaryData;
+        
         this.cborRef = cborRef ?? subCborRefOrUndef( tx );
     }
 
@@ -116,24 +117,24 @@ export class Tx
         {
             const { pubKey, signature } = signer.sign( this.body.hash.toBuffer() );
             this.addVKeyWitness(
-                new VKeyWitness(
-                    new VKey( pubKey ),
-                    new Signature( signature )
-                )
+                new VKeyWitness({
+                    vkey: new VKey( pubKey ),
+                    signature: new Signature( signature )
+                })
             );
             return;
         }
 
-        const { pubKey, signature } = signEd25519_sync(
+        const { pubKey, signature } = signEd25519(
             this.body.hash.toBuffer(),
             signer instanceof Uint8Array ? signer : signer.toBuffer()
         );
 
         this.addVKeyWitness(
-            new VKeyWitness(
-                new VKey( pubKey ),
-                new Signature( signature )
-            )
+            new VKeyWitness({
+                vkey: new VKey( pubKey ),
+                signature: new Signature( signature )
+            })
         );
     }
 
@@ -213,7 +214,9 @@ export class Tx
     }
     static fromCborObj( cObj: CborObj ): Tx
     {
-        if( !(cObj instanceof CborArray) )
+        if( !(
+            cObj instanceof CborArray
+        ) )
         throw new InvalidCborFormatError("Tx");
         
         const [ _body, _wits, _isValid, _aux ] = cObj.array;

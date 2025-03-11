@@ -8,8 +8,14 @@ import { ToJson } from "../../utils/ToJson";
 import { assert } from "../../utils/assert";
 import { VKey } from "./VKeyWitness/VKey";
 import { isUint8Array, toHex } from "@harmoniclabs/uint8array-utils";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
+export interface IBootstrapWitness {
+    pubKey: Hash32;
+    signature: Signature;
+    chainCode: Hash32;
+    attributes: Uint8Array;
+}
 export class BootstrapWitness
     implements ToCbor, Cloneable<BootstrapWitness>, ToJson
 {
@@ -19,62 +25,48 @@ export class BootstrapWitness
     readonly attributes!: Uint8Array;
 
     constructor(
-        pubKey: Hash32,
-        signature: Signature,
-        chainCode: Hash32,
-        attributes: Uint8Array,
+        witness: IBootstrapWitness,
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
-            pubKey instanceof Hash32,
-            "invalid 'pubKey' constructing 'BootstrapWitness'"
-        );
-        defineReadOnlyProperty(
-            this,
-            "pubKey",
-            pubKey instanceof VKey ? pubKey : new VKey( pubKey )
-        );
+        const { 
+            pubKey, 
+            signature, 
+            chainCode, 
+            attributes 
+        } = witness;
+        
+        if(!(
+            pubKey instanceof Hash32
+        ))throw new Error("invalid 'pubKey' constructing 'BootstrapWitness'");
+        this.pubKey =  pubKey instanceof VKey ? pubKey : new VKey( pubKey )
 
-        assert(
-            signature instanceof Signature,
-            "invalid 'signature' constructing 'BootstrapWitness'"
-        );
-        defineReadOnlyProperty(
-            this,
-            "signature",
-            signature
-        );
+        if(!(
+            signature instanceof Signature
+        ))throw new Error("invalid 'signature' constructing 'BootstrapWitness'");
+        this.signature = signature;
 
-        assert(
-            chainCode instanceof Hash32,
-            "invalid 'chainCode' constructing 'BootstrapWitness'"
-        );
-        defineReadOnlyProperty(
-            this,
-            "chainCode",
-            chainCode
-        );
+        if(!(
+            chainCode instanceof Hash32
+        ))throw new Error("invalid 'chainCode' constructing 'BootstrapWitness'");
+        this.chainCode = chainCode;
 
-        assert(
-            isUint8Array( attributes ),
-            "invalid 'attributes' constructing 'BootstrapWitness'"
-        );
-        defineReadOnlyProperty(
-            this,
-            "attributes",
-            Uint8Array.from( attributes )
-        );
+        if(!(
+            isUint8Array( attributes )
+        ))throw new Error("invalid 'attributes' constructing 'BootstrapWitness'");
+        this.attributes = Uint8Array.from( attributes );
+
+        this.cborRef = cborRef ?? subCborRefOrUndef( witness );
     }
 
     clone(): BootstrapWitness
     {
-        return new BootstrapWitness(
-            this.pubKey.clone(),
-            this.signature.clone(),
-            this.chainCode.clone(),
-            this.attributes.slice()
-        )
+        return new BootstrapWitness({
+                pubKey: this.pubKey.clone(),
+                signature: this.signature.clone(),
+                chainCode: this.chainCode.clone(),
+                attributes: this.attributes.slice()
+            }, this.cborRef?.clone())
     }
 
     toCborBytes(): Uint8Array
@@ -122,10 +114,12 @@ export class BootstrapWitness
         throw new InvalidCborFormatError("BootstrapWitness");
 
         return new BootstrapWitness(
-            Hash32.fromCborObj( cObj.array[0] ),
-            Signature.fromCborObj( cObj.array[1] ),
-            Hash32.fromCborObj( cObj.array[2] ),
-            cObj.array[3].bytes,
+            {
+                pubKey: Hash32.fromCborObj(cObj.array[0]),
+                signature: Signature.fromCborObj(cObj.array[1]),
+                chainCode: Hash32.fromCborObj(cObj.array[2]),
+                attributes: cObj.array[3].bytes
+            },
             getSubCborRef( cObj )
         );
     }

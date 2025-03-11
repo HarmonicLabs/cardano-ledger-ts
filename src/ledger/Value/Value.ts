@@ -7,7 +7,7 @@ import { IValue, isIValue, getEmptyNameQty, getNameQty, IValueAdaEntry, IValueAs
 import { assert } from "../../utils/assert";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { ToDataVersion } from "../../toData/defaultToDataVersion";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 const enum Ord {
     LT = -1,
@@ -34,7 +34,7 @@ const _0n = BigInt( 0 );
 export class Value
     implements ToCbor, ToData
 {
-    readonly map!: NormalizedIValue
+    readonly map!: Readonly<NormalizedIValue>
 
     *[Symbol.iterator]()
     {
@@ -50,10 +50,11 @@ export class Value
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
-            isIValue( map ),
-            "invalid value interface passed to contruct a 'value' instance"
-        );
+        
+        if(!(
+            isIValue( map )
+        ))throw new Error("invalid value interface passed to contruct a 'value' instance");
+
 
         const _map = normalizeIValue( map );
 
@@ -92,11 +93,11 @@ export class Value
             return lexCompare( a.policy.toBuffer(), b.policy.toBuffer() );
         });
 
-        defineReadOnlyProperty(
-            this,
-            "map",
-            Object.freeze( _map )
-        );
+        this.map = Object.freeze( _map );
+
+        
+        /* DONE: this.cborRef */
+        this.cborRef = cborRef ?? subCborRefOrUndef( map );        
     }
 
     get lovelaces(): bigint
@@ -273,17 +274,17 @@ export class Value
 
     static add( a: Value, b: Value ): Value
     {
-        return new Value( addIValues( a.map, b.map ) );
+        return new Value( addIValues( a.map as IValue, b.map as IValue ) );
     }
 
     static sub( a: Value, b: Value ): Value
     {
-        return new Value( subIValues( a.map, b.map ) );
+        return new Value( subIValues( a.map as IValue, b.map as IValue ) );
     }
 
     clone(): Value
     {
-        return new Value( cloneIValue(this.map ) )
+        return new Value( cloneIValue(this.map as IValue) )
     }
 
     toData( version?: ToDataVersion ): DataMap<DataB,DataMap<DataB,DataI>>
@@ -462,7 +463,7 @@ export class Value
     toJSON() { return this.toJson(); }
     toJson(): ValueJson
     {
-        return IValueToJson( this.map );
+        return IValueToJson( this.map as IValue  );
     }
 
     /**

@@ -49,12 +49,11 @@ export class TxOut
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
+        if(!(
             isObject( txOutput ) &&
             hasOwn( txOutput, "address" ) &&
-            hasOwn( txOutput, "value" ),
-            "txOutput is missing some necessary fields"
-        );
+            hasOwn( txOutput, "value" )
+        )) throw new Error("txOutput is missing some necessary fields");
 
         let {
             address,
@@ -62,52 +61,36 @@ export class TxOut
             datum,
             refScript
         } = txOutput;
-
-        if( typeof address === "string" )
+        
+        if (isAddressStr(address))
         {
             address = Address.fromString(address);
         }
-        assert(
-            address instanceof Address,
-            "invlaid 'address' while constructing 'TxOut'" 
-        );
-        assert(
-            value instanceof Value,
-            "invlaid 'value' while constructing 'TxOut'" 
-        );
+        if(!(
+            address instanceof Address
+        )) throw new Error("invlaid 'address' while constructing 'TxOut'");
 
-        defineReadOnlyProperty(
-            this,
-            "address",
-            address
-        );
-        defineReadOnlyProperty(
-            this,
-            "value",
-            value
-        );
+        if(!(
+            value instanceof Value
+        )) throw new Error("invlaid 'value' while constructing 'TxOut'");
+
+        this.address = address;
+
+        this.value = value;
 
         if( datum !== undefined )
-            assert(
-                datum instanceof Hash32 || isData( datum ),
-                "invalid 'datum' field"
-            );
-        defineReadOnlyProperty(
-            this,
-            "datum",
-            datum
-        );
+            if(!(
+                datum instanceof Hash32 || isData( datum )
+            ))throw new Error("invalid 'datum' field")
+        
+        this.datum = datum;
 
         if( refScript !== undefined )
-            assert(
-                refScript instanceof Script,
-                "invalid 'refScript' field"
-            );
-        defineReadOnlyProperty(
-            this,
-            "refScript",
-            refScript
-        );
+            if(!(
+                refScript instanceof Script
+            )) throw new Error("invalid 'refScript' field");
+        
+        this.refScript = refScript;
 
         this.cborRef = cborRef ?? subCborRefOrUndef( txOutput );
     }
@@ -334,7 +317,10 @@ export class TxOut
             ))
             throw new InvalidCborFormatError("TxOut");
 
-            refScript = new Script( ScriptType.PlutusV2, _refScript.data.buffer );
+            refScript = new Script( {
+                scriptType: ScriptType.PlutusV2, 
+                bytes: _refScript.data.buffer 
+            });
         }
 
         if( _addr === undefined || _amt === undefined )
