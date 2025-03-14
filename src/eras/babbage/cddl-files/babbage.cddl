@@ -169,7 +169,8 @@ header = [header_body, body_signature : $kes_signature]
 ;  block_body_size: merkle triple root
 ;       vrf_result: NEW, replaces nonce_vrf and leader_vrf
 ; 
-header_body = [block_number : uint
+header_body = [
+                block_number : uint
               , slot : uint
               , prev_hash : $hash32 / nil
               , issuer_vkey : $vkey
@@ -178,7 +179,8 @@ header_body = [block_number : uint
               , block_body_size : uint
               , block_body_hash : $hash32
               , operational_cert
-              , protocol_version]
+              , protocol_version
+              ]
 
 int64 = -9223372036854775808 .. 9223372036854775807
 
@@ -409,10 +411,12 @@ signkeyKES = bytes .size 64
 
 stake_credential = credential
 
-transaction = [transaction_body
+transaction = [
+                transaction_body
               , transaction_witness_set
               , bool
-              , auxiliary_data / nil]
+              , auxiliary_data / nil
+              ]
 
 ;  2: fee
 ;  3: time to live
@@ -423,7 +427,8 @@ transaction = [transaction_body
 ;   17: total collateral
 ;   18: reference inputs
 ; 
-transaction_body = {0 : set<transaction_input>
+transaction_body = {
+                     0 : set<transaction_input>
                    , 1 : [* transaction_output]
                    , 2 : coin
                    , ? 3 : uint

@@ -43,6 +43,8 @@ export interface ITypedVotingProceduresEntry {
 export type IVotingProcedures = IVotingProceduresEntry[]
 export type ITypedVotingProcedures = ITypedVotingProceduresEntry[]
 
+//** TO DO: add fromCborObj and toJson */
+
 export class VotingProcedures
 {
     readonly procedures: ITypedVotingProcedures

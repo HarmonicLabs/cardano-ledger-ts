@@ -3,41 +3,41 @@ import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, C
 import { signEd25519_sync } from "@harmoniclabs/crypto"
 import { PrivateKey, CredentialType, PubKeyHash } from "../../../credentials"
 import { Signature, Hash32, Hash28 } from "../../../hashes"
-import { IMaryTxBody, IMaryTxWitnessSet, AuxiliaryData, MaryTxBody, MaryTxWitnessSet, isIMaryTxBody, isIMaryTxWitnessSet, VKeyWitness, VKey } from "../../../tx"
+import { IAllegraTxBody, IAllegraTxWitnessSet, AuxiliaryData, AllegraTxBody, AllegraTxWitnessSet, isIAllegraTxBody, isIAllegraTxWitnessSet, VKeyWitness, VKey } from "../../../tx"
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef"
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError"
 import { ToJson } from "../../../utils/ToJson"
 
-export interface IMaryTx {
-    body: IMaryTxBody
-    witnesses: IMaryTxWitnessSet
+export interface IAllegraTx {
+    body: IAllegraTxBody
+    witnesses: IAllegraTxWitnessSet
     auxiliaryData?: AuxiliaryData | null
 }
 
-export interface Cip30LikeSignMaryTx {
+export interface Cip30LikeSignAllegraTx {
     /**
      * 
      * @param {string} txCbor receives the current transaction (`this`) cbor
      * @param {boolean} partial (standard parameter) wheather to throw or not if the wallet can not sign the entire transaction (`true` always passed)
-     * @returns {string} the cbor of the `MaryTxWitnessSet` (!!! NOT the cbor of the signe transaction !!!)
+     * @returns {string} the cbor of the `AllegraTxWitnessSet` (!!! NOT the cbor of the signe transaction !!!)
      */
     signTx: ( txCbor: string, partial?: boolean ) => ( string | Promise<string> )
 }
 
-export class MaryTx
-    implements IMaryTx, ToCbor, ToJson
+export class AllegraTx
+    implements IAllegraTx, ToCbor, ToJson
 {
-    readonly body!: MaryTxBody;
-    readonly witnesses!: MaryTxWitnessSet;
+    readonly body!: AllegraTxBody;
+    readonly witnesses!: AllegraTxWitnessSet;
     readonly auxiliaryData?: AuxiliaryData | null | undefined;
 
-    clone(): MaryTx
+    clone(): AllegraTx
     {
-        return new MaryTx( this );
+        return new AllegraTx( this );
     }
 
     constructor(
-        tx: IMaryTx,
+        tx: IAllegraTx,
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
@@ -48,14 +48,14 @@ export class MaryTx
         } = tx;
 
         if(!(
-            body instanceof MaryTxBody ||
-            isIMaryTxBody( body )
-        )) throw new Error("invalid transaction body; must be instance of 'MaryTxBody'");
+            body instanceof AllegraTxBody ||
+            isIAllegraTxBody( body )
+        )) throw new Error("invalid transaction body; must be instance of 'AllegraTxBody'");
 
         if(!(
-            witnesses instanceof MaryTxWitnessSet ||
-            isIMaryTxWitnessSet( witnesses )
-        )) throw new Error("invalid wintesses; must be instance of 'MaryTxWitnessSet'");
+            witnesses instanceof AllegraTxWitnessSet ||
+            isIAllegraTxWitnessSet( witnesses )
+        )) throw new Error("invalid wintesses; must be instance of 'AllegraTxWitnessSet'");
         
         if(!(
             auxiliaryData === undefined ||
@@ -63,8 +63,8 @@ export class MaryTx
             auxiliaryData instanceof AuxiliaryData
         )) throw new Error("invalid transaction auxiliray data; must be instance of 'AuxiliaryData'");
 
-        this.body = new MaryTxBody( body );
-        this.witnesses = new MaryTxWitnessSet(
+        this.body = new AllegraTxBody( body );
+        this.witnesses = new AllegraTxWitnessSet(
             witnesses,
             subCborRefOrUndef( witnesses ),
             getAllRequiredSigners( this.body )
@@ -82,7 +82,7 @@ export class MaryTx
      * one might prefer to use this method instead of `signWith`
      * when signature is provided by a third party (example CIP30 wallet)
     **/
-    addVKeyWitness( this: MaryTx, vkeyWit: VKeyWitness ): void
+    addVKeyWitness( this: AllegraTx, vkeyWit: VKeyWitness ): void
     {
         this.witnesses.addVKeyWitness( vkeyWit )
     }
@@ -131,11 +131,11 @@ export class MaryTx
      * that follows the [CIP-0030 standard]
      * (https://github.com/cardano-foundation/CIPs/tree/master/CIP-0030#apisigntxtx-cbortransaction-partialsign-bool--false-promisecbortransaction_witness_set)
     **/
-    async signWithCip30Wallet( cip30: Cip30LikeSignMaryTx ): Promise<void>
+    async signWithCip30Wallet( cip30: Cip30LikeSignAllegraTx ): Promise<void>
     {
-        const wits = MaryTxWitnessSet.fromCbor(
+        const wits = AllegraTxWitnessSet.fromCbor(
             await cip30.signTx(
-                // signMaryTx expects the entire transaction by standard (not only the body ¯\_(ツ)_/¯)
+                // signAllegraTx expects the entire transaction by standard (not only the body ¯\_(ツ)_/¯)
                 this.toCbor().toString(),
                 true
             )
@@ -198,16 +198,16 @@ export class MaryTx
         ]);
     }
 
-    static fromCbor( cStr: CanBeCborString ): MaryTx
+    static fromCbor( cStr: CanBeCborString ): AllegraTx
     {
-        return MaryTx.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true }) );
+        return AllegraTx.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true }) );
     }
-    static fromCborObj( cObj: CborObj ): MaryTx
+    static fromCborObj( cObj: CborObj ): AllegraTx
     {
         if(!(
             cObj instanceof CborArray
             && cObj.array.length >= 3
-        ))throw new InvalidCborFormatError("MaryTx");
+        ))throw new InvalidCborFormatError("AllegraTx");
         
         const [ 
             _body, 
@@ -215,11 +215,12 @@ export class MaryTx
             _aux 
         ] = cObj.array;
 
+
         const noAuxiliaryData = _aux instanceof CborSimple && (_aux.simple === null || _aux.simple === undefined);
 
-        return new MaryTx({
-            body: MaryTxBody.fromCborObj( _body ),
-            witnesses: MaryTxWitnessSet.fromCborObj( _wits ),
+        return new AllegraTx({
+            body: AllegraTxBody.fromCborObj( _body ),
+            witnesses: AllegraTxWitnessSet.fromCborObj( _wits ),
             auxiliaryData: noAuxiliaryData ? undefined : AuxiliaryData.fromCborObj( _aux )
         }, getSubCborRef( cObj ))
     }
@@ -245,7 +246,7 @@ export class MaryTx
  *  - required by withdrawals
  *  - additional specified in the `requiredSigners` field
  */
-export function getAllRequiredSigners( body: Readonly<MaryTxBody> ): Hash28[]
+export function getAllRequiredSigners( body: Readonly<AllegraTxBody> ): Hash28[]
 {
     return (
         // required for spending pubKey utxo
@@ -282,7 +283,7 @@ export function getAllRequiredSigners( body: Readonly<MaryTxBody> ): Hash28[]
     ).filter( ( elem, i, thisArr ) => thisArr.indexOf( elem ) === i );
 }
 
-export function getNSignersNeeded( body: Readonly<MaryTxBody> ): number
+export function getNSignersNeeded( body: Readonly<AllegraTxBody> ): number
 {
     const n = getAllRequiredSigners( body ).length
     return n === 0 ? 1 : n;

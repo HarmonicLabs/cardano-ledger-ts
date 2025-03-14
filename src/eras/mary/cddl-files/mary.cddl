@@ -227,9 +227,14 @@ script_hash = $hash28
 
 stake_credential = credential
 
-transaction = [transaction_body, transaction_witness_set, auxiliary_data / nil]
+transaction = [
+        transaction_body, 
+        transaction_witness_set, 
+        auxiliary_data / nil
+        ]
 
-transaction_body = {0 : set<transaction_input>
+transaction_body = {
+                     0 : set<transaction_input>
                    , 1 : [* transaction_output]
                    , 2 : coin
                    , 3 : uint
@@ -238,7 +243,8 @@ transaction_body = {0 : set<transaction_input>
                    , ? 6 : update
                    , ? 7 : metadata_hash
                    , ? 8 : uint
-                   , ? 9 : mint}
+                   , ? 9 : mint
+                   }
 
 transaction_index = uint .size 2
 

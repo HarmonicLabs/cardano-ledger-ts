@@ -221,11 +221,16 @@ script_hash = $hash28
 
 stake_credential = credential
 
-transaction = [transaction_body, transaction_witness_set, auxiliary_data / nil]
+transaction = [
+        transaction_body, 
+        transaction_witness_set, 
+        auxiliary_data / nil
+        ]
 
 ; Allegra transaction body adds the validity interval start at index 8
 ; 
-transaction_body = {0 : set<transaction_input>
+transaction_body = {
+                     0 : set<transaction_input>
                    , 1 : [* transaction_output]
                    , 2 : coin
                    , 3 : uint
@@ -233,7 +238,8 @@ transaction_body = {0 : set<transaction_input>
                    , ? 5 : withdrawals
                    , ? 6 : update
                    , ? 7 : metadata_hash
-                   , ? 8 : uint}
+                   , ? 8 : uint
+                    }
 
 transaction_index = uint .size 2
 

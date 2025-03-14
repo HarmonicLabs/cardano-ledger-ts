@@ -15,7 +15,7 @@ import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 
 
-export interface IBabbageTxBody {
+export interface IShelleyTxBody {
     inputs: [ UTxO, ...UTxO[] ],
     outputs: TxOut[],
     fee: Coin,
@@ -24,23 +24,14 @@ export interface IBabbageTxBody {
     withdrawals?: TxWithdrawals | ITxWithdrawals,
     protocolUpdate?: LegacyPPUpdateProposal,
     auxDataHash?: AuxiliaryDataHash, // hash 32
-    validityIntervalStart?: CanBeUInteger,
-    mint?: Value,
-    scriptDataHash?: ScriptDataHash, // hash 32
-    collateralInputs?: UTxO[], 
-    requiredSigners?: CanBeHash28[],
-    network?: NetworkT,
-    collateralReturn?: TxOut,
-    totCollateral?: Coin,
-    refInputs?: UTxO[]
 }
 
-export function isIBabbageTxBody( body: Readonly<object> ): body is IBabbageTxBody
+export function isIShelleyTxBody( body: Readonly<object> ): body is IShelleyTxBody
 {
     if( !isObject( body ) ) return false;
 
     const fields = Object.keys( body );
-    const b = body as IBabbageTxBody;
+    const b = body as IShelleyTxBody;
 
     return (
         fields.length >= 3 &&
@@ -60,29 +51,11 @@ export function isIBabbageTxBody( body: Readonly<object> ): body is IBabbageTxBo
         ( b.withdrawals === undefined || canBeTxWithdrawals( b.withdrawals ) ) &&
         ( b.protocolUpdate === undefined || isLegacyPPUpdateProposal( b.protocolUpdate ) ) &&
         ( b.auxDataHash === undefined || b.auxDataHash instanceof Hash32 ) &&
-        ( b.validityIntervalStart === undefined || canBeUInteger( b.validityIntervalStart ) ) &&
-        ( b.mint === undefined || b.mint instanceof Value ) &&
-        ( b.scriptDataHash === undefined || b.scriptDataHash instanceof Hash32 ) &&
-        ( b.network === undefined || b.network === "mainnet" || b.network === "testnet" ) &&
-        ( b.collateralReturn === undefined || b.collateralReturn instanceof TxOut || isITxOut( b.collateralReturn ) ) &&
-        ( b.totCollateral === undefined || canBeUInteger( b.totCollateral ) ) &&
-        ( b.collateralInputs === undefined || (
-            Array.isArray( b.collateralInputs ) && 
-            b.collateralInputs.every( collateral => collateral instanceof UTxO )
-        )) &&
-        ( b.requiredSigners === undefined || (
-            Array.isArray( b.requiredSigners ) &&
-            b.requiredSigners.every( sig => sig instanceof PubKeyHash )
-        )) &&
-        ( b.refInputs === undefined || (
-            Array.isArray( b.refInputs ) &&
-            b.refInputs.every( ref => ref instanceof UTxO || isIUTxO( ref ) )
-        ))
     )
 }
 
-export class BabbageTxBody
-    implements IBabbageTxBody, ToCbor, ToJson
+export class ShelleyTxBody
+    implements IShelleyTxBody, ToCbor, ToJson
 {
     readonly inputs!: [ UTxO, ...UTxO[] ];
     readonly outputs!: TxOut[];
@@ -92,15 +65,6 @@ export class BabbageTxBody
     readonly withdrawals?: TxWithdrawals;
     readonly protocolUpdate?: LegacyPPUpdateProposal; // babbage only; removed in conway
     readonly auxDataHash?: AuxiliaryDataHash; // hash 32
-    readonly validityIntervalStart?: bigint;
-    readonly mint?: Value;
-    readonly scriptDataHash?: ScriptDataHash; // hash 32
-    readonly collateralInputs?: UTxO[];
-    readonly requiredSigners?: PubKeyHash[];
-    readonly network?: NetworkT;
-    readonly collateralReturn?: TxOut;
-    readonly totCollateral?: bigint; // Coin
-    readonly refInputs?: UTxO[];
 
     /**
      * getter
@@ -129,11 +93,11 @@ export class BabbageTxBody
     /**
      * 
      * @param body object describing the transaction
-     * @throws only if the the `body` parameter does not respect the `IConwayBabbageTxBody` interface
-     *      **DOES NOT THROW** if the transaction is unbalanced; that needs to be checked using `ConwayBabbageTxBody.isValueConserved` static method
+     * @throws only if the the `body` parameter does not respect the `IConwayShelleyTxBody` interface
+     *      **DOES NOT THROW** if the transaction is unbalanced; that needs to be checked using `ConwayShelleyTxBody.isValueConserved` static method
      */
     constructor(
-        body: IBabbageTxBody,
+        body: IShelleyTxBody,
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
@@ -146,15 +110,6 @@ export class BabbageTxBody
             withdrawals,
             protocolUpdate,
             auxDataHash,
-            validityIntervalStart,
-            mint,
-            scriptDataHash,
-            collateralInputs,
-            requiredSigners,
-            network,
-            collateralReturn,
-            totCollateral,
-            refInputs,
         } = body;
 
         // -------------------------------------- inputs -------------------------------------- //
@@ -230,110 +185,6 @@ export class BabbageTxBody
 
         this.auxDataHash = auxDataHash === undefined ? undefined : new AuxiliaryDataHash( auxDataHash );
         
-        // -------------------------------------- validityIntervalStart -------------------------------------- //
-                
-        if(!(
-            validityIntervalStart === undefined ||
-            canBeUInteger( validityIntervalStart )
-        )) throw new Error("invalid 'validityIntervalStart' field");
-
-        this.validityIntervalStart = validityIntervalStart === undefined ? undefined : forceBigUInt( validityIntervalStart );
-        
-        // -------------------------------------- mint -------------------------------------- //
-
-        if(!(
-            mint === undefined
-            || mint instanceof Value
-            || isIValue( mint )
-        )) throw new Error("invalid 'mint' field");
-        
-        if( mint === undefined ) this.mint = undefined;
-        else if( mint instanceof Value ) this.mint = mint;
-        else this.mint = new Value( mint );
-        
-        // -------------------------------------- scriptDataHash -------------------------------------- //
-        
-        if(!(
-            scriptDataHash === undefined ||
-            scriptDataHash instanceof Hash32
-        )) throw new Error("invalid 'scriptDataHash' field");
-
-        this.scriptDataHash = scriptDataHash === undefined ? undefined : new ScriptDataHash( scriptDataHash );
-
-        // -------------------------------------- collateral inputs -------------------------------------- //
-
-        if(!(
-            collateralInputs === undefined ||
-            (
-                Array.isArray( collateralInputs ) &&
-                collateralInputs.every( isIUTxO )
-            )
-        )) throw new Error("invalid 'collateralInputs' field");
-
-        this.collateralInputs = collateralInputs?.map( collateral =>
-            collateral instanceof UTxO ? collateral :
-            new UTxO( collateral )
-        );
-        // -------------------------------------- requiredSigners -------------------------------------- //
-        if(!(
-            requiredSigners === undefined ||
-            (
-                Array.isArray( requiredSigners ) &&
-                requiredSigners.every( canBeHash28 )
-            )
-        )) throw new Error("invalid 'requiredSigners' field");
-
-        this.requiredSigners = requiredSigners?.map( signer =>
-            signer instanceof PubKeyHash ? signer :
-            new PubKeyHash( signer )
-        );
-
-        // -------------------------------------- network -------------------------------------- //
-        
-        if(!(
-            network === undefined ||
-            network === "mainnet" ||
-            network === "testnet"
-        )) throw new Error("invalid 'network' field");
-
-        this.network = network;
-
-        // -------------------------------------- collateralReturn -------------------------------------- //
-        
-        if(!(
-            collateralReturn === undefined ||
-            collateralReturn instanceof TxOut ||
-            isITxOut( collateralReturn )
-        )) throw new Error("invalid 'collateralReturn' field");
-
-        this.collateralReturn = (
-            collateralReturn === undefined ? undefined :
-            collateralReturn instanceof TxOut ? collateralReturn :
-            new TxOut( collateralReturn )
-        )
-        // -------------------------------------- totCollateral -------------------------------------- //
-
-        if(!(
-            totCollateral === undefined ||
-            canBeUInteger( totCollateral )
-        ))
-
-        this.totCollateral = maybeBigUint( totCollateral );
-
-        // -------------------------------------- reference inputs -------------------------------------- //  
-
-        if(!(
-            refInputs === undefined ||
-            (
-                Array.isArray( refInputs ) &&
-                refInputs.every( isIUTxO )
-            )
-        )) throw new Error("invalid 'refInputs' field");
-
-        this.refInputs = refInputs?.map( refIn =>
-            refIn instanceof UTxO ? refIn :
-            new UTxO( refIn )
-        );
     }
 
     toCborBytes(): Uint8Array
@@ -398,66 +249,21 @@ export class BabbageTxBody
                 k: new CborUInt( 7 ),
                 v: this.auxDataHash.toCborObj()
             },
-            this.validityIntervalStart === undefined ? undefined :
-            {
-                k: new CborUInt( 8 ),
-                v: new CborUInt( this.validityIntervalStart )
-            },
-            this.mint === undefined ? undefined :
-            {
-                k: new CborUInt( 9 ),
-                v: this.mint.toCborObj()
-            },
-            this.scriptDataHash === undefined ? undefined :
-            {
-                k: new CborUInt( 11 ),
-                v: this.scriptDataHash.toCborObj()
-            },
-            this.collateralInputs === undefined || this.collateralInputs.length === 0 ? undefined :
-            {
-                k: new CborUInt( 13 ),
-                v: new CborArray( this.collateralInputs.map( collateral => collateral.utxoRef.toCborObj() ) )
-            },
-            this.requiredSigners === undefined || this.requiredSigners.length === 0 ? undefined :
-            {
-                k: new CborUInt( 14 ),
-                v: new CborArray( this.requiredSigners.map( signer => signer.toCborObj() ) )
-            },
-            this.network === undefined ? undefined :
-            {
-                k: new CborUInt( 15 ),
-                v: new CborUInt(this.network === "testnet" ? 0 : 1)
-            },
-            this.collateralReturn === undefined ? undefined :
-            {
-                k: new CborUInt( 16 ),
-                v: this.collateralReturn.toCborObj()
-            },
-            this.totCollateral === undefined ? undefined :
-            {
-                k: new CborUInt( 17 ),
-                v: new CborUInt( this.totCollateral )
-            },
-            this.refInputs === undefined || this.refInputs.length === 0 ? undefined :
-            {
-                k: new CborUInt( 18 ),
-                v: new CborArray( this.refInputs.map( refIn => refIn.utxoRef.toCborObj() ) )
-            }
         ].filter( entry => entry !== undefined ) as CborMapEntry[]))
     }
 
-    static fromCbor( cStr: CanBeCborString ): BabbageTxBody
+    static fromCbor( cStr: CanBeCborString ): ShelleyTxBody
     {
-        return BabbageTxBody.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
+        return ShelleyTxBody.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
-    static fromCborObj( cObj: CborObj ): BabbageTxBody
+    static fromCborObj( cObj: CborObj ): ShelleyTxBody
     {
         if(!(cObj instanceof CborMap))
-        throw new InvalidCborFormatError("BabbageTxBody")
+        throw new InvalidCborFormatError("ShelleyTxBody")
 
-        let fields: (CborObj | undefined)[] = new Array( 19 ).fill( undefined );
+        let fields: (CborObj | undefined)[] = new Array( 8 ).fill( undefined );
 
-        for( let i = 0; i < 19; i++)
+        for( let i = 0; i < 8; i++)
         {
             const { v } = cObj.map.find(
                 ({ k }) => k instanceof CborUInt && Number( k.num ) === i
@@ -477,40 +283,29 @@ export class BabbageTxBody
             _withdrawals,           // 5
             _pUp,                   // 6
             _auxDataHash,           // 7
-            _validityStart,         // 8
-            _mint,                  // 9
-            _10,                    // 10
-            _scriptDataHash,        // 11
-            _12,                    // 12
-            _collIns,               // 13 // set
-            _reqSigs,               // 14 // set
-            _net,                   // 15
-            _collRet,               // 16
-            _totColl,               // 17
-            _refIns,                // 18
         ] = fields;
 
         if( _ins_ === undefined || _outs === undefined || _fee === undefined )
-        throw new InvalidCborFormatError("BabbageTxBody");
+        throw new InvalidCborFormatError("ShelleyTxBody");
 
         if(!(
             // _ins  instanceof CborArray &&
             _outs instanceof CborArray &&
             _fee  instanceof CborUInt
         ))
-        throw new InvalidCborFormatError("BabbageTxBody");
+        throw new InvalidCborFormatError("ShelleyTxBody");
 
         let ttl: bigint | undefined = undefined;
         if( _ttl !== undefined )
         {
             if(!( _ttl instanceof CborUInt ))
-            throw new InvalidCborFormatError("BabbageTxBody");
+            throw new InvalidCborFormatError("ShelleyTxBody");
 
             ttl = _ttl.num;
         }
         
         //** TO DO: add votingProcedures, proposalProcedures, currentTreasuryValue, donation */
-        return new BabbageTxBody({
+        return new ShelleyTxBody({
             inputs: getCborSet( _ins_ ).map( txOutRefAsUTxOFromCborObj ) as [UTxO, ...UTxO[]],
             outputs: _outs.array.map( TxOut.fromCborObj ),
             fee: _fee.num,
@@ -519,15 +314,6 @@ export class BabbageTxBody
             withdrawals:                _withdrawals === undefined ? undefined : TxWithdrawals.fromCborObj( _withdrawals ),
             protocolUpdate:             _pUp === undefined ? undefined : LegacyPPUpdateProposalFromCborObj( _pUp ),
             auxDataHash:                _auxDataHash === undefined ? undefined : AuxiliaryDataHash.fromCborObj( _auxDataHash ),
-            validityIntervalStart:      _validityStart instanceof CborUInt ? _validityStart.num : undefined,
-            mint:                       _mint === undefined ? undefined : Value.fromCborObj( _mint ),
-            scriptDataHash:             _scriptDataHash === undefined ? undefined : ScriptDataHash.fromCborObj( _scriptDataHash ),
-            collateralInputs:           _collIns !== undefined ? getCborSet( _collIns ).map( txOutRefAsUTxOFromCborObj ) : undefined ,
-            requiredSigners:            _reqSigs !== undefined  ? getCborSet( _reqSigs ).map( PubKeyHash.fromCborObj ) : undefined,
-            network:                    _net instanceof CborUInt ? (Number( _net.num ) === 0 ? "testnet": "mainnet") : undefined,
-            collateralReturn:           _collRet === undefined ? undefined : TxOut.fromCborObj( _collRet ),
-            totCollateral:              _totColl instanceof CborUInt ? _totColl.num : undefined,
-            refInputs:                  _refIns !== undefined ? getCborSet( _refIns ).map( txOutRefAsUTxOFromCborObj ) : undefined
         }, getSubCborRef( cObj ));
     }
 
@@ -543,19 +329,8 @@ export class BabbageTxBody
             ttl: this.ttl?.toString(),
             certs: this.certs?.map( c => c.toJson() ),
             withdrawals: this.withdrawals?.toJson() ,
-            protocolUpdate: 
-                this.protocolUpdate === undefined ? undefined :
-                protocolUpdateToJson( this.protocolUpdate ),
+            protocolUpdate: this.protocolUpdate === undefined ? undefined : protocolUpdateToJson( this.protocolUpdate ),
             auxDataHash: this.auxDataHash?.toString() , // hash 32
-            validityIntervalStart: this.validityIntervalStart?.toString(),
-            mint: this.mint?.toJson(),
-            scriptDataHash: this.scriptDataHash?.toString(), // hash 32
-            collateralInputs: this.collateralInputs?.map( i => i.toJson() ), 
-            requiredSigners: this.requiredSigners?.map( sig => sig.toString() ),
-            network: this.network,
-            collateralReturn: this.collateralReturn?.toJson(),
-            totCollateral: this.totCollateral?.toString(),
-            refInputs: this.refInputs?.map( i => i.toJson() )
         }
     }
 
@@ -566,7 +341,7 @@ export class BabbageTxBody
      * @todo add mints and burns
      * @deprecated until mints and burns are added
      */
-    static isValueConserved( tx: BabbageTxBody ): boolean
+    static isValueConserved( tx: ShelleyTxBody ): boolean
     {
         const {
             inputs,

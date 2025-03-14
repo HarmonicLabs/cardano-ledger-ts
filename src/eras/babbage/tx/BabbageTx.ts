@@ -8,7 +8,6 @@ import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef"
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError"
 import { ToJson } from "../../../utils/ToJson"
 
-
 export interface IBabbageTx {
     body: IBabbageTxBody
     witnesses: IBabbageTxWitnessSet
@@ -80,6 +79,7 @@ export class BabbageTx
         );
         this.isScriptValid = isScriptValid === undefined ? true : isScriptValid;
         this.auxiliaryData = auxiliaryData;
+
         this.cborRef = cborRef ?? subCborRefOrUndef( tx );
     }
 
@@ -114,10 +114,10 @@ export class BabbageTx
         {
             const { pubKey, signature } = signer.sign( this.body.hash.toBuffer() );
             this.addVKeyWitness(
-                new VKeyWitness(
-                    new VKey( pubKey ),
-                    new Signature( signature )
-                )
+                new VKeyWitness({
+                    vkey: new VKey( pubKey ),
+                    signature: new Signature( signature )
+                })
             );
             return;
         }
@@ -128,10 +128,10 @@ export class BabbageTx
         );
 
         this.addVKeyWitness(
-            new VKeyWitness(
-                new VKey( pubKey ),
-                new Signature( signature )
-            )
+            new VKeyWitness({
+                vkey: new VKey( pubKey ),
+                signature: new Signature( signature )
+            })
         );
     }
 
@@ -143,7 +143,7 @@ export class BabbageTx
     async signWithCip30Wallet( cip30: Cip30LikeSignBabbageTx ): Promise<void>
     {
         const wits = BabbageTxWitnessSet.fromCbor(
-            await cip30.signBabbageTx(
+            await cip30.signTx(
                 // signBabbageTx expects the entire transaction by standard (not only the body ¯\_(ツ)_/¯)
                 this.toCbor().toString(),
                 true
@@ -169,7 +169,10 @@ export class BabbageTx
         return this.witnesses.isComplete
     }
     
-    get hash(): Hash32 { return this.body.hash; }
+    get hash(): Hash32 
+    { 
+        return this.body.hash; 
+    }
 
     toCborBytes(): Uint8Array
     {
@@ -214,16 +217,14 @@ export class BabbageTx
         if(!(
             cObj instanceof CborArray
             && cObj.array.length >= 4
-        ))
-        throw new InvalidCborFormatError("BabbageTx");
+        ))throw new InvalidCborFormatError("BabbageTx");
         
         const [ _body, _wits, _isValid, _aux ] = cObj.array;
 
         if(!(
             _isValid instanceof CborSimple &&
             typeof (_isValid.simple) === "boolean"
-        ))
-        throw new InvalidCborFormatError("BabbageTx","isScriptValid is not a boolean")
+        ))throw new InvalidCborFormatError("BabbageTx","isScriptValid is not a boolean")
 
         const noAuxiliaryData = _aux instanceof CborSimple && (_aux.simple === null || _aux.simple === undefined);
 
@@ -235,7 +236,9 @@ export class BabbageTx
         }, getSubCborRef( cObj ))
     }
 
-    toJSON() { return this.toJson(); }
+    toJSON() { 
+        return this.toJson(); 
+    }
     toJson()
     {
         return {

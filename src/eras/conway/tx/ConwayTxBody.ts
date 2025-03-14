@@ -15,7 +15,7 @@ import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 
 
-export interface ITxBody {
+export interface IConwayTxBody {
     inputs: [ UTxO, ...UTxO[] ],
     outputs: TxOut[],
     fee: Coin,
@@ -34,18 +34,18 @@ export interface ITxBody {
     totCollateral?: Coin,
     refInputs?: UTxO[]
     // conway
-    votingProcedures?: IVotingProcedures | VotingProcedures;
+    votingProcedures?: VotingProcedures | IVotingProcedures;
     proposalProcedures?: (ProposalProcedure | IProposalProcedure)[];
     currentTreasuryValue?: CanBeUInteger; // Coin
     donation?: CanBeUInteger; // Coin (positive)
 }
 
-export function isITxBody( body: Readonly<object> ): body is ITxBody
+export function isIConwayTxBody( body: Readonly<object> ): body is IConwayTxBody
 {
     if( !isObject( body ) ) return false;
 
     const fields = Object.keys( body );
-    const b = body as ITxBody;
+    const b = body as IConwayTxBody;
 
     return (
         fields.length >= 3 &&
@@ -105,8 +105,8 @@ export function isITxBody( body: Readonly<object> ): body is ITxBody
     )
 }
 
-export class TxBody
-    implements ITxBody, ToCbor, ToJson
+export class ConwayTxBody
+    implements IConwayTxBody, ToCbor, ToJson
 {
     readonly inputs!: [ UTxO, ...UTxO[] ];
     readonly outputs!: TxOut[];
@@ -114,6 +114,7 @@ export class TxBody
     readonly ttl?: bigint;
     readonly certs?: Certificate[];
     readonly withdrawals?: TxWithdrawals;
+    //* TO DO: ask about removing this //
     readonly protocolUpdate?: LegacyPPUpdateProposal; // babbage only; removed in conway
     readonly auxDataHash?: AuxiliaryDataHash; // hash 32
     readonly validityIntervalStart?: bigint;
@@ -158,11 +159,11 @@ export class TxBody
     /**
      * 
      * @param body object describing the transaction
-     * @throws only if the the `body` parameter does not respect the `ITxBody` interface
-     *      **DOES NOT THROW** if the transaction is unbalanced; that needs to be checked using `TxBody.isValueConserved` static method
+     * @throws only if the the `body` parameter does not respect the `IConwayConwayTxBody` interface
+     *      **DOES NOT THROW** if the transaction is unbalanced; that needs to be checked using `ConwayConwayTxBody.isValueConserved` static method
      */
     constructor(
-        body: ITxBody,
+        body: IConwayTxBody,
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
@@ -569,14 +570,14 @@ export class TxBody
         ].filter( entry => entry !== undefined ) as CborMapEntry[]))
     }
 
-    static fromCbor( cStr: CanBeCborString ): TxBody
+    static fromCbor( cStr: CanBeCborString ): ConwayTxBody
     {
-        return TxBody.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
+        return ConwayTxBody.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
-    static fromCborObj( cObj: CborObj ): TxBody
+    static fromCborObj( cObj: CborObj ): ConwayTxBody
     {
         if(!(cObj instanceof CborMap))
-        throw new InvalidCborFormatError("TxBody")
+        throw new InvalidCborFormatError("ConwayTxBody")
 
         let fields: (CborObj | undefined)[] = new Array( 23 ).fill( undefined );
 
@@ -618,25 +619,26 @@ export class TxBody
         ] = fields;
 
         if( _ins_ === undefined || _outs === undefined || _fee === undefined )
-        throw new InvalidCborFormatError("TxBody");
+        throw new InvalidCborFormatError("ConwayTxBody");
 
         if(!(
             // _ins  instanceof CborArray &&
             _outs instanceof CborArray &&
             _fee  instanceof CborUInt
         ))
-        throw new InvalidCborFormatError("TxBody");
+        throw new InvalidCborFormatError("ConwayTxBody");
 
         let ttl: bigint | undefined = undefined;
         if( _ttl !== undefined )
         {
             if(!( _ttl instanceof CborUInt ))
-            throw new InvalidCborFormatError("TxBody");
+            throw new InvalidCborFormatError("ConwayTxBody");
 
             ttl = _ttl.num;
         }
-
-        return new TxBody({
+        
+        //** TO DO: add votingProcedures, proposalProcedures, currentTreasuryValue, donation */
+        return new ConwayTxBody({
             inputs: getCborSet( _ins_ ).map( txOutRefAsUTxOFromCborObj ) as [UTxO, ...UTxO[]],
             outputs: _outs.array.map( TxOut.fromCborObj ),
             fee: _fee.num,
@@ -658,6 +660,8 @@ export class TxBody
     }
 
     toJSON() { return this.toJson(); }
+
+    //** TO DO: add votingProcedures, proposalProcedures, currentTreasuryValue, donation */
     toJson()
     {
         return {
@@ -667,15 +671,13 @@ export class TxBody
             ttl: this.ttl?.toString(),
             certs: this.certs?.map( c => c.toJson() ),
             withdrawals: this.withdrawals?.toJson() ,
-            protocolUpdate: 
-                this.protocolUpdate === undefined ? undefined :
-                protocolUpdateToJson( this.protocolUpdate ),
-            auxDataHash: this.auxDataHash?.asString , // hash 32
+            protocolUpdate: this.protocolUpdate === undefined ? undefined :  protocolUpdateToJson( this.protocolUpdate ),
+            auxDataHash: this.auxDataHash?.toString() , // hash 32
             validityIntervalStart: this.validityIntervalStart?.toString(),
             mint: this.mint?.toJson(),
-            scriptDataHash: this.scriptDataHash?.asString, // hash 32
+            scriptDataHash: this.scriptDataHash?.toString(), // hash 32
             collateralInputs: this.collateralInputs?.map( i => i.toJson() ), 
-            requiredSigners: this.requiredSigners?.map( sig => sig.asString ),
+            requiredSigners: this.requiredSigners?.map( sig => sig.toString() ),
             network: this.network,
             collateralReturn: this.collateralReturn?.toJson(),
             totCollateral: this.totCollateral?.toString(),
@@ -690,7 +692,7 @@ export class TxBody
      * @todo add mints and burns
      * @deprecated until mints and burns are added
      */
-    static isValueConserved( tx: TxBody ): boolean
+    static isValueConserved( tx: ConwayTxBody ): boolean
     {
         const {
             inputs,

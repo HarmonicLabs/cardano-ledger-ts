@@ -164,7 +164,8 @@ proposed_protocol_parameter_updates = {* genesis_hash => protocol_param_update}
 ; 14: protocol version
 ; 15: min utxo value
 ; 
-protocol_param_update = {? 0 : uint
+protocol_param_update = {
+                          ? 0 : uint
                         , ? 1 : uint
                         , ? 2 : uint
                         , ? 3 : uint
@@ -179,7 +180,8 @@ protocol_param_update = {? 0 : uint
                         , ? 12 : unit_interval
                         , ? 13 : nonce
                         , ? 14 : [protocol_version]
-                        , ? 15 : coin}
+                        , ? 15 : coin
+                        }
 
 relay = [single_host_addr // single_host_name // multi_host_name]
 
@@ -203,18 +205,21 @@ signkeyKES = bytes .size 64
 
 stake_credential = credential
 
-transaction = [transaction_body
+transaction = [
+                transaction_body
               , transaction_witness_set
               , transaction_metadata / nil]
 
-transaction_body = {0 : set<transaction_input>
+transaction_body = {
+                     0 : set<transaction_input>
                    , 1 : [* transaction_output]
                    , 2 : coin
                    , 3 : uint
                    , ? 4 : [* certificate]
                    , ? 5 : withdrawals
                    , ? 6 : update
-                   , ? 7 : metadata_hash}
+                   , ? 7 : metadata_hash
+                   }
 
 transaction_index = uint .size 2
 

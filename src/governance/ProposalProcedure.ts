@@ -26,7 +26,7 @@ export function isIProposalProcedure( stuff: any ): stuff is IProposalProcedure
         isIAnchor( stuff.anchor )
     );
 }
-
+//** To DO: add fromCborObj and toJson */
 export class ProposalProcedure
     implements IProposalProcedure, ToCbor, ToData
 {
