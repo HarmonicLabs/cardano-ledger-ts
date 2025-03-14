@@ -13,8 +13,8 @@ export function isIProtocolVersion( thing: any ): thing is IProtocolVersion
     return isObject( thing ) && (
         thing instanceof ProtocolVersion // already validated at construction, shortcut
         || (
-            canBeUInteger( typeof thing.major ) &&
-            canBeUInteger( typeof thing.minor )
+            canBeUInteger( thing.major ) &&
+            canBeUInteger( thing.minor )
         )
     );
 }
