@@ -185,6 +185,8 @@ export class ShelleyTxBody
 
         this.auxDataHash = auxDataHash === undefined ? undefined : new AuxiliaryDataHash( auxDataHash );
         
+        this.cborRef = cborRef ?? subCborRefOrUndef( body );
+
     }
 
     toCborBytes(): Uint8Array

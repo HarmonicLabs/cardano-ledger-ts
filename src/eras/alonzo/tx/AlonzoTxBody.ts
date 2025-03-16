@@ -274,6 +274,8 @@ export class AlonzoTxBody
         )) throw new Error("invalid 'network' field");
 
         this.network = network;
+
+        this.cborRef = cborRef ?? subCborRefOrUndef( body );
     }
 
     toCborBytes(): Uint8Array

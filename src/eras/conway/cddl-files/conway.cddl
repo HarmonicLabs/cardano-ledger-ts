@@ -76,13 +76,17 @@ asset_name = bytes .size (0 .. 32)
 ; #6.259(0 ==> metadata): alonzo onwards
 ; 
 auxiliary_data = metadata
-                  / [transaction_metadata : metadata
-                    , auxiliary_scripts : [* native_script]]
-                  / #6.259({? 0 : metadata
+                  / [
+                      transaction_metadata : metadata
+                    , auxiliary_scripts : [* native_script]
+                    ]
+                  / #6.259({
+                             ? 0 : metadata
                            , ? 1 : [* native_script]
                            , ? 2 : [* plutus_v1_script]
                            , ? 3 : [* plutus_v2_script]
-                           , ? 4 : [* plutus_v3_script]})
+                           , ? 4 : [* plutus_v3_script]
+                           })
 
 auxiliary_data_hash = $hash32
 

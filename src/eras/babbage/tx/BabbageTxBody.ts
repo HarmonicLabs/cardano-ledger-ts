@@ -334,6 +334,8 @@ export class BabbageTxBody
             refIn instanceof UTxO ? refIn :
             new UTxO( refIn )
         );
+
+        this.cborRef = cborRef ?? subCborRefOrUndef( body );
     }
 
     toCborBytes(): Uint8Array
@@ -360,6 +362,7 @@ export class BabbageTxBody
             // we assume correctness here
             return Cbor.parse( this.cborRef.toBuffer() );
         }
+
         return new CborMap(([
             {
                 k: new CborUInt( 0 ),
@@ -452,8 +455,11 @@ export class BabbageTxBody
     }
     static fromCborObj( cObj: CborObj ): BabbageTxBody
     {
-        if(!(cObj instanceof CborMap))
-        throw new InvalidCborFormatError("BabbageTxBody")
+        if(!(
+            cObj instanceof CborMap
+            //* TO DO: as if add map lenght to CborMap
+            // && cObj.map.length >= 3
+        )) throw new InvalidCborFormatError("BabbageTxBody")
 
         let fields: (CborObj | undefined)[] = new Array( 19 ).fill( undefined );
 

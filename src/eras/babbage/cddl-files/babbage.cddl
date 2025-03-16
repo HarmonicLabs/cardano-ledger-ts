@@ -71,8 +71,10 @@ asset_name = bytes .size (0 .. 32)
 ;   3: [* plutus_v2_script]
 ; 
 auxiliary_data = metadata
-                  / [transaction_metadata : metadata
-                    , auxiliary_scripts : auxiliary_scripts]
+                  / [
+                    transaction_metadata : metadata
+                    , auxiliary_scripts : auxiliary_scripts
+                    ]
                   / #6.259({? 0 : metadata
                            , ? 1 : [* native_script]
                            , ? 2 : [* plutus_v1_script]

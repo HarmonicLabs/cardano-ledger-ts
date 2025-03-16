@@ -65,8 +65,10 @@ address = h'00100000000000000000000000000000000000000000000000000000001100000000
 asset_name = bytes .size (0 .. 32)
 
 auxiliary_data = metadata
-                  / [transaction_metadata : metadata
-                    , auxiliary_scripts : auxiliary_scripts]
+                  / [
+                        transaction_metadata : metadata
+                        , auxiliary_scripts : auxiliary_scripts
+                    ]
 
 auxiliary_scripts = [* native_script]
 

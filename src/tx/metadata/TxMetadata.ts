@@ -71,6 +71,7 @@ export class TxMetadata
             // we assume correctness here
             return Cbor.parse( this.cborRef.toBuffer() );
         }
+        
         return new CborMap(
             Object.keys( this.metadata ).map( labelStr => {
                 return {

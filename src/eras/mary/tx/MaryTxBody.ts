@@ -213,6 +213,8 @@ export class MaryTxBody
         if( mint === undefined ) this.mint = undefined;
         else if( mint instanceof Value ) this.mint = mint;
         else this.mint = new Value( mint );
+
+        this.cborRef = cborRef ?? subCborRefOrUndef( body );
     }
 
     toCborBytes(): Uint8Array
