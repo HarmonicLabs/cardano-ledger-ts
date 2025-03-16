@@ -254,7 +254,7 @@ export class ConwayAuxiliaryData
             if(!(
                 cObj.array[1] instanceof CborArray
                 //* TO DO: ask about this example from TX */
-                // && cObj.array.length >= 5               
+                && cObj.array.length >= 5               
             ))throw new InvalidCborFormatError("ConwayAuxiliaryData")
 
             return new ConwayAuxiliaryData({
