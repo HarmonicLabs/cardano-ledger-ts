@@ -88,8 +88,9 @@ export class TxMetadata
     }
     static fromCborObj( cObj: CborObj ): TxMetadata
     {
-        if(!( cObj instanceof CborMap ))
-        throw new InvalidCborFormatError("TxMetadata")
+        if(!( 
+            cObj instanceof CborMap 
+        ))throw new InvalidCborFormatError("TxMetadata")
 
         const meta = {};
         const len = cObj.map.length;

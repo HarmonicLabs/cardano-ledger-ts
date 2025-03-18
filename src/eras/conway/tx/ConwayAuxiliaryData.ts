@@ -179,7 +179,8 @@ export class ConwayAuxiliaryData
     
     toCborBytes(): Uint8Array
     {
-        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
+        if( this.cborRef instanceof SubCborRef  ) return this.cborRef.toBuffer();
+
         return this.toCbor().toBuffer();
     }
     toCbor(): CborString

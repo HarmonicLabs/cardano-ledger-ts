@@ -458,7 +458,7 @@ export class BabbageTxBody
         if(!(
             cObj instanceof CborMap
             //* TO DO: as if add map lenght to CborMap
-            // && cObj.map.length >= 3
+            && cObj.map.length >= 19
         )) throw new InvalidCborFormatError("BabbageTxBody")
 
         let fields: (CborObj | undefined)[] = new Array( 19 ).fill( undefined );
