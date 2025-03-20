@@ -42,6 +42,7 @@ export class ConwayAuxiliaryData
         if( 
             this._hash instanceof AuxiliaryDataHash 
         ) return this._hash;
+        
 
         this._hash = new AuxiliaryDataHash(
             new Uint8Array(
@@ -179,7 +180,9 @@ export class ConwayAuxiliaryData
     
     toCborBytes(): Uint8Array
     {
-        if( this.cborRef instanceof SubCborRef  ) return this.cborRef.toBuffer();
+        if( 
+            this.cborRef instanceof SubCborRef  
+        ) return this.cborRef.toBuffer();
 
         return this.toCbor().toBuffer();
     }
@@ -196,8 +199,7 @@ export class ConwayAuxiliaryData
     }
     toCborObj(): CborTag
     {
-
-        //* TO DO: ask about this example from TX */
+         
         if ( this.cborRef instanceof SubCborRef )
         {
             return Cbor.parse( this.cborRef.toBuffer() ) as CborTag;
@@ -239,6 +241,7 @@ export class ConwayAuxiliaryData
     {
         return ConwayAuxiliaryData.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
+    
     static fromCborObj( cObj: CborObj ): ConwayAuxiliaryData
     {
         // shelley; metadata only
@@ -254,7 +257,6 @@ export class ConwayAuxiliaryData
         {
             if(!(
                 cObj.array[1] instanceof CborArray
-                //* TO DO: ask about this example from TX */
                 && cObj.array.length >= 5               
             ))throw new InvalidCborFormatError("ConwayAuxiliaryData")
 
@@ -265,8 +267,8 @@ export class ConwayAuxiliaryData
         }
 
         if(!(
-            cObj instanceof CborTag &&
-            cObj.data instanceof CborMap
+            cObj instanceof CborTag 
+            && cObj.data instanceof CborMap
         ))throw new InvalidCborFormatError("ConwayAuxiliaryData")
 
         //* TO DO: Updated from 4 to 5 */

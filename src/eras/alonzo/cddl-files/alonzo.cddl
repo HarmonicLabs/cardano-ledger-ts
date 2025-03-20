@@ -70,8 +70,10 @@ asset_name = bytes .size (0 .. 32)
 ;   #6.259(0 ==> metadata): alonzo onwards
 ; 
 auxiliary_data = metadata
-                  / [transaction_metadata : metadata
-                    , auxiliary_scripts : auxiliary_scripts]
+                  / [
+                    transaction_metadata : metadata
+                    , auxiliary_scripts : auxiliary_scripts
+                    ]
                   / #6.259({? 0 : metadata
                            , ? 1 : [* native_script]
                            , ? 2 : [* plutus_script]})
@@ -100,10 +102,12 @@ block = [header
         , auxiliary_data_set : {* transaction_index => auxiliary_data}
         , invalid_transactions : [* transaction_index]]
 
-bootstrap_witness = [public_key : $vkey
+bootstrap_witness = [
+                      public_key : $vkey
                     , signature : $signature
                     , chain_code : bytes .size 32
-                    , attributes : bytes]
+                    , attributes : bytes
+                    ]
 
 ; The real bounded_bytes does not have this limit. it instead has
 ; a different limit which cannot be expressed in CDDL.

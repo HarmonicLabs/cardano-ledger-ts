@@ -77,10 +77,12 @@ block = [header
         , transaction_witness_sets : [* transaction_witness_set]
         , auxiliary_data_set : {* transaction_index => auxiliary_data}]
 
-bootstrap_witness = [public_key : $vkey
+bootstrap_witness = [
+                      public_key : $vkey
                     , signature : $signature
                     , chain_code : bytes .size 32
-                    , attributes : bytes]
+                    , attributes : bytes
+                    ]
 
 certificate = [stake_registration
                // stake_deregistration
@@ -262,9 +264,11 @@ transaction_metadatum_label = uint
 
 transaction_output = [address, amount : value]
 
-transaction_witness_set = {? 0 : [* vkeywitness]
+transaction_witness_set = {
+                            ? 0 : [* vkeywitness]
                           , ? 1 : [* native_script]
-                          , ? 2 : [* bootstrap_witness]}
+                          , ? 2 : [* bootstrap_witness]
+                          }
 
 ; The real unit_interval is: #6.30([uint, uint])
 ; 

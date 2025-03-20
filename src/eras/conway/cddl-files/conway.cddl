@@ -115,10 +115,12 @@ block = [header
 
 block_no = uint .size 8
 
-bootstrap_witness = [public_key : $vkey
+bootstrap_witness = [
+                      public_key : $vkey
                     , signature : $signature
                     , chain_code : bytes .size 32
-                    , attributes : bytes]
+                    , attributes : bytes
+                    ]
 
 ; The real bounded_bytes does not have this limit. it instead has
 ; a different limit which cannot be expressed in CDDL.
@@ -404,7 +406,8 @@ redeemer_tag = 0 / 1 / 2 / 3 / 4 / 5
 ; will be removed in the next era. It is recommended for tools to
 ; adopt using a Map instead of Array going forward.
 ; 
-redeemers = [+ [tag : redeemer_tag
+redeemers = [+ [
+                 tag : redeemer_tag
                , index : uint .size 4
                , data : plutus_data
                , ex_units : ex_units]]
@@ -565,7 +568,8 @@ transaction_metadatum_label = uint .size 8
 ; 
 transaction_output = shelley_transaction_output / babbage_transaction_output
 
-transaction_witness_set = {? 0 : nonempty_set<vkeywitness>
+transaction_witness_set = {?
+							 0 : nonempty_set<vkeywitness>
                           , ? 1 : nonempty_set<native_script>
                           , ? 2 : nonempty_set<bootstrap_witness>
                           , ? 3 : nonempty_set<plutus_v1_script>
@@ -595,7 +599,10 @@ url = text .size (0 .. 128)
 
 value = coin / [coin, multiasset<positive_coin>]
 
-vkeywitness = [$vkey, $signature]
+vkeywitness = [
+	$vkey, 
+	$signature
+]
 
 vote = 0 .. 2
 

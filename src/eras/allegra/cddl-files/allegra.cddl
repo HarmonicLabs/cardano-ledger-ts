@@ -63,8 +63,10 @@ address = h'00100000000000000000000000000000000000000000000000000000001100000000
            / h'7080000000000000000000000000000000000000000000000000000000'
 
 auxiliary_data = metadata
-                  / [transaction_metadata : metadata
-                    , auxiliary_scripts : auxiliary_scripts]
+                / [
+                    transaction_metadata : metadata
+                    , auxiliary_scripts : auxiliary_scripts
+                ]
 
 auxiliary_scripts = [* native_script]
 
@@ -73,10 +75,12 @@ block = [header
         , transaction_witness_sets : [* transaction_witness_set]
         , auxiliary_data_set : {* transaction_index => auxiliary_data}]
 
-bootstrap_witness = [public_key : $vkey
+bootstrap_witness = [
+					  public_key : $vkey
                     , signature : $signature
                     , chain_code : bytes .size 32
-                    , attributes : bytes]
+                    , attributes : bytes
+					]
 
 certificate = [stake_registration
                // stake_deregistration
@@ -255,9 +259,11 @@ transaction_metadatum_label = uint
 
 transaction_output = [address, amount : coin]
 
-transaction_witness_set = {? 0 : [* vkeywitness]
+transaction_witness_set = {
+							? 0 : [* vkeywitness]
                           , ? 1 : [* native_script]
-                          , ? 2 : [* bootstrap_witness]}
+                          , ? 2 : [* bootstrap_witness]
+						}
 
 ; The real unit_interval is: #6.30([uint, uint])
 ; 

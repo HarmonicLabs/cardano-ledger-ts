@@ -457,7 +457,6 @@ export class BabbageTxBody
     {
         if(!(
             cObj instanceof CborMap
-            //* TO DO: as if add map lenght to CborMap
             && cObj.map.length >= 19
         )) throw new InvalidCborFormatError("BabbageTxBody")
 

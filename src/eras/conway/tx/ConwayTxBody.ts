@@ -578,7 +578,6 @@ export class ConwayTxBody
     {
         if(!(
             cObj instanceof CborMap
-            //* TO DO: ask if add map lenght to CborMap
             && cObj.map.length >= 23
         ))
         throw new InvalidCborFormatError("ConwayTxBody")
