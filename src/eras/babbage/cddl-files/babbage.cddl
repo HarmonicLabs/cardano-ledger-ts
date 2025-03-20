@@ -88,10 +88,12 @@ auxiliary_scripts = [* native_script]
 ;   datum_option
 ;   script_ref
 ; 
-babbage_transaction_output = {0 : address
-                             , 1 : value
+babbage_transaction_output = {
+                                 0 : address
+                             ,   1 : value
                              , ? 2 : datum_option
-                             , ? 3 : script_ref}
+                             , ? 3 : script_ref
+                            }
 
 big_int = int / big_uint / big_nint
 

@@ -13,14 +13,14 @@ import { ToDataVersion } from "../../../toData/defaultToDataVersion";
 import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
 
 
-export interface ITxOut {
+export interface IConwayTxOut {
     address: Address | AddressStr,
     value: Value | IValue,
     datum?: Hash32 | Data,
     refScript?: Script
 }
 
-export function isITxOut( stuff: any ): stuff is ITxOut
+export function isIConwayTxOut( stuff: any ): stuff is IConwayTxOut
 {
     return (
         isObject( stuff ) &&
@@ -35,8 +35,8 @@ export function isITxOut( stuff: any ): stuff is ITxOut
     );
 }
 
-export class TxOut
-    implements ITxOut, ToCbor, Cloneable<TxOut>, ToData, ToJson
+export class ConwayTxOut
+    implements IConwayTxOut, ToCbor, Cloneable<ConwayTxOut>, ToData, ToJson
 {
     readonly address!: Address
     readonly value!: Value
@@ -44,22 +44,22 @@ export class TxOut
     readonly refScript?: Script
 
     constructor(
-        txOutput: ITxOut,
+        ConwayTxOutput: IConwayTxOut,
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
         if(!(
-            isObject( txOutput ) &&
-            hasOwn( txOutput, "address" ) &&
-            hasOwn( txOutput, "value" )
-        )) throw new Error("txOutput is missing some necessary fields");
+            isObject( ConwayTxOutput ) &&
+            hasOwn( ConwayTxOutput, "address" ) &&
+            hasOwn( ConwayTxOutput, "value" )
+        )) throw new Error("ConwayTxOutput is missing some necessary fields");
 
         let {
             address,
             value,
             datum,
             refScript
-        } = txOutput;
+        } = ConwayTxOutput;
         
         if (isAddressStr(address))
         {
@@ -67,11 +67,11 @@ export class TxOut
         }
         if(!(
             address instanceof Address
-        )) throw new Error("invlaid 'address' while constructing 'TxOut'");
+        )) throw new Error("invlaid 'address' while constructing 'ConwayTxOut'");
 
         if(!(
             value instanceof Value
-        )) throw new Error("invlaid 'value' while constructing 'TxOut'");
+        )) throw new Error("invlaid 'value' while constructing 'ConwayTxOut'");
 
         this.address = address;
 
@@ -91,12 +91,12 @@ export class TxOut
         
         this.refScript = refScript;
 
-        this.cborRef = cborRef ?? subCborRefOrUndef( txOutput );
+        this.cborRef = cborRef ?? subCborRefOrUndef( ConwayTxOutput );
     }
 
-    clone(): TxOut
+    clone(): ConwayTxOut
     {
-        return new TxOut({
+        return new ConwayTxOut({
             address: this.address.clone(),
             value: this.value.clone(),
             datum: this.datum?.clone(),
@@ -104,9 +104,9 @@ export class TxOut
         })
     }
 
-    static get fake(): TxOut
+    static get fake(): ConwayTxOut
     {
-        return new TxOut({
+        return new ConwayTxOut({
             address: Address.fake,
             value: Value.lovelaces( 0 ),
             datum: undefined,
@@ -173,6 +173,13 @@ export class TxOut
     {
         const datum = this.datum;
 
+        if( this.cborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.cborRef.toBuffer() ) as CborMap;
+        }
+
         if( !Value.isPositive( this.value ) )
         {
             console.log(
@@ -182,9 +189,8 @@ export class TxOut
                     2
                 )
             )
-            throw new BasePlutsError("TxOut values can only be positive; value was: " + JSON.stringify( this.value.toJson() ));
+            throw new BasePlutsError("ConwayTxOut values can only be positive; value was: " + JSON.stringify( this.value.toJson() ));
         }
-
         return new CborMap([
             {
                 k: new CborUInt( 0 ),
@@ -220,23 +226,25 @@ export class TxOut
         ].filter( elem => elem !== undefined ) as CborMapEntry[])
     }
 
-    static fromCbor( cStr: CanBeCborString ): TxOut
+    static fromCbor( cStr: CanBeCborString ): ConwayTxOut
     {
-        return TxOut.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
+        return ConwayTxOut.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
-    static fromCborObj( cObj: CborObj ): TxOut
+    static fromCborObj( cObj: CborObj ): ConwayTxOut
     {
         if(!(
-            cObj instanceof CborMap ||
-            cObj instanceof CborArray
-        ))
-        throw new InvalidCborFormatError("TxOut");
+            cObj instanceof CborMap 
+            || cObj instanceof CborArray
+            && cObj.array.length >= 4
+        )) throw new InvalidCborFormatError("ConwayTxOut");
 
         // legacy
         if( cObj instanceof CborArray )
         {
-            const [ _addr, _val, _dat ] = cObj.array;
-            return new TxOut({
+            //* TO DO: added _refScript to array find out if correct */
+            const [ _addr, _val, _dat, _refScript ] = cObj.array;
+            
+            return new ConwayTxOut({
                 address: Address.fromCborObj( _addr ),
                 value: Value.fromCborObj( _val ),
                 datum: _dat === undefined ? undefined : Hash32.fromCborObj( _dat ),
@@ -273,12 +281,12 @@ export class TxOut
         if( _dat !== undefined )
         {
             if(!(_dat instanceof CborArray))
-            throw new InvalidCborFormatError("TxOut");
+            throw new InvalidCborFormatError("ConwayTxOut");
             
             const [ _0, _1 ] = _dat.array;
 
             if(!(_0 instanceof CborUInt))
-            throw new InvalidCborFormatError("TxOut");
+            throw new InvalidCborFormatError("ConwayTxOut");
 
             const opt = Number( _0.num );
 
@@ -287,7 +295,7 @@ export class TxOut
                 if(!(
                     _1 instanceof CborBytes
                 ))
-                throw new InvalidCborFormatError("TxOut");
+                throw new InvalidCborFormatError("ConwayTxOut");
 
                 datum = new Hash32( _1.buffer );
             }
@@ -298,12 +306,12 @@ export class TxOut
                     _1.data instanceof CborBytes
                 ))
                 {
-                    throw new InvalidCborFormatError("TxOut");
+                    throw new InvalidCborFormatError("ConwayTxOut");
                 }
 
                 datum = dataFromCborObj( Cbor.parse( _1.data.buffer ) )
             }
-            else throw new InvalidCborFormatError("TxOut");
+            else throw new InvalidCborFormatError("ConwayTxOut");
 
         }
 
@@ -314,7 +322,7 @@ export class TxOut
                 _refScript instanceof CborTag &&
                 _refScript.data instanceof CborBytes
             ))
-            throw new InvalidCborFormatError("TxOut");
+            throw new InvalidCborFormatError("ConwayTxOut");
 
             refScript = new Script( {
                 scriptType: ScriptType.PlutusV2, 
@@ -323,9 +331,9 @@ export class TxOut
         }
 
         if( _addr === undefined || _amt === undefined )
-        throw new InvalidCborFormatError("TxOut");
+        throw new InvalidCborFormatError("ConwayTxOut");
 
-        return new TxOut({
+        return new ConwayTxOut({
             address: Address.fromCborObj( _addr ),
             value:  Value.fromCborObj( _amt ),
             datum,

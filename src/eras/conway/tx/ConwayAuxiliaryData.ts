@@ -3,7 +3,7 @@ import { blake2b_256 } from "@harmoniclabs/crypto";
 import { hasOwn } from "@harmoniclabs/obj-utils";
 import { AuxiliaryDataHash } from "../../../hashes";
 import { NativeScript, nativeScriptFromCborObj } from "../../../script/NativeScript";
-import { PlutusScriptJsonFormat, Script, ScriptType } from "../../../script/Script";
+import { PlutusScriptJsonFormat, Script, ScriptType } from "../../../script";
 import { TxMetadata } from "../../../tx";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";

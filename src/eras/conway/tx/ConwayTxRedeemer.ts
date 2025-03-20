@@ -224,10 +224,10 @@ export class ConwayTxRedeemer
     static fromCborObj( cObj: CborObj ): ConwayTxRedeemer
     {
         if(!(
-            cObj instanceof CborArray &&
-            cObj.array.length >= 4 &&
-            cObj.array[0] instanceof CborUInt &&
-            cObj.array[1] instanceof CborUInt
+            cObj instanceof CborArray 
+            && cObj.array.length >= 4 
+            && cObj.array[0] instanceof CborUInt 
+            && cObj.array[1] instanceof CborUInt
         ))throw new InvalidCborFormatError("ConwayTxRedeemer");
 
         //* TO DO: added array */

@@ -237,7 +237,10 @@ transaction_metadatum = {* transaction_metadatum => transaction_metadatum}
 
 transaction_metadatum_label = uint
 
-transaction_output = [address, amount : coin]
+transaction_output = [
+                        address, 
+                        amount : coin
+                    ]
 
 transaction_witness_set = {
                             ? 0 : [* vkeywitness]

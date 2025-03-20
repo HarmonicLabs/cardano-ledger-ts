@@ -448,7 +448,10 @@ transaction_metadatum_label = uint
 ; NEW:
 ;   datum_hash: $hash32
 ; 
-transaction_output = [address, amount : value, ? datum_hash : $hash32]
+transaction_output = [
+                      address, 
+                      amount : value, ? datum_hash : $hash32
+                    ]
 
 ; 
 ; NEW:
