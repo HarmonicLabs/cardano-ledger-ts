@@ -1,11 +1,12 @@
 
 export enum Era {
-    Byron = "byron",
-    Shelley = "shelley",
-    Allegra = "allegra",
-    Mary = "mary",
-    Alonzo = "alonzo",
-    Babbage = "babbage"
+    Byron,
+    Shelley,
+    Allegra,
+    Mary,
+    Alonzo,
+    Babbage,
+    Conway
 }
 
 Object.freeze( Era );

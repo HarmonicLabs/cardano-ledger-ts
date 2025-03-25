@@ -1,6 +1,6 @@
 import { blake2b_224 } from "@harmoniclabs/crypto";
-import { PubKeyHash } from "../../../credentials/PubKeyHash";
-import { Hash32 } from "../../../hashes/Hash32/Hash32";
+import { PubKeyHash } from "../../credentials/PubKeyHash";
+import { Hash32 } from "../../hashes/Hash32/Hash32";
 
 export class VKey extends Hash32
 {

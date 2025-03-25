@@ -2,11 +2,11 @@ import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborBytes, Ca
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { toHex } from "@harmoniclabs/uint8array-utils";
 import { isUint8Array } from "util/types";
-import { Hash32, Signature } from "../../../hashes";
-import { VKey } from "../../../tx";
-import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
-import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
-import { ToJson } from "../../../utils/ToJson";
+import { Hash32, Signature } from "../../hashes";
+import { VKey } from "../../tx";
+import { subCborRefOrUndef, getSubCborRef } from "../../utils/getSubCborRef";
+import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
+import { ToJson } from "../../utils/ToJson";
 
 export interface IBootstrapWitness {
     pubKey: Hash32;
@@ -128,7 +128,7 @@ export class BootstrapWitness
             getSubCborRef( cObj )
         );
     }
-
+    //** TO DO(mike) find out about mising fromCborObj */
     toJSON() { return this.toJson(); }
     toJson()
     {

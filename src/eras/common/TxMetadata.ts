@@ -1,9 +1,9 @@
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
-import { TxMetadatum, isTxMetadatum, txMetadatumFromCborObj } from "../../../tx";
-import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
-import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
-import { ToJson } from "../../../utils/ToJson";
+import { TxMetadatum, isTxMetadatum, txMetadatumFromCborObj } from "../../tx";
+import { subCborRefOrUndef, getSubCborRef } from "../../utils/getSubCborRef";
+import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
+import { ToJson } from "../../utils/ToJson";
 
 export type ITxMetadata = {
     [metadatum_label: number | string]: TxMetadatum 

@@ -5,7 +5,6 @@ import { ToCbor, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborStri
 import { signEd25519, signEd25519_sync } from "@harmoniclabs/crypto";
 import { InvalidCborFormatError } from "../utils/InvalidCborFormatError";
 import { ToJson } from "../utils/ToJson";
-import { assert } from "../utils/assert";
 import { AuxiliaryData } from "./AuxiliaryData";
 import { ITxBody, TxBody, isITxBody } from "./body";
 import { XPrv } from "@harmoniclabs/bip32_ed25519";

@@ -1,9 +1,9 @@
 import { CborObj, CborMap, CborArray, CborUInt, CborNegInt, CborBytes, CborText, ToCbor, SubCborRef, CborString, Cbor } from "@harmoniclabs/cbor";
 import { has_n_determined_keys } from "@harmoniclabs/obj-utils";
 import { fromHex, toHex } from "@harmoniclabs/uint8array-utils";
-import { subCborRefOrUndef } from "../../../utils/getSubCborRef";
-import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
-import { ToJson } from "../../../utils/ToJson";
+import { subCborRefOrUndef } from "../../utils/getSubCborRef";
+import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
+import { ToJson } from "../../utils/ToJson";
 
 
 export type TxMetadatum
@@ -126,6 +126,8 @@ export class TxMetadatumMap
             })
         )
     }
+
+    //** TO DO(mike) find out about mising fromCborObj */
 
     toJSON() { return this.toJson(); }
     toJson(): { k: any, v: any }[]

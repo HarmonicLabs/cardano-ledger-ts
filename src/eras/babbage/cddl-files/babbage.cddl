@@ -309,7 +309,8 @@ protocol_param_update = {? 0 : uint
 protocol_version = [major_protocol_version, uint]
 
 ; NEW
-redeemer = [tag : redeemer_tag
+redeemer = [
+             tag : redeemer_tag
            , index : uint
            , data : plutus_data
            , ex_units : ex_units]
