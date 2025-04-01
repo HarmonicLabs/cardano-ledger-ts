@@ -4,23 +4,17 @@ import { Data, isData, dataToCborObj, dataFromCborObj } from "@harmoniclabs/plut
 import { isObject } from "@harmoniclabs/obj-utils";
 import { Script, ScriptType, nativeScriptToCborObj } from "../../../script";
 import { Hash28 } from "../../../hashes";
-import { ConwayTxRedeemer } from "./ConwayTxRedeemer";
-import { VKeyWitness } from "../../common/VKeyWitness";
+import { VKeyWitness, TxRedeemer } from "../../../tx";
 import { isCborSet, getCborSet } from "../../../utils/getCborSet";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 import { BootstrapWitness } from "../../common/BootstrapWitness";
 
-export interface IConwayTxWitnessSet {
+export interface IAllegraTxWitnessSet {
     vkeyWitnesses?: VKeyWitness[],
     nativeScripts?: Script<ScriptType.NativeScript>[],
-    bootstrapWitnesses?: BootstrapWitness[],
-    plutusV1Scripts?: Script<ScriptType.PlutusV1>[],
-    datums?: Data[],
-    redeemers?: ConwayTxRedeemer[],
-    plutusV2Scripts?: Script<ScriptType.PlutusV2>[],
-    plutusV3Scripts?: Script<ScriptType.PlutusV3>[],
+    bootstrapWitnesses?: BootstrapWitness[]
 };
 
 function isUndefOrCheckedArr<ArrElemT>( stuff: undefined | ArrElemT[], arrayElemCheck: (elem: ArrElemT) => boolean )
@@ -33,7 +27,7 @@ function isUndefOrCheckedArr<ArrElemT>( stuff: undefined | ArrElemT[], arrayElem
     );
 }
 
-export function isIConwayTxWitnessSet( set: object ): set is IConwayTxWitnessSet
+export function isIAllegraTxWitnessSet( set: object ): set is IAllegraTxWitnessSet
 {
     if( !isObject( set ) ) return false;
 
@@ -41,12 +35,7 @@ export function isIConwayTxWitnessSet( set: object ): set is IConwayTxWitnessSet
         vkeyWitnesses,
         nativeScripts,
         bootstrapWitnesses,
-        plutusV1Scripts,
-        datums,
-        redeemers,
-        plutusV2Scripts,
-        plutusV3Scripts,
-    } = set as IConwayTxWitnessSet;
+    } = set as IAllegraTxWitnessSet;
 
     return (
         isUndefOrCheckedArr(
@@ -60,38 +49,16 @@ export function isIConwayTxWitnessSet( set: object ): set is IConwayTxWitnessSet
         isUndefOrCheckedArr(
             bootstrapWitnesses,
             bootWit => bootWit instanceof BootstrapWitness
-        ) &&
-        isUndefOrCheckedArr(
-            plutusV1Scripts,
-            pv1 => pv1 instanceof Script && pv1.type === ScriptType.PlutusV1
-        ) &&
-        isUndefOrCheckedArr( datums, isData ) &&
-        isUndefOrCheckedArr(
-            redeemers,
-            rdmr => rdmr instanceof ConwayTxRedeemer
-        ) &&
-        isUndefOrCheckedArr(
-            plutusV2Scripts,
-            pv2 => pv2 instanceof Script && pv2.type === ScriptType.PlutusV2
-        ) &&
-        isUndefOrCheckedArr(
-            plutusV3Scripts,
-            pv3 => pv3 instanceof Script && pv3.type === ScriptType.PlutusV3
         )
     );
 }
 
-export class ConwayTxWitnessSet
-    implements IConwayTxWitnessSet, ToCbor, ToJson
+export class AllegraTxWitnessSet
+    implements IAllegraTxWitnessSet, ToCbor, ToJson
 {
     readonly vkeyWitnesses?: VKeyWitness[];
     readonly nativeScripts?: Script<ScriptType.NativeScript>[];
     readonly bootstrapWitnesses?: BootstrapWitness[];
-    readonly plutusV1Scripts?: Script<ScriptType.PlutusV1>[];
-    readonly datums?: Data[];
-    readonly redeemers?: ConwayTxRedeemer[];
-    readonly plutusV2Scripts?: Script<ScriptType.PlutusV2>[];
-    readonly plutusV3Scripts?: Script<ScriptType.PlutusV3>[];
     
     /*
      * checks that the signer is needed
@@ -113,18 +80,18 @@ export class ConwayTxWitnessSet
     readonly isComplete: boolean
 
     constructor(
-        witnesses: IConwayTxWitnessSet,
+        witnesses: IAllegraTxWitnessSet,
         readonly cborRef: SubCborRef | undefined = undefined,
         allRequiredSigners: Hash28[] | undefined = undefined,
     )
     {
         if(!(
-            isIConwayTxWitnessSet( witnesses )
+            isIAllegraTxWitnessSet( witnesses )
         )) throw new Error("invalid witnesses passed");
 
 
         
-        const defGetter = ( name: keyof IConwayTxWitnessSet, get: () => any ) =>
+        const defGetter = ( name: keyof IAllegraTxWitnessSet, get: () => any ) =>
         {
             Object.defineProperty(this, name, {
                 get,
@@ -149,7 +116,7 @@ export class ConwayTxWitnessSet
             return arr?.map( element => element.clone() ) ?? [];
         }
 
-        function defGetterArr( name: keyof IConwayTxWitnessSet, elems?: Cloneable<any>[] )
+        function defGetterArr( name: keyof IAllegraTxWitnessSet, elems?: Cloneable<any>[] )
         {
             let _elems = elems ?? [];
             defGetter(
@@ -160,25 +127,15 @@ export class ConwayTxWitnessSet
 
         const {
             vkeyWitnesses,
-            bootstrapWitnesses,
-            datums,
             nativeScripts,
-            plutusV1Scripts,
-            plutusV2Scripts,
-            redeemers,
-            plutusV3Scripts
+            bootstrapWitnesses,
         } = witnesses;
 
         const _vkeyWits = vkeyWitnesses?.map( wit => wit.clone() ) ?? [];
 
         defGetterArr( "vkeyWitnesses", _vkeyWits );
-        defGetterArr( "bootstrapWitnesses", bootstrapWitnesses );
-        defGetterArr( "datums", datums );
         defGetterArr( "nativeScripts", nativeScripts );
-        defGetterArr( "plutusV1Scripts", plutusV1Scripts );
-        defGetterArr( "plutusV2Scripts", plutusV2Scripts );
-        defGetterArr( "redeemers", redeemers );
-        defGetterArr( "plutusV3Scripts", plutusV3Scripts );
+        defGetterArr( "bootstrapWitnesses", bootstrapWitnesses );
 
         const _reqSigs =
             Array.isArray( allRequiredSigners ) && allRequiredSigners.every( reqSig => reqSig instanceof Hash28 ) ? 
@@ -206,7 +163,6 @@ export class ConwayTxWitnessSet
         this.addVKeyWitness = ( vkeyWit: VKeyWitness ) => {_vkeyWits.push( vkeyWit.clone() );
         }
 
-        /* DONE: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef( witnesses );
     }
 
@@ -217,11 +173,6 @@ export class ConwayTxWitnessSet
             vkeyWitnesses: this.vkeyWitnesses?.map( vkWit => vkWit.toJson() ),
             nativeScripts: this.nativeScripts?.map( ns => ns.toJson() ),
             bootstrapWitnesses: this.bootstrapWitnesses?.map( bWit => bWit.toJson() ),
-            plutusV1Scripts: this.plutusV1Scripts?.map( s => s.toJson() ),
-            datums: this.datums?.map( dat => dat.toJson() ),
-            redeemers: this.redeemers?.map( rdmr => rdmr.toJson() ),
-            plutusV2Scripts: this.plutusV2Scripts?.map( s => s.toJson() ),
-            plutusV3Scripts: this.plutusV3Scripts?.map( s => s.toJson() ),
         }
     }
 
@@ -276,70 +227,27 @@ export class ConwayTxWitnessSet
                     v: new CborArray(
                         this.bootstrapWitnesses.map( w => w.toCborObj() )
                     )
-                },
-
-                this.plutusV1Scripts === undefined ? undefined :
-                {
-                    k: new CborUInt( 3 ),
-                    v: new CborArray(
-                        this.plutusV1Scripts
-                        .map( script =>  Cbor.parse( script.cbor ) )
-                    )
-                },
-
-                this.datums === undefined ? undefined :
-                {
-                    k: new CborUInt( 4 ),
-                    v: new CborArray(
-                        this.datums.map( dataToCborObj )
-                    )
-                },
-
-                this.redeemers === undefined ? undefined :
-                {
-                    k: new CborUInt( 5 ),
-                    v: new CborArray(
-                        this.redeemers.map( r => r.toCborObj() )
-                    )
-                },
-
-                this.plutusV2Scripts === undefined ? undefined :
-                {
-                    k: new CborUInt( 6 ),
-                    v: new CborArray(
-                        this.plutusV2Scripts
-                        .map( script => Cbor.parse( script.cbor ) )
-                    )
-                },
-
-                this.plutusV3Scripts === undefined ? undefined :
-                {
-                    k: new CborUInt( 7 ),
-                    v: new CborArray(
-                        this.plutusV3Scripts
-                        .map( script => Cbor.parse( script.cbor ) )
-                    )
-                },
+                }
             ]
             .filter( elem => elem !== undefined ) as CborMapEntry[])
         )
     }
 
-    static fromCbor( cStr: CanBeCborString ): ConwayTxWitnessSet
+    static fromCbor( cStr: CanBeCborString ): AllegraTxWitnessSet
     {
-        return ConwayTxWitnessSet.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
+        return AllegraTxWitnessSet.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
 
-    static fromCborObj( cObj: CborObj ): ConwayTxWitnessSet
+    static fromCborObj( cObj: CborObj ): AllegraTxWitnessSet
     {
         if(!( 
             cObj instanceof CborMap 
-            && cObj.map.length >= 8
-        ))throw new InvalidCborFormatError("ConwayTxWitnessSet");
+            && cObj.map.length >= 3
+        ))throw new InvalidCborFormatError("AllegraTxWitnessSet");
 
-        let fields: (CborObj | undefined)[] = new Array( 8 ).fill( undefined );
+        let fields: (CborObj | undefined)[] = new Array( 3 ).fill( undefined );
 
-        for( let i = 0; i < 8; i++)
+        for( let i = 0; i < 3; i++)
         {
             const { v } = cObj.map.find(
                 ({ k }) => k instanceof CborUInt && Number( k.num ) === i
@@ -354,26 +262,15 @@ export class ConwayTxWitnessSet
             _vkey,
             _native,
             _bootstrap,
-            _plutusV1,
-            _dats,
-            _reds,
-            _plutusV2,
-            _plutusV3,
         ] = fields;
 
-        // redeemer might be either array or map in conway
-        //* TO DO: ASK About Adding Redeemers */
         if(!(
             (_vkey === undefined        || isCborSet( _vkey ) )      &&
             (_native === undefined      || isCborSet( _native ) )    &&
-            (_bootstrap === undefined   || isCborSet( _bootstrap ) ) &&
-            (_plutusV1 === undefined    || isCborSet( _plutusV1 ) )  &&
-            (_dats === undefined        || isCborSet( _dats ) )      &&
-            (_plutusV2 === undefined    || isCborSet( _plutusV2 ) )  &&
-            (_plutusV3 === undefined    || isCborSet( _plutusV3 ) )
-        )) throw new InvalidCborFormatError("ConwayTxWitnessSet");
+            (_bootstrap === undefined   || isCborSet( _bootstrap ) )
+        )) throw new InvalidCborFormatError("AllegraTxWitnessSet");
 
-        return new ConwayTxWitnessSet({
+        return new AllegraTxWitnessSet({
             vkeyWitnesses: _vkey === undefined ? undefined : getCborSet( _vkey ).map( VKeyWitness.fromCborObj ),
             nativeScripts: _native === undefined ? undefined : 
                 getCborSet( _native ).map( nativeCborObj => 
@@ -382,46 +279,7 @@ export class ConwayTxWitnessSet
                         bytes: Cbor.encode( nativeCborObj ).toBuffer()
                     })
                 ),
-            bootstrapWitnesses: _bootstrap === undefined ? undefined :
-                getCborSet( _bootstrap ).map( BootstrapWitness.fromCborObj ),
-            plutusV1Scripts: _plutusV1 === undefined ? undefined :
-                getCborSet( _plutusV1 ).map( cbor =>
-                    new Script({
-                        scriptType: ScriptType.PlutusV1,
-                        bytes: Cbor.encode( cbor ).toBuffer()
-                    })
-                ),
-            datums: _dats === undefined ? undefined :
-                getCborSet( _dats ).map( dataFromCborObj ),
-            redeemers: _reds === undefined ? undefined : witnessRedeemersFromCborObj( _reds ),
-            plutusV2Scripts: _plutusV2 === undefined ? undefined :
-                getCborSet( _plutusV2 ).map( cbor =>
-                    new Script({
-                        scriptType: ScriptType.PlutusV2,
-                        bytes: Cbor.encode( cbor ).toBuffer()
-                    })
-                ),
-            plutusV3Scripts: _plutusV3 === undefined ? undefined :
-                getCborSet( _plutusV3 ).map( cbor =>
-                    new Script({
-                        scriptType: ScriptType.PlutusV3,
-                        bytes: Cbor.encode( cbor ).toBuffer()
-                    })
-                ),
+            bootstrapWitnesses: _bootstrap === undefined ? undefined : getCborSet( _bootstrap ).map( BootstrapWitness.fromCborObj )
         }, getSubCborRef( cObj ));
     }
-
-}
-
-function witnessRedeemersFromCborObj( cbor: CborObj ): ConwayTxRedeemer[]
-{
-    if( cbor instanceof CborArray )
-    {
-        return cbor.array.map( ConwayTxRedeemer.fromCborObj );
-    }
-    else if( cbor instanceof CborMap )
-    {
-        return cbor.map.map( ConwayTxRedeemer.fromCborMapEntry );
-    }
-    else throw new Error("invalid format for witness set redeemers field");
 }

@@ -3,7 +3,8 @@ import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, C
 import { signEd25519_sync } from "@harmoniclabs/crypto"
 import { PrivateKey, CredentialType, PubKeyHash } from "../../../credentials"
 import { Signature, Hash32, Hash28 } from "../../../hashes"
-import { IConwayTxBody, IConwayTxWitnessSet, AuxiliaryData, ConwayTxBody, ConwayTxWitnessSet, isIConwayTxBody, isIConwayTxWitnessSet, VKeyWitness, VKey } from "../../../tx"
+import { IConwayTxBody, IConwayTxWitnessSet, ConwayAuxiliaryData, ConwayTxBody, ConwayTxWitnessSet, isIConwayTxBody, isIConwayTxWitnessSet } from "."
+import { VKey, VKeyWitness } from "../../common"
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef"
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError"
 import { ToJson } from "../../../utils/ToJson"
@@ -12,7 +13,7 @@ export interface IConwayTx {
     body: IConwayTxBody
     witnesses: IConwayTxWitnessSet
     isScriptValid?: boolean
-    auxiliaryData?: AuxiliaryData | null
+    conwayAuxiliaryData?: ConwayAuxiliaryData | null
 }
 
 export interface Cip30LikeSignConwayTx {
@@ -31,7 +32,7 @@ export class ConwayTx
     readonly body!: ConwayTxBody;
     readonly witnesses!: ConwayTxWitnessSet;
     readonly isScriptValid!: boolean;
-    readonly auxiliaryData?: AuxiliaryData | null | undefined;
+    readonly conwayAuxiliaryData?: ConwayAuxiliaryData | null | undefined;
 
     clone(): ConwayTx
     {
@@ -47,7 +48,7 @@ export class ConwayTx
             body,
             witnesses,
             isScriptValid,
-            auxiliaryData
+            conwayAuxiliaryData
         } = tx;
 
         if(!(
@@ -66,10 +67,10 @@ export class ConwayTx
         )) throw new Error("'isScriptValid' ('ConwayTx' third paramter) must be a boolean");
         
         if(!(
-            auxiliaryData === undefined ||
-            auxiliaryData === null ||
-            auxiliaryData instanceof AuxiliaryData
-        )) throw new Error("invalid transaction auxiliray data; must be instance of 'AuxiliaryData'");
+            conwayAuxiliaryData === undefined ||
+            conwayAuxiliaryData === null ||
+            conwayAuxiliaryData instanceof ConwayAuxiliaryData
+        )) throw new Error("invalid transaction auxiliray data; must be instance of 'ConwayAuxiliaryData'");
 
         this.body = new ConwayTxBody( body );
         this.witnesses = new ConwayTxWitnessSet(
@@ -78,7 +79,7 @@ export class ConwayTx
             getAllRequiredSigners( this.body )
         );
         this.isScriptValid = isScriptValid === undefined ? true : isScriptValid;
-        this.auxiliaryData = auxiliaryData;
+        this.conwayAuxiliaryData = conwayAuxiliaryData;
 
         this.cborRef = cborRef ?? subCborRefOrUndef( tx );
     }
@@ -202,9 +203,9 @@ export class ConwayTx
             this.body.toCborObj(),
             this.witnesses.toCborObj(),
             new CborSimple( this.isScriptValid ),
-            this.auxiliaryData === undefined || this.auxiliaryData === null ?
+            this.conwayAuxiliaryData === undefined || this.conwayAuxiliaryData === null ?
                 new CborSimple( null ) :
-                this.auxiliaryData.toCborObj()
+                this.conwayAuxiliaryData.toCborObj()
         ]);
     }
 
@@ -226,13 +227,13 @@ export class ConwayTx
             typeof (_isValid.simple) === "boolean"
         ))throw new InvalidCborFormatError("ConwayTx","isScriptValid is not a boolean")
 
-        const noAuxiliaryData = _aux instanceof CborSimple && (_aux.simple === null || _aux.simple === undefined);
+        const noConwayAuxiliaryData = _aux instanceof CborSimple && (_aux.simple === null || _aux.simple === undefined);
 
         return new ConwayTx({
             body: ConwayTxBody.fromCborObj( _body ),
             witnesses: ConwayTxWitnessSet.fromCborObj( _wits ),
             isScriptValid: _isValid.simple,
-            auxiliaryData: noAuxiliaryData ? undefined : AuxiliaryData.fromCborObj( _aux )
+            conwayAuxiliaryData: noConwayAuxiliaryData ? undefined : ConwayAuxiliaryData.fromCborObj( _aux )
         }, getSubCborRef( cObj ))
     }
 
@@ -245,7 +246,7 @@ export class ConwayTx
             body: this.body.toJson(),
             witnesses: this.witnesses.toJson(),
             isScriptValid: this.isScriptValid,
-            auxiliaryData: this.auxiliaryData?.toJson()
+            conwayAuxiliaryData: this.conwayAuxiliaryData?.toJson()
         };
     }
 

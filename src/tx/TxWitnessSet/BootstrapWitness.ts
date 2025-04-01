@@ -6,7 +6,7 @@ import { Signature } from "../../hashes/Signature";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
 import { assert } from "../../utils/assert";
-import { VKey } from "./VKeyWitness/VKey";
+import { VKey } from "../../eras/common/VKey";
 import { isUint8Array, toHex } from "@harmoniclabs/uint8array-utils";
 import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 

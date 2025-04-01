@@ -3,18 +3,15 @@ import { blake2b_256 } from "@harmoniclabs/crypto";
 import { hasOwn } from "@harmoniclabs/obj-utils";
 import { AuxiliaryDataHash } from "../../../hashes";
 import { NativeScript, nativeScriptFromCborObj } from "../../../script/NativeScript";
-import { PlutusScriptJsonFormat, Script, ScriptType } from "../../../script/Script";
+import {  Script, ScriptType } from "../../../script/Script";
 import { TxMetadata } from "../../../tx";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 
-
-export interface IBabbageAuxiliaryData {
+export interface IAlonzoAuxiliaryData {
     metadata?: TxMetadata;
     nativeScripts?: (NativeScript | Script<ScriptType.NativeScript>)[];
-    plutusV1Scripts?: (PlutusScriptJsonFormat<ScriptType.PlutusV1 | "PlutusScriptV1"> | Script<ScriptType.PlutusV1>)[];
-    plutusV2Scripts?: (PlutusScriptJsonFormat<ScriptType.PlutusV2 | "PlutusScriptV2"> | Script<ScriptType.PlutusV2>)[];
 }
 
 function scriptArrToCbor( scripts: Script[] ): CborArray
@@ -24,13 +21,11 @@ function scriptArrToCbor( scripts: Script[] ): CborArray
     );
 }
 
-export class BabbageAuxiliaryData
-    implements IBabbageAuxiliaryData, ToCbor, ToJson
+export class AlonzoAuxiliaryData
+    implements IAlonzoAuxiliaryData, ToCbor, ToJson
 {
     readonly metadata?: TxMetadata;
     readonly nativeScripts?: Script<ScriptType.NativeScript>[];
-    readonly plutusV1Scripts?: Script<ScriptType.PlutusV1>[];
-    readonly plutusV2Scripts?: Script<ScriptType.PlutusV2>[];
 
     // --------- hash ---- //
     private _hash!: AuxiliaryDataHash
@@ -51,26 +46,24 @@ export class BabbageAuxiliaryData
     }
 
     constructor(
-        auxData: IBabbageAuxiliaryData,
+        auxData: IAlonzoAuxiliaryData,
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
         if(!(
             hasOwn( auxData, "metadata" )
-        ))throw new Error("'BabbageAuxiliaryData' is missing 'metadata' field");
+        ))throw new Error("'AlonzoAuxiliaryData' is missing 'metadata' field");
 
         const {
             metadata,
-            nativeScripts,
-            plutusV1Scripts,
-            plutusV2Scripts,
+            nativeScripts
         } = auxData;
 
         // -------------------------------- native scripts -------------------------------- //
         if(!(
             metadata === undefined || 
             metadata instanceof TxMetadata
-        ))throw new Error("'BabbageAuxiliaryData' :: 'metadata' field was not instance of 'TxMetadata'");
+        ))throw new Error("'AlonzoAuxiliaryData' :: 'metadata' field was not instance of 'TxMetadata'");
         this.metadata = metadata
         
 
@@ -97,55 +90,6 @@ export class BabbageAuxiliaryData
         else
         {
             this.nativeScripts = undefined;
-        }
-
-        // -------------------------------- plutus v1 -------------------------------- //
-        if( plutusV1Scripts !== undefined )
-        {   
-            if(!(
-                Array.isArray( plutusV1Scripts ) &&
-                plutusV1Scripts.every( script => {
-                    return true;
-                })
-            ))throw new Error("invalid plutusV1Scripts field");
-
-            this.plutusV1Scripts = plutusV1Scripts?.map( plutusScript =>
-                plutusScript instanceof Script
-                    ? plutusScript :
-                    new Script({
-                        scriptType: ScriptType.PlutusV1, 
-                        bytes: plutusScript 
-                    })
-            )
-        }
-        else
-        {
-            this.plutusV1Scripts = undefined;
-        }
-
-        // -------------------------------- plutus v2 -------------------------------- //
-        if( plutusV2Scripts !== undefined )
-        {
-            if(!(
-                Array.isArray( plutusV2Scripts ) &&
-                plutusV2Scripts.every( script => {
-                    return true;
-                })
-            ))throw new Error("invalid plutusV2Scripts field");
-
-            this.plutusV2Scripts = plutusV2Scripts?.map( plutusScript =>
-                plutusScript instanceof Script
-                    ? plutusScript :
-                    new Script({ 
-                        scriptType: ScriptType.PlutusV2, 
-                        bytes: plutusScript 
-
-                    })
-            )
-        }
-        else
-        {
-            this.plutusV2Scripts = undefined;
         }
         
         this.cborRef = cborRef ?? subCborRefOrUndef( auxData );
@@ -186,31 +130,21 @@ export class BabbageAuxiliaryData
                 {
                     k: new CborUInt( 1 ),
                     v: scriptArrToCbor( this.nativeScripts )
-                },
-                this.plutusV1Scripts === undefined || this.plutusV1Scripts.length === 0 ? undefined :
-                {
-                    k: new CborUInt( 2 ),
-                    v: scriptArrToCbor( this.plutusV1Scripts )
-                },
-                this.plutusV2Scripts === undefined || this.plutusV2Scripts.length === 0 ? undefined :
-                {
-                    k: new CborUInt( 3 ),
-                    v: scriptArrToCbor( this.plutusV2Scripts )
-                },
+                }
             ].filter( elem => elem !== undefined ) as CborMapEntry[])
         )
     }
 
-    static fromCbor( cStr: CanBeCborString ): BabbageAuxiliaryData
+    static fromCbor( cStr: CanBeCborString ): AlonzoAuxiliaryData
     {
-        return BabbageAuxiliaryData.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
+        return AlonzoAuxiliaryData.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
-    static fromCborObj( cObj: CborObj ): BabbageAuxiliaryData
+    static fromCborObj( cObj: CborObj ): AlonzoAuxiliaryData
     {
         // shelley; metadata only
         if( cObj instanceof CborMap )
         {
-            return new BabbageAuxiliaryData({
+            return new AlonzoAuxiliaryData({
                 metadata: TxMetadata.fromCborObj( cObj )
             });
         }
@@ -220,9 +154,9 @@ export class BabbageAuxiliaryData
         {
             if(!(
                 cObj.array[1] instanceof CborArray
-            ))throw new InvalidCborFormatError("BabbageAuxiliaryData")
+            ))throw new InvalidCborFormatError("AlonzoAuxiliaryData")
 
-            return new BabbageAuxiliaryData({
+            return new AlonzoAuxiliaryData({
                 metadata: TxMetadata.fromCborObj( cObj.array[0] ),
                 nativeScripts: cObj.array[1].array.map( nativeScriptFromCborObj )
             });
@@ -231,13 +165,12 @@ export class BabbageAuxiliaryData
         if(!(
             cObj instanceof CborTag &&
             cObj.data instanceof CborMap &&
-            cObj.data.map.length <= 4
-        ))
-        throw new InvalidCborFormatError("BabbageAuxiliaryData")
+            cObj.data.map.length <= 2
+        ))throw new InvalidCborFormatError("AlonzoAuxiliaryData")
 
-        let fields: (CborObj | undefined)[] = new Array( 4 ).fill( undefined );
+        let fields: (CborObj | undefined)[] = new Array( 2 ).fill( undefined );
 
-        for( let i = 0; i < 4; i++)
+        for( let i = 0; i < 2; i++)
         {
             const { v } = cObj.data.map.find(
                 ({ k }) => k instanceof CborUInt && Number( k.num ) === i
@@ -250,18 +183,14 @@ export class BabbageAuxiliaryData
 
         const [
             _metadata,
-            _native,
-            _pV1,
-            _pV2,
+            _native
         ] = fields;
 
         if(!(
-            _native instanceof CborArray &&
-            _pV1 instanceof CborArray &&
-            _pV2 instanceof CborArray
-        ))throw new InvalidCborFormatError("BabbageAuxiliaryData")
+            _native instanceof CborArray
+        ))throw new InvalidCborFormatError("AlonzoAuxiliaryData")
 
-        return new BabbageAuxiliaryData({
+        return new AlonzoAuxiliaryData({
             metadata: _metadata === undefined ? undefined : TxMetadata.fromCborObj( _metadata ),
             nativeScripts:_native === undefined ? undefined : 
                 _native.array.map( nativeCborObj => 
@@ -269,21 +198,7 @@ export class BabbageAuxiliaryData
                         scriptType: ScriptType.NativeScript, 
                         bytes: Cbor.encode( nativeCborObj ).toBuffer()
                     })
-                ),
-            plutusV1Scripts: _pV1 === undefined ? undefined :
-                _pV1.array.map( cbor =>
-                    new Script({
-                        scriptType: ScriptType.PlutusV1,
-                        bytes: Cbor.encode( cbor ).toBuffer()
-                    })
-                ),
-            plutusV2Scripts: _pV2 === undefined ? undefined :
-                _pV2.array.map( cbor =>
-                    new Script({
-                        scriptType: ScriptType.PlutusV2,
-                        bytes: Cbor.encode( cbor ).toBuffer()
-                    })
-                )             
+                )           
         }, getSubCborRef( cObj ));
     }
 
@@ -293,8 +208,6 @@ export class BabbageAuxiliaryData
         return {
             metadata: this.metadata?.toJson(),
             nativeScripts: this.nativeScripts?.map( s => s.toJson() ),
-            plutusV1Scripts: this.plutusV1Scripts?.map( s => s.toJson() ),
-            plutusV2Scripts: this.plutusV2Scripts?.map( s => s.toJson() )
         }
     }
 }

@@ -62,7 +62,8 @@ address = h'00100000000000000000000000000000000000000000000000000000001100000000
            / h'6070000000000000000000000000000000000000000000000000000000'
            / h'7080000000000000000000000000000000000000000000000000000000'
 
-block = [header
+block = [
+          header
         , transaction_bodies : [* transaction_body]
         , transaction_witness_sets : [* transaction_witness_set]
         , transaction_metadata_set : {* transaction_index => transaction_metadata}]

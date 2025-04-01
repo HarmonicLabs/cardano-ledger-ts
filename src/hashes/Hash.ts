@@ -2,8 +2,6 @@ import { ToCbor, CborString, Cbor, CborObj, CborBytes, CanBeCborString, forceCbo
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { ToData, Data, DataB } from "@harmoniclabs/plutus-data";
 import { fromAscii, fromHex, isUint8Array, toAscii, toHex } from "@harmoniclabs/uint8array-utils";
-import { assert } from "../utils/assert";
-import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { isHex } from "../utils/hex";
 import { ToDataVersion } from "../toData/defaultToDataVersion";
 import { getSubCborRef } from "../utils/getSubCborRef";

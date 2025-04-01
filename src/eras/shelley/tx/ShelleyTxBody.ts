@@ -4,7 +4,6 @@ import { blake2b_256 } from "@harmoniclabs/crypto";
 import { hasOwn, isObject } from "@harmoniclabs/obj-utils";
 import { Certificate } from "crypto";
 import { PubKeyHash } from "../../../credentials";
-import { IVotingProcedures, VotingProcedures, ProposalProcedure, IProposalProcedure, isIVotingProceduresEntry, isIProposalProcedure } from "../../../governance";
 import { AuxiliaryDataHash, ScriptDataHash, CanBeHash28, Hash32, canBeHash28 } from "../../../hashes";
 import { Coin, TxWithdrawals, ITxWithdrawals, LegacyPPUpdateProposal, Value, NetworkT, isCertificate, canBeTxWithdrawals, isLegacyPPUpdateProposal, forceTxWithdrawals, isIValue, LegacyPPUpdateProposalToCborObj, certificateFromCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, certificatesToDepositLovelaces } from "../../../ledger";
 import { UTxO, TxOut, isIUTxO, isITxOut, TxOutRef } from "../../../tx";
@@ -14,7 +13,7 @@ import { maybeBigUint } from "../../../utils/ints";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 
-
+//** TO DO: Should AUX data here be replaced with the simple TxMetadata.ts from common */
 export interface IShelleyTxBody {
     inputs: [ UTxO, ...UTxO[] ],
     outputs: TxOut[],

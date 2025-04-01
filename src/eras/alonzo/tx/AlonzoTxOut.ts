@@ -1,6 +1,6 @@
 import { ToCbor, CborString, Cbor, CborMap, CborUInt, CborArray, CborTag, CborBytes, CborMapEntry, CanBeCborString, forceCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
-import { isObject, hasOwn } from "@harmoniclabs/obj-utils";
+import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { Data, isData, ToData, DataConstr, dataToCbor, dataFromCborObj } from "@harmoniclabs/plutus-data";
 import { Hash32 } from "../../../hashes";
 import { Address, AddressStr, Value, IValue, isAddressStr, isIValue } from "../../../ledger";
@@ -13,14 +13,13 @@ import { ToDataVersion } from "../../../toData/defaultToDataVersion";
 import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
 
 
-export interface IBabbageTxOut {
+export interface IAlonzoTxOut {
     address: Address | AddressStr,
     value: Value | IValue,
-    datum?: Hash32 | Data,
-    refScript?: Script
+    datum?: Hash32 | Data
 }
 
-export function isIBabbageTxOut( stuff: any ): stuff is IBabbageTxOut
+export function isIAlonzoTxOut( stuff: any ): stuff is IAlonzoTxOut
 {
     return (
         isObject( stuff ) &&
@@ -30,36 +29,33 @@ export function isIBabbageTxOut( stuff: any ): stuff is IBabbageTxOut
         hasOwn( stuff, "value" ) && (
             stuff.value instanceof Value || isIValue( stuff.value )
         ) &&
-        ( stuff.datum === undefined || stuff.datum instanceof Hash32 || isData( stuff.datum ) ) &&
-        ( stuff.refScript === undefined || stuff.refScript instanceof Script )
+        ( stuff.datum === undefined || stuff.datum instanceof Hash32 || isData( stuff.datum ) )
     );
 }
 
-export class BabbageTxOut
-    implements IBabbageTxOut, ToCbor, Cloneable<BabbageTxOut>, ToData, ToJson
+export class AlonzoTxOut
+    implements IAlonzoTxOut, ToCbor, Cloneable<AlonzoTxOut>, ToData, ToJson
 {
     readonly address!: Address
     readonly value!: Value
     readonly datum?: Hash32 | Data
-    readonly refScript?: Script
 
     constructor(
-        BabbageTxOutput: IBabbageTxOut,
+        AlonzoTxOutput: IAlonzoTxOut,
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
         if(!(
-            isObject( BabbageTxOutput ) &&
-            hasOwn( BabbageTxOutput, "address" ) &&
-            hasOwn( BabbageTxOutput, "value" )
-        )) throw new Error("BabbageTxOutput is missing some necessary fields");
+            isObject( AlonzoTxOutput ) &&
+            hasOwn( AlonzoTxOutput, "address" ) &&
+            hasOwn( AlonzoTxOutput, "value" )
+        )) throw new Error("AlonzoTxOutput is missing some necessary fields");
 
         let {
             address,
             value,
             datum,
-            refScript
-        } = BabbageTxOutput;
+        } = AlonzoTxOutput;
         
         if (isAddressStr(address))
         {
@@ -67,11 +63,11 @@ export class BabbageTxOut
         }
         if(!(
             address instanceof Address
-        )) throw new Error("invlaid 'address' while constructing 'BabbageTxOut'");
+        )) throw new Error("invlaid 'address' while constructing 'AlonzoTxOut'");
 
         if(!(
             value instanceof Value
-        )) throw new Error("invlaid 'value' while constructing 'BabbageTxOut'");
+        )) throw new Error("invlaid 'value' while constructing 'AlonzoTxOut'");
 
         this.address = address;
 
@@ -84,33 +80,25 @@ export class BabbageTxOut
         
         this.datum = datum;
 
-        if( refScript !== undefined )
-            if(!(
-                refScript instanceof Script
-            )) throw new Error("invalid 'refScript' field");
-        
-        this.refScript = refScript;
 
-        this.cborRef = cborRef ?? subCborRefOrUndef( BabbageTxOutput );
+        this.cborRef = cborRef ?? subCborRefOrUndef( AlonzoTxOutput );
     }
 
-    clone(): BabbageTxOut
+    clone(): AlonzoTxOut
     {
-        return new BabbageTxOut({
+        return new AlonzoTxOut({
             address: this.address.clone(),
             value: this.value.clone(),
-            datum: this.datum?.clone(),
-            refScript: this.refScript?.clone() 
+            datum: this.datum?.clone()
         })
     }
 
-    static get fake(): BabbageTxOut
+    static get fake(): AlonzoTxOut
     {
-        return new BabbageTxOut({
+        return new AlonzoTxOut({
             address: Address.fake,
             value: Value.lovelaces( 0 ),
-            datum: undefined,
-            refScript: undefined
+            datum: undefined
         })
     }
 
@@ -147,8 +135,7 @@ export class BabbageTxOut
             [
                 this.address.toData( version ),
                 this.value.toData( version ),
-                datumData,
-                maybeData( this.refScript?.hash.toData( version ) )
+                datumData
             ]
         )
     }
@@ -189,7 +176,7 @@ export class BabbageTxOut
                     2
                 )
             )
-            throw new BasePlutsError("BabbageTxOut values can only be positive; value was: " + JSON.stringify( this.value.toJson() ));
+            throw new BasePlutsError("AlonzoTxOut values can only be positive; value was: " + JSON.stringify( this.value.toJson() ));
         }
         return new CborMap([
             {
@@ -217,43 +204,38 @@ export class BabbageTxOut
                             )
                         )
                     ])
-            },
-            this.refScript === undefined ? undefined :
-            {
-                k: new CborUInt( 3 ),
-                v: new CborTag( 24, new CborBytes( this.refScript.toCbor().toBuffer() ) )
             }
         ].filter( elem => elem !== undefined ) as CborMapEntry[])
     }
 
-    static fromCbor( cStr: CanBeCborString ): BabbageTxOut
+    static fromCbor( cStr: CanBeCborString ): AlonzoTxOut
     {
-        return BabbageTxOut.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
+        return AlonzoTxOut.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
-    static fromCborObj( cObj: CborObj ): BabbageTxOut
+    static fromCborObj( cObj: CborObj ): AlonzoTxOut
     {
         if(!(
-            cObj instanceof CborMap && cObj.map.length >= 4
-            || cObj instanceof CborArray && cObj.array.length >= 4
+            cObj instanceof CborMap && cObj.map.length >= 3
+            || cObj instanceof CborArray && cObj.array.length >= 3
             
-        )) throw new InvalidCborFormatError("BabbageTxOut");
+        )) throw new InvalidCborFormatError("AlonzoTxOut");
 
         // legacy
         if( cObj instanceof CborArray )
         {
             //* TO DO: added _refScript to array find out if correct */
-            const [ _addr, _val, _dat, _refScript ] = cObj.array;
+            const [ _addr, _val, _dat ] = cObj.array;
             
-            return new BabbageTxOut({
+            return new AlonzoTxOut({
                 address: Address.fromCborObj( _addr ),
                 value: Value.fromCborObj( _val ),
                 datum: _dat === undefined ? undefined : Hash32.fromCborObj( _dat ),
             });
         }
 
-        let fields: (CborObj | undefined )[] = new Array( 4 ).fill( undefined );
+        let fields: (CborObj | undefined )[] = new Array( 3 ).fill( undefined );
 
-        for( let i = 0; i < 4; i++)
+        for( let i = 0; i < 3; i++)
         {
             const { v } = (cObj as CborMap).map.find(
                 ({ k }) => {
@@ -272,8 +254,7 @@ export class BabbageTxOut
         const [
             _addr,
             _amt,
-            _dat,
-            _refScript
+            _dat
         ] = fields;
 
         let datum: Hash32 | Data | undefined = undefined;
@@ -281,12 +262,12 @@ export class BabbageTxOut
         if( _dat !== undefined )
         {
             if(!(_dat instanceof CborArray))
-            throw new InvalidCborFormatError("BabbageTxOut");
+            throw new InvalidCborFormatError("AlonzoTxOut");
             
             const [ _0, _1 ] = _dat.array;
 
             if(!(_0 instanceof CborUInt))
-            throw new InvalidCborFormatError("BabbageTxOut");
+            throw new InvalidCborFormatError("AlonzoTxOut");
 
             const opt = Number( _0.num );
 
@@ -295,7 +276,7 @@ export class BabbageTxOut
                 if(!(
                     _1 instanceof CborBytes
                 ))
-                throw new InvalidCborFormatError("BabbageTxOut");
+                throw new InvalidCborFormatError("AlonzoTxOut");
 
                 datum = new Hash32( _1.buffer );
             }
@@ -306,38 +287,22 @@ export class BabbageTxOut
                     _1.data instanceof CborBytes
                 ))
                 {
-                    throw new InvalidCborFormatError("BabbageTxOut");
+                    throw new InvalidCborFormatError("AlonzoTxOut");
                 }
 
                 datum = dataFromCborObj( Cbor.parse( _1.data.buffer ) )
             }
-            else throw new InvalidCborFormatError("BabbageTxOut");
+            else throw new InvalidCborFormatError("AlonzoTxOut");
 
-        }
-
-        let refScript: Script | undefined = undefined;
-        if( _refScript !== undefined )
-        {
-            if(!(
-                _refScript instanceof CborTag &&
-                _refScript.data instanceof CborBytes
-            ))
-            throw new InvalidCborFormatError("BabbageTxOut");
-
-            refScript = new Script( {
-                scriptType: ScriptType.PlutusV2, 
-                bytes: _refScript.data.buffer 
-            });
         }
 
         if( _addr === undefined || _amt === undefined )
-        throw new InvalidCborFormatError("BabbageTxOut");
+        throw new InvalidCborFormatError("AlonzoTxOut");
 
-        return new BabbageTxOut({
+        return new AlonzoTxOut({
             address: Address.fromCborObj( _addr ),
             value:  Value.fromCborObj( _amt ),
-            datum,
-            refScript
+            datum
         }, getSubCborRef( cObj ));
     }
 
@@ -350,8 +315,7 @@ export class BabbageTxOut
             datum: this.datum === undefined ? undefined :
             this.datum instanceof Hash32 ?
                 this.datum.toString() :
-                this.datum.toJson(),
-            refScript: this.refScript?.toJson()
+                this.datum.toJson()
         }
     }
 

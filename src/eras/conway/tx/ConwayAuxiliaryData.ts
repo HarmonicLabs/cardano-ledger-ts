@@ -4,7 +4,7 @@ import { hasOwn } from "@harmoniclabs/obj-utils";
 import { AuxiliaryDataHash } from "../../../hashes";
 import { NativeScript, nativeScriptFromCborObj } from "../../../script/NativeScript";
 import { PlutusScriptJsonFormat, Script, ScriptType } from "../../../script";
-import { TxMetadata } from "../../../tx";
+import { TxMetadata } from "../../common/TxMetadata";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
@@ -268,10 +268,10 @@ export class ConwayAuxiliaryData
 
         if(!(
             cObj instanceof CborTag 
-            && cObj.data instanceof CborMap
+            && cObj.data instanceof CborMap 
+            && cObj.data.map.length <= 5
         ))throw new InvalidCborFormatError("ConwayAuxiliaryData")
 
-        //* TO DO: Updated from 4 to 5 */
         let fields: (CborObj | undefined)[] = new Array( 5 ).fill( undefined );
 
         for( let i = 0; i < 5 ; i++)
@@ -298,8 +298,7 @@ export class ConwayAuxiliaryData
             _pV1 instanceof CborArray &&
             _pV2 instanceof CborArray &&
             _pV3 instanceof CborArray
-        ))
-        throw new InvalidCborFormatError("ConwayAuxiliaryData")
+        ))throw new InvalidCborFormatError("ConwayAuxiliaryData")
 
         return new ConwayAuxiliaryData({
             metadata: _metadata === undefined ? undefined : TxMetadata.fromCborObj( _metadata ),

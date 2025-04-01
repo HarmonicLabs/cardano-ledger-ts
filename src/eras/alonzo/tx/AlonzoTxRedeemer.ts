@@ -9,68 +9,60 @@ import { ToJson } from "../../../utils/ToJson";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../../utils/ints";
 import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
 
-export enum ConwayTxRedeemerTag {
+export enum AlonzoTxRedeemerTag {
     Spend       = 0,
     Mint        = 1,
     Cert        = 2,
-    Withdraw    = 3,
-    Voting      = 4,
-    Proposing   = 5
+    Withdraw    = 3
 };
 
-Object.freeze( ConwayTxRedeemerTag );
+Object.freeze( AlonzoTxRedeemerTag );
 
 /** @deprecated */
-export function txRdmrTagToString( tag: ConwayTxRedeemerTag ): string
+export function txRdmrTagToString( tag: AlonzoTxRedeemerTag ): string
 {
     switch( tag )
     {
-        case ConwayTxRedeemerTag.Cert: return "Cert";
-        case ConwayTxRedeemerTag.Mint: return "Mint";
-        case ConwayTxRedeemerTag.Spend: return "Spend";
-        case ConwayTxRedeemerTag.Withdraw: return "Withdraw";
-        case ConwayTxRedeemerTag.Voting: return "Voting";
-        case ConwayTxRedeemerTag.Proposing: return "Proposing";
+        case AlonzoTxRedeemerTag.Cert: return "Cert";
+        case AlonzoTxRedeemerTag.Mint: return "Mint";
+        case AlonzoTxRedeemerTag.Spend: return "Spend";
+        case AlonzoTxRedeemerTag.Withdraw: return "Withdraw";
         default: return "";
     }
 }
 
-export type ConwayTxRedeemerTagStr<Tag extends ConwayTxRedeemerTag> =
-    Tag extends ConwayTxRedeemerTag.Spend     ? "Spend"       :
-    Tag extends ConwayTxRedeemerTag.Mint      ? "Mint"        :
-    Tag extends ConwayTxRedeemerTag.Cert      ? "Cert"        :
-    Tag extends ConwayTxRedeemerTag.Withdraw  ? "Withdraw"    :
-    Tag extends ConwayTxRedeemerTag.Voting    ? "Voting"      :
-    Tag extends ConwayTxRedeemerTag.Proposing ? "Proposing"   :
+export type AlonzoTxRedeemerTagStr<Tag extends AlonzoTxRedeemerTag> =
+    Tag extends AlonzoTxRedeemerTag.Spend     ? "Spend"       :
+    Tag extends AlonzoTxRedeemerTag.Mint      ? "Mint"        :
+    Tag extends AlonzoTxRedeemerTag.Cert      ? "Cert"        :
+    Tag extends AlonzoTxRedeemerTag.Withdraw  ? "Withdraw"    :
     never;
 
-export function ConwayTxRedeemerTagToString<Tag extends ConwayTxRedeemerTag>( tag: Tag ): ConwayTxRedeemerTagStr<Tag>
+export function AlonzoTxRedeemerTagToString<Tag extends AlonzoTxRedeemerTag>( tag: Tag ): AlonzoTxRedeemerTagStr<Tag>
 {
     switch( tag )
     {
-        case ConwayTxRedeemerTag.Spend:       return "Spend" as any;
-        case ConwayTxRedeemerTag.Mint:        return "Mint" as any;
-        case ConwayTxRedeemerTag.Cert:        return "Cert" as any;
-        case ConwayTxRedeemerTag.Withdraw:    return "Withdraw" as any;
-        case ConwayTxRedeemerTag.Voting:      return "Voting" as any;
-        case ConwayTxRedeemerTag.Proposing:   return "Proposing" as any;
+        case AlonzoTxRedeemerTag.Spend:       return "Spend" as any;
+        case AlonzoTxRedeemerTag.Mint:        return "Mint" as any;
+        case AlonzoTxRedeemerTag.Cert:        return "Cert" as any;
+        case AlonzoTxRedeemerTag.Withdraw:    return "Withdraw" as any;
         default:
-            throw new BasePlutsError("invalid ConwayTxRedeemerTag")
+            throw new BasePlutsError("invalid AlonzoTxRedeemerTag")
     }
 }
 
-export interface IConwayTxRedeemer {
-    tag: ConwayTxRedeemerTag
+export interface IAlonzoTxRedeemer {
+    tag: AlonzoTxRedeemerTag
     index: CanBeUInteger
     data: Data
     execUnits: ExBudget
 }
 
-export class ConwayTxRedeemer
-    implements IConwayTxRedeemer, ToCbor, Cloneable<ConwayTxRedeemer>, ToJson
+export class AlonzoTxRedeemer
+    implements IAlonzoTxRedeemer, ToCbor, Cloneable<AlonzoTxRedeemer>, ToJson
 {
     
-    readonly tag!: ConwayTxRedeemerTag
+    readonly tag!: AlonzoTxRedeemerTag
     /**
      * index of the input the redeemer corresponds to
     **/
@@ -87,13 +79,13 @@ export class ConwayTxRedeemer
 
     set execUnits(newExUnits: ExBudget) {
         if (!(newExUnits instanceof ExBudget)) {
-            throw new Error("invalid 'execUnits' setting 'ConwayTxRedeemer'");
+            throw new Error("invalid 'execUnits' setting 'AlonzoTxRedeemer'");
         }
         this._execUnits = newExUnits;
     }
 
     constructor(
-        redeemer: IConwayTxRedeemer,
+        redeemer: IAlonzoTxRedeemer,
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
@@ -103,7 +95,7 @@ export class ConwayTxRedeemer
             hasOwn( redeemer, "index" ) &&
             hasOwn( redeemer, "data" ) &&
             hasOwn( redeemer, "execUnits" )
-        ))throw new Error( "invalid object passed to construct a 'ConwayTxRedeemer'");
+        ))throw new Error( "invalid object passed to construct a 'AlonzoTxRedeemer'");
 
         const {
             tag,
@@ -116,9 +108,7 @@ export class ConwayTxRedeemer
             tag === 0 || 
             tag === 1 || 
             tag === 2 || 
-            tag === 3 ||
-            tag === 4 ||
-            tag === 5
+            tag === 3
         ))throw new Error("invalid redeemer tag");
         this.tag = tag;
 
@@ -134,16 +124,16 @@ export class ConwayTxRedeemer
 
         if(!( 
             execUnits instanceof ExBudget
-        ))throw new Error("invalid 'execUnits' constructing 'ConwayTxRedeemer'");
+        ))throw new Error("invalid 'execUnits' constructing 'AlonzoTxRedeemer'");
         this._execUnits = execUnits.clone();
 
          /* Done: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef( redeemer );
     }
 
-    clone(): ConwayTxRedeemer
+    clone(): AlonzoTxRedeemer
     {
-        return new ConwayTxRedeemer({
+        return new AlonzoTxRedeemer({
             ...this,
             data: this.data.clone(),
             execUnits: this.execUnits.clone()
@@ -164,7 +154,7 @@ export class ConwayTxRedeemer
         };
     }
     
-    static fromCborMapEntry( entry: CborMapEntry ): ConwayTxRedeemer
+    static fromCborMapEntry( entry: CborMapEntry ): AlonzoTxRedeemer
     {
         if(!(
             isObject( entry ) &&
@@ -174,9 +164,9 @@ export class ConwayTxRedeemer
             entry.k.array[1] instanceof CborUInt &&
             entry.v instanceof CborArray &&
             entry.v.array.length >= 2
-        )) throw new Error("invalid CborMapEntry building ConwayTxRedeemer");
+        )) throw new Error("invalid CborMapEntry building AlonzoTxRedeemer");
 
-        return new ConwayTxRedeemer({
+        return new AlonzoTxRedeemer({
             tag: Number( entry.k.array[0].num ),
             index: Number( entry.k.array[1].num ),
             data: dataFromCborObj( entry.v.array[0] ),
@@ -217,24 +207,24 @@ export class ConwayTxRedeemer
         ])
     }
 
-    static fromCbor( cStr: CanBeCborString ): ConwayTxRedeemer
+    static fromCbor( cStr: CanBeCborString ): AlonzoTxRedeemer
     {
-        return ConwayTxRedeemer.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
+        return AlonzoTxRedeemer.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
 
-    static fromCborObj( cObj: CborObj ): ConwayTxRedeemer
+    static fromCborObj( cObj: CborObj ): AlonzoTxRedeemer
     {
         if(!(
             cObj instanceof CborArray 
             && cObj.array.length >= 4 
             && cObj.array[0] instanceof CborUInt 
             && cObj.array[1] instanceof CborUInt
-        ))throw new InvalidCborFormatError("ConwayTxRedeemer");
+        ))throw new InvalidCborFormatError("AlonzoTxRedeemer");
 
         //* TO DO: added array */
         const [ _tag, _index, _data, _execUnits ] = cObj.array;
 
-        return new ConwayTxRedeemer({
+        return new AlonzoTxRedeemer({
             tag: Number( cObj.array[0].num ) as any,
             index: cObj.array[1].num,
             data: dataFromCborObj( cObj.array[2] ),
@@ -246,7 +236,7 @@ export class ConwayTxRedeemer
     toJson()
     {
         return {
-            tag: ConwayTxRedeemerTagToString( this.tag ),
+            tag: AlonzoTxRedeemerTagToString( this.tag ),
             index: this.index,
             execUnits: this.execUnits.toJson(),
             data: this.data.toJson(),

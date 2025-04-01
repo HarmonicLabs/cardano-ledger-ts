@@ -3,15 +3,16 @@ import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, C
 import { signEd25519_sync } from "@harmoniclabs/crypto"
 import { PrivateKey, CredentialType, PubKeyHash } from "../../../credentials"
 import { Signature, Hash32, Hash28 } from "../../../hashes"
-import { IShelleyTxBody, IShelleyTxWitnessSet, AuxiliaryData, ShelleyTxBody, ShelleyTxWitnessSet, isIShelleyTxBody, isIShelleyTxWitnessSet, VKeyWitness, VKey } from "../../../tx"
+import { IShelleyTxBody, IShelleyTxWitnessSet, ShelleyAuxiliaryData, ShelleyTxBody, ShelleyTxWitnessSet, isIShelleyTxBody, isIShelleyTxWitnessSet, VKeyWitness, VKey } from "./ShelleyTxDependencies"
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef"
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError"
 import { ToJson } from "../../../utils/ToJson"
 
+//** TO DO: Find out if this can stay AUX data in which case should native script be removed or just include TxMetadata.ts from common */
 export interface IShelleyTx {
     body: IShelleyTxBody
     witnesses: IShelleyTxWitnessSet
-    auxiliaryData?: AuxiliaryData | null
+    ShelleyAuxiliaryData?: ShelleyAuxiliaryData | null
 }
 
 export interface Cip30LikeSignShelleyTx {

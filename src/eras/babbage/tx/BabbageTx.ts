@@ -3,7 +3,11 @@ import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, C
 import { signEd25519_sync } from "@harmoniclabs/crypto"
 import { PrivateKey, CredentialType, PubKeyHash } from "../../../credentials"
 import { Signature, Hash32, Hash28 } from "../../../hashes"
-import { IBabbageTxBody, IBabbageTxWitnessSet, AuxiliaryData, BabbageTxBody, BabbageTxWitnessSet, isIBabbageTxBody, isIBabbageTxWitnessSet, VKeyWitness, VKey } from "../../../tx"
+import { VKeyWitness, VKey } from "../../common"
+import { BabbageAuxiliaryData } from "./BabbageAuxiliaryData"
+import { isIBabbageTxBody } from "./BabbageTxBody"
+import { BabbageTxWitnessSet, IBabbageTxWitnessSet, isIBabbageTxWitnessSet } from "./BabbageTxWitnessSet"
+import { BabbageTxBody, IBabbageTxBody } from "./BabbageTxBody"
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef"
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError"
 import { ToJson } from "../../../utils/ToJson"
@@ -12,7 +16,7 @@ export interface IBabbageTx {
     body: IBabbageTxBody
     witnesses: IBabbageTxWitnessSet
     isScriptValid?: boolean
-    auxiliaryData?: AuxiliaryData | null
+    auxiliaryData?: BabbageAuxiliaryData | null
 }
 
 export interface Cip30LikeSignBabbageTx {
@@ -31,7 +35,7 @@ export class BabbageTx
     readonly body!: BabbageTxBody;
     readonly witnesses!: BabbageTxWitnessSet;
     readonly isScriptValid!: boolean;
-    readonly auxiliaryData?: AuxiliaryData | null | undefined;
+    readonly auxiliaryData?: BabbageAuxiliaryData | null | undefined;
 
     clone(): BabbageTx
     {
@@ -68,8 +72,8 @@ export class BabbageTx
         if(!(
             auxiliaryData === undefined ||
             auxiliaryData === null ||
-            auxiliaryData instanceof AuxiliaryData
-        )) throw new Error("invalid transaction auxiliray data; must be instance of 'AuxiliaryData'");
+            auxiliaryData instanceof BabbageAuxiliaryData
+        )) throw new Error("invalid transaction auxiliray data; must be instance of 'BabbageAuxiliaryData'");
 
         this.body = new BabbageTxBody( body );
         this.witnesses = new BabbageTxWitnessSet(
@@ -232,7 +236,7 @@ export class BabbageTx
             body: BabbageTxBody.fromCborObj( _body ),
             witnesses: BabbageTxWitnessSet.fromCborObj( _wits ),
             isScriptValid: _isValid.simple,
-            auxiliaryData: noAuxiliaryData ? undefined : AuxiliaryData.fromCborObj( _aux )
+            auxiliaryData: noAuxiliaryData ? undefined : BabbageAuxiliaryData.fromCborObj( _aux )
         }, getSubCborRef( cObj ))
     }
 

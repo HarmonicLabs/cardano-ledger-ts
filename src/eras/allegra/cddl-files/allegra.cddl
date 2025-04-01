@@ -70,7 +70,8 @@ auxiliary_data = metadata
 
 auxiliary_scripts = [* native_script]
 
-block = [header
+block = [
+          header
         , transaction_bodies : [* transaction_body]
         , transaction_witness_sets : [* transaction_witness_set]
         , auxiliary_data_set : {* transaction_index => auxiliary_data}]
@@ -258,12 +259,12 @@ transaction_metadatum = {* transaction_metadatum => transaction_metadatum}
 transaction_metadatum_label = uint
 
 transaction_output = [
-						address, 
-						amount : coin
-					]
+			address, 
+			amount : coin
+		     ]
 
 transaction_witness_set = {
-							? 0 : [* vkeywitness]
+			    ? 0 : [* vkeywitness]
                           , ? 1 : [* native_script]
                           , ? 2 : [* bootstrap_witness]
 						}

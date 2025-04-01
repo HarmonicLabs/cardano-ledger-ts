@@ -6,7 +6,6 @@ import { ExBudget } from "@harmoniclabs/plutus-machine";
 import { BasePlutsError } from "../../../utils/BasePlutsError";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
-import { assert } from "../../../utils/assert";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../../utils/ints";
 import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
 

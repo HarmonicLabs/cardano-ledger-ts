@@ -302,7 +302,8 @@ protocol_param_update = {? 0 : uint
                         , ? 24 : uint}
 
 ; NEW
-redeemer = [tag : redeemer_tag
+redeemer = [
+             tag : redeemer_tag
            , index : uint
            , data : plutus_data
            , ex_units : ex_units]
@@ -459,12 +460,14 @@ transaction_output = [
 ;   4: [* plutus_data ]
 ;   5: redeemers
 ; 
-transaction_witness_set = {? 0 : [* vkeywitness]
+transaction_witness_set = {
+                            ? 0 : [* vkeywitness]
                           , ? 1 : [* native_script]
                           , ? 2 : [* bootstrap_witness]
                           , ? 3 : [* plutus_script]
                           , ? 4 : [* plutus_data]
-                          , ? 5 : redeemers}
+                          , ? 5 : redeemers
+                          }
 
 ; The real unit_interval is: #6.30([uint, uint])
 ; 
