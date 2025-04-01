@@ -4,10 +4,10 @@ import { blake2b_256 } from "@harmoniclabs/crypto";
 import { hasOwn, isObject } from "@harmoniclabs/obj-utils";
 import { Certificate } from "crypto";
 import { PubKeyHash } from "../../../credentials";
-import { IVotingProcedures, VotingProcedures, ProposalProcedure, IProposalProcedure, isIVotingProceduresEntry, isIProposalProcedure } from "../../../governance";
 import { AuxiliaryDataHash, ScriptDataHash, CanBeHash28, Hash32, canBeHash28 } from "../../../hashes";
 import { Coin, TxWithdrawals, ITxWithdrawals, LegacyPPUpdateProposal, Value, NetworkT, isCertificate, canBeTxWithdrawals, isLegacyPPUpdateProposal, forceTxWithdrawals, isIValue, LegacyPPUpdateProposalToCborObj, certificateFromCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, certificatesToDepositLovelaces } from "../../../ledger";
-import { UTxO, TxOut, isIUTxO, isITxOut, TxOutRef } from "../../../tx";
+import { MaryTxOut, isIMaryTxOut } from "./";
+import { UTxO, isIUTxO, TxOutRef } from "../../common";
 import { getCborSet } from "../../../utils/getCborSet";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { maybeBigUint } from "../../../utils/ints";
@@ -17,7 +17,7 @@ import { ToJson } from "../../../utils/ToJson";
 
 export interface IMaryTxBody {
     inputs: [ UTxO, ...UTxO[] ],
-    outputs: TxOut[],
+    outputs: MaryTxOut[],
     fee: Coin,
     ttl?: CanBeUInteger,
     certs?: Certificate[],
@@ -44,7 +44,7 @@ export function isIMaryTxBody( body: Readonly<object> ): body is IMaryTxBody
         
         hasOwn( b, "outputs" ) &&
         Array.isArray( b.outputs ) && b.outputs.length > 0 &&
-        b.outputs.every( out => out instanceof TxOut || isITxOut( out ) ) &&
+        b.outputs.every( out => out instanceof MaryTxOut || isIMaryTxOut( out ) ) &&
 
         hasOwn( b, "fee" ) && canBeUInteger( b.fee ) &&
 
@@ -62,7 +62,7 @@ export class MaryTxBody
     implements IMaryTxBody, ToCbor, ToJson
 {
     readonly inputs!: [ UTxO, ...UTxO[] ];
-    readonly outputs!: TxOut[];
+    readonly outputs!: MaryTxOut[];
     readonly fee!: bigint;
     readonly ttl?: bigint;
     readonly certs?: Certificate[];
@@ -134,10 +134,10 @@ export class MaryTxBody
         if(!(
             Array.isArray( outputs )  &&
             outputs.length > 0 &&
-            outputs.every( isITxOut )
+            outputs.every( isIMaryTxOut )
         )) throw new Error("invald 'outputs' field");
 
-        this.outputs = outputs.map( out => out instanceof TxOut ? out : new TxOut( out ) );
+        this.outputs = outputs.map( out => out instanceof MaryTxOut ? out : new MaryTxOut( out ) );
 
         // -------------------------------------- fee -------------------------------------- //
         if( !canBeUInteger( fee ) ) throw new Error("invald 'fee' field");
@@ -351,7 +351,7 @@ export class MaryTxBody
         //** TO DO: add votingProcedures, proposalProcedures, currentTreasuryValue, donation */
         return new MaryTxBody({
             inputs: getCborSet( _ins_ ).map( txOutRefAsUTxOFromCborObj ) as [UTxO, ...UTxO[]],
-            outputs: _outs.array.map( TxOut.fromCborObj ),
+            outputs: _outs.array.map( MaryTxOut.fromCborObj ),
             fee: _fee.num,
             ttl,
             certs:                      _certs_ !== undefined ? getCborSet( _certs_ ).map( certificateFromCborObj ) : undefined,
@@ -429,6 +429,6 @@ function txOutRefAsUTxOFromCborObj( cObj: CborObj ): UTxO
 {
     return new UTxO({
         utxoRef: TxOutRef.fromCborObj( cObj ),
-        resolved: TxOut.fake
+        resolved: MaryTxOut.fake
     });
 }

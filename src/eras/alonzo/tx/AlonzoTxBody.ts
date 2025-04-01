@@ -6,7 +6,8 @@ import { Certificate } from "crypto";
 import { PubKeyHash } from "../../../credentials";
 import { AuxiliaryDataHash, ScriptDataHash, CanBeHash28, Hash32, canBeHash28 } from "../../../hashes";
 import { Coin, TxWithdrawals, ITxWithdrawals, LegacyPPUpdateProposal, Value, NetworkT, isCertificate, canBeTxWithdrawals, isLegacyPPUpdateProposal, forceTxWithdrawals, isIValue, LegacyPPUpdateProposalToCborObj, certificateFromCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, certificatesToDepositLovelaces } from "../../../ledger";
-import { UTxO, TxOut, isIUTxO, isITxOut, TxOutRef } from "../../../tx";
+import { AlonzoTxOut, isIAlonzoTxOut,  } from "./";
+import { UTxO, isIUTxO, TxOutRef } from "../../common"
 import { getCborSet } from "../../../utils/getCborSet";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { maybeBigUint } from "../../../utils/ints";
@@ -16,7 +17,7 @@ import { ToJson } from "../../../utils/ToJson";
 
 export interface IAlonzoTxBody {
     inputs: [ UTxO, ...UTxO[] ],
-    outputs: TxOut[],
+    outputs: AlonzoTxOut[],
     fee: Coin,
     ttl?: CanBeUInteger,
     certs?: Certificate[],
@@ -47,7 +48,7 @@ export function isIAlonzoTxBody( body: Readonly<object> ): body is IAlonzoTxBody
         
         hasOwn( b, "outputs" ) &&
         Array.isArray( b.outputs ) && b.outputs.length > 0 &&
-        b.outputs.every( out => out instanceof TxOut || isITxOut( out ) ) &&
+        b.outputs.every( out => out instanceof AlonzoTxOut || isIAlonzoTxOut( out ) ) &&
 
         hasOwn( b, "fee" ) && canBeUInteger( b.fee ) &&
 
@@ -67,7 +68,7 @@ export class AlonzoTxBody
     implements IAlonzoTxBody, ToCbor, ToJson
 {
     readonly inputs!: [ UTxO, ...UTxO[] ];
-    readonly outputs!: TxOut[];
+    readonly outputs!: AlonzoTxOut[];
     readonly fee!: bigint;
     readonly ttl?: bigint;
     readonly certs?: Certificate[];
@@ -147,10 +148,10 @@ export class AlonzoTxBody
         if(!(
             Array.isArray( outputs )  &&
             outputs.length > 0 &&
-            outputs.every( isITxOut )
+            outputs.every( isIAlonzoTxOut )
         )) throw new Error("invald 'outputs' field");
 
-        this.outputs = outputs.map( out => out instanceof TxOut ? out : new TxOut( out ) );
+        this.outputs = outputs.map( out => out instanceof AlonzoTxOut ? out : new AlonzoTxOut( out ) );
 
         // -------------------------------------- fee -------------------------------------- //
         if( !canBeUInteger( fee ) ) throw new Error("invald 'fee' field");
@@ -437,7 +438,7 @@ export class AlonzoTxBody
         //** TO DO: add votingProcedures, proposalProcedures, currentTreasuryValue, donation */
         return new AlonzoTxBody({
             inputs: getCborSet( _ins_ ).map( txOutRefAsUTxOFromCborObj ) as [UTxO, ...UTxO[]],
-            outputs: _outs.array.map( TxOut.fromCborObj ),
+            outputs: _outs.array.map( AlonzoTxOut.fromCborObj ),
             fee: _fee.num,
             ttl,
             certs:                      _certs_ !== undefined ? getCborSet( _certs_ ).map( certificateFromCborObj ) : undefined,
@@ -523,6 +524,6 @@ function txOutRefAsUTxOFromCborObj( cObj: CborObj ): UTxO
 {
     return new UTxO({
         utxoRef: TxOutRef.fromCborObj( cObj ),
-        resolved: TxOut.fake
+        resolved: AlonzoTxOut.fake
     });
 }

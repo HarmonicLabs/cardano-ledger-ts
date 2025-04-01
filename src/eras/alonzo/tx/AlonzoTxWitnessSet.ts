@@ -4,12 +4,12 @@ import { Data, isData, dataToCborObj, dataFromCborObj } from "@harmoniclabs/plut
 import { isObject } from "@harmoniclabs/obj-utils";
 import { Script, ScriptType, nativeScriptToCborObj } from "../../../script";
 import { Hash28 } from "../../../hashes";
-import { VKeyWitness, TxRedeemer } from "../../../tx";
+import { AlonzoTxRedeemer } from "./";
+import { BootstrapWitness, VKeyWitness } from "../../common";
 import { isCborSet, getCborSet } from "../../../utils/getCborSet";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
-import { BootstrapWitness } from "../../common/BootstrapWitness";
 
 export interface IAlonzoTxWitnessSet {
     vkeyWitnesses?: VKeyWitness[],
@@ -17,7 +17,7 @@ export interface IAlonzoTxWitnessSet {
     bootstrapWitnesses?: BootstrapWitness[],
     plutusV1Scripts?: Script<ScriptType.PlutusV1>[],
     datums?: Data[],
-    redeemers?: TxRedeemer[]
+    redeemers?: AlonzoTxRedeemer[]
 };
 
 function isUndefOrCheckedArr<ArrElemT>( stuff: undefined | ArrElemT[], arrayElemCheck: (elem: ArrElemT) => boolean )
@@ -63,7 +63,7 @@ export function isIAlonzoTxWitnessSet( set: object ): set is IAlonzoTxWitnessSet
         isUndefOrCheckedArr( datums, isData ) &&
         isUndefOrCheckedArr(
             redeemers,
-            rdmr => rdmr instanceof TxRedeemer
+            rdmr => rdmr instanceof AlonzoTxRedeemer
         )
     );
 }
@@ -76,7 +76,7 @@ export class AlonzoTxWitnessSet
     readonly bootstrapWitnesses?: BootstrapWitness[];
     readonly plutusV1Scripts?: Script<ScriptType.PlutusV1>[];
     readonly datums?: Data[];
-    readonly redeemers?: TxRedeemer[];
+    readonly redeemers?: AlonzoTxRedeemer[];
     
     /*
      * checks that the signer is needed
@@ -355,15 +355,15 @@ export class AlonzoTxWitnessSet
 
 }
 
-function witnessRedeemersFromCborObj( cbor: CborObj ): TxRedeemer[]
+function witnessRedeemersFromCborObj( cbor: CborObj ): AlonzoTxRedeemer[]
 {
     if( cbor instanceof CborArray )
     {
-        return cbor.array.map( TxRedeemer.fromCborObj );
+        return cbor.array.map( AlonzoTxRedeemer.fromCborObj );
     }
     else if( cbor instanceof CborMap )
     {
-        return cbor.map.map( TxRedeemer.fromCborMapEntry );
+        return cbor.map.map( AlonzoTxRedeemer.fromCborMapEntry );
     }
     else throw new Error("invalid format for witness set redeemers field");
 }

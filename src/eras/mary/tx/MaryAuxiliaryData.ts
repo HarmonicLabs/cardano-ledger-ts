@@ -4,7 +4,7 @@ import { hasOwn } from "@harmoniclabs/obj-utils";
 import { AuxiliaryDataHash } from "../../../hashes";
 import { NativeScript, nativeScriptFromCborObj } from "../../../script/NativeScript";
 import {  Script, ScriptType } from "../../../script/Script";
-import { TxMetadata } from "../../../tx";
+import { TxMetadata } from "../../common";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
@@ -21,7 +21,7 @@ function scriptArrToCbor( scripts: Script[] ): CborArray
     );
 }
 
-export class AlonzoAuxiliaryData
+export class MaryAuxiliaryData
     implements IAlonzoAuxiliaryData, ToCbor, ToJson
 {
     readonly metadata?: TxMetadata;
@@ -52,7 +52,7 @@ export class AlonzoAuxiliaryData
     {
         if(!(
             hasOwn( auxData, "metadata" )
-        ))throw new Error("'AlonzoAuxiliaryData' is missing 'metadata' field");
+        ))throw new Error("'MaryAuxiliaryData' is missing 'metadata' field");
 
         const {
             metadata,
@@ -63,7 +63,7 @@ export class AlonzoAuxiliaryData
         if(!(
             metadata === undefined || 
             metadata instanceof TxMetadata
-        ))throw new Error("'AlonzoAuxiliaryData' :: 'metadata' field was not instance of 'TxMetadata'");
+        ))throw new Error("'MaryAuxiliaryData' :: 'metadata' field was not instance of 'TxMetadata'");
         this.metadata = metadata
         
 
@@ -135,16 +135,16 @@ export class AlonzoAuxiliaryData
         )
     }
 
-    static fromCbor( cStr: CanBeCborString ): AlonzoAuxiliaryData
+    static fromCbor( cStr: CanBeCborString ): MaryAuxiliaryData
     {
-        return AlonzoAuxiliaryData.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
+        return MaryAuxiliaryData.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
-    static fromCborObj( cObj: CborObj ): AlonzoAuxiliaryData
+    static fromCborObj( cObj: CborObj ): MaryAuxiliaryData
     {
         // shelley; metadata only
         if( cObj instanceof CborMap )
         {
-            return new AlonzoAuxiliaryData({
+            return new MaryAuxiliaryData({
                 metadata: TxMetadata.fromCborObj( cObj )
             });
         }
@@ -154,9 +154,9 @@ export class AlonzoAuxiliaryData
         {
             if(!(
                 cObj.array[1] instanceof CborArray
-            ))throw new InvalidCborFormatError("AlonzoAuxiliaryData")
+            ))throw new InvalidCborFormatError("MaryAuxiliaryData")
 
-            return new AlonzoAuxiliaryData({
+            return new MaryAuxiliaryData({
                 metadata: TxMetadata.fromCborObj( cObj.array[0] ),
                 nativeScripts: cObj.array[1].array.map( nativeScriptFromCborObj )
             });
@@ -166,7 +166,7 @@ export class AlonzoAuxiliaryData
             cObj instanceof CborTag &&
             cObj.data instanceof CborMap &&
             cObj.data.map.length <= 2
-        ))throw new InvalidCborFormatError("AlonzoAuxiliaryData")
+        ))throw new InvalidCborFormatError("MaryAuxiliaryData")
 
         let fields: (CborObj | undefined)[] = new Array( 2 ).fill( undefined );
 
@@ -188,9 +188,9 @@ export class AlonzoAuxiliaryData
 
         if(!(
             _native instanceof CborArray
-        ))throw new InvalidCborFormatError("AlonzoAuxiliaryData")
+        ))throw new InvalidCborFormatError("MaryAuxiliaryData")
 
-        return new AlonzoAuxiliaryData({
+        return new MaryAuxiliaryData({
             metadata: _metadata === undefined ? undefined : TxMetadata.fromCborObj( _metadata ),
             nativeScripts:_native === undefined ? undefined : 
                 _native.array.map( nativeCborObj => 

@@ -3,7 +3,8 @@ import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, C
 import { signEd25519_sync } from "@harmoniclabs/crypto"
 import { PrivateKey, CredentialType, PubKeyHash } from "../../../credentials"
 import { Signature, Hash32, Hash28 } from "../../../hashes"
-import { IAlonzoTxBody, IAlonzoTxWitnessSet, AuxiliaryData, AlonzoTxBody, AlonzoTxWitnessSet, isIAlonzoTxBody, isIAlonzoTxWitnessSet, VKeyWitness, VKey } from "../../../tx"
+import { IAlonzoTxBody, IAlonzoTxWitnessSet, AlonzoAuxiliaryData, AlonzoTxBody, AlonzoTxWitnessSet, isIAlonzoTxBody, isIAlonzoTxWitnessSet } from "./"
+import { VKeyWitness, VKey } from "../../common"
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef"
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError"
 import { ToJson } from "../../../utils/ToJson"
@@ -12,7 +13,7 @@ export interface IAlonzoTx {
     body: IAlonzoTxBody
     witnesses: IAlonzoTxWitnessSet
     isScriptValid?: boolean
-    auxiliaryData?: AuxiliaryData | null
+    auxiliaryData?: AlonzoAuxiliaryData | null
 }
 
 export interface Cip30LikeSignAlonzoTx {
@@ -31,7 +32,7 @@ export class AlonzoTx
     readonly body!: AlonzoTxBody;
     readonly witnesses!: AlonzoTxWitnessSet;
     readonly isScriptValid!: boolean;
-    readonly auxiliaryData?: AuxiliaryData | null | undefined;
+    readonly auxiliaryData?: AlonzoAuxiliaryData | null | undefined;
 
     clone(): AlonzoTx
     {
@@ -68,8 +69,8 @@ export class AlonzoTx
         if(!(
             auxiliaryData === undefined ||
             auxiliaryData === null ||
-            auxiliaryData instanceof AuxiliaryData
-        )) throw new Error("invalid transaction auxiliray data; must be instance of 'AuxiliaryData'");
+            auxiliaryData instanceof AlonzoAuxiliaryData
+        )) throw new Error("invalid transaction auxiliray data; must be instance of 'AlonzoAuxiliaryData'");
 
         this.body = new AlonzoTxBody( body );
         this.witnesses = new AlonzoTxWitnessSet(
@@ -232,7 +233,7 @@ export class AlonzoTx
             body: AlonzoTxBody.fromCborObj( _body ),
             witnesses: AlonzoTxWitnessSet.fromCborObj( _wits ),
             isScriptValid: _isValid.simple,
-            auxiliaryData: noAuxiliaryData ? undefined : AuxiliaryData.fromCborObj( _aux )
+            auxiliaryData: noAuxiliaryData ? undefined : AlonzoAuxiliaryData.fromCborObj( _aux )
         }, getSubCborRef( cObj ))
     }
 

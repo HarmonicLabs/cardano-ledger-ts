@@ -5,7 +5,7 @@ import { isObject } from "@harmoniclabs/obj-utils";
 import { Script, ScriptType, nativeScriptToCborObj } from "../../../script";
 import { Hash28 } from "../../../hashes";
 import { VKeyWitness, BootstrapWitness } from "../../common";
-import { BabbageTxRedeemer } from "./BabbageTxRedeemer";
+import { BabbageTxRedeemer } from "./";
 import { isCborSet, getCborSet } from "../../../utils/getCborSet";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";

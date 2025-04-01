@@ -3,7 +3,8 @@ import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, C
 import { signEd25519_sync } from "@harmoniclabs/crypto"
 import { PrivateKey, CredentialType, PubKeyHash } from "../../../credentials"
 import { Signature, Hash32, Hash28 } from "../../../hashes"
-import { IShelleyTxBody, IShelleyTxWitnessSet, ShelleyAuxiliaryData, ShelleyTxBody, ShelleyTxWitnessSet, isIShelleyTxBody, isIShelleyTxWitnessSet, VKeyWitness, VKey } from "./ShelleyTxDependencies"
+import { IShelleyTxBody, IShelleyTxWitnessSet, ShelleyAuxiliaryData, ShelleyTxBody, ShelleyTxWitnessSet, isIShelleyTxBody, isIShelleyTxWitnessSet} from "./";
+import { VKeyWitness, VKey } from "../../common";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef"
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError"
 import { ToJson } from "../../../utils/ToJson"
@@ -12,7 +13,7 @@ import { ToJson } from "../../../utils/ToJson"
 export interface IShelleyTx {
     body: IShelleyTxBody
     witnesses: IShelleyTxWitnessSet
-    ShelleyAuxiliaryData?: ShelleyAuxiliaryData | null
+    auxiliaryData?: ShelleyAuxiliaryData | null
 }
 
 export interface Cip30LikeSignShelleyTx {
@@ -30,7 +31,7 @@ export class ShelleyTx
 {
     readonly body!: ShelleyTxBody;
     readonly witnesses!: ShelleyTxWitnessSet;
-    readonly auxiliaryData?: AuxiliaryData | null | undefined;
+    readonly auxiliaryData?: ShelleyAuxiliaryData | null | undefined;
 
     clone(): ShelleyTx
     {
@@ -61,8 +62,8 @@ export class ShelleyTx
         if(!(
             auxiliaryData === undefined ||
             auxiliaryData === null ||
-            auxiliaryData instanceof AuxiliaryData
-        )) throw new Error("invalid transaction auxiliray data; must be instance of 'AuxiliaryData'");
+            auxiliaryData instanceof ShelleyAuxiliaryData
+        )) throw new Error("invalid transaction auxiliray data; must be instance of 'ShelleyAuxiliaryData'");
 
         this.body = new ShelleyTxBody( body );
         this.witnesses = new ShelleyTxWitnessSet(
@@ -222,7 +223,7 @@ export class ShelleyTx
         return new ShelleyTx({
             body: ShelleyTxBody.fromCborObj( _body ),
             witnesses: ShelleyTxWitnessSet.fromCborObj( _wits ),
-            auxiliaryData: noAuxiliaryData ? undefined : AuxiliaryData.fromCborObj( _aux )
+            auxiliaryData: noAuxiliaryData ? undefined : ShelleyAuxiliaryData.fromCborObj( _aux )
         }, getSubCborRef( cObj ))
     }
 

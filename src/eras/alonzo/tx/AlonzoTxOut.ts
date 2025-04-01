@@ -4,7 +4,6 @@ import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-util
 import { Data, isData, ToData, DataConstr, dataToCbor, dataFromCborObj } from "@harmoniclabs/plutus-data";
 import { Hash32 } from "../../../hashes";
 import { Address, AddressStr, Value, IValue, isAddressStr, isIValue } from "../../../ledger";
-import { Script, ScriptType } from "../../../script";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 import { maybeData } from "../../../utils/maybeData";

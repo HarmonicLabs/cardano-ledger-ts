@@ -3,7 +3,8 @@ import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, C
 import { signEd25519_sync } from "@harmoniclabs/crypto"
 import { PrivateKey, CredentialType, PubKeyHash } from "../../../credentials"
 import { Signature, Hash32, Hash28 } from "../../../hashes"
-import { IMaryTxBody, IMaryTxWitnessSet, AuxiliaryData, MaryTxBody, MaryTxWitnessSet, isIMaryTxBody, isIMaryTxWitnessSet, VKeyWitness, VKey } from "../../../tx"
+import { IMaryTxBody, IMaryTxWitnessSet, MaryAuxiliaryData, MaryTxBody, MaryTxWitnessSet, isIMaryTxBody, isIMaryTxWitnessSet } from "./"
+import {  VKeyWitness, VKey } from "../../common"
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef"
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError"
 import { ToJson } from "../../../utils/ToJson"
@@ -11,7 +12,7 @@ import { ToJson } from "../../../utils/ToJson"
 export interface IMaryTx {
     body: IMaryTxBody
     witnesses: IMaryTxWitnessSet
-    auxiliaryData?: AuxiliaryData | null
+    auxiliaryData?: MaryAuxiliaryData | null
 }
 
 export interface Cip30LikeSignMaryTx {
@@ -29,7 +30,7 @@ export class MaryTx
 {
     readonly body!: MaryTxBody;
     readonly witnesses!: MaryTxWitnessSet;
-    readonly auxiliaryData?: AuxiliaryData | null | undefined;
+    readonly auxiliaryData?: MaryAuxiliaryData | null | undefined;
 
     clone(): MaryTx
     {
@@ -60,8 +61,8 @@ export class MaryTx
         if(!(
             auxiliaryData === undefined ||
             auxiliaryData === null ||
-            auxiliaryData instanceof AuxiliaryData
-        )) throw new Error("invalid transaction auxiliray data; must be instance of 'AuxiliaryData'");
+            auxiliaryData instanceof MaryAuxiliaryData
+        )) throw new Error("invalid transaction auxiliray data; must be instance of 'MaryAuxiliaryData'");
 
         this.body = new MaryTxBody( body );
         this.witnesses = new MaryTxWitnessSet(
@@ -220,7 +221,7 @@ export class MaryTx
         return new MaryTx({
             body: MaryTxBody.fromCborObj( _body ),
             witnesses: MaryTxWitnessSet.fromCborObj( _wits ),
-            auxiliaryData: noAuxiliaryData ? undefined : AuxiliaryData.fromCborObj( _aux )
+            auxiliaryData: noAuxiliaryData ? undefined : MaryAuxiliaryData.fromCborObj( _aux )
         }, getSubCborRef( cObj ))
     }
 

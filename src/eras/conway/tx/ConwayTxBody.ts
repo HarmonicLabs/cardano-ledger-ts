@@ -8,7 +8,7 @@ import { IVotingProcedures, VotingProcedures, ProposalProcedure, IProposalProced
 import { AuxiliaryDataHash, ScriptDataHash, CanBeHash28, Hash32, canBeHash28 } from "../../../hashes";
 import { Coin, TxWithdrawals, ITxWithdrawals, LegacyPPUpdateProposal, Value, NetworkT, isCertificate, canBeTxWithdrawals, isLegacyPPUpdateProposal, forceTxWithdrawals, isIValue, LegacyPPUpdateProposalToCborObj, certificateFromCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, certificatesToDepositLovelaces } from "../../../ledger";
 import { UTxO, isIUTxO, TxOutRef } from "../../common";
-import { ConwayTxOut, isIConwayTxOut } from "./ConwayTxOut";
+import { ConwayTxOut, isIConwayTxOut } from "./";
 import { getCborSet } from "../../../utils/getCborSet";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { maybeBigUint } from "../../../utils/ints";

@@ -3,7 +3,8 @@ import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, C
 import { signEd25519_sync } from "@harmoniclabs/crypto"
 import { PrivateKey, CredentialType, PubKeyHash } from "../../../credentials"
 import { Signature, Hash32, Hash28 } from "../../../hashes"
-import { IAllegraTxBody, IAllegraTxWitnessSet, AuxiliaryData, AllegraTxBody, AllegraTxWitnessSet, isIAllegraTxBody, isIAllegraTxWitnessSet, VKeyWitness, VKey } from "../../../tx"
+import { IAllegraTxBody, IAllegraTxWitnessSet, AllegraAuxiliaryData, AllegraTxBody, AllegraTxWitnessSet, isIAllegraTxBody, isIAllegraTxWitnessSet } from "./"
+import { VKeyWitness, VKey } from "../../common"
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef"
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError"
 import { ToJson } from "../../../utils/ToJson"
@@ -11,7 +12,7 @@ import { ToJson } from "../../../utils/ToJson"
 export interface IAllegraTx {
     body: IAllegraTxBody
     witnesses: IAllegraTxWitnessSet
-    auxiliaryData?: AuxiliaryData | null
+    auxiliaryData?: AllegraAuxiliaryData | null
 }
 
 export interface Cip30LikeSignAllegraTx {
@@ -29,7 +30,7 @@ export class AllegraTx
 {
     readonly body!: AllegraTxBody;
     readonly witnesses!: AllegraTxWitnessSet;
-    readonly auxiliaryData?: AuxiliaryData | null | undefined;
+    readonly auxiliaryData?: AllegraAuxiliaryData | null | undefined;
 
     clone(): AllegraTx
     {
@@ -60,8 +61,8 @@ export class AllegraTx
         if(!(
             auxiliaryData === undefined ||
             auxiliaryData === null ||
-            auxiliaryData instanceof AuxiliaryData
-        )) throw new Error("invalid transaction auxiliray data; must be instance of 'AuxiliaryData'");
+            auxiliaryData instanceof AllegraAuxiliaryData
+        )) throw new Error("invalid transaction auxiliray data; must be instance of 'AllegraAuxiliaryData'");
 
         this.body = new AllegraTxBody( body );
         this.witnesses = new AllegraTxWitnessSet(
@@ -216,12 +217,12 @@ export class AllegraTx
         ] = cObj.array;
 
 
-        const noAuxiliaryData = _aux instanceof CborSimple && (_aux.simple === null || _aux.simple === undefined);
+        const noAllegraAuxiliaryData = _aux instanceof CborSimple && (_aux.simple === null || _aux.simple === undefined);
 
         return new AllegraTx({
             body: AllegraTxBody.fromCborObj( _body ),
             witnesses: AllegraTxWitnessSet.fromCborObj( _wits ),
-            auxiliaryData: noAuxiliaryData ? undefined : AuxiliaryData.fromCborObj( _aux )
+            auxiliaryData: noAllegraAuxiliaryData ? undefined : AllegraAuxiliaryData.fromCborObj( _aux )
         }, getSubCborRef( cObj ))
     }
 

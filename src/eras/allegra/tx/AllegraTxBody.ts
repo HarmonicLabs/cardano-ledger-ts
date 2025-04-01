@@ -6,7 +6,8 @@ import { Certificate } from "crypto";
 import { PubKeyHash } from "../../../credentials";
 import { AuxiliaryDataHash, ScriptDataHash, CanBeHash28, Hash32, canBeHash28 } from "../../../hashes";
 import { Coin, TxWithdrawals, ITxWithdrawals, LegacyPPUpdateProposal, Value, NetworkT, isCertificate, canBeTxWithdrawals, isLegacyPPUpdateProposal, forceTxWithdrawals, isIValue, LegacyPPUpdateProposalToCborObj, certificateFromCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, certificatesToDepositLovelaces } from "../../../ledger";
-import { UTxO, TxOut, isIUTxO, isITxOut, TxOutRef } from "../../../tx";
+import { AllegraTxOut, isIAllegraTxOut  } from "./";
+import { UTxO, isIUTxO, TxOutRef } from "../../common";
 import { getCborSet } from "../../../utils/getCborSet";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { maybeBigUint } from "../../../utils/ints";
@@ -16,7 +17,7 @@ import { ToJson } from "../../../utils/ToJson";
 
 export interface IAllegraTxBody {
     inputs: [ UTxO, ...UTxO[] ],
-    outputs: TxOut[],
+    outputs: AllegraTxOut[],
     fee: Coin,
     ttl?: CanBeUInteger,
     certs?: Certificate[],
@@ -43,7 +44,7 @@ export function isIAllegraTxBody( body: Readonly<object> ): body is IAllegraTxBo
         
         hasOwn( b, "outputs" ) &&
         Array.isArray( b.outputs ) && b.outputs.length > 0 &&
-        b.outputs.every( out => out instanceof TxOut || isITxOut( out ) ) &&
+        b.outputs.every( out => out instanceof AllegraTxOut || isIAllegraTxOut( out ) ) &&
 
         hasOwn( b, "fee" ) && canBeUInteger( b.fee ) &&
 
@@ -61,7 +62,7 @@ export class AllegraTxBody
     implements IAllegraTxBody, ToCbor, ToJson
 {
     readonly inputs!: [ UTxO, ...UTxO[] ];
-    readonly outputs!: TxOut[];
+    readonly outputs!: AllegraTxOut[];
     readonly fee!: bigint;
     readonly ttl?: bigint;
     readonly certs?: Certificate[];
@@ -133,10 +134,10 @@ export class AllegraTxBody
         if(!(
             Array.isArray( outputs )  &&
             outputs.length > 0 &&
-            outputs.every( isITxOut )
+            outputs.every( isIAllegraTxOut )
         )) throw new Error("invald 'outputs' field");
 
-        this.outputs = outputs.map( out => out instanceof TxOut ? out : new TxOut( out ) );
+        this.outputs = outputs.map( out => out instanceof AllegraTxOut ? out : new AllegraTxOut( out ) );
 
         // -------------------------------------- fee -------------------------------------- //
         if( !canBeUInteger( fee ) ) throw new Error("invald 'fee' field");
@@ -348,7 +349,7 @@ export class AllegraTxBody
         //** TO DO: add votingProcedures, proposalProcedures, currentTreasuryValue, donation */
         return new AllegraTxBody({
             inputs: getCborSet( _ins_ ).map( txOutRefAsUTxOFromCborObj ) as [UTxO, ...UTxO[]],
-            outputs: _outs.array.map( TxOut.fromCborObj ),
+            outputs: _outs.array.map( AllegraTxOut.fromCborObj ),
             fee: _fee.num,
             ttl,
             certs:                      _certs_ !== undefined ? getCborSet( _certs_ ).map( certificateFromCborObj ) : undefined,
@@ -426,6 +427,6 @@ function txOutRefAsUTxOFromCborObj( cObj: CborObj ): UTxO
 {
     return new UTxO({
         utxoRef: TxOutRef.fromCborObj( cObj ),
-        resolved: TxOut.fake
+        resolved: AllegraTxOut.fake
     });
 }

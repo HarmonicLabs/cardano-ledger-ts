@@ -4,7 +4,7 @@ import { hasOwn } from "@harmoniclabs/obj-utils";
 import { AuxiliaryDataHash } from "../../../hashes";
 import { NativeScript, nativeScriptFromCborObj } from "../../../script/NativeScript";
 import { PlutusScriptJsonFormat, Script, ScriptType } from "../../../script/Script";
-import { TxMetadata } from "../../../tx";
+import { TxMetadata } from "../../common";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
