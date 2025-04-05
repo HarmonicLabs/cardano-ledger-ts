@@ -5,15 +5,12 @@ import { Credential, StakeCredentials, StakeCredentialsType, CredentialType, Pub
 import { Hash28 } from "../hashes";
 import { forceBigUInt } from "../utils/ints";
 import { NetworkT } from "./Network";
-import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
-import { assert } from "../utils/assert";
 import { nothingData, justData } from "../utils/maybeData";
 import UPLCFlatUtils from "../utils/UPLCFlatUtils";
 import { fromHex, toHex } from "@harmoniclabs/uint8array-utils";
 import { harden, XPrv } from "@harmoniclabs/bip32_ed25519";
 import { ToDataVersion } from "../toData/defaultToDataVersion";
 import { getSubCborRef } from "../utils/getSubCborRef";
-import { error } from "console";
 
 export type AddressStr = `${"addr1"|"addr_test1"}${string}`;
 
