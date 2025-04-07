@@ -1,6 +1,7 @@
 ; This file was auto-generated from huddle. Please do not modify it directly!
 ; Pseudo-rule introduced by Cuddle to collect root elements
-huddle_root_defs = [block, transaction]
+huddle_root_defs = [block
+                    , transaction]
 
 $hash28 = bytes .size 28
 

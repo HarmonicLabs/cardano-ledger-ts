@@ -58,6 +58,14 @@ export class Constitution
     }
     toCborObj(): CborArray
     {
+
+        /* if( this.cborRef instanceof SubCborRef )
+        {
+            // keeps cbor ref
+            return Cbor.parse( this.cborRef.toBuffer() );
+        }
+        */
+
         return new CborArray([
             this.anchor.toCborObj(),
             this.scriptHash?.toCborObj() ?? new CborSimple( null )

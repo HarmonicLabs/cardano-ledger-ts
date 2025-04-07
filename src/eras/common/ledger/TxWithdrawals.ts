@@ -6,7 +6,7 @@ import { ToData, DataMap, DataConstr, DataI, DataPair } from "@harmoniclabs/plut
 import { CanBeHash28, Hash28, canBeHash28 } from "../hashes";
 import { canBeUInteger, forceBigUInt } from "../utils/ints";
 import { Coin } from "./Coin";
-import { Value } from "./Value";
+import { Value } from "../Value";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { ToDataVersion } from "../toData/defaultToDataVersion";
 import { getSubCborRef } from "../utils/getSubCborRef";

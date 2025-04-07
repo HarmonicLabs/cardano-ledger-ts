@@ -1,14 +1,14 @@
 import { CborArray, CborObj, CborUInt } from "@harmoniclabs/cbor";
 import { CertAuthCommitteeHot, ICertAuthCommitteeHot } from "./CertAuthCommitteeHot";
 import { CertGenesisKeyDelegation, ICertGenesisKeyDelegation } from "./CertGenesisKeyDelegation";
-import { CertPoolRegistration, ICertPoolRegistration } from "./CertPoolRegistration";
-import { CertPoolRetirement, ICertPoolRetirement } from "./CertPoolRetirement";
+import { CertPoolRegistration, ICertPoolRegistration } from "../../common/certs/CertPoolRegistration";
+import { CertPoolRetirement, ICertPoolRetirement } from "../../common/certs/CertPoolRetirement";
 import { CertRegistrationDeposit, ICertRegistrationDeposit } from "./CertRegistrationDeposit";
 import { CertRegistrationDrep, ICertRegistrationDrep } from "./CertRegistrationDrep";
 import { CertResignCommitteeCold, ICertResignCommitteeCold } from "./CertResignCommitteeCold";
-import { CertStakeDeRegistration, ICertStakeDeRegistration } from "./CertStakeDeRegistration";
-import { CertStakeDelegation, ICertStakeDelegation } from "./CertStakeDelegation";
-import { CertStakeRegistration, ICertStakeRegistration } from "./CertStakeRegistration";
+import { CertStakeDeRegistration, ICertStakeDeRegistration } from "../../common/certs/CertStakeDeRegistration";
+import { CertStakeDelegation, ICertStakeDelegation } from "../../common/certs/CertStakeDelegation";
+import { CertStakeRegistration, ICertStakeRegistration } from "../../common/certs/CertStakeRegistration";
 import { CertStakeVoteDeleg, ICertStakeVoteDeleg } from "./CertStakeVoteDeleg";
 import { CertStakeVoteRegistrationDeleg, ICertStakeVoteRegistrationDeleg } from "./CertStakeVoteRegistrationDeleg";
 import { CertUnRegistrationDeposit, ICertUnRegistrationDeposit } from "./CertUnRegistrationDeposit";
@@ -16,7 +16,7 @@ import { CertUnRegistrationDrep, ICertUnRegistrationDrep } from "./CertUnRegistr
 import { CertUpdateDrep, ICertUpdateDrep } from "./CertUpdateDrep";
 import { CertVoteDeleg, ICertVoteDeleg } from "./CertVoteDeleg";
 import { CertVoteRegistrationDeleg, ICertVoteRegistrationDeleg } from "./CertVoteRegistrationDeleg";
-import { CertificateType, isCertificateType } from "./CertificateType";
+import { CertificateType, isCertificateType } from "../../common/certs/CertificateType";
 import { IMoveInstantRewardsCert, MoveInstantRewardsCert } from "./MoveInstantRewardsCert";
 import { CertStakeRegistrationDeleg, ICertStakeRegistrationDeleg } from "./CertStakeRegistrationDeleg";
 

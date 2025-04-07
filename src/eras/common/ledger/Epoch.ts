@@ -1,3 +1,3 @@
-import { CanBeUInteger } from "../utils/ints";
+import { CanBeUInteger } from "../../../utils/ints";
 
 export type Epoch = CanBeUInteger;

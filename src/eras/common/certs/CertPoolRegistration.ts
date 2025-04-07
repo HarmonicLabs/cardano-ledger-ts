@@ -3,7 +3,7 @@ import { Credential } from "../../credentials"
 import { roDescr } from "../../utils/roDescr";
 import { CertificateType, certTypeToString } from "./CertificateType"
 import { ICert } from "./ICert"
-import { IPoolParams, PoolParams } from "../PoolParams";
+import { IPoolParams, PoolParams } from "../ledger/PoolParams";
 import { Hash28 } from "../../hashes";
 import { Data, DataConstr } from "@harmoniclabs/plutus-data";
 import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";

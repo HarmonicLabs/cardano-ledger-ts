@@ -3,7 +3,7 @@ export * from "./CertGenesisKeyDelegation";
 export * from "./CertPoolRegistration";
 export * from "./CertPoolRetirement";
 export * from "./CertRegistrationDeposit";
-export * from "./CertRegistrationDrep";
+export * from "../../../conway/ledger/certs/CertRegistrationDrep";
 export * from "./CertResignCommitteeCold";
 export * from "./CertStakeDeRegistration";
 export * from "./CertStakeDelegation";

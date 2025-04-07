@@ -204,9 +204,9 @@ export class ConwayTxRedeemer
     {
         if( this.cborRef instanceof SubCborRef )
         {
-                // TODO: validate cbor structure
-                // we assume correctness here
-                return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
         }
 
         return new CborArray([

@@ -1,13 +1,11 @@
 import { ToCbor, CborString, Cbor, CborObj, CborUInt, CborMap, CborBytes, CborNegInt, CborArray, CanBeCborString, forceCborString, CborMapEntry, SubCborRef } from "@harmoniclabs/cbor";
 import { ToData, DataMap, DataB, DataI, DataPair } from "@harmoniclabs/plutus-data";
 import { lexCompare, toHex, fromHex } from "@harmoniclabs/uint8array-utils";
-import { Hash28 } from "../../hashes";
-import { forceBigUInt, CanBeUInteger } from "../../utils/ints";
+import { Hash28 } from "../../../hashes";
+import { forceBigUInt, CanBeUInteger } from "../../../utils/ints";
 import { IValue, isIValue, getEmptyNameQty, getNameQty, IValueAdaEntry, IValueAsset, IValuePolicyEntry, addIValues, subIValues, cloneIValue, IValueToJson, ValueJson, NormalizedIValuePolicyEntry, IValueAssetBI, NormalizedIValueAdaEntry, normalizeIValueAsset, NormalizedIValue, normalizeIValue } from "./IValue";
-import { assert } from "../../utils/assert";
-import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
-import { ToDataVersion } from "../../toData/defaultToDataVersion";
-import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
+import { ToDataVersion } from "../../../toData/defaultToDataVersion";
+import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
 
 const enum Ord {
     LT = -1,
@@ -371,8 +369,7 @@ export class Value
             cObj instanceof CborArray   ||  // ada and assets
             cObj instanceof CborMap     ||  // only assets
             cObj instanceof CborUInt        // only ada
-        ))
-        throw new Error(`Invalid CBOR format for "Value"`);
+        ))throw new Error(`Invalid CBOR format for "Value"`);
 
         if( cObj instanceof CborUInt )
         return Value.lovelaces( cObj.num );

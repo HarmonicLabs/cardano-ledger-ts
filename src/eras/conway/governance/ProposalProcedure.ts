@@ -49,7 +49,6 @@ export class ProposalProcedure
             }
         );
     }
-
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
@@ -75,7 +74,6 @@ export class ProposalProcedure
             this.anchor.toCborObj()
         ]);
     }
-
     toData( v?: ToDataVersion ): DataConstr
     {
         v = "v3"; // only supported so far

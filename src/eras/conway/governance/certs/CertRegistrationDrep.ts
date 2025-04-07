@@ -1,10 +1,10 @@
 import { Cbor, CborArray, CborObj, CborSimple, CborString, CborUInt, SubCborRef } from "@harmoniclabs/cbor";
 import { Credential } from "../../credentials"
 import { roDescr } from "../../utils/roDescr";
-import { CertificateType, certTypeToString } from "./CertificateType"
-import { ICert } from "./ICert"
+import { CertificateType, certTypeToString } from "../../../common/ledger/certs/CertificateType"
+import { ICert } from "../../../common/ledger/certs/ICert"
 import { Anchor, IAnchor, isIAnchor } from "../../governance/Anchor";
-import { Coin } from "../Coin";
+import { Coin } from "../../../common/ledger/Coin";
 import { forceBigUInt } from "../../utils/ints";
 import { Hash28 } from "../../hashes";
 import { Data, DataConstr, DataI } from "@harmoniclabs/plutus-data";

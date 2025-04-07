@@ -1,13 +1,13 @@
 import { Cbor, CborArray, CborObj, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
-import { Credential } from "../../credentials"
-import { roDescr } from "../../utils/roDescr";
+import { Credential } from "../../../../credentials"
+import { roDescr } from "../../../../utils/roDescr";
 import { CertificateType, certTypeToString } from "./CertificateType"
 import { ICert } from "./ICert"
-import { ToJson } from "../../utils/ToJson";
-import { Hash28 } from "../../hashes";
+import { ToJson } from "../../../../utils/ToJson";
+import { Hash28 } from "../../../../hashes";
 import { Data, DataConstr } from "@harmoniclabs/plutus-data";
-import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { ToDataVersion, definitelyToDataVersion } from "../../../../toData/defaultToDataVersion";
+import { getSubCborRef } from "../../../../utils/getSubCborRef";
 
 export interface ICertAuthCommitteeHot {
     coldCredential: Credential,
@@ -76,10 +76,11 @@ export class CertAuthCommitteeHot
     }
     toCborObj(): CborArray
     {
+
         return new CborArray([
             new CborUInt( this.certType ),
             this.coldCredential.toCborObj(),
-            this.hotCredential .toCborObj()
+            this.hotCredential.toCborObj()
         ]);
     }
     

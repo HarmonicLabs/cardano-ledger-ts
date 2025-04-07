@@ -1,11 +1,11 @@
 ; This file was auto-generated from huddle. Please do not modify it directly!
 ; Pseudo-rule introduced by Cuddle to collect root elements
 huddle_root_defs = [block
-                   , transaction
-                   , $kes_signature
-                   , language
-                   , potential_languages
-                   , signkeyKES]
+                    , transaction
+                    , $kes_signature
+                    , language
+                    , potential_languages
+                    , signkeyKES]
 
 $hash28 = bytes .size 28
 
@@ -364,7 +364,8 @@ proposal_procedures = nonempty_set<proposal_procedure>
 ; 32: drep inactivity period
 ; 33: minfee refscriptcoinsperbyte
 ; 
-protocol_param_update = {? 0 : coin
+protocol_param_update = {
+                        ? 0 : coin
                         , ? 1 : coin
                         , ? 2 : uint .size 4
                         , ? 3 : uint .size 4
@@ -393,7 +394,8 @@ protocol_param_update = {? 0 : coin
                         , ? 30 : coin
                         , ? 31 : coin
                         , ? 32 : epoch_interval
-                        , ? 33 : nonnegative_interval}
+                        , ? 33 : nonnegative_interval
+                        }
 
 protocol_version = [major_protocol_version, uint]
 

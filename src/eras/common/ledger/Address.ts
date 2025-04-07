@@ -1,16 +1,16 @@
 import { ToCbor, CborObj, CborBytes, CborString, Cbor, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { byte, encodeBech32, decodeBech32 } from "@harmoniclabs/crypto";
 import { ToData, Data, DataConstr } from "@harmoniclabs/plutus-data";
-import { Credential, StakeCredentials, StakeCredentialsType, CredentialType, PublicKey } from "../credentials";
-import { Hash28 } from "../hashes";
-import { forceBigUInt } from "../utils/ints";
+import { Credential, StakeCredentials, StakeCredentialsType, CredentialType, PublicKey } from "../../../credentials";
+import { Hash28 } from "../../../hashes";
+import { forceBigUInt } from "../../../utils/ints";
 import { NetworkT } from "./Network";
-import { nothingData, justData } from "../utils/maybeData";
-import UPLCFlatUtils from "../utils/UPLCFlatUtils";
+import { nothingData, justData } from "../../../utils/maybeData";
+import UPLCFlatUtils from "../../../utils/UPLCFlatUtils";
 import { fromHex, toHex } from "@harmoniclabs/uint8array-utils";
 import { harden, XPrv } from "@harmoniclabs/bip32_ed25519";
-import { ToDataVersion } from "../toData/defaultToDataVersion";
-import { getSubCborRef } from "../utils/getSubCborRef";
+import { ToDataVersion } from "../../../toData/defaultToDataVersion";
+import { getSubCborRef } from "../../../utils/getSubCborRef";
 
 export type AddressStr = `${"addr1"|"addr_test1"}${string}`;
 

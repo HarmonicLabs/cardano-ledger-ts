@@ -3,7 +3,7 @@ import { Credential } from "../../credentials"
 import { roDescr } from "../../utils/roDescr";
 import { CertificateType, certTypeToString } from "./CertificateType"
 import { ICert } from "./ICert"
-import { Epoch } from "../Epoch";
+import { Epoch } from "../ledger/Epoch";
 import { CanBeHash28, Hash28 } from "../../hashes";
 import { forceBigUInt } from "../../utils/ints";
 import { Data, DataConstr, DataI } from "@harmoniclabs/plutus-data";

@@ -3,8 +3,6 @@ import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { ToData, Data, DataConstr, DataB } from "@harmoniclabs/plutus-data";
 import { canBeHash28, CanBeHash28, Hash28 } from "../hashes/Hash28/Hash28";
 import { PubKeyHash } from "./PubKeyHash";
-import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils"
-import { assert } from "../utils/assert";
 import { getSubCborRef } from "../utils/getSubCborRef";
 
 export class ValidatorHash extends Hash28 {}

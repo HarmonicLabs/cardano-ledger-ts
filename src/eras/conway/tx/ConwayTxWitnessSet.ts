@@ -362,7 +362,7 @@ export class ConwayTxWitnessSet
         ] = fields;
 
         // redeemer might be either array or map in conway
-        //* TO DO: ASK About Adding Redeemers */
+        //* TO DO: ASK About Adding Redeemers after dats/ums */
         if(!(
             (_vkey === undefined        || isCborSet( _vkey ) )      &&
             (_native === undefined      || isCborSet( _native ) )    &&
