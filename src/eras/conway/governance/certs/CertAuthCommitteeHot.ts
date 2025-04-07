@@ -1,8 +1,8 @@
 import { Cbor, CborArray, CborObj, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { Credential } from "../../../../credentials"
 import { roDescr } from "../../../../utils/roDescr";
-import { CertificateType, certTypeToString } from "./CertificateType"
-import { ICert } from "./ICert"
+import { CertificateType, certTypeToString } from "../../../common/certs/CertificateType"
+import { ICert } from "../../../common/certs/ICert"
 import { ToJson } from "../../../../utils/ToJson";
 import { Hash28 } from "../../../../hashes";
 import { Data, DataConstr } from "@harmoniclabs/plutus-data";
@@ -76,7 +76,7 @@ export class CertAuthCommitteeHot
     }
     toCborObj(): CborArray
     {
-
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
         return new CborArray([
             new CborUInt( this.certType ),
             this.coldCredential.toCborObj(),
