@@ -1,15 +1,10 @@
 import { ToCbor, CborString, Cbor, CborMap, CborUInt, CborArray, CborTag, CborBytes, CborMapEntry, CanBeCborString, forceCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
-import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
-import { Data, isData, ToData, DataConstr, dataToCbor, dataFromCborObj } from "@harmoniclabs/plutus-data";
-import { Hash32 } from "../../../hashes";
+import { isObject, hasOwn } from "@harmoniclabs/obj-utils";
 import { Address, AddressStr, Value, IValue, isAddressStr, isIValue } from "../../../ledger";
-import { Script, ScriptType } from "../../../script";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
-import { maybeData } from "../../../utils/maybeData";
 import { BasePlutsError } from "../../../utils/BasePlutsError";
-import { ToDataVersion } from "../../../toData/defaultToDataVersion";
 import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
 
 export interface IAllegraTxOut {
@@ -31,7 +26,7 @@ export function isIAllegraTxOut( stuff: any ): stuff is IAllegraTxOut
 }
 
 export class AllegraTxOut
-    implements IAllegraTxOut, ToCbor, Cloneable<AllegraTxOut>, ToData, ToJson
+    implements IAllegraTxOut, ToCbor, Cloneable<AllegraTxOut>, ToJson
 {
     readonly address!: Address
     readonly value!: Value
@@ -83,17 +78,6 @@ export class AllegraTxOut
             address: Address.fake,
             value: Value.lovelaces( 0 )
         })
-    }
-
-    toData( version: ToDataVersion ): Data
-    {
-        return new DataConstr(
-            0,
-            [
-                this.address.toData( version ),
-                this.value.toData( version ),
-            ]
-        )
     }
 
     toCborBytes(): Uint8Array

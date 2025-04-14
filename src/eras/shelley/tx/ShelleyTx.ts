@@ -3,17 +3,16 @@ import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, C
 import { signEd25519_sync } from "@harmoniclabs/crypto"
 import { PrivateKey, CredentialType, PubKeyHash } from "../../../credentials"
 import { Signature, Hash32, Hash28 } from "../../../hashes"
-import { IShelleyTxBody, IShelleyTxWitnessSet, ShelleyAuxiliaryData, ShelleyTxBody, ShelleyTxWitnessSet, isIShelleyTxBody, isIShelleyTxWitnessSet} from "./";
-import { VKeyWitness, VKey } from "../../common";
+import { IShelleyTxBody, IShelleyTxWitnessSet, ShelleyTxBody, ShelleyTxWitnessSet, isIShelleyTxBody, isIShelleyTxWitnessSet} from "./";
+import { VKeyWitness, VKey, TxMetadata } from "../../common";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef"
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError"
 import { ToJson } from "../../../utils/ToJson"
 
-//** TO DO: Find out if this can stay AUX data in which case should native script be removed or just include TxMetadata.ts from common */
 export interface IShelleyTx {
     body: IShelleyTxBody
     witnesses: IShelleyTxWitnessSet
-    auxiliaryData?: ShelleyAuxiliaryData | null
+    metadata?: TxMetadata | null
 }
 
 export interface Cip30LikeSignShelleyTx {
@@ -31,7 +30,7 @@ export class ShelleyTx
 {
     readonly body!: ShelleyTxBody;
     readonly witnesses!: ShelleyTxWitnessSet;
-    readonly auxiliaryData?: ShelleyAuxiliaryData | null | undefined;
+    readonly metadata?: TxMetadata | null | undefined;
 
     clone(): ShelleyTx
     {
@@ -46,7 +45,7 @@ export class ShelleyTx
         const {
             body,
             witnesses,
-            auxiliaryData
+            metadata
         } = tx;
 
         if(!(
@@ -60,10 +59,10 @@ export class ShelleyTx
         )) throw new Error("invalid wintesses; must be instance of 'ShelleyTxWitnessSet'");
         
         if(!(
-            auxiliaryData === undefined ||
-            auxiliaryData === null ||
-            auxiliaryData instanceof ShelleyAuxiliaryData
-        )) throw new Error("invalid transaction auxiliray data; must be instance of 'ShelleyAuxiliaryData'");
+            metadata === undefined ||
+            metadata === null ||
+            metadata instanceof TxMetadata
+        )) throw new Error("invalid transaction metadata data; must be instance of 'TxMetadata'");
 
         this.body = new ShelleyTxBody( body );
         this.witnesses = new ShelleyTxWitnessSet(
@@ -71,7 +70,7 @@ export class ShelleyTx
             subCborRefOrUndef( witnesses ),
             getAllRequiredSigners( this.body )
         );
-        this.auxiliaryData = auxiliaryData;
+        this.metadata = metadata;
 
         this.cborRef = cborRef ?? subCborRefOrUndef( tx );
     }
@@ -190,9 +189,9 @@ export class ShelleyTx
         return new CborArray([
             this.body.toCborObj(),
             this.witnesses.toCborObj(),
-            this.auxiliaryData === undefined || this.auxiliaryData === null ?
+            this.metadata === undefined || this.metadata === null ?
                 new CborSimple( null ) :
-                this.auxiliaryData.toCborObj()
+                this.metadata.toCborObj()
         ]);
     }
 
@@ -210,16 +209,16 @@ export class ShelleyTx
         const [ 
             _body, 
             _wits, 
-            _aux 
+            _metadata 
         ] = cObj.array;
 
 
-        const noAuxiliaryData = _aux instanceof CborSimple && (_aux.simple === null || _aux.simple === undefined);
+        const noMetadataData = _metadata instanceof CborSimple && (_metadata.simple === null || _metadata.simple === undefined);
 
         return new ShelleyTx({
             body: ShelleyTxBody.fromCborObj( _body ),
             witnesses: ShelleyTxWitnessSet.fromCborObj( _wits ),
-            auxiliaryData: noAuxiliaryData ? undefined : ShelleyAuxiliaryData.fromCborObj( _aux )
+            metadata: noMetadataData ? undefined : TxMetadata.fromCborObj( _metadata )
         }, getSubCborRef( cObj ))
     }
 
@@ -231,7 +230,7 @@ export class ShelleyTx
         return {
             body: this.body.toJson(),
             witnesses: this.witnesses.toJson(),
-            auxiliaryData: this.auxiliaryData?.toJson()
+            metadata: this.metadata?.toJson()
         };
     }
 

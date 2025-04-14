@@ -1,13 +1,10 @@
 import { ToCbor, CborString, Cbor, CborArray, CanBeCborString, forceCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
-import { ToData, Data, DataConstr } from "@harmoniclabs/plutus-data";
 import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 import { IAllegraTxOut, isIAllegraTxOut, AllegraTxOut } from "./AllegraTxOut";
 import { ITxOutRef, isITxOutRef, TxOutRef } from "../../common/TxOutRef";
-import { lexCompare } from "@harmoniclabs/uint8array-utils";
-import { ToDataVersion } from "../../../toData/defaultToDataVersion";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
 
 export interface IAllegraUTxO {
@@ -25,7 +22,7 @@ export function isIAllegraUTxO( stuff: any ): stuff is IAllegraUTxO
 }
 
 export class AllegraUTxO
-    implements IAllegraUTxO, ToData, ToJson, ToCbor, Cloneable<AllegraUTxO>
+    implements IAllegraUTxO, ToJson, ToCbor, Cloneable<AllegraUTxO>
 {
     readonly utxoRef!: TxOutRef
     readonly resolved!: AllegraTxOut
@@ -47,17 +44,6 @@ export class AllegraUTxO
     clone(): AllegraUTxO
     {
         return new AllegraUTxO( this );
-    }
-
-    toData( version?: ToDataVersion ): Data
-    {
-        return new DataConstr(
-            0, // PTxInInfo only constructor
-            [
-                this.utxoRef.toData( version ),
-                this.resolved.toData( version ) // PTxOut based on specified version
-            ]
-        );
     }
 
     toCborBytes(): Uint8Array

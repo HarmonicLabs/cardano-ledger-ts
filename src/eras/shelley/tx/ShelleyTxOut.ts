@@ -1,15 +1,10 @@
 import { ToCbor, CborString, Cbor, CborMap, CborUInt, CborArray, CborTag, CborBytes, CborMapEntry, CanBeCborString, forceCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
-import { Data, isData, ToData, DataConstr, dataToCbor, dataFromCborObj } from "@harmoniclabs/plutus-data";
-import { Hash32 } from "../../../hashes";
 import { Address, AddressStr, Value, IValue, isAddressStr, isIValue } from "../../../ledger";
-import { Script, ScriptType } from "../../../script";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
-import { maybeData } from "../../../utils/maybeData";
 import { BasePlutsError } from "../../../utils/BasePlutsError";
-import { ToDataVersion } from "../../../toData/defaultToDataVersion";
 import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
 
 export interface IShelleyTxOut {
@@ -31,7 +26,7 @@ export function isIShelleyTxOut( stuff: any ): stuff is IShelleyTxOut
 }
 
 export class ShelleyTxOut
-    implements IShelleyTxOut, ToCbor, Cloneable<ShelleyTxOut>, ToData, ToJson
+    implements IShelleyTxOut, ToCbor, Cloneable<ShelleyTxOut>, ToJson
 {
     readonly address!: Address
     readonly value!: Value
@@ -83,17 +78,6 @@ export class ShelleyTxOut
             address: Address.fake,
             value: Value.lovelaces( 0 )
         })
-    }
-
-    toData( version: ToDataVersion ): Data
-    {
-        return new DataConstr(
-            0,
-            [
-                this.address.toData( version ),
-                this.value.toData( version ),
-            ]
-        )
     }
 
     toCborBytes(): Uint8Array

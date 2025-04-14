@@ -578,7 +578,7 @@ export class ConwayTxBody
     {
         if(!(
             cObj instanceof CborMap
-            // && cObj.map.length >= 4
+            // && cObj.map.length >= 20 
         ))throw new InvalidCborFormatError("ConwayTxBody")
 
         let fields: (CborObj | undefined)[] = new Array( 23 ).fill( undefined );

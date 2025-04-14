@@ -51,7 +51,7 @@ export function isIShelleyTxBody( body: Readonly<object> ): body is IShelleyTxBo
         ( b.certs === undefined || b.certs.every( isCertificate ) ) &&
         ( b.withdrawals === undefined || canBeTxWithdrawals( b.withdrawals ) ) &&
         ( b.protocolUpdate === undefined || isLegacyPPUpdateProposal( b.protocolUpdate ) ) &&
-        ( b.auxDataHash === undefined || b.auxDataHash instanceof Hash32 ) &&
+        ( b.auxDataHash === undefined || b.auxDataHash instanceof Hash32 )
     )
 }
 
