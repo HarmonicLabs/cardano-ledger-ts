@@ -11,4 +11,3 @@ export * from "./StakeAddress";
 export * from "./TxWithdrawals";
 export * from "../Value";
 export * from "../certs";
-export * from "../protocol";

@@ -1,18 +1,16 @@
 import type { Epoch } from "../../common/ledger/Epoch";
 import type { Coin } from "../../common/ledger/Coin";
 import { CborPositiveRational, CborUInt, CborObj, CborMapEntry, CborMap, CborArray, CborNegInt, CborBytes, CborTag, CborText } from "@harmoniclabs/cbor";
-import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../utils/ints";
+import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../../utils/ints";
 import { CostModels, costModelsFromCborObj, costModelsToCborObj, costModelsToJson, defaultV1Costs, defaultV2Costs, defaultV3Costs, isCostModels } from "@harmoniclabs/cardano-costmodels-ts";
 import { ExBudget, ExBudgetJson } from "@harmoniclabs/plutus-machine";
 import { freezeAll, isObject } from "@harmoniclabs/obj-utils";
-import { Rational, cborFromRational, isRational, isRationalOrUndefined, tryCborFromRational } from "../../common/protocol/Rational";
-import { PParamsPoolVotingThresholds, isPParamsPoolVotingThresholds, poolVotingThresholdsToCborObj, tryGetPParamsPoolVotingThresholdsFromCborObj } from "./PParamsPoolVotingThresholds";
-import { PParamsDrepVotingThresholds, drepVotingThresholdsToCborObj, isPParamsDrepVotingThresholds, tryGetPParamsDrepVotingThresholdsFromCborObj } from "./PParamsDrepVotingThresholds";
-import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "../../eras/common/protocolVersion";
+import { Rational, cborFromRational, isRational, isRationalOrUndefined, tryCborFromRational } from "./Rational";
+import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "./protocolVersion";
 import { Data, DataB, DataConstr, DataI, DataList, DataMap, DataPair } from "@harmoniclabs/plutus-data";
 import { fromUtf8 } from "@harmoniclabs/uint8array-utils";
 
-export interface ProtocolParameters {
+export interface BabbageProtocolParameters {
     txFeePerByte: CanBeUInteger,
     txFeeFixed: CanBeUInteger,
     maxBlockBodySize: CanBeUInteger,
@@ -25,7 +23,6 @@ export interface ProtocolParameters {
     poolPledgeInfluence: Rational,
     monetaryExpansion: Rational,
     treasuryCut: Rational,
-    /** @deprecated protocolVersion removed in conway */
     protocolVersion?: IProtocolVersion,
     minPoolCost: Coin,
     utxoCostPerByte: Coin,
@@ -42,19 +39,9 @@ export interface ProtocolParameters {
     maxValueSize: CanBeUInteger,
     collateralPercentage: CanBeUInteger,
     maxCollateralInputs: CanBeUInteger,
-    // conway (governance params)
-    poolVotingThresholds: PParamsPoolVotingThresholds,
-    drepVotingThresholds: PParamsDrepVotingThresholds,
-    minCommitteSize: CanBeUInteger,
-    committeeTermLimit: Epoch,
-    governanceActionValidityPeriod: Epoch,
-    governanceActionDeposit: Epoch,
-    drepDeposit: Coin,
-    drepActivityPeriod: Epoch,
-    minfeeRefScriptCostPerByte: Rational
 }
 
-export function isProtocolParameters( something: any ): something is ProtocolParameters
+export function isProtocolParameters( something: any ): something is BabbageProtocolParameters
 {
     const expectedKeys = [
         "txFeePerByte",
@@ -69,8 +56,7 @@ export function isProtocolParameters( something: any ): something is ProtocolPar
         "poolPledgeInfluence",
         "monetaryExpansion",
         "treasuryCut",
-        // protocolVersion removed in conway
-        // "protocolVersion",
+        "protocolVersion",
         "minPoolCost",
         "utxoCostPerByte",
         "costModels",
@@ -80,15 +66,6 @@ export function isProtocolParameters( something: any ): something is ProtocolPar
         "maxValueSize",
         "collateralPercentage",
         "maxCollateralInputs",
-        "poolVotingThresholds",
-        "drepVotingThresholds",
-        "minCommitteSize",
-        "committeeTermLimit",
-        "governanceActionValidityPeriod",
-        "governanceActionDeposit",
-        "drepDeposit",
-        "drepActivityPeriod",
-        "minfeeRefScriptCostPerByte"
     ] as const;
 
     const actualKeys = Object.keys( something );
@@ -97,7 +74,7 @@ export function isProtocolParameters( something: any ): something is ProtocolPar
         !expectedKeys.every( k => actualKeys.includes( k ) )
     ) return false;
 
-    const pp: ProtocolParameters = something;
+    const pp: BabbageProtocolParameters = something;
 
     if(!
         ([
@@ -115,22 +92,16 @@ export function isProtocolParameters( something: any ): something is ProtocolPar
             "maxValueSize",
             "collateralPercentage",
             "maxCollateralInputs",
-            "minCommitteSize",
-            "committeeTermLimit",
-            "governanceActionValidityPeriod",
-            "governanceActionDeposit",
-            "drepDeposit",
-            "drepActivityPeriod"
         ] as const).every( uintKey => canBeUInteger( pp[uintKey] ) )
     ) return false;
 
     if(!(
         isRational( pp.poolPledgeInfluence ) &&
         isRational( pp.monetaryExpansion ) &&
-        isRational( pp.treasuryCut ) &&
-        isRational( pp.minfeeRefScriptCostPerByte )
+        isRational( pp.treasuryCut )
     )) return false
 
+    
     const ppv = pp.protocolVersion;
 
     if(!(
@@ -138,6 +109,7 @@ export function isProtocolParameters( something: any ): something is ProtocolPar
         ppv === undefined ||
         isIProtocolVersion( ppv )
     )) return false;
+    
 
     const ppexecCosts = pp.executionUnitPrices;
 
@@ -161,19 +133,17 @@ export function isProtocolParameters( something: any ): something is ProtocolPar
     )) return false
 
     if(!(
-        isCostModels( pp.costModels ) &&
-        isPParamsPoolVotingThresholds( pp.poolVotingThresholds ) &&
-        isPParamsDrepVotingThresholds( pp.drepVotingThresholds )
+        isCostModels( pp.costModels )
     )) return false;
 
     return true;
 }
 
-export function isPartialProtocolParameters( something: object ): something is Partial<ProtocolParameters>
+export function isPartialProtocolParameters( something: object ): something is Partial<BabbageProtocolParameters>
 {
     if( !isObject( something ) ) return false;
 
-    const pp: Partial<ProtocolParameters> = something;
+    const pp: Partial<BabbageProtocolParameters> = something;
 
     if(!
         ([
@@ -191,12 +161,6 @@ export function isPartialProtocolParameters( something: object ): something is P
             "maxValueSize",
             "collateralPercentage",
             "maxCollateralInputs",
-            "minCommitteSize",
-            "committeeTermLimit",
-            "governanceActionValidityPeriod",
-            "governanceActionDeposit",
-            "drepDeposit",
-            "drepActivityPeriod"
         ] as const).every( uintKey => pp[uintKey] === undefined || canBeUInteger( pp[uintKey] ) )
     ) return false;
 
@@ -204,16 +168,17 @@ export function isPartialProtocolParameters( something: object ): something is P
     if(!(
         isRationalOrUndefined( pp.poolPledgeInfluence ) &&
         isRationalOrUndefined( pp.monetaryExpansion ) &&
-        isRationalOrUndefined( pp.treasuryCut )  &&
-        isRationalOrUndefined( pp.minfeeRefScriptCostPerByte )
+        isRationalOrUndefined( pp.treasuryCut )
     )) return false;
 
+    
     const ppv = pp.protocolVersion;
 
     if(!(
         ppv === undefined ||
         isIProtocolVersion( ppv )
     )) return false;
+    
 
     const ppexecCosts = pp.executionUnitPrices;
 
@@ -245,9 +210,7 @@ export function isPartialProtocolParameters( something: object ): something is P
     )) return false
 
     if(!(
-        (pp.costModels === undefined || isCostModels( pp.costModels )) &&
-        (pp.poolVotingThresholds === undefined || isPParamsPoolVotingThresholds( pp.poolVotingThresholds )) &&
-        (pp.drepVotingThresholds === undefined || isPParamsDrepVotingThresholds( pp.drepVotingThresholds ))
+        (pp.costModels === undefined || isCostModels( pp.costModels ))
     )) return false;
 
     return true;
@@ -274,7 +237,7 @@ function kv( k: number, v: CborObj | undefined ): CborMapEntry | undefined
     };
 }
 
-export function partialProtocolParametersToCborObj( pps: Partial<ProtocolParameters> ): CborMap
+export function partialProtocolParametersToCborObj( pps: Partial<BabbageProtocolParameters> ): CborMap
 {
     const {
         protocolVersion,
@@ -299,11 +262,13 @@ export function partialProtocolParametersToCborObj( pps: Partial<ProtocolParamet
         kv( 9 , tryCborFromRational( pps.poolPledgeInfluence ) ),
         kv( 10, tryCborFromRational( pps.monetaryExpansion   ) ),
         kv( 11, tryCborFromRational( pps.treasuryCut         ) ),
+        /* 
         protocolVersion === undefined ? undefined :
         kv(
             14,
             new ProtocolVersion( protocolVersion ).toCborObj()
         ),
+        */
         mapUIntEntryOrUndefined( 16, pps.minPoolCost ),
         mapUIntEntryOrUndefined( 17, pps.utxoCostPerByte ),
         kv( 18, 
@@ -326,20 +291,11 @@ export function partialProtocolParametersToCborObj( pps: Partial<ProtocolParamet
         kv( 21, ExBudget.isJson( maxBlockExecutionUnits ) ? ExBudget.fromJson( maxBlockExecutionUnits ).toCborObj() : maxBlockExecutionUnits?.toCborObj()   ),
         mapUIntEntryOrUndefined( 22, pps.maxValueSize ),
         mapUIntEntryOrUndefined( 23, pps.collateralPercentage ),
-        mapUIntEntryOrUndefined( 24, pps.maxCollateralInputs ),
-        pps.poolVotingThresholds ? kv( 25, poolVotingThresholdsToCborObj( pps.poolVotingThresholds ) ) : undefined, 
-        pps.drepVotingThresholds ? kv( 26, drepVotingThresholdsToCborObj( pps.drepVotingThresholds ) ) : undefined,
-        mapUIntEntryOrUndefined( 27, pps.minCommitteSize ),
-        mapUIntEntryOrUndefined( 28, pps.committeeTermLimit ),
-        mapUIntEntryOrUndefined( 29, pps.governanceActionValidityPeriod ),
-        mapUIntEntryOrUndefined( 30, pps.governanceActionDeposit ),
-        mapUIntEntryOrUndefined( 31, pps.drepDeposit ),
-        mapUIntEntryOrUndefined( 32, pps.drepActivityPeriod ),
-        kv( 33, tryCborFromRational( pps.minfeeRefScriptCostPerByte ) ),
+        mapUIntEntryOrUndefined( 24, pps.maxCollateralInputs )
     ].filter( elem => elem !== undefined ) as CborMapEntry[])
 }
 
-export function partialProtocolParametersToData( pps: Partial<ProtocolParameters> ): Data
+export function partialProtocolParametersToData( pps: Partial<BabbageProtocolParameters> ): Data
 {
     return cborToDataLitteral( partialProtocolParametersToCborObj( pps ) );
 }
@@ -388,10 +344,10 @@ function cborToDataLitteral( cbor: CborObj ): Data
 
 const maxProtocolParamsEntries = 33;
 
-export function partialProtocolParametersFromCborObj( cObj: CborObj ): Partial<ProtocolParameters>
+export function partialProtocolParametersFromCborObj( cObj: CborObj ): Partial<BabbageProtocolParameters>
 {
     if(!( cObj instanceof CborMap ))
-    throw new Error(`Invalid CBOR format for "Partial<ProtocolParameters>"`)
+    throw new Error(`Invalid CBOR format for "Partial<BabbageProtocolParameters>"`)
 
     let fields: (CborObj | undefined)[] = new Array( maxProtocolParamsEntries ).fill( undefined );
 
@@ -432,23 +388,16 @@ export function partialProtocolParametersFromCborObj( cObj: CborObj ): Partial<P
         _maxValueSize,
         _collatearalPerc,
         _maxCollIns,
-        // conway
-        _poolVotingThresholds,
-        _drepVotingThresholds,
-        _minCommitteSize,
-        _committeeTermLimit,
-        _governanceActionValidityPeriod,
-        _governanceActionDeposit,
-        _drepDeposit,
-        _drepActivityPeriod,
-        _minfeeRefScriptCostPerByte,
+
     ] = fields;
 
+    
     let protocolVersion: ProtocolVersion | undefined;
     try{
         protocolVersion =  _protocolVersion ? ProtocolVersion.fromCborObj( _protocolVersion ) : undefined;
     } catch {}
-
+    
+    
     let executionUnitPrices: [CborPositiveRational, CborPositiveRational] | undefined = undefined;
     if( _execCosts instanceof CborArray )
     {
@@ -481,20 +430,11 @@ export function partialProtocolParametersFromCborObj( cObj: CborObj ): Partial<P
         maxBlockExecutionUnits:         _maxBlockExecUnits === undefined ? undefined : ExBudget.fromCborObj( _maxBlockExecUnits ),
         maxValueSize:                   fromUIntOrUndef( _maxValueSize ),
         collateralPercentage:           fromUIntOrUndef( _collatearalPerc ),
-        maxCollateralInputs:            fromUIntOrUndef( _maxCollIns ),
-        poolVotingThresholds:           tryGetPParamsPoolVotingThresholdsFromCborObj( _poolVotingThresholds ),
-        drepVotingThresholds:           tryGetPParamsDrepVotingThresholdsFromCborObj( _drepVotingThresholds ),
-        minCommitteSize:                fromUIntOrUndef( _minCommitteSize ),
-        committeeTermLimit:             fromUIntOrUndef( _committeeTermLimit ),
-        governanceActionValidityPeriod: fromUIntOrUndef( _governanceActionValidityPeriod ),
-        governanceActionDeposit:        fromUIntOrUndef( _governanceActionDeposit ),
-        drepDeposit:                    fromUIntOrUndef( _drepDeposit ),
-        drepActivityPeriod:             fromUIntOrUndef( _drepActivityPeriod ),
-        minfeeRefScriptCostPerByte:     tryCborFromRational( _minfeeRefScriptCostPerByte )
+        maxCollateralInputs:            fromUIntOrUndef( _maxCollIns )
     }
 }
 
-export const defaultProtocolParameters: ProtocolParameters = freezeAll({
+export const defaultProtocolParameters: BabbageProtocolParameters = freezeAll({
     txFeePerByte: 44,
     txFeeFixed: 155381,
     maxBlockBodySize: 73728,
@@ -523,36 +463,10 @@ export const defaultProtocolParameters: ProtocolParameters = freezeAll({
     maxBlockExecutionUnits: new ExBudget({ mem: 50_000_000, cpu: 40_000_000_000 }),
     maxValueSize: 5000,
     collateralPercentage: 150,
-    maxCollateralInputs: 3,
-    poolVotingThresholds: {
-        committeeNormal: CborPositiveRational.fromNumber( 0.51 ),
-        committeeNoConfidence: CborPositiveRational.fromNumber( 0.51 ),
-        hardForkInitiation: CborPositiveRational.fromNumber( 0.51 ),
-        motionNoConfidence: CborPositiveRational.fromNumber( 0.51 ),
-        securityRelevantVotingThresholds: CborPositiveRational.fromNumber( 0.51 )
-    } as PParamsPoolVotingThresholds,
-    drepVotingThresholds: {
-        motionNoConfidence: CborPositiveRational.fromNumber( 0.51 ),
-        committeeNormal: CborPositiveRational.fromNumber( 0.51 ),
-        committeeNoConfidence: CborPositiveRational.fromNumber( 0.51 ),
-        updateConstitution: CborPositiveRational.fromNumber( 0.51 ),
-        hardForkInitiation: CborPositiveRational.fromNumber( 0.51 ),
-        ppNetworkGroup: CborPositiveRational.fromNumber( 0.51 ),
-        ppEconomicGroup: CborPositiveRational.fromNumber( 0.51 ),
-        ppTechnicalGroup: CborPositiveRational.fromNumber( 0.51 ),
-        ppGovGroup: CborPositiveRational.fromNumber( 0.51 ),
-        treasuryWithdrawal: CborPositiveRational.fromNumber( 0.51 )
-    } as PParamsDrepVotingThresholds,
-    minCommitteSize: 0,
-    committeeTermLimit: 200,
-    governanceActionValidityPeriod: 10,
-    governanceActionDeposit: 1_000_000_000,
-    drepDeposit: 2_000_000,
-    drepActivityPeriod: 20,
-    minfeeRefScriptCostPerByte: CborPositiveRational.fromNumber( 0.5 )
-} as ProtocolParameters)
+    maxCollateralInputs: 3
+} as BabbageProtocolParameters)
 
-export function partialProtocolParamsToJson( pp: Partial<ProtocolParameters> )
+export function partialProtocolParamsToJson( pp: Partial<BabbageProtocolParameters> )
 {
     return {
         ...pp,

@@ -1,15 +1,15 @@
+import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
+import { ToData, DataMap, DataConstr, DataI, DataPair } from "@harmoniclabs/plutus-data";
+import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { StakeAddress, StakeAddressBech32 } from "./StakeAddress";
 import { NetworkT } from "./Network";
 import { Address } from "./Address";
-import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
-import { ToData, DataMap, DataConstr, DataI, DataPair } from "@harmoniclabs/plutus-data";
-import { CanBeHash28, Hash28, canBeHash28 } from "../hashes";
-import { canBeUInteger, forceBigUInt } from "../utils/ints";
+import { CanBeHash28, Hash28, canBeHash28 } from "../../../hashes";
+import { canBeUInteger, forceBigUInt } from "../../../utils/ints";
 import { Coin } from "./Coin";
 import { Value } from "../Value";
-import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
-import { ToDataVersion } from "../toData/defaultToDataVersion";
-import { getSubCborRef } from "../utils/getSubCborRef";
+import { ToDataVersion } from "../../../toData/defaultToDataVersion";
+import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
 
 export type ITxWithdrawalsEntryBigInt = {
     rewardAccount: StakeAddress,
@@ -104,9 +104,8 @@ export class TxWithdrawals
                 amount: forceBigUInt( (map as any)[rewAccount] )
             }))
         }
-        /* TO DO: COme back to this to do cborRef
-        // this.cborRef = cborRef ?? subCborRefOrUndef( map );
-        */
+        
+        this.cborRef = cborRef ?? subCborRefOrUndef( map );
     }
 
     toTotalWitdrawn(): Value

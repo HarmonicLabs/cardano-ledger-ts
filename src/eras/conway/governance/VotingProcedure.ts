@@ -1,5 +1,5 @@
 import { CborString, Cbor, CborObj, CborArray, CborText, CborBytes, CborUInt, CborSimple, SubCborRef } from "@harmoniclabs/cbor";
-import { roDescr } from "../utils/roDescr";
+import { roDescr } from "../../../utils/roDescr";
 import { Anchor, IAnchor, isIAnchor } from "./Anchor";
 import { Vote, isVote, voteToCborObj } from "./Vote";
 import { isObject } from "@harmoniclabs/obj-utils";

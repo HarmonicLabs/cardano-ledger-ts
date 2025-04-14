@@ -2,11 +2,12 @@ import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborA
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
 import { blake2b_256 } from "@harmoniclabs/crypto";
 import { hasOwn, isObject } from "@harmoniclabs/obj-utils";
-import { Certificate } from "crypto";
 import { PubKeyHash } from "../../../credentials";
 import { AuxiliaryDataHash, ScriptDataHash, CanBeHash28, Hash32, canBeHash28 } from "../../../hashes";
-import { Coin, TxWithdrawals, ITxWithdrawals, LegacyPPUpdateProposal, Value, NetworkT, isCertificate, canBeTxWithdrawals, isLegacyPPUpdateProposal, forceTxWithdrawals, isIValue, LegacyPPUpdateProposalToCborObj, certificateFromCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, certificatesToDepositLovelaces } from "../../../ledger";
-import { UTxO, isIUTxO, TxOutRef } from "../../common";
+import { Coin, TxWithdrawals, ITxWithdrawals, Value, NetworkT, isCertificate, canBeTxWithdrawals, forceTxWithdrawals, isIValue, certificateFromCborObj, certificatesToDepositLovelaces, Certificate } from "../../common/ledger";
+import { LegacyPPUpdateProposal, isLegacyPPUpdateProposal, LegacyPPUpdateProposalToCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson } from "../protocol"
+import { TxOutRef } from "../../common/TxOutRef";
+import { BabbageUTxO, isIBabbageUTxO, } from "./BabbageUTxO";
 import { BabbageTxOut, isIBabbageTxOut } from "./";
 import { getCborSet } from "../../../utils/getCborSet";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
@@ -16,7 +17,7 @@ import { ToJson } from "../../../utils/ToJson";
 
 
 export interface IBabbageTxBody {
-    inputs: [ UTxO, ...UTxO[] ],
+    inputs: [ BabbageUTxO, ...BabbageUTxO[] ],
     outputs: BabbageTxOut[],
     fee: Coin,
     ttl?: CanBeUInteger,
@@ -27,12 +28,12 @@ export interface IBabbageTxBody {
     validityIntervalStart?: CanBeUInteger,
     mint?: Value,
     scriptDataHash?: ScriptDataHash, // hash 32
-    collateralInputs?: UTxO[], 
+    collateralInputs?: BabbageUTxO[], 
     requiredSigners?: CanBeHash28[],
     network?: NetworkT,
     collateralReturn?: BabbageTxOut,
     totCollateral?: Coin,
-    refInputs?: UTxO[]
+    refInputs?: BabbageUTxO[]
 }
 
 export function isIBabbageTxBody( body: Readonly<object> ): body is IBabbageTxBody
@@ -47,7 +48,7 @@ export function isIBabbageTxBody( body: Readonly<object> ): body is IBabbageTxBo
         
         hasOwn( b, "inputs" ) &&
         Array.isArray( b.inputs ) && b.inputs.length > 0 &&
-        b.inputs.every( _in => _in instanceof UTxO || isIUTxO( _in ) ) &&
+        b.inputs.every( _in => _in instanceof BabbageUTxO || isIBabbageUTxO( _in ) ) &&
         
         hasOwn( b, "outputs" ) &&
         Array.isArray( b.outputs ) && b.outputs.length > 0 &&
@@ -68,7 +69,7 @@ export function isIBabbageTxBody( body: Readonly<object> ): body is IBabbageTxBo
         ( b.totCollateral === undefined || canBeUInteger( b.totCollateral ) ) &&
         ( b.collateralInputs === undefined || (
             Array.isArray( b.collateralInputs ) && 
-            b.collateralInputs.every( collateral => collateral instanceof UTxO )
+            b.collateralInputs.every( collateral => collateral instanceof BabbageUTxO )
         )) &&
         ( b.requiredSigners === undefined || (
             Array.isArray( b.requiredSigners ) &&
@@ -76,7 +77,7 @@ export function isIBabbageTxBody( body: Readonly<object> ): body is IBabbageTxBo
         )) &&
         ( b.refInputs === undefined || (
             Array.isArray( b.refInputs ) &&
-            b.refInputs.every( ref => ref instanceof UTxO || isIUTxO( ref ) )
+            b.refInputs.every( ref => ref instanceof BabbageUTxO || isIBabbageUTxO( ref ) )
         ))
     )
 }
@@ -84,7 +85,7 @@ export function isIBabbageTxBody( body: Readonly<object> ): body is IBabbageTxBo
 export class BabbageTxBody
     implements IBabbageTxBody, ToCbor, ToJson
 {
-    readonly inputs!: [ UTxO, ...UTxO[] ];
+    readonly inputs!: [ BabbageUTxO, ...BabbageUTxO[] ];
     readonly outputs!: BabbageTxOut[];
     readonly fee!: bigint;
     readonly ttl?: bigint;
@@ -95,12 +96,12 @@ export class BabbageTxBody
     readonly validityIntervalStart?: bigint;
     readonly mint?: Value;
     readonly scriptDataHash?: ScriptDataHash; // hash 32
-    readonly collateralInputs?: UTxO[];
+    readonly collateralInputs?: BabbageUTxO[];
     readonly requiredSigners?: PubKeyHash[];
     readonly network?: NetworkT;
     readonly collateralReturn?: BabbageTxOut;
     readonly totCollateral?: bigint; // Coin
-    readonly refInputs?: UTxO[];
+    readonly refInputs?: BabbageUTxO[];
 
     /**
      * getter
@@ -161,10 +162,10 @@ export class BabbageTxBody
         if(!(
             Array.isArray( inputs )  &&
             inputs.length > 0 &&
-            inputs.every( isIUTxO )
+            inputs.every( isIBabbageUTxO )
         )) throw new Error("invalid 'inputs' field");
 
-        this.inputs = inputs.map( i => i instanceof UTxO ? i : new UTxO( i ) ) as [ UTxO, ...UTxO[] ];
+        this.inputs = inputs.map( i => i instanceof BabbageUTxO ? i : new BabbageUTxO( i ) ) as [ BabbageUTxO, ...BabbageUTxO[] ];
 
         // -------------------------------------- outputs -------------------------------------- //
 
@@ -266,13 +267,13 @@ export class BabbageTxBody
             collateralInputs === undefined ||
             (
                 Array.isArray( collateralInputs ) &&
-                collateralInputs.every( isIUTxO )
+                collateralInputs.every( isIBabbageUTxO )
             )
         )) throw new Error("invalid 'collateralInputs' field");
 
         this.collateralInputs = collateralInputs?.map( collateral =>
-            collateral instanceof UTxO ? collateral :
-            new UTxO( collateral )
+            collateral instanceof BabbageUTxO ? collateral :
+            new BabbageUTxO( collateral )
         );
         // -------------------------------------- requiredSigners -------------------------------------- //
         if(!(
@@ -326,13 +327,13 @@ export class BabbageTxBody
             refInputs === undefined ||
             (
                 Array.isArray( refInputs ) &&
-                refInputs.every( isIUTxO )
+                refInputs.every( isIBabbageUTxO )
             )
         )) throw new Error("invalid 'refInputs' field");
 
         this.refInputs = refInputs?.map( refIn =>
-            refIn instanceof UTxO ? refIn :
-            new UTxO( refIn )
+            refIn instanceof BabbageUTxO ? refIn :
+            new BabbageUTxO( refIn )
         );
 
         this.cborRef = cborRef ?? subCborRefOrUndef( body );
@@ -457,7 +458,7 @@ export class BabbageTxBody
     {
         if(!(
             cObj instanceof CborMap
-            && cObj.map.length >= 19
+            // && cObj.map.length >= 19
         )) throw new InvalidCborFormatError("BabbageTxBody")
 
         let fields: (CborObj | undefined)[] = new Array( 19 ).fill( undefined );
@@ -514,9 +515,8 @@ export class BabbageTxBody
             ttl = _ttl.num;
         }
         
-        //** TO DO: add votingProcedures, proposalProcedures, currentTreasuryValue, donation */
         return new BabbageTxBody({
-            inputs: getCborSet( _ins_ ).map( txOutRefAsUTxOFromCborObj ) as [UTxO, ...UTxO[]],
+            inputs: getCborSet( _ins_ ).map( txOutRefAsUTxOFromCborObj ) as [BabbageUTxO, ...BabbageUTxO[]],
             outputs: _outs.array.map( BabbageTxOut.fromCborObj ),
             fee: _fee.num,
             ttl,
@@ -538,7 +538,6 @@ export class BabbageTxBody
 
     toJSON() { return this.toJson(); }
     
-    //** TO DO: add votingProcedures, proposalProcedures, currentTreasuryValue, donation */
     toJson()
     {
         return {
@@ -607,9 +606,9 @@ export class BabbageTxBody
 };
 
 
-function txOutRefAsUTxOFromCborObj( cObj: CborObj ): UTxO
+function txOutRefAsUTxOFromCborObj( cObj: CborObj ): BabbageUTxO
 {
-    return new UTxO({
+    return new BabbageUTxO({
         utxoRef: TxOutRef.fromCborObj( cObj ),
         resolved: BabbageTxOut.fake
     });

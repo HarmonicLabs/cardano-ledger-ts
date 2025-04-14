@@ -2,12 +2,13 @@ import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborA
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
 import { blake2b_256 } from "@harmoniclabs/crypto";
 import { hasOwn, isObject } from "@harmoniclabs/obj-utils";
-import { Certificate } from "crypto";
 import { PubKeyHash } from "../../../credentials";
 import { AuxiliaryDataHash, ScriptDataHash, CanBeHash28, Hash32, canBeHash28 } from "../../../hashes";
-import { Coin, TxWithdrawals, ITxWithdrawals, LegacyPPUpdateProposal, Value, NetworkT, isCertificate, canBeTxWithdrawals, isLegacyPPUpdateProposal, forceTxWithdrawals, isIValue, LegacyPPUpdateProposalToCborObj, certificateFromCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, certificatesToDepositLovelaces } from "../../../ledger";
+import { Coin, TxWithdrawals, ITxWithdrawals, Value, NetworkT, isCertificate, canBeTxWithdrawals, forceTxWithdrawals, isIValue, certificateFromCborObj, certificatesToDepositLovelaces, Certificate } from "../../common/ledger";
+import { LegacyPPUpdateProposal, isLegacyPPUpdateProposal, LegacyPPUpdateProposalToCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson } from "../protocol"
+import { TxOutRef } from "../../common/TxOutRef";
 import { AlonzoTxOut, isIAlonzoTxOut,  } from "./";
-import { UTxO, isIUTxO, TxOutRef } from "../../common"
+import { AlonzoUTxO, isIAlonzoUTxO, } from "./AlonzoUTxO";
 import { getCborSet } from "../../../utils/getCborSet";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { maybeBigUint } from "../../../utils/ints";
@@ -16,7 +17,7 @@ import { ToJson } from "../../../utils/ToJson";
 
 
 export interface IAlonzoTxBody {
-    inputs: [ UTxO, ...UTxO[] ],
+    inputs: [ AlonzoUTxO, ...AlonzoUTxO[] ],
     outputs: AlonzoTxOut[],
     fee: Coin,
     ttl?: CanBeUInteger,
@@ -27,7 +28,7 @@ export interface IAlonzoTxBody {
     validityIntervalStart?: CanBeUInteger,
     mint?: Value,
     scriptDataHash?: ScriptDataHash, // hash 32
-    collateralInputs?: UTxO[],
+    collateralInputs?: AlonzoUTxO[],
     requiredSigners?: CanBeHash28[],
     network?: NetworkT,
 }
@@ -44,7 +45,7 @@ export function isIAlonzoTxBody( body: Readonly<object> ): body is IAlonzoTxBody
         
         hasOwn( b, "inputs" ) &&
         Array.isArray( b.inputs ) && b.inputs.length > 0 &&
-        b.inputs.every( _in => _in instanceof UTxO || isIUTxO( _in ) ) &&
+        b.inputs.every( _in => _in instanceof AlonzoUTxO || isIAlonzoUTxO( _in ) ) &&
         
         hasOwn( b, "outputs" ) &&
         Array.isArray( b.outputs ) && b.outputs.length > 0 &&
@@ -67,7 +68,7 @@ export function isIAlonzoTxBody( body: Readonly<object> ): body is IAlonzoTxBody
 export class AlonzoTxBody
     implements IAlonzoTxBody, ToCbor, ToJson
 {
-    readonly inputs!: [ UTxO, ...UTxO[] ];
+    readonly inputs!: [ AlonzoUTxO, ...AlonzoUTxO[] ];
     readonly outputs!: AlonzoTxOut[];
     readonly fee!: bigint;
     readonly ttl?: bigint;
@@ -78,7 +79,7 @@ export class AlonzoTxBody
     readonly validityIntervalStart?: bigint;
     readonly mint?: Value;
     readonly scriptDataHash?: ScriptDataHash; // hash 32
-    readonly collateralInputs?: UTxO[];
+    readonly collateralInputs?: AlonzoUTxO[];
     readonly requiredSigners?: PubKeyHash[];
     readonly network?: NetworkT;
 
@@ -138,10 +139,10 @@ export class AlonzoTxBody
         if(!(
             Array.isArray( inputs )  &&
             inputs.length > 0 &&
-            inputs.every( isIUTxO )
+            inputs.every( isIAlonzoUTxO )
         )) throw new Error("invalid 'inputs' field");
 
-        this.inputs = inputs.map( i => i instanceof UTxO ? i : new UTxO( i ) ) as [ UTxO, ...UTxO[] ];
+        this.inputs = inputs.map( i => i instanceof AlonzoUTxO ? i : new AlonzoUTxO( i ) ) as [ AlonzoUTxO, ...AlonzoUTxO[] ];
 
         // -------------------------------------- outputs -------------------------------------- //
 
@@ -243,13 +244,13 @@ export class AlonzoTxBody
             collateralInputs === undefined ||
             (
                 Array.isArray( collateralInputs ) &&
-                collateralInputs.every( isIUTxO )
+                collateralInputs.every( isIAlonzoUTxO )
             )
         )) throw new Error("invalid 'collateralInputs' field");
 
         this.collateralInputs = collateralInputs?.map( collateral =>
-            collateral instanceof UTxO ? collateral :
-            new UTxO( collateral )
+            collateral instanceof AlonzoUTxO ? collateral :
+            new AlonzoUTxO( collateral )
         );
         // -------------------------------------- requiredSigners -------------------------------------- //
         if(!(
@@ -381,7 +382,7 @@ export class AlonzoTxBody
     {
         if(!(
             cObj instanceof CborMap
-            && cObj.map.length >= 16
+            // && cObj.map.length >= 16
         ))throw new InvalidCborFormatError("AlonzoTxBody")
 
         let fields: (CborObj | undefined)[] = new Array( 16 ).fill( undefined );
@@ -435,9 +436,8 @@ export class AlonzoTxBody
             ttl = _ttl.num;
         }
         
-        //** TO DO: add votingProcedures, proposalProcedures, currentTreasuryValue, donation */
         return new AlonzoTxBody({
-            inputs: getCborSet( _ins_ ).map( txOutRefAsUTxOFromCborObj ) as [UTxO, ...UTxO[]],
+            inputs: getCborSet( _ins_ ).map( txOutRefAsUTxOFromCborObj ) as [AlonzoUTxO, ...AlonzoUTxO[]],
             outputs: _outs.array.map( AlonzoTxOut.fromCborObj ),
             fee: _fee.num,
             ttl,
@@ -456,7 +456,6 @@ export class AlonzoTxBody
 
     toJSON() { return this.toJson(); }
     
-    //** TO DO: add votingProcedures, proposalProcedures, currentTreasuryValue, donation */
     toJson()
     {
         return {
@@ -520,9 +519,9 @@ export class AlonzoTxBody
 };
 
 
-function txOutRefAsUTxOFromCborObj( cObj: CborObj ): UTxO
+function txOutRefAsUTxOFromCborObj( cObj: CborObj ): AlonzoUTxO
 {
-    return new UTxO({
+    return new AlonzoUTxO({
         utxoRef: TxOutRef.fromCborObj( cObj ),
         resolved: AlonzoTxOut.fake
     });

@@ -1,6 +1,6 @@
 import { XPrv } from "@harmoniclabs/bip32_ed25519"
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborString, forceCborString } from "@harmoniclabs/cbor"
-import { signEd25519_sync } from "@harmoniclabs/crypto"
+import { signEd25519_sync,  signEd25519 } from "@harmoniclabs/crypto"
 import { PrivateKey, CredentialType, PubKeyHash } from "../../../credentials"
 import { Signature, Hash32, Hash28 } from "../../../hashes"
 import { IAllegraTxBody, IAllegraTxWitnessSet, AllegraAuxiliaryData, AllegraTxBody, AllegraTxWitnessSet, isIAllegraTxBody, isIAllegraTxWitnessSet } from "./"
@@ -184,12 +184,8 @@ export class AllegraTx
     }
     toCborObj(): CborObj
     {
-        if( this.cborRef instanceof SubCborRef )
-        {
-            // keeps cbor ref
-            return Cbor.parse( this.cborRef.toBuffer() );
-        }
-
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() );
+        
         return new CborArray([
             this.body.toCborObj(),
             this.witnesses.toCborObj(),
@@ -274,11 +270,6 @@ export function getAllRequiredSigners( body: Readonly<AllegraTxBody> ): Hash28[]
             body.withdrawals?.map
             .map( ({ rewardAccount }) => rewardAccount.credentials.clone() )
             ?? []
-        )
-        // requred signers explicitly specified by the tx
-        .concat(
-            ...body.requiredSigners
-            ?.map( sig => sig.clone() ) ?? []
         )
     // remove duplicates
     ).filter( ( elem, i, thisArr ) => thisArr.indexOf( elem ) === i );

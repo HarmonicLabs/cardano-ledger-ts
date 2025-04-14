@@ -5,18 +5,18 @@ import { hasOwn, isObject } from "@harmoniclabs/obj-utils";
 import { PubKeyHash } from "../../../credentials";
 import { IVotingProcedures, VotingProcedures, ProposalProcedure, IProposalProcedure, isIVotingProceduresEntry, isIProposalProcedure } from "../../../governance";
 import { AuxiliaryDataHash, ScriptDataHash, CanBeHash28, Hash32, canBeHash28 } from "../../../hashes";
-import { Coin, TxWithdrawals, ITxWithdrawals, LegacyPPUpdateProposal, Value, NetworkT, Certificate, isCertificate, canBeTxWithdrawals, isLegacyPPUpdateProposal, forceTxWithdrawals, isIValue, LegacyPPUpdateProposalToCborObj, certificateFromCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, certificatesToDepositLovelaces } from "../../common/ledger";
-import { UTxO, isIUTxO, TxOutRef } from "../../common";
+import { Coin, TxWithdrawals, ITxWithdrawals, Value, NetworkT, Certificate, isCertificate, canBeTxWithdrawals, forceTxWithdrawals, isIValue, certificateFromCborObj, certificatesToDepositLovelaces } from "../../common/ledger";
+import { LegacyPPUpdateProposal, isLegacyPPUpdateProposal, LegacyPPUpdateProposalToCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson } from "../protocol";
+import { TxOutRef } from "../../common/TxOutRef";
+import { ConwayUTxO, isIConwayUTxO } from "./ConwayUTxO";
 import { ConwayTxOut, isIConwayTxOut } from "./";
 import { getCborSet } from "../../../utils/getCborSet";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { maybeBigUint } from "../../../utils/ints";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
-
-
 export interface IConwayTxBody {
-    inputs: [ UTxO, ...UTxO[] ],
+    inputs: [ ConwayUTxO, ...ConwayUTxO[] ],
     outputs: ConwayTxOut[],
     fee: Coin,
     ttl?: CanBeUInteger,
@@ -27,12 +27,12 @@ export interface IConwayTxBody {
     validityIntervalStart?: CanBeUInteger,
     mint?: Value,
     scriptDataHash?: ScriptDataHash, // hash 32
-    collateralInputs?: UTxO[], 
+    collateralInputs?: ConwayUTxO[], 
     requiredSigners?: CanBeHash28[],
     network?: NetworkT,
     collateralReturn?: ConwayTxOut,
     totCollateral?: Coin,
-    refInputs?: UTxO[]
+    refInputs?: ConwayUTxO[]
     // conway
     votingProcedures?: VotingProcedures | IVotingProcedures;
     proposalProcedures?: (ProposalProcedure | IProposalProcedure)[];
@@ -52,7 +52,7 @@ export function isIConwayTxBody( body: Readonly<object> ): body is IConwayTxBody
         
         hasOwn( b, "inputs" ) &&
         Array.isArray( b.inputs ) && b.inputs.length > 0 &&
-        b.inputs.every( _in => _in instanceof UTxO || isIUTxO( _in ) ) &&
+        b.inputs.every( _in => _in instanceof ConwayUTxO || isIConwayUTxO( _in ) ) &&
         
         hasOwn( b, "outputs" ) &&
         Array.isArray( b.outputs ) && b.outputs.length > 0 &&
@@ -73,7 +73,7 @@ export function isIConwayTxBody( body: Readonly<object> ): body is IConwayTxBody
         ( b.totCollateral === undefined || canBeUInteger( b.totCollateral ) ) &&
         ( b.collateralInputs === undefined || (
             Array.isArray( b.collateralInputs ) && 
-            b.collateralInputs.every( collateral => collateral instanceof UTxO )
+            b.collateralInputs.every( collateral => collateral instanceof ConwayUTxO )
         )) &&
         ( b.requiredSigners === undefined || (
             Array.isArray( b.requiredSigners ) &&
@@ -81,7 +81,7 @@ export function isIConwayTxBody( body: Readonly<object> ): body is IConwayTxBody
         )) &&
         ( b.refInputs === undefined || (
             Array.isArray( b.refInputs ) &&
-            b.refInputs.every( ref => ref instanceof UTxO || isIUTxO( ref ) )
+            b.refInputs.every( ref => ref instanceof ConwayUTxO || isIConwayUTxO( ref ) )
         )) &&
         (b.votingProcedures === undefined || (
             b.votingProcedures instanceof VotingProcedures ||
@@ -108,7 +108,7 @@ export function isIConwayTxBody( body: Readonly<object> ): body is IConwayTxBody
 export class ConwayTxBody
     implements IConwayTxBody, ToCbor, ToJson
 {
-    readonly inputs!: [ UTxO, ...UTxO[] ];
+    readonly inputs!: [ ConwayUTxO, ...ConwayUTxO[] ];
     readonly outputs!: ConwayTxOut[];
     readonly fee!: bigint;
     readonly ttl?: bigint;
@@ -120,12 +120,12 @@ export class ConwayTxBody
     readonly validityIntervalStart?: bigint;
     readonly mint?: Value;
     readonly scriptDataHash?: ScriptDataHash; // hash 32
-    readonly collateralInputs?: UTxO[];
+    readonly collateralInputs?: ConwayUTxO[];
     readonly requiredSigners?: PubKeyHash[];
     readonly network?: NetworkT;
     readonly collateralReturn?: ConwayTxOut;
     readonly totCollateral?: bigint; // Coin
-    readonly refInputs?: UTxO[];
+    readonly refInputs?: ConwayUTxO[];
     // conway
     readonly votingProcedures?: VotingProcedures;
     readonly proposalProcedures?: ProposalProcedure[];
@@ -195,10 +195,10 @@ export class ConwayTxBody
         if(!(
             Array.isArray( inputs )  &&
             inputs.length > 0 &&
-            inputs.every( isIUTxO )
+            inputs.every( isIConwayUTxO )
         )) throw new Error("invalid 'inputs' field");
 
-        this.inputs = inputs.map( i => i instanceof UTxO ? i : new UTxO( i ) ) as [ UTxO, ...UTxO[] ];
+        this.inputs = inputs.map( i => i instanceof ConwayUTxO ? i : new ConwayUTxO( i ) ) as [ ConwayUTxO, ...ConwayUTxO[] ];
 
         // -------------------------------------- outputs -------------------------------------- //
 
@@ -300,13 +300,13 @@ export class ConwayTxBody
             collateralInputs === undefined ||
             (
                 Array.isArray( collateralInputs ) &&
-                collateralInputs.every( isIUTxO )
+                collateralInputs.every( isIConwayUTxO )
             )
         )) throw new Error("invalid 'collateralInputs' field");
 
         this.collateralInputs = collateralInputs?.map( collateral =>
-            collateral instanceof UTxO ? collateral :
-            new UTxO( collateral )
+            collateral instanceof ConwayUTxO ? collateral :
+            new ConwayUTxO( collateral )
         );
         // -------------------------------------- requiredSigners -------------------------------------- //
         if(!(
@@ -360,13 +360,13 @@ export class ConwayTxBody
             refInputs === undefined ||
             (
                 Array.isArray( refInputs ) &&
-                refInputs.every( isIUTxO )
+                refInputs.every( isIConwayUTxO )
             )
         )) throw new Error("invalid 'refInputs' field");
 
         this.refInputs = refInputs?.map( refIn =>
-            refIn instanceof UTxO ? refIn :
-            new UTxO( refIn )
+            refIn instanceof ConwayUTxO ? refIn :
+            new ConwayUTxO( refIn )
         );
 
         // -------------------------------------- votingProcedures -------------------------------------- //
@@ -578,9 +578,8 @@ export class ConwayTxBody
     {
         if(!(
             cObj instanceof CborMap
-            && cObj.map.length >= 23
-        ))
-        throw new InvalidCborFormatError("ConwayTxBody")
+            // && cObj.map.length >= 4
+        ))throw new InvalidCborFormatError("ConwayTxBody")
 
         let fields: (CborObj | undefined)[] = new Array( 23 ).fill( undefined );
 
@@ -642,7 +641,7 @@ export class ConwayTxBody
         
         //** TO DO: add votingProcedures, proposalProcedures, currentTreasuryValue, donation */
         return new ConwayTxBody({
-            inputs: getCborSet( _ins_ ).map( txOutRefAsUTxOFromCborObj ) as [UTxO, ...UTxO[]],
+            inputs: getCborSet( _ins_ ).map( txOutRefAsUTxOFromCborObj ) as [ConwayUTxO, ...ConwayUTxO[]],
             outputs: _outs.array.map( ConwayTxOut.fromCborObj ),
             fee: _fee.num,
             ttl,
@@ -731,9 +730,9 @@ export class ConwayTxBody
 };
 
 
-function txOutRefAsUTxOFromCborObj( cObj: CborObj ): UTxO
+function txOutRefAsUTxOFromCborObj( cObj: CborObj ): ConwayUTxO
 {
-    return new UTxO({
+    return new ConwayUTxO({
         utxoRef: TxOutRef.fromCborObj( cObj ),
         resolved: ConwayTxOut.fake
     });

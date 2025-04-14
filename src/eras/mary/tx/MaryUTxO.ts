@@ -1,52 +1,52 @@
 import { ToCbor, CborString, Cbor, CborArray, CanBeCborString, forceCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
-import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { ToData, Data, DataConstr } from "@harmoniclabs/plutus-data";
-import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
-import { ToJson } from "../../utils/ToJson";
-import { ITxOut, isITxOut, TxOut } from "./TxOut";
-import { ITxOutRef, isITxOutRef, TxOutRef } from "./TxOutRef";
+import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
+import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
+import { ToJson } from "../../../utils/ToJson";
+import { IMaryTxOut, isIMaryTxOut, MaryTxOut } from "./MaryTxOut";
+import { ITxOutRef, isITxOutRef, TxOutRef } from "../../common/TxOutRef";
 import { lexCompare } from "@harmoniclabs/uint8array-utils";
-import { ToDataVersion } from "../../toData/defaultToDataVersion";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { ToDataVersion } from "../../../toData/defaultToDataVersion";
+import { getSubCborRef } from "../../../utils/getSubCborRef";
 
-export interface IUTxO {
+export interface IMaryUTxO {
     utxoRef: ITxOutRef,
-    resolved: ITxOut
+    resolved: IMaryTxOut
 }
 
-export function isIUTxO( stuff: any ): stuff is IUTxO
+export function isIMaryUTxO( stuff: any ): stuff is IMaryUTxO
 {
     return (
         isObject( stuff ) &&
         hasOwn( stuff, "utxoRef" ) && isITxOutRef( stuff.utxoRef ) &&
-        hasOwn( stuff, "resolved" ) && isITxOut( stuff.resolved )
+        hasOwn( stuff, "resolved" ) && isIMaryTxOut( stuff.resolved )
     );
 }
 
-export class UTxO
-    implements IUTxO, ToData, ToJson, ToCbor, Cloneable<UTxO>
+export class MaryUTxO
+    implements IMaryUTxO, ToData, ToJson, ToCbor, Cloneable<MaryUTxO>
 {
     readonly utxoRef!: TxOutRef
-    readonly resolved!: TxOut
+    readonly resolved!: MaryTxOut
 
     constructor(
         { 
             utxoRef, 
             resolved 
-        }: IUTxO,
+        }: IMaryUTxO,
         
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
         this.utxoRef = utxoRef instanceof TxOutRef ? utxoRef : new TxOutRef( utxoRef );
 
-        this.resolved = resolved instanceof TxOut ? resolved : new TxOut( resolved );
+        this.resolved = resolved instanceof MaryTxOut ? resolved : new MaryTxOut( resolved );
     }
 
-    clone(): UTxO
+    clone(): MaryUTxO
     {
-        return new UTxO( this );
+        return new MaryUTxO( this );
     }
 
     toData( version?: ToDataVersion ): Data
@@ -90,33 +90,33 @@ export class UTxO
         ])
     }
 
-    static fromCbor( cStr: CanBeCborString ): UTxO
+    static fromCbor( cStr: CanBeCborString ): MaryUTxO
     {
-        return UTxO.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
+        return MaryUTxO.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
-    static fromCborObj( cObj: CborObj ): UTxO
+    static fromCborObj( cObj: CborObj ): MaryUTxO
     {
         if(!(cObj instanceof CborArray))
-        throw new InvalidCborFormatError("UTxO");
+        throw new InvalidCborFormatError("MaryUTxO");
 
         const [ ref, res ] = cObj.array;
 
         let utxoRef: TxOutRef;
-        let resolved: TxOut;
+        let resolved: MaryTxOut;
 
         if( ref === undefined )
-        throw new InvalidCborFormatError("UTxO");
+        throw new InvalidCborFormatError("MaryUTxO");
 
         if( res === undefined )
         throw new InvalidCborFormatError(
-            "UTxO",
+            "MaryUTxO",
             "if you are trying to parse only a TxOutRef instead (<hex>#<index>) you should use `TxOutRef.fromCborObj`"
         );
 
         utxoRef = TxOutRef.fromCborObj( ref );
-        resolved = TxOut.fromCborObj( res );
+        resolved = MaryTxOut.fromCborObj( res );
 
-        return new UTxO({
+        return new MaryUTxO({
             utxoRef,
             resolved
         }, getSubCborRef( cObj ));
@@ -131,7 +131,7 @@ export class UTxO
         }
     }
 
-    static sort( a: IUTxO, b: IUTxO ): number
+    static sort( a: IMaryUTxO, b: IMaryUTxO ): number
     {
         return TxOutRef.sort( a.utxoRef, b.utxoRef );
     }

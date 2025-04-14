@@ -233,14 +233,16 @@ export class ConwayTxOut
     static fromCborObj( cObj: CborObj ): ConwayTxOut
     {
         if(!(
-            cObj instanceof CborMap && cObj.map.length >= 4
-            || cObj instanceof CborArray && cObj.array.length >= 4
+            cObj instanceof CborMap ||
+            cObj instanceof CborArray
+            // cObj instanceof CborMap && cObj.map.length >= 3 ||
+            // cObj instanceof CborArray && cObj.array.length >= 3
         )) throw new InvalidCborFormatError("ConwayTxOut");
 
         // legacy
         if( cObj instanceof CborArray )
         {
-            //* TO DO: added _refScript to array find out if correct */
+            // TO DO: need _refScript?
             const [ _addr, _val, _dat, _refScript ] = cObj.array;
             
             return new ConwayTxOut({

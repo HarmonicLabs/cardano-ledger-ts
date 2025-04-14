@@ -1,15 +1,16 @@
 import { Cbor, CborArray, CborMap, CborPositiveRational, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
-import { Epoch } from "../../ledger";
-import { Rational, cborFromRational, isRational } from "../../ledger/protocol/Rational";
-import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx";
+import { DataConstr, DataI, DataList, DataMap, DataPair, ToData } from "@harmoniclabs/plutus-data";
+import { isObject } from "@harmoniclabs/obj-utils";
+import { Epoch } from "../../../common/ledger/Epoch";
+import { Rational, cborFromRational, isRational } from "../../protocol/Rational";
+import { ITxOutRef, TxOutRef, isITxOutRef } from "../../../common/TxOutRef";
 import { IGovAction } from "./IGovAction";
 import { GovActionType } from "./GovActionType";
-import { Credential } from "../../credentials";import { roDescr } from "../../utils/roDescr";
-import { canBeUInteger, forceBigUInt } from "../../utils/ints";
-import { isObject } from "@harmoniclabs/obj-utils";
-import { DataConstr, DataI, DataList, DataMap, DataPair, ToData } from "@harmoniclabs/plutus-data";
-import { ToDataVersion } from "../../toData/defaultToDataVersion";
-import { maybeData } from "../../utils/maybeData";
+import { Credential } from "../../../../credentials";
+import { roDescr } from "../../../../utils/roDescr";
+import { canBeUInteger, forceBigUInt } from "../../../../utils/ints";
+import { ToDataVersion } from "../../../../toData/defaultToDataVersion";
+import { maybeData } from "../../../../utils/maybeData";
 
 export interface INewCommitteeEntry {
     coldCredential: Credential,
@@ -93,11 +94,11 @@ export class GovActionUpdateCommittee
             // we assume correctness here
             return new CborString( this.cborRef.toBuffer() );
         }
-        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborArray
     {
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
         return new CborArray([
             new CborUInt( this.govActionType ),
             this.govActionId?.toCborObj() ?? new CborSimple( null ),

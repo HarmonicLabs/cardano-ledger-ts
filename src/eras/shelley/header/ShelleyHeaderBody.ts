@@ -1,7 +1,7 @@
 import { canBeUInteger, CanBeUInteger } from "@harmoniclabs/cbor/dist/utils/ints";
 import { canBeHash32, CanBeHash32, hash32bytes } from "../../../hashes";
 import { isIVrfCert, IVrfCert, VrfCert } from "../../common/Vrf";
-import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "../../common/protocolVersion";
+import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "../../conway/protocol/protocolVersion";
 import { IPoolOperationalCert, isIPoolOperationalCert, PoolOperationalCert } from "../../common/PoolOperationalCert";
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborSimple, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { isObject } from "@harmoniclabs/obj-utils";

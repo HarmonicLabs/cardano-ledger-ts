@@ -1,13 +1,13 @@
 import { Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, SubCborRef } from "@harmoniclabs/cbor";
-import { Credential, PubKeyHash } from "../../credentials";
-import { CanBeHash28, Hash28, canBeHash28 } from "../../hashes";
-import { roDescr } from "../../utils/roDescr";
-import { DRepType, drepTypeToString } from "./DRepType";
-import { IDRep } from "./IDRep";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { Data, DataConstr } from "@harmoniclabs/plutus-data";
-import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { Credential, PubKeyHash } from "../../../../credentials";
+import { CanBeHash28, Hash28, canBeHash28 } from "../../../../hashes";
+import { roDescr } from "../../../../utils/roDescr";
+import { DRepType, drepTypeToString } from "./DRepType";
+import { IDRep } from "./IDRep";
+import { ToDataVersion, definitelyToDataVersion } from "../../../../toData/defaultToDataVersion";
+import { getSubCborRef } from "../../../../utils/getSubCborRef";
 
 export interface IDRepKeyHash {
     hash: CanBeHash28
@@ -68,6 +68,7 @@ export class DRepKeyHash
     }
     toCborObj(): CborArray
     {
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
         return new CborArray([
             new CborUInt( this.drepType ),
             this.hash.toCborObj()

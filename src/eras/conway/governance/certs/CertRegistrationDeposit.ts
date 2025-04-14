@@ -1,15 +1,15 @@
 import { Cbor, CborArray, CborObj, CborString, CborUInt, SubCborRef } from "@harmoniclabs/cbor";
-import { Credential } from "../../credentials"
-import { roDescr } from "../../utils/roDescr";
-import { CertificateType, certTypeToString } from "./CertificateType"
-import { ICert } from "./ICert"
-import { Coin } from "../Coin";
-import { forceBigUInt } from "../../utils/ints";
-import { Hash28 } from "../../hashes";
 import { DataConstr, DataI } from "@harmoniclabs/plutus-data";
-import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
-import { justData, nothingData } from "../../utils/maybeData";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { Credential } from "../../../../credentials"
+import { roDescr } from "../../../../utils/roDescr";
+import { CertificateType, certTypeToString } from "../../../common/certs/CertificateType"
+import { ICert } from "../../../common/certs/ICert"
+import { Coin } from "../../../common/ledger/Coin";
+import { forceBigUInt } from "../../../../utils/ints";
+import { Hash28 } from "../../../../hashes";
+import { ToDataVersion, definitelyToDataVersion } from "../../../../toData/defaultToDataVersion";
+import { justData, nothingData } from "../../../../utils/maybeData";
+import { getSubCborRef } from "../../../../utils/getSubCborRef";
 
 export interface ICertRegistrationDeposit {
     stakeCredential: Credential,
@@ -86,6 +86,8 @@ export class CertRegistrationDeposit
     }
     toCborObj(): CborArray
     {
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
+        
         return new CborArray([
             new CborUInt( this.certType ),
             this.stakeCredential.toCborObj(),

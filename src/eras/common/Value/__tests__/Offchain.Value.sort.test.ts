@@ -1,6 +1,6 @@
 import { fromAscii } from "@harmoniclabs/uint8array-utils";
 import { Value } from "../Value";
-import { Hash28 } from "../../../hashes";
+import { Hash28 } from "../../../../hashes";
 import { IValueToJson } from "../IValue";
 
 test("sorted", () => {

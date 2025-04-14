@@ -1,6 +1,6 @@
 import { XPrv } from "@harmoniclabs/bip32_ed25519"
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborString, forceCborString } from "@harmoniclabs/cbor"
-import { signEd25519_sync } from "@harmoniclabs/crypto"
+import { signEd25519 } from "@harmoniclabs/crypto"
 import { PrivateKey, CredentialType, PubKeyHash } from "../../../credentials"
 import { Signature, Hash32, Hash28 } from "../../../hashes"
 import { IConwayTxBody, IConwayTxWitnessSet, ConwayAuxiliaryData, ConwayTxBody, ConwayTxWitnessSet, isIConwayTxBody, isIConwayTxWitnessSet } from "./"
@@ -122,8 +122,8 @@ export class ConwayTx
             );
             return;
         }
-
-        const { pubKey, signature } = signEd25519_sync(
+        // TO DO: come back to this
+        const { pubKey, signature } = signEd25519(
             this.body.hash.toBuffer(),
             signer instanceof Uint8Array ? signer : signer.toBuffer()
         );
@@ -188,17 +188,11 @@ export class ConwayTx
             // we assume correctness here
             return new CborString( this.cborRef.toBuffer() );
         }
-        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
-        if( this.cborRef instanceof SubCborRef )
-        {
-            // keeps cbor ref
-            return Cbor.parse( this.cborRef.toBuffer() );
-        }
-
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() );
         return new CborArray([
             this.body.toCborObj(),
             this.witnesses.toCborObj(),
@@ -217,6 +211,7 @@ export class ConwayTx
     {
         if(!(
             cObj instanceof CborArray
+            // TO DO: come back to this
             && cObj.array.length >= 4
         ))throw new InvalidCborFormatError("ConwayTx");
         

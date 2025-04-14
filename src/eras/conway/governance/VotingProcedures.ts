@@ -1,11 +1,11 @@
 import { CborString, Cbor, CborObj, CborArray, CborText, CborBytes, CborUInt, CborSimple, CborMap, SubCborRef } from "@harmoniclabs/cbor";
-import { roDescr } from "../utils/roDescr";
+import { isObject } from "@harmoniclabs/obj-utils";
+import { roDescr } from "../../../utils/roDescr";
 import { Anchor, IAnchor } from "./Anchor";
 import { Vote, voteToCborObj } from "./Vote";
 import { IVoter, Voter, isIVoter } from "./Voter";
 import { IVotingProcedure, VotingProcedure } from "./VotingProcedure";
-import { ITxOutRef, TxOutRef, isITxOutRef } from "../tx/body/output/TxOutRef";
-import { isObject } from "@harmoniclabs/obj-utils";
+import { ITxOutRef, TxOutRef, isITxOutRef } from "../../common/TxOutRef";
 
 export interface IVotingProceduresEntry {
     voter: IVoter,

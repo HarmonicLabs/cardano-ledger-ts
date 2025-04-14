@@ -1,13 +1,13 @@
 import { Cbor, CborArray, CborObj, CborString, CborUInt, SubCborRef } from "@harmoniclabs/cbor";
-import { Credential } from "../../credentials"
-import { roDescr } from "../../utils/roDescr";
+import { Credential } from "../../../credentials"
+import { roDescr } from "../../../utils/roDescr";
 import { CertificateType, certTypeToString } from "./CertificateType"
-import { ICert } from "./ICert"
+import { ICert } from "../../common/certs/ICert"
 import { IPoolParams, PoolParams } from "../ledger/PoolParams";
-import { Hash28 } from "../../hashes";
+import { Hash28 } from "../../../hashes";
 import { Data, DataConstr } from "@harmoniclabs/plutus-data";
-import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { ToDataVersion, definitelyToDataVersion } from "../../../toData/defaultToDataVersion";
+import { getSubCborRef } from "../../../utils/getSubCborRef";
 
 export interface ICertPoolRegistration {
     poolParams: IPoolParams

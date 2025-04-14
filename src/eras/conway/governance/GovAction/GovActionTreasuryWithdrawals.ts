@@ -1,13 +1,13 @@
 import { Cbor, CborArray, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
-import { CanBeHash28, Hash28, canBeHash28 } from "../../hashes";
-import { ITxWithdrawals, TxWithdrawals, isITxWithdrawals } from "../../ledger";
+import { DataConstr, DataI, ToData } from "@harmoniclabs/plutus-data";
+import { CanBeHash28, Hash28, canBeHash28 } from "../../../../hashes";
+import { ITxWithdrawals, TxWithdrawals, isITxWithdrawals } from "../../../common/ledger";
 import { IGovAction } from "./IGovAction";
 import { GovActionType } from "./GovActionType";
-import { roDescr } from "../../utils/roDescr";
+import { roDescr } from "../../../../utils/roDescr";
 import { isObject } from "@harmoniclabs/obj-utils";
-import { DataConstr, DataI, ToData } from "@harmoniclabs/plutus-data";
-import { ToDataVersion } from "../../toData/defaultToDataVersion";
-import { maybeData } from "../../utils/maybeData";
+import { ToDataVersion } from "../../../../toData/defaultToDataVersion";
+import { maybeData } from "../../../../utils/maybeData";
 
 export interface IGovActionTreasuryWithdrawals {
     withdrawals: ITxWithdrawals | TxWithdrawals,
@@ -67,6 +67,7 @@ export class GovActionTreasuryWithdrawals
     }
     toCborObj(): CborArray
     {
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
         return new CborArray([
             new CborUInt( this.govActionType ),
             this.withdrawals.toCborObj(),

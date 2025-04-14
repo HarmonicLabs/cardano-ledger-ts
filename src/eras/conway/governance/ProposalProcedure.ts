@@ -1,14 +1,14 @@
 import { Cbor, CborArray, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
-import { Coin, StakeAddress } from "../ledger";
+import { Data, DataConstr, DataI, ToData } from "@harmoniclabs/plutus-data";
+import { isObject } from "@harmoniclabs/obj-utils";
+import { forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
+import { Coin, StakeAddress } from "../../common/ledger";
 import { Anchor, IAnchor, isIAnchor } from "./Anchor";
 import { GovActionLike, isGovActionLike, toRealGovAction } from "./GovAction/GovActionLike";
-import { forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
-import { roDescr } from "../utils/roDescr";
+import { roDescr } from "../../../utils/roDescr";
 import { GovAction } from "./GovAction";
-import { isObject } from "@harmoniclabs/obj-utils";
-import { canBeUInteger } from "../utils/ints";
-import { Data, DataConstr, DataI, ToData } from "@harmoniclabs/plutus-data";
-import { ToDataVersion } from "../toData/defaultToDataVersion";
+import { canBeUInteger } from "../../../utils/ints";
+import { ToDataVersion } from "../../../toData/defaultToDataVersion";
 
 export interface IProposalProcedure {
     deposit: Coin,
@@ -67,6 +67,8 @@ export class ProposalProcedure
     }
     toCborObj(): CborArray
     {
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
+
         return new CborArray([
             new CborUInt( this.deposit ),
             this.rewardAccount.toCredential().toCborObj(),

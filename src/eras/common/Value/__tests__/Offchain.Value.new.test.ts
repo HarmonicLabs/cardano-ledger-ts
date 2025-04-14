@@ -1,5 +1,5 @@
 import { fromAscii } from "@harmoniclabs/uint8array-utils";
-import { Script, ScriptType } from "../../../script/Script";
+import { Script, ScriptType } from "../../../../script/Script";
 import { Value } from "../Value";
 
 

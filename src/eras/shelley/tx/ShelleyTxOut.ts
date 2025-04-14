@@ -152,10 +152,12 @@ export class ShelleyTxOut
     static fromCborObj( cObj: CborObj ): ShelleyTxOut
     {
         if(!(
-            cObj instanceof CborMap && cObj.map.length >= 2 ||
-            cObj instanceof CborArray && cObj.array.length >= 2
+            cObj instanceof CborMap ||
+            cObj instanceof CborArray
+            // cObj instanceof CborMap && cObj.map.length >= 2 ||
+            // cObj instanceof CborArray && cObj.array.length >= 2
             
-        )) throw new InvalidCborFormatError("ShelleyTxOut");
+        ))throw new InvalidCborFormatError("ShelleyTxOut");
 
         // legacy
         if( cObj instanceof CborArray )

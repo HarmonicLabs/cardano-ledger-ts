@@ -1,7 +1,7 @@
 import { fromHex, lexCompare, toHex, uint8ArrayEq } from "@harmoniclabs/uint8array-utils";
-import { CanBeHash28, Hash28 } from "../../hashes/Hash28/Hash28";
-import { CanBeUInteger } from "../../utils/ints";
 import { defineReadOnlyProperty, isObject, hasOwn } from "@harmoniclabs/obj-utils";
+import { CanBeHash28, Hash28 } from "../../../hashes/Hash28/Hash28";
+import { CanBeUInteger } from "../../../utils/ints";
 
 export type AssetJson = { [ name_hex: string ]: `${number}` };
 

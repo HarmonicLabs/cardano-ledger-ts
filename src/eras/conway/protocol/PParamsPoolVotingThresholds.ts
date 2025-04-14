@@ -1,5 +1,5 @@
 import { isObject } from "@harmoniclabs/obj-utils";
-import { Rational, canBeCborPostiveRational, cborFromRational, isRational } from "../../common/protocol/Rational";
+import { Rational, canBeCborPostiveRational, cborFromRational, isRational } from "./Rational";
 import { CborArray, CborObj, CborPositiveRational, CborTag, CborUInt } from "@harmoniclabs/cbor";
 
 export interface PParamsPoolVotingThresholds {

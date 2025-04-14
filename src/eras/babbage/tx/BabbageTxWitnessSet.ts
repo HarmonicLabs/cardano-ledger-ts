@@ -314,7 +314,7 @@ export class BabbageTxWitnessSet
     {
         if(!( 
             cObj instanceof CborMap 
-            && cObj.map.length >= 7
+            // && cObj.map.length >= 7
         ))throw new InvalidCborFormatError("BabbageTxWitnessSet");
 
         let fields: (CborObj | undefined)[] = new Array( 7 ).fill( undefined );

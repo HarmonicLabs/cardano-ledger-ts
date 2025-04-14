@@ -1,13 +1,13 @@
 import { Cbor, CborArray, CborSimple, CborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
-import { CanBeHash28, Hash28, canBeHash28 } from "../hashes";
-import { Anchor, IAnchor, isIAnchor } from "./Anchor";
-import { GovActionType } from "./GovAction/GovActionType";
-import { roDescr } from "../utils/roDescr";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { DataConstr } from "@harmoniclabs/plutus-data";
-import { ToDataVersion } from "../toData/defaultToDataVersion";
-import { maybeData } from "../utils/maybeData";
-import { subCborRefOrUndef } from "../utils/getSubCborRef";
+import { CanBeHash28, Hash28, canBeHash28 } from "../../../hashes";
+import { Anchor, IAnchor, isIAnchor } from "./Anchor";
+import { GovActionType } from "./GovAction/GovActionType";
+import { roDescr } from "../../../utils/roDescr";
+import { ToDataVersion } from "../../../toData/defaultToDataVersion";
+import { maybeData } from "../../../utils/maybeData";
+import { subCborRefOrUndef } from "../../../utils/getSubCborRef";
 
 export interface IConstitution {
     anchor: IAnchor,
@@ -58,13 +58,7 @@ export class Constitution
     }
     toCborObj(): CborArray
     {
-
-        /* if( this.cborRef instanceof SubCborRef )
-        {
-            // keeps cbor ref
-            return Cbor.parse( this.cborRef.toBuffer() );
-        }
-        */
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
 
         return new CborArray([
             this.anchor.toCborObj(),

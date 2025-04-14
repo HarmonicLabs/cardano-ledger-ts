@@ -1,4 +1,4 @@
-import { defaultProtocolParameters, isPartialProtocolParameters, isProtocolParameters } from "../ProtocolParameters"
+import { defaultProtocolParameters, isPartialProtocolParameters, isProtocolParameters } from "../BabbageProtocolParameters"
 
 
 describe("Ledger.isProtocolParameter", () => {

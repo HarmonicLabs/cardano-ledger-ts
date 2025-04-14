@@ -1,7 +1,7 @@
-import { isObject } from "@harmoniclabs/obj-utils";
-import { CanBeUInteger, canBeUInteger, forceBigUInt, u32 } from "../../utils/ints";
 import { CanBeCborString, Cbor, CborArray, CborObj, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
-import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
+import { isObject } from "@harmoniclabs/obj-utils";
+import { CanBeUInteger, canBeUInteger, forceBigUInt, u32 } from "../../../utils/ints";
+import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
 
 export interface IProtocolVersion {
     major: CanBeUInteger,

@@ -2,12 +2,13 @@ import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborA
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
 import { blake2b_256 } from "@harmoniclabs/crypto";
 import { hasOwn, isObject } from "@harmoniclabs/obj-utils";
-import { Certificate } from "crypto";
 import { PubKeyHash } from "../../../credentials";
 import { AuxiliaryDataHash, ScriptDataHash, CanBeHash28, Hash32, canBeHash28 } from "../../../hashes";
-import { Coin, TxWithdrawals, ITxWithdrawals, LegacyPPUpdateProposal, Value, NetworkT, isCertificate, canBeTxWithdrawals, isLegacyPPUpdateProposal, forceTxWithdrawals, isIValue, LegacyPPUpdateProposalToCborObj, certificateFromCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, certificatesToDepositLovelaces } from "../../../ledger";
+import { Coin, TxWithdrawals, ITxWithdrawals, Value, NetworkT, isCertificate, canBeTxWithdrawals, forceTxWithdrawals, isIValue, certificateFromCborObj, certificatesToDepositLovelaces, Certificate } from "../../common/ledger";
+import { LegacyPPUpdateProposal, isLegacyPPUpdateProposal, LegacyPPUpdateProposalToCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson } from "../protocol"
 import { AllegraTxOut, isIAllegraTxOut  } from "./";
-import { UTxO, isIUTxO, TxOutRef } from "../../common";
+import { TxOutRef } from "../../common/TxOutRef";
+import { AllegraUTxO, isIAllegraUTxO, } from "./AllegraUTxO";
 import { getCborSet } from "../../../utils/getCborSet";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { maybeBigUint } from "../../../utils/ints";
@@ -16,7 +17,7 @@ import { ToJson } from "../../../utils/ToJson";
 
 
 export interface IAllegraTxBody {
-    inputs: [ UTxO, ...UTxO[] ],
+    inputs: [ AllegraUTxO, ...AllegraUTxO[] ],
     outputs: AllegraTxOut[],
     fee: Coin,
     ttl?: CanBeUInteger,
@@ -24,8 +25,7 @@ export interface IAllegraTxBody {
     withdrawals?: TxWithdrawals | ITxWithdrawals,
     protocolUpdate?: LegacyPPUpdateProposal,
     auxDataHash?: AuxiliaryDataHash, // hash 32
-    validityIntervalStart?: CanBeUInteger,
-    mint?: Value,
+    validityIntervalStart?: CanBeUInteger
 }
 
 export function isIAllegraTxBody( body: Readonly<object> ): body is IAllegraTxBody
@@ -40,7 +40,7 @@ export function isIAllegraTxBody( body: Readonly<object> ): body is IAllegraTxBo
         
         hasOwn( b, "inputs" ) &&
         Array.isArray( b.inputs ) && b.inputs.length > 0 &&
-        b.inputs.every( _in => _in instanceof UTxO || isIUTxO( _in ) ) &&
+        b.inputs.every( _in => _in instanceof AllegraUTxO || isIAllegraUTxO( _in ) ) &&
         
         hasOwn( b, "outputs" ) &&
         Array.isArray( b.outputs ) && b.outputs.length > 0 &&
@@ -53,15 +53,14 @@ export function isIAllegraTxBody( body: Readonly<object> ): body is IAllegraTxBo
         ( b.withdrawals === undefined || canBeTxWithdrawals( b.withdrawals ) ) &&
         ( b.protocolUpdate === undefined || isLegacyPPUpdateProposal( b.protocolUpdate ) ) &&
         ( b.auxDataHash === undefined || b.auxDataHash instanceof Hash32 ) &&
-        ( b.validityIntervalStart === undefined || canBeUInteger( b.validityIntervalStart ) ) &&
-        ( b.mint === undefined || b.mint instanceof Value ) &&
+        ( b.validityIntervalStart === undefined || canBeUInteger( b.validityIntervalStart ) )
     )
 }
 
 export class AllegraTxBody
     implements IAllegraTxBody, ToCbor, ToJson
 {
-    readonly inputs!: [ UTxO, ...UTxO[] ];
+    readonly inputs!: [ AllegraUTxO, ...AllegraUTxO[] ];
     readonly outputs!: AllegraTxOut[];
     readonly fee!: bigint;
     readonly ttl?: bigint;
@@ -70,7 +69,6 @@ export class AllegraTxBody
     readonly protocolUpdate?: LegacyPPUpdateProposal; // babbage only; removed in conway
     readonly auxDataHash?: AuxiliaryDataHash; // hash 32
     readonly validityIntervalStart?: bigint;
-    readonly mint?: Value;
 
     /**
      * getter
@@ -116,18 +114,17 @@ export class AllegraTxBody
             withdrawals,
             protocolUpdate,
             auxDataHash,
-            validityIntervalStart,
-            mint,
+            validityIntervalStart
         } = body;
 
         // -------------------------------------- inputs -------------------------------------- //
         if(!(
             Array.isArray( inputs )  &&
             inputs.length > 0 &&
-            inputs.every( isIUTxO )
+            inputs.every( isIAllegraUTxO )
         )) throw new Error("invalid 'inputs' field");
 
-        this.inputs = inputs.map( i => i instanceof UTxO ? i : new UTxO( i ) ) as [ UTxO, ...UTxO[] ];
+        this.inputs = inputs.map( i => i instanceof AllegraUTxO ? i : new AllegraUTxO( i ) ) as [ AllegraUTxO, ...AllegraUTxO[] ];
 
         // -------------------------------------- outputs -------------------------------------- //
 
@@ -202,18 +199,6 @@ export class AllegraTxBody
 
         this.validityIntervalStart = validityIntervalStart === undefined ? undefined : forceBigUInt( validityIntervalStart );
         
-        // -------------------------------------- mint -------------------------------------- //
-
-        if(!(
-            mint === undefined
-            || mint instanceof Value
-            || isIValue( mint )
-        )) throw new Error("invalid 'mint' field");
-        
-        if( mint === undefined ) this.mint = undefined;
-        else if( mint instanceof Value ) this.mint = mint;
-        else this.mint = new Value( mint );
-
         this.cborRef = cborRef ?? subCborRefOrUndef( body );
     }
 
@@ -224,23 +209,13 @@ export class AllegraTxBody
     }
     toCbor(): CborString
     {
-        if( this.cborRef instanceof SubCborRef )
-        {
-            // TODO: validate cbor structure
-            // we assume correctness here
-            return new CborString( this.cborRef.toBuffer() );
-        }
+        if( this.cborRef instanceof SubCborRef ) return new CborString( this.cborRef.toBuffer() );
         
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
-        if( this.cborRef instanceof SubCborRef )
-        {
-            // TODO: validate cbor structure
-            // we assume correctness here
-            return Cbor.parse( this.cborRef.toBuffer() );
-        }
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() );
         return new CborMap(([
             {
                 k: new CborUInt( 0 ),
@@ -283,11 +258,6 @@ export class AllegraTxBody
             {
                 k: new CborUInt( 8 ),
                 v: new CborUInt( this.validityIntervalStart )
-            },
-            this.mint === undefined ? undefined :
-            {
-                k: new CborUInt( 9 ),
-                v: this.mint.toCborObj()
             }
         ].filter( entry => entry !== undefined ) as CborMapEntry[]))
     }
@@ -298,12 +268,13 @@ export class AllegraTxBody
     }
     static fromCborObj( cObj: CborObj ): AllegraTxBody
     {
-        if(!(cObj instanceof CborMap))
-        throw new InvalidCborFormatError("AllegraTxBody")
+        if(!(
+            cObj instanceof CborMap
+        ))throw new InvalidCborFormatError("AllegraTxBody")
 
-        let fields: (CborObj | undefined)[] = new Array( 10 ).fill( undefined );
+        let fields: (CborObj | undefined)[] = new Array( 9 ).fill( undefined );
 
-        for( let i = 0; i < 10; i++)
+        for( let i = 0; i < 9; i++)
         {
             const { v } = cObj.map.find(
                 ({ k }) => k instanceof CborUInt && Number( k.num ) === i
@@ -324,7 +295,6 @@ export class AllegraTxBody
             _pUp,                   // 6
             _auxDataHash,           // 7
             _validityStart,         // 8
-            _mint,                  // 9
         ] = fields;
 
         if( _ins_ === undefined || _outs === undefined || _fee === undefined )
@@ -346,9 +316,8 @@ export class AllegraTxBody
             ttl = _ttl.num;
         }
         
-        //** TO DO: add votingProcedures, proposalProcedures, currentTreasuryValue, donation */
         return new AllegraTxBody({
-            inputs: getCborSet( _ins_ ).map( txOutRefAsUTxOFromCborObj ) as [UTxO, ...UTxO[]],
+            inputs: getCborSet( _ins_ ).map( txOutRefAsUTxOFromCborObj ) as [AllegraUTxO, ...AllegraUTxO[]],
             outputs: _outs.array.map( AllegraTxOut.fromCborObj ),
             fee: _fee.num,
             ttl,
@@ -356,14 +325,12 @@ export class AllegraTxBody
             withdrawals:                _withdrawals === undefined ? undefined : TxWithdrawals.fromCborObj( _withdrawals ),
             protocolUpdate:             _pUp === undefined ? undefined : LegacyPPUpdateProposalFromCborObj( _pUp ),
             auxDataHash:                _auxDataHash === undefined ? undefined : AuxiliaryDataHash.fromCborObj( _auxDataHash ),
-            validityIntervalStart:      _validityStart instanceof CborUInt ? _validityStart.num : undefined,
-            mint:                       _mint === undefined ? undefined : Value.fromCborObj( _mint ),
+            validityIntervalStart:      _validityStart instanceof CborUInt ? _validityStart.num : undefined
         }, getSubCborRef( cObj ));
     }
 
     toJSON() { return this.toJson(); }
     
-    //** TO DO: add votingProcedures, proposalProcedures, currentTreasuryValue, donation */
     toJson()
     {
         return {
@@ -375,8 +342,7 @@ export class AllegraTxBody
             withdrawals: this.withdrawals?.toJson() ,
             protocolUpdate: this.protocolUpdate === undefined ? undefined : protocolUpdateToJson( this.protocolUpdate ),
             auxDataHash: this.auxDataHash?.toString() , // hash 32
-            validityIntervalStart: this.validityIntervalStart?.toString(),
-            mint: this.mint?.toJson(),
+            validityIntervalStart: this.validityIntervalStart?.toString()
         }
     }
 
@@ -423,9 +389,9 @@ export class AllegraTxBody
 };
 
 
-function txOutRefAsUTxOFromCborObj( cObj: CborObj ): UTxO
+function txOutRefAsUTxOFromCborObj( cObj: CborObj ): AllegraUTxO
 {
-    return new UTxO({
+    return new AllegraUTxO({
         utxoRef: TxOutRef.fromCborObj( cObj ),
         resolved: AllegraTxOut.fake
     });

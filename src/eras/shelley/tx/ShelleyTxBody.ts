@@ -2,12 +2,13 @@ import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborA
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
 import { blake2b_256 } from "@harmoniclabs/crypto";
 import { hasOwn, isObject } from "@harmoniclabs/obj-utils";
-import { Certificate } from "crypto";
 import { PubKeyHash } from "../../../credentials";
 import { AuxiliaryDataHash, ScriptDataHash, CanBeHash28, Hash32, canBeHash28 } from "../../../hashes";
-import { Coin, TxWithdrawals, ITxWithdrawals, LegacyPPUpdateProposal, Value, NetworkT, isCertificate, canBeTxWithdrawals, isLegacyPPUpdateProposal, forceTxWithdrawals, isIValue, LegacyPPUpdateProposalToCborObj, certificateFromCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, certificatesToDepositLovelaces } from "../../../ledger";
+import { Coin, TxWithdrawals, ITxWithdrawals, Value, NetworkT, isCertificate, canBeTxWithdrawals, forceTxWithdrawals, isIValue, certificateFromCborObj, certificatesToDepositLovelaces, Certificate } from "../../common/ledger";
+import { LegacyPPUpdateProposal, isLegacyPPUpdateProposal, LegacyPPUpdateProposalToCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson } from "../protocol"
 import { ShelleyTxOut, isIShelleyTxOut} from "./";
-import { UTxO, isIUTxO, TxOutRef  } from "../../common"
+import { TxOutRef } from "../../common/TxOutRef";
+import { ShelleyUTxO, isIShelleyUTxO, } from "./ShelleyUTxO";
 import { getCborSet } from "../../../utils/getCborSet";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { maybeBigUint } from "../../../utils/ints";
@@ -16,7 +17,7 @@ import { ToJson } from "../../../utils/ToJson";
 
 //** TO DO: Should AUX data here be replaced with the simple TxMetadata.ts from common */
 export interface IShelleyTxBody {
-    inputs: [ UTxO, ...UTxO[] ],
+    inputs: [ ShelleyUTxO, ...ShelleyUTxO[] ],
     outputs: ShelleyTxOut[],
     fee: Coin,
     ttl?: CanBeUInteger,
@@ -38,7 +39,7 @@ export function isIShelleyTxBody( body: Readonly<object> ): body is IShelleyTxBo
         
         hasOwn( b, "inputs" ) &&
         Array.isArray( b.inputs ) && b.inputs.length > 0 &&
-        b.inputs.every( _in => _in instanceof UTxO || isIUTxO( _in ) ) &&
+        b.inputs.every( _in => _in instanceof ShelleyUTxO || isIShelleyUTxO( _in ) ) &&
         
         hasOwn( b, "outputs" ) &&
         Array.isArray( b.outputs ) && b.outputs.length > 0 &&
@@ -57,7 +58,7 @@ export function isIShelleyTxBody( body: Readonly<object> ): body is IShelleyTxBo
 export class ShelleyTxBody
     implements IShelleyTxBody, ToCbor, ToJson
 {
-    readonly inputs!: [ UTxO, ...UTxO[] ];
+    readonly inputs!: [ ShelleyUTxO, ...ShelleyUTxO[] ];
     readonly outputs!: ShelleyTxOut[];
     readonly fee!: bigint;
     readonly ttl?: bigint;
@@ -116,10 +117,10 @@ export class ShelleyTxBody
         if(!(
             Array.isArray( inputs )  &&
             inputs.length > 0 &&
-            inputs.every( isIUTxO )
+            inputs.every( isIShelleyUTxO )
         )) throw new Error("invalid 'inputs' field");
 
-        this.inputs = inputs.map( i => i instanceof UTxO ? i : new UTxO( i ) ) as [ UTxO, ...UTxO[] ];
+        this.inputs = inputs.map( i => i instanceof ShelleyUTxO ? i : new ShelleyUTxO( i ) ) as [ ShelleyUTxO, ...ShelleyUTxO[] ];
 
         // -------------------------------------- outputs -------------------------------------- //
 
@@ -260,8 +261,9 @@ export class ShelleyTxBody
     }
     static fromCborObj( cObj: CborObj ): ShelleyTxBody
     {
-        if(!(cObj instanceof CborMap))
-        throw new InvalidCborFormatError("ShelleyTxBody")
+        if(!(
+            cObj instanceof CborMap
+        ))throw new InvalidCborFormatError("ShelleyTxBody")
 
         let fields: (CborObj | undefined)[] = new Array( 8 ).fill( undefined );
 
@@ -308,7 +310,7 @@ export class ShelleyTxBody
         
         //** TO DO: add votingProcedures, proposalProcedures, currentTreasuryValue, donation */
         return new ShelleyTxBody({
-            inputs: getCborSet( _ins_ ).map( txOutRefAsUTxOFromCborObj ) as [UTxO, ...UTxO[]],
+            inputs: getCborSet( _ins_ ).map( txOutRefAsUTxOFromCborObj ) as [ShelleyUTxO, ...ShelleyUTxO[]],
             outputs: _outs.array.map( ShelleyTxOut.fromCborObj ),
             fee: _fee.num,
             ttl,
@@ -379,9 +381,9 @@ export class ShelleyTxBody
 };
 
 
-function txOutRefAsUTxOFromCborObj( cObj: CborObj ): UTxO
+function txOutRefAsUTxOFromCborObj( cObj: CborObj ): ShelleyUTxO
 {
-    return new UTxO({
+    return new ShelleyUTxO({
         utxoRef: TxOutRef.fromCborObj( cObj ),
         resolved: ShelleyTxOut.fake
     });

@@ -1,15 +1,13 @@
-import { NetworkT } from "./Network";
-import { StakeCredentials, StakeCredentialsType, StakeValidatorHash } from "../credentials/StakeCredentials";
-import { StakeKeyHash } from "../credentials/StakeKeyHash";
-import { Hash28 } from "../hashes/Hash28/Hash28";
-import { CredentialType, PublicKey } from "../credentials";
 import { encodeBech32, decodeBech32, byte } from "@harmoniclabs/crypto";
-import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
-import { assert } from "../utils/assert";
-import { fromHex } from "@harmoniclabs/uint8array-utils";
-import { Credential } from "../credentials";
 import { CanBeCborString, Cbor, CborBytes, CborObj, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
-import { getSubCborRef, subCborRefOrUndef } from "../utils/getSubCborRef";
+import { fromHex } from "@harmoniclabs/uint8array-utils";
+import { NetworkT } from "./Network";
+import { StakeCredentials, StakeCredentialsType, StakeValidatorHash } from "../../../credentials/StakeCredentials";
+import { StakeKeyHash } from "../../../credentials/StakeKeyHash";
+import { Hash28 } from "../../../hashes/Hash28/Hash28";
+import { CredentialType, PublicKey } from "../../../credentials";
+import { Credential } from "../../../credentials";
+import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
 
 
 export type StakeAddressBech32 = `stake1${string}` | `stake_test1${string}`;
@@ -128,7 +126,10 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType> {
         });
     }
 
-    toCborObj(): CborObj {
+    toCborObj(): CborObj 
+    {
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() )
+    
         return new CborBytes(this.toBuffer());
     }
 

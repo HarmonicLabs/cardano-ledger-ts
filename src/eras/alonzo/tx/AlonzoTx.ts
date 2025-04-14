@@ -193,11 +193,7 @@ export class AlonzoTx
     }
     toCborObj(): CborObj
     {
-        if( this.cborRef instanceof SubCborRef )
-        {
-            // keeps cbor ref
-            return Cbor.parse( this.cborRef.toBuffer() );
-        }
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() );
 
         return new CborArray([
             this.body.toCborObj(),

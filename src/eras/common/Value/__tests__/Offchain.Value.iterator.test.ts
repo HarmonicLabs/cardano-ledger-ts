@@ -1,4 +1,4 @@
-import { Hash28 } from "../../../hashes/Hash28/Hash28";
+import { Hash28 } from "../../../../hashes/Hash28/Hash28";
 import { Value } from "../Value"
 
 describe("for entry of value", () => {

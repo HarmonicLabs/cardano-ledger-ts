@@ -194,17 +194,11 @@ export class ConwayAuxiliaryData
             // we assume correctness here
             return new CborString( this.cborRef.toBuffer() );
         }
-        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborTag
     {
-         
-        if ( this.cborRef instanceof SubCborRef )
-        {
-            return Cbor.parse( this.cborRef.toBuffer() ) as CborTag;
-        }
-
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborTag;
         return new CborTag(
             259,
             new CborMap([

@@ -1,13 +1,13 @@
 import { Cbor, CborArray, CborObj, CborSimple, CborString, CborUInt, SubCborRef } from "@harmoniclabs/cbor";
-import { Credential } from "../../credentials"
-import { roDescr } from "../../utils/roDescr";
-import { CertificateType, certTypeToString } from "./CertificateType"
-import { ICert } from "./ICert"
-import { Anchor, IAnchor, isIAnchor } from "../../governance/Anchor";
-import { Hash28 } from "../../hashes";
 import { DataConstr } from "@harmoniclabs/plutus-data";
-import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { Credential } from "../../../../credentials"
+import { roDescr } from "../../../../utils/roDescr";
+import { CertificateType, certTypeToString } from "../../../common/certs/CertificateType"
+import { ICert } from "../../../common/certs/ICert"
+import { Anchor, IAnchor, isIAnchor } from "../../governance/Anchor";
+import { Hash28 } from "../../../../hashes";
+import { ToDataVersion, definitelyToDataVersion } from "../../../../toData/defaultToDataVersion";
+import { getSubCborRef } from "../../../../utils/getSubCborRef";
 
 export interface ICertResignCommitteeCold {
     coldCredential: Credential,
@@ -74,6 +74,7 @@ export class CertResignCommitteeCold
     }
     toCborObj(): CborArray
     {
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
         return new CborArray([
             new CborUInt( this.certType ),
             this.coldCredential.toCborObj(),

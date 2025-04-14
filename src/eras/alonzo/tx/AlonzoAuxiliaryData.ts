@@ -140,10 +140,7 @@ export class AlonzoAuxiliaryData
     }
     toCborObj(): CborTag
     {
-        if ( this.cborRef instanceof SubCborRef )
-        {
-            return Cbor.parse( this.cborRef.toBuffer() ) as CborTag;
-        }
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborTag;
 
         return new CborTag(
             259,

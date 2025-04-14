@@ -1,16 +1,15 @@
 import { CborMap, CborNegInt, CborUInt, CborObj, ToCbor, CborString, Cbor, CborArray, SubCborRef } from "@harmoniclabs/cbor";
-import { canBeUInteger, forceBigUInt } from "../../utils/ints";
-import { Coin } from "../Coin";
-import { assert } from "../../utils/assert";
-import { hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
-import { CertificateType, certTypeToString } from "./CertificateType";
-import { ToJson } from "../../utils/ToJson";
-import { Credential } from "../../credentials";
-import { ICert } from "./ICert";
-import { Hash28 } from "../../hashes";
+import { hasOwn } from "@harmoniclabs/obj-utils";
 import { Data, DataConstr } from "@harmoniclabs/plutus-data";
-import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { canBeUInteger, forceBigUInt } from "../../../../utils/ints";
+import { Coin } from "../../../common/ledger/Coin";
+import { CertificateType, certTypeToString } from "../../../common/certs/CertificateType";
+import { ToJson } from "../../../../utils/ToJson";
+import { Credential } from "../../../../credentials";
+import { ICert } from "../../../common/certs/ICert";
+import { Hash28 } from "../../../../hashes";
+import { ToDataVersion, definitelyToDataVersion } from "../../../../toData/defaultToDataVersion";
+import { getSubCborRef } from "../../../../utils/getSubCborRef";
 
 export enum InstantRewardsSource {
     Reserves = 0,

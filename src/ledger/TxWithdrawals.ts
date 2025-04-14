@@ -10,7 +10,7 @@ import { Value } from "./Value";
 import { assert } from "../utils/assert";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { ToDataVersion } from "../toData/defaultToDataVersion";
-import { getSubCborRef } from "../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../utils/getSubCborRef";
 
 export type ITxWithdrawalsEntryBigInt = {
     rewardAccount: StakeAddress,
@@ -106,6 +106,7 @@ export class TxWithdrawals
                 amount: forceBigUInt( (map as any)[rewAccount] )
             }))
         }
+        this.cborRef = cborRef ?? subCborRefOrUndef( map );
     }
 
     toTotalWitdrawn(): Value

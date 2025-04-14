@@ -1,14 +1,14 @@
 import { Cbor, CborArray, CborObj, CborString, CborUInt, SubCborRef } from "@harmoniclabs/cbor";
-import { Credential } from "../../credentials"
-import { roDescr } from "../../utils/roDescr";
+import { Credential } from "../../../credentials"
+import { roDescr } from "../../../utils/roDescr";
 import { CertificateType, certTypeToString } from "./CertificateType"
-import { ICert } from "./ICert"
+import { ICert } from "../../common/certs/ICert"
 import { Epoch } from "../ledger/Epoch";
-import { CanBeHash28, Hash28 } from "../../hashes";
-import { forceBigUInt } from "../../utils/ints";
+import { CanBeHash28, Hash28 } from "../../../hashes";
+import { forceBigUInt } from "../../../utils/ints";
 import { Data, DataConstr, DataI } from "@harmoniclabs/plutus-data";
-import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { ToDataVersion, definitelyToDataVersion } from "../../../toData/defaultToDataVersion";
+import { getSubCborRef } from "../../../utils/getSubCborRef";
 
 export interface ICertPoolRetirement {
     poolHash: CanBeHash28,
@@ -80,6 +80,8 @@ export class CertPoolRetirement
     }
     toCborObj(): CborArray
     {
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
+
         return new CborArray([
             new CborUInt( this.certType ),
             this.poolHash.toCborObj(),

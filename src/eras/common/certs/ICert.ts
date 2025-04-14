@@ -1,5 +1,5 @@
 import { ToData } from "@harmoniclabs/plutus-data";
-import { Hash28 } from "../../hashes";
+import { Hash28 } from "../../../hashes";
 import { CertificateType } from "./CertificateType";
 
 export interface ICert extends ToData {

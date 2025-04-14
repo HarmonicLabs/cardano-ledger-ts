@@ -1,20 +1,19 @@
 
-import { Coin } from "./Coin";
-import { PubKeyHash } from "../credentials/PubKeyHash";
-import { CanBeHash32, Hash32, canBeHash32 } from "../hashes/Hash32/Hash32";
-import { PoolKeyHash } from "../hashes/Hash28/PoolKeyHash";
-import { VRFKeyHash } from "../hashes/Hash32/VRFKeyHash";
 import { CborPositiveRational, CborObj, CborUInt, CborArray, CborSimple, CborText, CborTag, CborBytes, SubCborRef, Cbor } from "@harmoniclabs/cbor";
-import { CanBeHash28, Hash28, canBeHash28 } from "../hashes";
-import { canBeUInteger, forceBigUInt } from "../utils/ints";
+import { isObject, hasOwn } from "@harmoniclabs/obj-utils";
+import { Coin } from "./Coin";
+import { PubKeyHash } from "../../../credentials/PubKeyHash";
+import { CanBeHash32, Hash32, canBeHash32 } from "../../../hashes/Hash32/Hash32";
+import { PoolKeyHash } from "../../../hashes/Hash28/PoolKeyHash";
+import { VRFKeyHash } from "../../../hashes/Hash32/VRFKeyHash";
+import { CanBeHash28, Hash28, canBeHash28 } from "../../../hashes";
+import { canBeUInteger, forceBigUInt } from "../../../utils/ints";
 import { PoolRelay, isPoolRelay, poolRelayToCborObj, poolRelayFromCborObj, poolRelayToJson } from "./PoolRelay";
-import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
-import { assert } from "../utils/assert";
-import { Rational, cborFromRational, isRational } from "../protocol/Rational";
+import { Rational, cborFromRational, isRational } from "../../conway/protocol/Rational";
 import { StakeAddress } from "./StakeAddress";
 import { Network } from "./Network";
-import { getCborSet } from "../utils/getCborSet";
-import { getSubCborRef, subCborRefOrUndef } from "../utils/getSubCborRef";
+import { getCborSet } from "../../../utils/getCborSet";
+import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
 
 export interface IPoolParamsMetadata {
     poolMetadataUrl: string,
@@ -197,10 +196,8 @@ export class PoolParams
     //*TO DO: should I remove the toCborObjArray when added this one? //*
     toCborObj(): CborObj
     {
-        if( this.cborRef instanceof SubCborRef )
-        {
-            return Cbor.parse( this.cborRef.toBuffer() )
-        }
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() );
+
         return new CborArray([
             this.operator.toCborObj(),
             this.vrfKeyHash.toCborObj(),

@@ -1,24 +1,24 @@
 import { CborArray, CborObj, CborUInt } from "@harmoniclabs/cbor";
-import { CertAuthCommitteeHot, ICertAuthCommitteeHot } from "./CertAuthCommitteeHot";
-import { CertGenesisKeyDelegation, ICertGenesisKeyDelegation } from "./CertGenesisKeyDelegation";
+import { CertAuthCommitteeHot, ICertAuthCommitteeHot } from "../../conway/governance/certs/CertAuthCommitteeHot";
+import { CertGenesisKeyDelegation, ICertGenesisKeyDelegation } from "../../conway/governance/certs/CertGenesisKeyDelegation";
 import { CertPoolRegistration, ICertPoolRegistration } from "./CertPoolRegistration";
 import { CertPoolRetirement, ICertPoolRetirement } from "./CertPoolRetirement";
-import { CertRegistrationDeposit, ICertRegistrationDeposit } from "./CertRegistrationDeposit";
-import { CertRegistrationDrep, ICertRegistrationDrep } from "../../../conway/ledger/certs/CertRegistrationDrep";
-import { CertResignCommitteeCold, ICertResignCommitteeCold } from "./CertResignCommitteeCold";
+import { CertRegistrationDeposit, ICertRegistrationDeposit } from "../../conway/governance/certs/CertRegistrationDeposit";
+import { CertRegistrationDrep, ICertRegistrationDrep } from "../../conway/governance/certs/CertRegistrationDrep";
+import { CertResignCommitteeCold, ICertResignCommitteeCold } from "../../conway/governance/certs/CertResignCommitteeCold";
 import { CertStakeDeRegistration, ICertStakeDeRegistration } from "./CertStakeDeRegistration";
 import { CertStakeDelegation, ICertStakeDelegation } from "./CertStakeDelegation";
 import { CertStakeRegistration, ICertStakeRegistration } from "./CertStakeRegistration";
-import { CertStakeVoteDeleg, ICertStakeVoteDeleg } from "./CertStakeVoteDeleg";
-import { CertStakeVoteRegistrationDeleg, ICertStakeVoteRegistrationDeleg } from "./CertStakeVoteRegistrationDeleg";
-import { CertUnRegistrationDeposit, ICertUnRegistrationDeposit } from "./CertUnRegistrationDeposit";
-import { CertUnRegistrationDrep, ICertUnRegistrationDrep } from "./CertUnRegistrationDrep";
-import { CertUpdateDrep, ICertUpdateDrep } from "./CertUpdateDrep";
-import { CertVoteDeleg, ICertVoteDeleg } from "./CertVoteDeleg";
-import { CertVoteRegistrationDeleg, ICertVoteRegistrationDeleg } from "./CertVoteRegistrationDeleg";
+import { CertStakeVoteDeleg, ICertStakeVoteDeleg } from "../../conway/governance/certs/CertStakeVoteDeleg";
+import { CertStakeVoteRegistrationDeleg, ICertStakeVoteRegistrationDeleg } from "../../conway/governance/certs/CertStakeVoteRegistrationDeleg";
+import { CertUnRegistrationDeposit, ICertUnRegistrationDeposit } from "../../conway/governance/certs/CertUnRegistrationDeposit";
+import { CertUnRegistrationDrep, ICertUnRegistrationDrep } from "../../conway/governance/certs/CertUnRegistrationDrep";
+import { CertUpdateDrep, ICertUpdateDrep } from "../../conway/governance/certs/CertUpdateDrep";
+import { CertVoteDeleg, ICertVoteDeleg } from "../../conway/governance/certs/CertVoteDeleg";
+import { CertVoteRegistrationDeleg, ICertVoteRegistrationDeleg } from "../../conway/governance/certs/CertVoteRegistrationDeleg";
 import { CertificateType, isCertificateType } from "./CertificateType";
-import { IMoveInstantRewardsCert, MoveInstantRewardsCert } from "./MoveInstantRewardsCert";
-import { CertStakeRegistrationDeleg, ICertStakeRegistrationDeleg } from "./CertStakeRegistrationDeleg";
+import { IMoveInstantRewardsCert, MoveInstantRewardsCert } from "../../conway/governance/certs/MoveInstantRewardsCert";
+import { CertStakeRegistrationDeleg, ICertStakeRegistrationDeleg } from "../../conway/governance/certs/CertStakeRegistrationDeleg";
 
 export type Certificate
     = CertStakeRegistration

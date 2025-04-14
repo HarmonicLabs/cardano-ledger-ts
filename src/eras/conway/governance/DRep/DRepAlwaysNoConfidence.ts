@@ -1,10 +1,9 @@
 import { Cbor, CborArray, CborString, CborUInt, SubCborRef } from "@harmoniclabs/cbor";
-import { roDescr } from "../../utils/roDescr";
+import { DataConstr } from "@harmoniclabs/plutus-data";
+import { roDescr } from "../../../../utils/roDescr";
 import { DRepType, drepTypeToString } from "./DRepType";
 import { IDRep } from "./IDRep";
-import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
-import { DataConstr } from "@harmoniclabs/plutus-data";
-
+import { ToDataVersion, definitelyToDataVersion } from "../../../../toData/defaultToDataVersion";
 export interface IDRepAlwaysNoConfidence {
     hash?: undefined // to preserve shape
 }
@@ -59,6 +58,7 @@ export class DRepAlwaysNoConfidence
     }
     toCborObj(): CborArray
     {
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
         return new CborArray([
             new CborUInt( this.drepType )
         ]);

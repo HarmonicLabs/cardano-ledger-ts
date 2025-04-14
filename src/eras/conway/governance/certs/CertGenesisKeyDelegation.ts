@@ -1,11 +1,11 @@
 import { Cbor, CborArray, CborObj, CborString, CborUInt, SubCborRef } from "@harmoniclabs/cbor";
-import { CanBeHash28, CanBeHash32, Hash28, Hash32 } from "../../hashes";
-import { roDescr } from "../../utils/roDescr";
-import { CertificateType, certTypeToString } from "./CertificateType";
-import { ICert } from "./ICert";
-import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
 import { DataConstr } from "@harmoniclabs/plutus-data";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { CanBeHash28, CanBeHash32, Hash28, Hash32 } from "../../../../hashes";
+import { roDescr } from "../../../../utils/roDescr";
+import { CertificateType, certTypeToString } from "../../../common/certs/CertificateType";
+import { ICert } from "../../../common/certs/ICert";
+import { ToDataVersion, definitelyToDataVersion } from "../../../../toData/defaultToDataVersion";
+import { getSubCborRef } from "../../../../utils/getSubCborRef";
 
 /** @deprecated */
 export interface ICertGenesisKeyDelegation {
@@ -74,6 +74,8 @@ export class CertGenesisKeyDelegation
     }
     toCborObj(): CborArray
     {
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
+        
         return new CborArray([
             new CborUInt( this.certType ),
             this.genesisHash.toCborObj(),

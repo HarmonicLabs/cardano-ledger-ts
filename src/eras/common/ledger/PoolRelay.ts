@@ -1,8 +1,7 @@
 import { CborObj, CborArray, CborUInt, CborSimple, CborBytes, CborText } from "@harmoniclabs/cbor";
-import { isUint8Array, readUInt16BE, readUInt8 } from "@harmoniclabs/uint8array-utils";
-import { CanBeUInteger, forceBigUInt, canBeUInteger } from "../utils/ints";
 import { hasOwn, isObject } from "@harmoniclabs/obj-utils";
-import { assert } from "../utils/assert";
+import { isUint8Array, readUInt16BE, readUInt8 } from "@harmoniclabs/uint8array-utils";
+import { CanBeUInteger, forceBigUInt, canBeUInteger } from "../../../utils/ints";
 
 export type IpPoolRelay = ({
     ipv4: Uint8Array

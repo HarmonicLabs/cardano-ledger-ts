@@ -185,11 +185,7 @@ export class ShelleyTx
     }
     toCborObj(): CborObj
     {
-        if( this.cborRef instanceof SubCborRef )
-        {
-            // keeps cbor ref
-            return Cbor.parse( this.cborRef.toBuffer() );
-        }
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() );
 
         return new CborArray([
             this.body.toCborObj(),
@@ -275,11 +271,6 @@ export function getAllRequiredSigners( body: Readonly<ShelleyTxBody> ): Hash28[]
             body.withdrawals?.map
             .map( ({ rewardAccount }) => rewardAccount.credentials.clone() )
             ?? []
-        )
-        // requred signers explicitly specified by the tx
-        .concat(
-            ...body.requiredSigners
-            ?.map( sig => sig.clone() ) ?? []
         )
     // remove duplicates
     ).filter( ( elem, i, thisArr ) => thisArr.indexOf( elem ) === i );

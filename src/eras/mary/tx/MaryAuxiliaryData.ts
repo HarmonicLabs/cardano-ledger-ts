@@ -113,10 +113,7 @@ export class MaryAuxiliaryData
     }
     toCborObj(): CborTag
     {
-        if ( this.cborRef instanceof SubCborRef )
-        {
-            return Cbor.parse( this.cborRef.toBuffer() ) as CborTag;
-        }
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborTag;
 
         return new CborTag(
             259,
@@ -164,8 +161,8 @@ export class MaryAuxiliaryData
 
         if(!(
             cObj instanceof CborTag &&
-            cObj.data instanceof CborMap &&
-            cObj.data.map.length <= 2
+            cObj.data instanceof CborMap 
+            && cObj.data.map.length <= 2
         ))throw new InvalidCborFormatError("MaryAuxiliaryData")
 
         let fields: (CborObj | undefined)[] = new Array( 2 ).fill( undefined );

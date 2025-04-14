@@ -1,16 +1,16 @@
 import { CborMap, CborObj, CborArray, CborUInt } from "@harmoniclabs/cbor";
 import { isObject } from "@harmoniclabs/obj-utils";
-import { GenesisHash } from "../../hashes/Hash28/GenesisHash";
-import { canBeUInteger, forceBigUInt } from "../../utils/ints";
-import { Epoch } from "../ledger/Epoch";
-import { ProtocolParameters, isPartialProtocolParameters, partialProtocolParametersFromCborObj, partialProtocolParametersToCborObj, partialProtocolParamsToJson } from "../../conway/protocol/Parse_CDDL_ProtocolParameters";
-import { Hash28 } from "../../hashes";
+import { GenesisHash } from "../../../hashes/Hash28/GenesisHash";
+import { canBeUInteger, forceBigUInt } from "../../../utils/ints";
+import { Epoch } from "../../common/ledger/Epoch";
+import { ConwayProtocolParameters, isPartialProtocolParameters, partialProtocolParametersFromCborObj, partialProtocolParametersToCborObj, partialProtocolParamsToJson } from "./ShelleyProtocolParameters";
+import { Hash28 } from "../../../hashes";
 
 export type LegacyPPUpdateProposal = [ LegacyPPUpdateMap, Epoch ];
 
 export type LegacyPPUpdateMap = {
     genesisHash: Hash28, // GenesisHash
-    changes: Partial<ProtocolParameters>
+    changes: Partial<ConwayProtocolParameters>
 }[];
 
 export function isLegacyPPUpdateMap( something: object ): something is LegacyPPUpdateMap

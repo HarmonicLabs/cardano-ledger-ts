@@ -4,7 +4,7 @@ import { signEd25519_sync } from "@harmoniclabs/crypto"
 import { PrivateKey, CredentialType, PubKeyHash } from "../../../credentials"
 import { Signature, Hash32, Hash28 } from "../../../hashes"
 import { IMaryTxBody, IMaryTxWitnessSet, MaryAuxiliaryData, MaryTxBody, MaryTxWitnessSet, isIMaryTxBody, isIMaryTxWitnessSet } from "./"
-import {  VKeyWitness, VKey } from "../../common"
+import { VKeyWitness, VKey } from "../../common"
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef"
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError"
 import { ToJson } from "../../../utils/ToJson"
@@ -184,11 +184,7 @@ export class MaryTx
     }
     toCborObj(): CborObj
     {
-        if( this.cborRef instanceof SubCborRef )
-        {
-            // keeps cbor ref
-            return Cbor.parse( this.cborRef.toBuffer() );
-        }
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() );
 
         return new CborArray([
             this.body.toCborObj(),
@@ -273,11 +269,6 @@ export function getAllRequiredSigners( body: Readonly<MaryTxBody> ): Hash28[]
             body.withdrawals?.map
             .map( ({ rewardAccount }) => rewardAccount.credentials.clone() )
             ?? []
-        )
-        // requred signers explicitly specified by the tx
-        .concat(
-            ...body.requiredSigners
-            ?.map( sig => sig.clone() ) ?? []
         )
     // remove duplicates
     ).filter( ( elem, i, thisArr ) => thisArr.indexOf( elem ) === i );

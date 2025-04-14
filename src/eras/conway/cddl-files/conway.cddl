@@ -394,7 +394,7 @@ protocol_param_update = {
                         , ? 30 : coin
                         , ? 31 : coin
                         , ? 32 : epoch_interval
-                        , ? 33 : nonnegative_interval
+                        , ? 33 : nonnegative_interval 
                         }
 
 protocol_version = [major_protocol_version, uint]

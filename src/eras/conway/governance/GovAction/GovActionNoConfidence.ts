@@ -1,12 +1,12 @@
 import { Cbor, CborArray, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
-import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx";
+import { DataConstr, ToData } from "@harmoniclabs/plutus-data";
+import { ITxOutRef, TxOutRef, isITxOutRef } from "../../../common/TxOutRef";
 import { IGovAction } from "./IGovAction";
 import { GovActionType } from "./GovActionType";
-import { roDescr } from "../../utils/roDescr";
+import { roDescr } from "../../../../utils/roDescr";
 import { isObject } from "@harmoniclabs/obj-utils";
-import { DataConstr, ToData } from "@harmoniclabs/plutus-data";
-import { ToDataVersion } from "../../toData/defaultToDataVersion";
-import { maybeData } from "../../utils/maybeData";
+import { ToDataVersion } from "../../../../toData/defaultToDataVersion";
+import { maybeData } from "../../../../utils/maybeData";
 
 export interface IGovActionNoConfidence {
     govActionId?: ITxOutRef | undefined,
@@ -56,6 +56,7 @@ export class GovActionNoConfidence
     }
     toCborObj(): CborArray
     {
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
         return new CborArray([
             new CborUInt( this.govActionType ),
             this.govActionId?.toCborObj() ?? new CborSimple( null )

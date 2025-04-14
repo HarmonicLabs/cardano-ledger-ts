@@ -295,7 +295,7 @@ export class AlonzoTxWitnessSet
     {
         if(!( 
             cObj instanceof CborMap 
-            && cObj.map.length >= 6
+            // && cObj.map.length >= 6
         ))throw new InvalidCborFormatError("AlonzoTxWitnessSet");
 
         let fields: (CborObj | undefined)[] = new Array( 6 ).fill( undefined );

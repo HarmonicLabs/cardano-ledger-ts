@@ -1,10 +1,10 @@
-import { CborArray, CborBytes, CborUInt } from "@harmoniclabs/cbor";
-import { CanBeHash28, Hash28, canBeHash28 } from "../hashes";
+import { Cbor, CborArray, CborBytes, CborUInt, SubCborRef, CborString } from "@harmoniclabs/cbor";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { uint8ArrayEq } from "@harmoniclabs/uint8array-utils";
 import { DataConstr, ToData } from "@harmoniclabs/plutus-data";
-import { Credential } from "../credentials";
-import { ToDataVersion } from "../toData/defaultToDataVersion";
+import { CanBeHash28, Hash28, canBeHash28 } from "../../../hashes";
+import { Credential } from "../../../credentials";
+import { ToDataVersion } from "../../../toData/defaultToDataVersion";
 
 export enum VoterKind {
     ConstitutionalCommitteKeyHash = 0,
@@ -67,7 +67,10 @@ export class Voter
     readonly kind: VoterKind;
     readonly hash: Hash28;
 
-    constructor({ kind, hash }: IVoter)
+    constructor(
+        { kind, hash }: IVoter,
+        readonly cborRef: SubCborRef | undefined = undefined
+    )
     {
         Object.defineProperties(
             this, {
@@ -98,8 +101,24 @@ export class Voter
         return new Voter({ kind: VoterKind.StakingPoolKeyHash, hash });
     }
 
+    toCborBytes(): Uint8Array
+    {
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
+        return this.toCbor().toBuffer();
+    }
+    toCbor(): CborString
+    {
+        if( this.cborRef instanceof SubCborRef )
+        {
+            // TODO: validate cbor structure
+            // we assume correctness here
+            return new CborString( this.cborRef.toBuffer() );
+        }
+        return Cbor.encode( this.toCborObj() );
+    }
     toCborObj(): CborArray
     {
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
         return new CborArray([
             new CborUInt( this.kind ),
             new CborBytes( this.hash.toBuffer() )

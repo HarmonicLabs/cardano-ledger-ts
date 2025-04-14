@@ -1,11 +1,11 @@
 import { Cbor, CborArray, CborObj, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
+import { isObject } from "@harmoniclabs/obj-utils";
 import { IGovAction } from "./IGovAction";
-import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx";
+import { ITxOutRef, TxOutRef, isITxOutRef } from "../../../common/TxOutRef";
 import { Constitution, IConstitution } from "../Constitution";
 import { GovActionType } from "./GovActionType";
-import { roDescr } from "../../utils/roDescr";
-import { isObject } from "@harmoniclabs/obj-utils";
-import { ToDataVersion } from "../../toData/defaultToDataVersion";
+import { roDescr } from "../../../../utils/roDescr";
+import { ToDataVersion } from "../../../../toData/defaultToDataVersion";
 import { DataConstr } from "@harmoniclabs/plutus-data";
 
 export interface IGovActionInfo {}
@@ -45,11 +45,11 @@ export class GovActionInfo
             // we assume correctness here
             return new CborString( this.cborRef.toBuffer() );
         }
-        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborArray
     {
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
         return new CborArray([
             new CborUInt( this.govActionType )
         ]);

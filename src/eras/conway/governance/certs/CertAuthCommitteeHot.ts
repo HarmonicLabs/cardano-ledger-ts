@@ -77,6 +77,7 @@ export class CertAuthCommitteeHot
     toCborObj(): CborArray
     {
         if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
+        
         return new CborArray([
             new CborUInt( this.certType ),
             this.coldCredential.toCborObj(),

@@ -1,18 +1,18 @@
 import { Cbor, CborArray, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
-import { CanBeHash28, Hash28, canBeHash28, canBeHash32 } from "../../hashes";
-import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx";
-import { roDescr } from "../../utils/roDescr";
-import { GovActionType } from "./GovActionType";
-import { IGovAction } from "./IGovAction";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { Data, DataConstr, ToData } from "@harmoniclabs/plutus-data";
-import { ToDataVersion } from "../../toData/defaultToDataVersion";
-import { maybeData } from "../../utils/maybeData";
-import { isPartialProtocolParameters, partialProtocolParametersToCborObj, partialProtocolParametersToData, ProtocolParameters } from "../../ledger/protocol/ProtocolParameters";
+import { CanBeHash28, Hash28, canBeHash28, canBeHash32 } from "../../../../hashes";
+import { ITxOutRef, TxOutRef, isITxOutRef } from "../../../common/TxOutRef";
+import { roDescr } from "../../../../utils/roDescr";
+import { GovActionType } from "./GovActionType";
+import { IGovAction } from "./IGovAction";
+import { ToDataVersion } from "../../../../toData/defaultToDataVersion";
+import { maybeData } from "../../../../utils/maybeData";
+import { isPartialProtocolParameters, partialProtocolParametersToCborObj, partialProtocolParametersToData, ConwayProtocolParameters } from "../../protocol";
 
 export interface IGovActionParameterChange {
     govActionId?: ITxOutRef | undefined,
-    protocolParamsUpdate: Partial<ProtocolParameters>,
+    protocolParamsUpdate: Partial<ConwayProtocolParameters>,
     policyHash?: CanBeHash28 | undefined
 }
 
@@ -30,7 +30,7 @@ export class GovActionParameterChange
 {
     readonly govActionType: GovActionType.ParameterChange;
     readonly govActionId: TxOutRef | undefined;
-    readonly protocolParamsUpdate: Partial<ProtocolParameters>;
+    readonly protocolParamsUpdate: Partial<ConwayProtocolParameters>;
     readonly policyHash: Hash28 | undefined;
 
     constructor(
@@ -66,6 +66,7 @@ export class GovActionParameterChange
     }
     toCborObj(): CborArray
     {
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
         return new CborArray([
             new CborUInt( this.govActionType ),
             this.govActionId?.toCborObj() ?? new CborSimple( null ),

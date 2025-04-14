@@ -1,5 +1,5 @@
 import { fromAscii } from "@harmoniclabs/uint8array-utils"
-import { Hash28 } from "../../../hashes/Hash28/Hash28"
+import { Hash28 } from "../../../../hashes/Hash28/Hash28"
 import { isIValue } from "../IValue"
 
 describe("isIValue", () => {

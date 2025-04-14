@@ -8,7 +8,7 @@ import { freezeAll, isObject } from "@harmoniclabs/obj-utils";
 import { Rational, cborFromRational, isRational, isRationalOrUndefined, tryCborFromRational } from "./Rational";
 import { PParamsPoolVotingThresholds, isPParamsPoolVotingThresholds, poolVotingThresholdsToCborObj, tryGetPParamsPoolVotingThresholdsFromCborObj } from "./PParamsPoolVotingThresholds";
 import { PParamsDrepVotingThresholds, drepVotingThresholdsToCborObj, isPParamsDrepVotingThresholds, tryGetPParamsDrepVotingThresholdsFromCborObj } from "./PParamsDrepVotingThresholds";
-import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "../../eras/common/protocolVersion";
+import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "../../eras/conway/protocol/protocolVersion";
 import { Data, DataB, DataConstr, DataI, DataList, DataMap, DataPair } from "@harmoniclabs/plutus-data";
 import { fromUtf8 } from "@harmoniclabs/uint8array-utils";
 

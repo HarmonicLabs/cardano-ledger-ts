@@ -1,5 +1,5 @@
 import { ITxOutRef, ITxOutRefToStr, TxOutRef, TxOutRefStr } from "./TxOutRef";
-import { IUTxO, isIUTxO } from "./UTxO";
+import { IUTxO, isIUTxO } from "../conway/tx/ConwayUTxO";
 
 
 export type CanBeTxOutRef = ITxOutRef | IUTxO | TxOutRefStr;

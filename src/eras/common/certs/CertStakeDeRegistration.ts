@@ -1,13 +1,13 @@
 import { Cbor, CborArray, CborObj, CborString, CborUInt, SubCborRef } from "@harmoniclabs/cbor";
-import { Credential } from "../../credentials"
-import { roDescr } from "../../utils/roDescr";
+import { Credential } from "../../../credentials"
+import { roDescr } from "../../../utils/roDescr";
 import { CertificateType, certTypeToString } from "./CertificateType"
-import { ICert } from "./ICert"
-import { Hash28 } from "../../hashes/Hash28/Hash28";
+import { ICert } from "../../common/certs/ICert"
+import { Hash28 } from "../../../hashes/Hash28/Hash28";
 import { DataConstr } from "@harmoniclabs/plutus-data";
-import { nothingData } from "../../utils/maybeData";
-import { ToDataVersion, definitelyToDataVersion } from "../../toData/defaultToDataVersion";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { nothingData } from "../../../utils/maybeData";
+import { ToDataVersion, definitelyToDataVersion } from "../../../toData/defaultToDataVersion";
+import { getSubCborRef } from "../../../utils/getSubCborRef";
 
 export interface ICertStakeDeRegistration {
     stakeCredential: Credential
@@ -79,6 +79,8 @@ export class CertStakeDeRegistration
     }
     toCborObj(): CborArray
     {
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
+
         return new CborArray([
             new CborUInt( this.certType ),
             this.stakeCredential.toCborObj()

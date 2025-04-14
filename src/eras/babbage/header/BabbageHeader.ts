@@ -56,6 +56,7 @@ export class BabbageHeader
     toCborObj(): CborArray
     {
         if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
+        
         return new CborArray([
             this.body.toCborObj(),
             new CborBytes( this.kesSignature )
