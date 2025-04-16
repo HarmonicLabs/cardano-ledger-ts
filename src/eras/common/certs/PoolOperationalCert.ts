@@ -1,10 +1,9 @@
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
-import { CanBeHash32 } from "../../hashes";
-import { isU8Arr, U8Arr } from "../../utils/U8Arr";
-import { isKesPubKey, KesPubKey } from "./Kes";
 import { isObject } from "@harmoniclabs/obj-utils";
-import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../utils/ints";
-import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
+import { isU8Arr, U8Arr } from "../../../utils/U8Arr";
+import { isKesPubKey, KesPubKey } from "../Kes";
+import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../../utils/ints";
+import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
 
 /*
 $signature = bytes .size 64

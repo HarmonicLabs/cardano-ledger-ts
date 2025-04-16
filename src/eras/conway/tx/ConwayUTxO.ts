@@ -6,7 +6,6 @@ import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 import { IConwayTxOut, isIConwayTxOut, ConwayTxOut } from "./ConwayTxOut";
 import { ITxOutRef, isITxOutRef, TxOutRef } from "../../common/TxOutRef";
-import { lexCompare } from "@harmoniclabs/uint8array-utils";
 import { ToDataVersion } from "../../../toData/defaultToDataVersion";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
 

@@ -20,3 +20,4 @@ export * from "./ICert";
 export * from "../../conway/governance/certs/MoveInstantRewardsCert";
 export * from "./CertificateType";
 export * from "./Certificate";
+export * from "./PoolOperationalCert";
