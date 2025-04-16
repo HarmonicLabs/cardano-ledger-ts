@@ -162,7 +162,7 @@ export class MaryAuxiliaryData
         if(!(
             cObj instanceof CborTag &&
             cObj.data instanceof CborMap 
-            && cObj.data.map.length <= 2
+            // && cObj.data.map.length <= 2
         ))throw new InvalidCborFormatError("MaryAuxiliaryData")
 
         let fields: (CborObj | undefined)[] = new Array( 2 ).fill( undefined );

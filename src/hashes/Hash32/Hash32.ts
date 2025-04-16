@@ -1,5 +1,4 @@
 import { CanBeCborString, Cbor, forceCborString, CborObj, CborBytes, SubCborRef } from "@harmoniclabs/cbor";
-import { assert } from "../../utils/assert";
 import { isHex } from "../../utils/hex";
 import { canBeHashInstance, Hash } from "../Hash";
 import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";

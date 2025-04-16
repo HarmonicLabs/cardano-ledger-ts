@@ -258,8 +258,7 @@ export class AuxiliaryData
         if(!(
             cObj instanceof CborTag &&
             cObj.data instanceof CborMap
-        ))
-        throw new InvalidCborFormatError("AuxiliaryData")
+        )) throw new InvalidCborFormatError("AuxiliaryData")
 
         let fields: (CborObj | undefined)[] = new Array( 4 ).fill( undefined );
 

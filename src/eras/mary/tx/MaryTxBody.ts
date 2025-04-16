@@ -2,8 +2,7 @@ import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborA
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
 import { blake2b_256 } from "@harmoniclabs/crypto";
 import { hasOwn, isObject } from "@harmoniclabs/obj-utils";
-import { PubKeyHash } from "../../../credentials";
-import { AuxiliaryDataHash, ScriptDataHash, CanBeHash28, Hash32, canBeHash28 } from "../../../hashes";
+import { AuxiliaryDataHash, Hash32 } from "../../../hashes";
 import { Coin, TxWithdrawals, ITxWithdrawals, Value, NetworkT, isCertificate, canBeTxWithdrawals, forceTxWithdrawals, isIValue, certificateFromCborObj, certificatesToDepositLovelaces, Certificate } from "../../common/ledger";
 import { LegacyPPUpdateProposal, isLegacyPPUpdateProposal, LegacyPPUpdateProposalToCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson } from "../protocol"
 import { MaryTxOut, isIMaryTxOut } from "./";
@@ -11,7 +10,6 @@ import { TxOutRef } from "../../common/TxOutRef";
 import { MaryUTxO, isIMaryUTxO, } from "./MaryUTxO";
 import { getCborSet } from "../../../utils/getCborSet";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
-import { maybeBigUint } from "../../../utils/ints";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 
