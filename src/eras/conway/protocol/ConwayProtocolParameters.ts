@@ -341,13 +341,13 @@ function cborToDataLitteral(cbor: CborObj): Data {
     throw new Error("unsupported cbor for literal data");
 }
 
-const maxProtocolParamsEntries = 33;
+const maxProtocolParamsEntries = 34;
 
 export function partialProtocolParametersFromCborObj(cObj: CborObj): Partial<ConwayProtocolParameters> {
     if (!(cObj instanceof CborMap))
         throw new Error(`Invalid CBOR format for "Partial<ConwayProtocolParameters>"`);
 
-    let fields: (CborObj | undefined)[] = new Array(maxProtocolParamsEntries + 1).fill(undefined); // Adjusted to 34 to cover index 33
+    let fields: (CborObj | undefined)[] = new Array(maxProtocolParamsEntries).fill(undefined);
 
     for (let i = 0; i <= maxProtocolParamsEntries; i++) {
         const { v } = (cObj as CborMap).map.find(

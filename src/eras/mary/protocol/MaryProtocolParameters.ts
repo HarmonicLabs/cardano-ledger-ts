@@ -204,7 +204,7 @@ function cborToDataLitteral(cbor: CborObj): Data {
     throw new Error("unsupported cbor for literal data");
 }
 
-const maxProtocolParamsEntries = 19;
+const maxProtocolParamsEntries = 23;
 
 export function partialProtocolParametersFromCborObj(cObj: CborObj): Partial<MaryProtocolParameters> {
     if (!(cObj instanceof CborMap))
