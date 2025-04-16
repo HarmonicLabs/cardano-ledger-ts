@@ -231,7 +231,6 @@ export class ConwayTxRedeemer
             && cObj.array[1] instanceof CborUInt
         ))throw new InvalidCborFormatError("ConwayTxRedeemer");
 
-        //* TO DO: added array */
         const [ _tag, _index, _data, _execUnits ] = cObj.array;
 
         return new ConwayTxRedeemer({

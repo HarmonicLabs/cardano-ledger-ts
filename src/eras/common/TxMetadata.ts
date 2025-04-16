@@ -25,7 +25,6 @@ export class TxMetadata
         
         Object.keys( metadata )
         .forEach( k =>
-            /* TO DO: how to handle this :grin: */
             defineReadOnlyProperty(
                 _metadata,
                 BigInt( k ).toString(),

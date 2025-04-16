@@ -115,7 +115,6 @@ export class BootstrapWitness
             && cObj.array.length >= 4
         ))throw new InvalidCborFormatError("BootstrapWitness");
 
-        //* TO DO: added array */
         const [ _pubKey, _signature, _chainCode, _attributes ] = cObj.array;
         
         return new BootstrapWitness(
@@ -128,7 +127,7 @@ export class BootstrapWitness
             getSubCborRef( cObj )
         );
     }
-    //** TO DO(mike) find out about mising fromCborObj */
+
     toJSON() { return this.toJson(); }
     toJson()
     {

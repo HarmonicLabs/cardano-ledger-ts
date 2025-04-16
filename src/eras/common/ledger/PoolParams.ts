@@ -192,8 +192,7 @@ export class PoolParams
                 ])
         ]) as any;
     }
-
-    //*TO DO: should I remove the toCborObjArray when added this one? //*
+    
     toCborObj(): CborObj
     {
         if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() );

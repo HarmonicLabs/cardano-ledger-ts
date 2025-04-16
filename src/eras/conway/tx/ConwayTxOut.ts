@@ -242,7 +242,6 @@ export class ConwayTxOut
         // legacy
         if( cObj instanceof CborArray )
         {
-            // TO DO: need _refScript?
             const [ _addr, _val, _dat, _refScript ] = cObj.array;
             
             return new ConwayTxOut({

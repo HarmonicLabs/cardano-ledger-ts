@@ -347,7 +347,6 @@ export class MaryTxBody
             ttl = _ttl.num;
         }
         
-        //** TO DO: add votingProcedures, proposalProcedures, currentTreasuryValue, donation */
         return new MaryTxBody({
             inputs: getCborSet( _ins_ ).map( txOutRefAsUTxOFromCborObj ) as [MaryUTxO, ...MaryUTxO[]],
             outputs: _outs.array.map( MaryTxOut.fromCborObj ),
@@ -364,7 +363,6 @@ export class MaryTxBody
 
     toJSON() { return this.toJson(); }
     
-    //** TO DO: add votingProcedures, proposalProcedures, currentTreasuryValue, donation */
     toJson()
     {
         return {

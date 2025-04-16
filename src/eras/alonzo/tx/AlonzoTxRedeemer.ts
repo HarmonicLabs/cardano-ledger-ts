@@ -221,7 +221,6 @@ export class AlonzoTxRedeemer
             && cObj.array[1] instanceof CborUInt
         ))throw new InvalidCborFormatError("AlonzoTxRedeemer");
 
-        //* TO DO: added array */
         const [ _tag, _index, _data, _execUnits ] = cObj.array;
 
         return new AlonzoTxRedeemer({

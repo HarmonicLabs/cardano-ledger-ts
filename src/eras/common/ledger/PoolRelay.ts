@@ -83,11 +83,6 @@ function portCheck( something: any ): boolean
     );
 }
 
-/* TO DO: 
-    export function isIpPoolRelay<T extends object>( something: T ): something is (T & IpPoolRelay)
-    [12:19 PM]Michele | Harmonic: make it just 
-    export function isIpPoolRelay( something: any ): something is IpPoolRelay
-*/
 export function isIpPoolRelay( something: any ): something is IpPoolRelay
 {
     const {

@@ -146,7 +146,6 @@ export class ShelleyTxOut
         // legacy
         if( cObj instanceof CborArray )
         {
-            //* TO DO: added _refScript to array find out if correct */
             const [ _addr, _val ] = cObj.array;
             
             return new ShelleyTxOut({

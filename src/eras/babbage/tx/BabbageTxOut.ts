@@ -243,7 +243,6 @@ export class BabbageTxOut
         // legacy
         if( cObj instanceof CborArray )
         {
-            //* TO DO: added _refScript to array find out if correct */
             const [ _addr, _val, _dat, _refScript ] = cObj.array;
             
             return new BabbageTxOut({

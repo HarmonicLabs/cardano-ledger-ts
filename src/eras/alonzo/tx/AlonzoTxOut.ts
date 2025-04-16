@@ -224,7 +224,6 @@ export class AlonzoTxOut
         // legacy
         if( cObj instanceof CborArray )
         {
-            //* TO DO: added _refScript to array find out if correct */
             const [ _addr, _val, _dat ] = cObj.array;
             
             return new AlonzoTxOut({

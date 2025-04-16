@@ -127,8 +127,6 @@ export class TxMetadatumMap
         )
     }
 
-    //** TO DO(mike) find out about mising fromCborObj */
-
     toJSON() { return this.toJson(); }
     toJson(): { k: any, v: any }[]
     {

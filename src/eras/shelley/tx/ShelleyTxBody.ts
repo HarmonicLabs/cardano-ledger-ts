@@ -308,7 +308,6 @@ export class ShelleyTxBody
             ttl = _ttl.num;
         }
         
-        //** TO DO: add votingProcedures, proposalProcedures, currentTreasuryValue, donation */
         return new ShelleyTxBody({
             inputs: getCborSet( _ins_ ).map( txOutRefAsUTxOFromCborObj ) as [ShelleyUTxO, ...ShelleyUTxO[]],
             outputs: _outs.array.map( ShelleyTxOut.fromCborObj ),
@@ -323,7 +322,6 @@ export class ShelleyTxBody
 
     toJSON() { return this.toJson(); }
     
-    //** TO DO: add votingProcedures, proposalProcedures, currentTreasuryValue, donation */
     toJson()
     {
         return {

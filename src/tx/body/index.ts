@@ -1,3 +1,3 @@
 export * from "./output";
-export * from "../../eras/conway/tx/ConwayTxIn";
+export * from "./TxIn";
 export * from "./TxBody";

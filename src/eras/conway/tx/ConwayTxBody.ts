@@ -22,7 +22,7 @@ export interface IConwayTxBody {
     ttl?: CanBeUInteger,
     certs?: Certificate[],
     withdrawals?: TxWithdrawals | ITxWithdrawals,
-    protocolUpdate?: LegacyPPUpdateProposal,
+    protocolUpdate?: LegacyPPUpdateProposal, // babbage only; removed in conway //* TO DO: removing this?? //
     auxDataHash?: AuxiliaryDataHash, // hash 32
     validityIntervalStart?: CanBeUInteger,
     mint?: Value,
@@ -114,7 +114,6 @@ export class ConwayTxBody
     readonly ttl?: bigint;
     readonly certs?: Certificate[];
     readonly withdrawals?: TxWithdrawals;
-    //* TO DO: ask about removing this //
     readonly protocolUpdate?: LegacyPPUpdateProposal; // babbage only; removed in conway
     readonly auxDataHash?: AuxiliaryDataHash; // hash 32
     readonly validityIntervalStart?: bigint;

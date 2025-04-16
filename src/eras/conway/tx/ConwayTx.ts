@@ -122,7 +122,6 @@ export class ConwayTx
             );
             return;
         }
-        // TO DO: come back to this
         const { pubKey, signature } = signEd25519(
             this.body.hash.toBuffer(),
             signer instanceof Uint8Array ? signer : signer.toBuffer()
@@ -211,7 +210,6 @@ export class ConwayTx
     {
         if(!(
             cObj instanceof CborArray
-            // TO DO: come back to this
             && cObj.array.length >= 4
         ))throw new InvalidCborFormatError("ConwayTx");
         
