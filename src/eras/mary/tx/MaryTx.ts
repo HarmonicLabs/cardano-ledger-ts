@@ -1,6 +1,6 @@
 import { XPrv } from "@harmoniclabs/bip32_ed25519"
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborString, forceCborString } from "@harmoniclabs/cbor"
-import { signEd25519_sync } from "@harmoniclabs/crypto"
+import { signEd25519_sync, signEd25519 } from "@harmoniclabs/crypto"
 import { PrivateKey, CredentialType, PubKeyHash } from "../../../credentials"
 import { Signature, Hash32, Hash28 } from "../../../hashes"
 import { IMaryTxBody, IMaryTxWitnessSet, MaryAuxiliaryData, MaryTxBody, MaryTxWitnessSet, isIMaryTxBody, isIMaryTxWitnessSet } from "./"
