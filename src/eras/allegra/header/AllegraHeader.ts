@@ -2,43 +2,43 @@ import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborU
 import { isObject } from "@harmoniclabs/obj-utils";
 import { IPraosHeader } from "../../common/interfaces/IPraosHeader";
 import { isKesSignature, KesSignature, KesSignatureBytes } from "../../common/Kes";
-import { AlonzoHeaderBody, IAlonzoHeaderBody, isIAlonzoHeaderBody } from "./AlonzoHeaderBody";
+import { AllegraHeaderBody, IAllegraHeaderBody, isIAllegraHeaderBody } from "./AllegraHeaderBody";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
 
 
-export interface IAlonzoHeader
+export interface IAllegraHeader
 {
-    body: IAlonzoHeaderBody;
+    body: IAllegraHeaderBody;
     kesSignature: KesSignatureBytes;
 }
 
-export interface IAlonzoHeaderChecked
+export interface IAllegraHeaderChecked
 {
-    body: IAlonzoHeaderBody;
+    body: IAllegraHeaderBody;
     kesSignature: KesSignature;
 }
 
-export function isIAlonzoHeader( thing: any ): thing is IAlonzoHeaderChecked
+export function isIAllegraHeader( thing: any ): thing is IAllegraHeaderChecked
 {
     return isObject( thing ) && (
-        isIAlonzoHeaderBody( thing.body ) &&
+        isIAllegraHeaderBody( thing.body ) &&
         isKesSignature( thing.kesSignature )
     );
 }
 
-export class AlonzoHeader
-    implements IAlonzoHeader, ToCbor
+export class AllegraHeader
+    implements IAllegraHeader, ToCbor
 {
-    readonly body: AlonzoHeaderBody;
+    readonly body: AllegraHeaderBody;
     readonly kesSignature: KesSignature;
 
     constructor(
-        hdr: IAlonzoHeader,
+        hdr: IAllegraHeader,
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        if(!isIAlonzoHeader(hdr)) throw new Error("Invalid AlonzoHeader");
-        this.body = new AlonzoHeaderBody( hdr.body );
+        if(!isIAllegraHeader(hdr)) throw new Error("Invalid AllegraHeader");
+        this.body = new AllegraHeaderBody( hdr.body );
         this.kesSignature = hdr.kesSignature;
     }
 
@@ -56,27 +56,26 @@ export class AlonzoHeader
     toCborObj(): CborArray
     {
         if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
-        
         return new CborArray([
             this.body.toCborObj(),
             new CborBytes( this.kesSignature )
         ]);
     }
 
-    static fromCbor( cbor: CanBeCborString ): AlonzoHeader
+    static fromCbor( cbor: CanBeCborString ): AllegraHeader
     {
         const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor ).toBuffer();
-        return AlonzoHeader.fromCborObj(
+        return AllegraHeader.fromCborObj(
             Cbor.parse( bytes, { keepRef: true } ),
             bytes
         );
     }
-    static fromCborObj( cbor: CborObj, _originalBytes?: Uint8Array ): AlonzoHeader
+    static fromCborObj( cbor: CborObj, _originalBytes?: Uint8Array ): AllegraHeader
     {
         if(!(
             cbor instanceof CborArray &&
             cbor.array.length >= 2
-        )) throw new Error("invalid cbor for AlonzoHeader");
+        )) throw new Error("invalid cbor for AllegraHeader");
 
         const [
             cHdrBody,
@@ -85,10 +84,10 @@ export class AlonzoHeader
 
         if(!(
             cBodySignature instanceof CborBytes
-        )) throw new Error("invalid cbor for AlonzoHeader");
+        )) throw new Error("invalid cbor for AllegraHeader");
 
-        return new AlonzoHeader({
-            body: AlonzoHeaderBody.fromCborObj( cHdrBody ),
+        return new AllegraHeader({
+            body: AllegraHeaderBody.fromCborObj( cHdrBody ),
             kesSignature: cBodySignature.bytes
         }, getSubCborRef( cbor, _originalBytes ));
     }

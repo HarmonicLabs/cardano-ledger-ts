@@ -1,8 +1,8 @@
 import { ToCborBytes } from "@harmoniclabs/cbor";
 import { U8Arr32 } from "../../../utils/U8Arr";
-import { VrfCert } from "../Vrf";
-import { KesSignature } from "../Kes";
-import { PoolOperationalCert } from "../certs/PoolOperationalCert";
+import { VrfCert } from "../../common/Vrf";
+import { KesSignature } from "../../common/Kes";
+import { PoolOperationalCert } from "../../common/certs/PoolOperationalCert";
 
 export interface IPraosHeader extends ToCborBytes {
     /* from `ToCborBytes` */

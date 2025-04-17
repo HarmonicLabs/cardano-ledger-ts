@@ -13,7 +13,7 @@ import { IPraosHeaderBody } from "../../common/interfaces//IPraosHeader";
 import { concatUint8Array } from "@harmoniclabs/uint8array-utils";
 
 
-export interface IShelleyHeaderBody
+export interface IAllegraHeaderBody
 {
     blockNumber: CanBeUInteger;
     slot: CanBeUInteger;
@@ -29,10 +29,10 @@ export interface IShelleyHeaderBody
     protocolVersion: IProtocolVersion;
 }
 
-export function isIShelleyHeaderBody( thing: any ): thing is IShelleyHeaderBody
+export function isIAllegraHeaderBody( thing: any ): thing is IAllegraHeaderBody
 {
     return isObject( thing ) && (
-        thing instanceof ShelleyHeaderBody // already validated at construction, shortcut
+        thing instanceof AllegraHeaderBody // already validated at construction, shortcut
         || (
             canBeUInteger( thing.blockNumber )
             && canBeUInteger( thing.slot )
@@ -49,8 +49,8 @@ export function isIShelleyHeaderBody( thing: any ): thing is IShelleyHeaderBody
     );
 }
 
-export class ShelleyHeaderBody
-    implements IShelleyHeaderBody, ToCbor
+export class AllegraHeaderBody
+    implements IAllegraHeaderBody, ToCbor
 {
     readonly blockNumber: bigint;
     readonly slot: bigint;
@@ -65,11 +65,11 @@ export class ShelleyHeaderBody
     readonly protocolVersion: ProtocolVersion;
 
     constructor(
-        hdrBody: IShelleyHeaderBody,
+        hdrBody: IAllegraHeaderBody,
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        if(!isIShelleyHeaderBody(hdrBody)) throw new Error("Invalid ShelleyHeaderBody");
+        if(!isIAllegraHeaderBody(hdrBody)) throw new Error("Invalid AllegraHeaderBody");
         this.blockNumber = forceBigUInt( hdrBody.blockNumber );
         this.slot = forceBigUInt( hdrBody.slot );
         this.prevHash = typeof hdrBody.prevHash !== "undefined" ? hash32bytes( hdrBody.prevHash ) : undefined;
@@ -96,9 +96,9 @@ export class ShelleyHeaderBody
         ) as U8Arr<32>;
     }
 
-    clone(): ShelleyHeaderBody
+    clone(): AllegraHeaderBody
     {
-        return new ShelleyHeaderBody({
+        return new AllegraHeaderBody({
             blockNumber: this.blockNumber,
             slot: this.slot,
             prevHash: this.prevHash?.slice(),
@@ -155,20 +155,20 @@ export class ShelleyHeaderBody
               , protocol_version]
     */
 
-    static fromCbor( cbor: CanBeCborString ): ShelleyHeaderBody
+    static fromCbor( cbor: CanBeCborString ): AllegraHeaderBody
     {
         const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor ).toBuffer();
-        return ShelleyHeaderBody.fromCborObj(
+        return AllegraHeaderBody.fromCborObj(
             Cbor.parse( bytes, { keepRef: true } ),
             bytes
         );
     }
-    static fromCborObj( cHdrBody: CborObj, _originalBytes?: Uint8Array ): ShelleyHeaderBody
+    static fromCborObj( cHdrBody: CborObj, _originalBytes?: Uint8Array ): AllegraHeaderBody
     {
         if(!(
             cHdrBody instanceof CborArray &&
             cHdrBody.array.length >= 10
-        )) throw new Error("invalid cbor for ShelleyHeaderBody");
+        )) throw new Error("invalid cbor for AllegraHeaderBody");
 
         const [
             cBlockNo,
@@ -191,9 +191,9 @@ export class ShelleyHeaderBody
             cVrfVkey    instanceof CborBytes    &&
             cBlockBodySize instanceof CborUInt  &&
             cBlockBodyHash instanceof CborBytes
-        )) throw new Error("invalid cbor for ShelleyHeaderBody");
+        )) throw new Error("invalid cbor for AllegraHeaderBody");
 
-        return new ShelleyHeaderBody({
+        return new AllegraHeaderBody({
             blockNumber: cBlockNo.num,
             slot: cSlotNo.num,
             prevHash: cPrevHash.bytes as U8Arr32,

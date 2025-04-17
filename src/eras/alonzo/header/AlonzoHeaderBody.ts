@@ -1,10 +1,10 @@
+import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborSimple, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
+import { isObject } from "@harmoniclabs/obj-utils";
 import { canBeUInteger, CanBeUInteger } from "@harmoniclabs/cbor/dist/utils/ints";
 import { canBeHash32, CanBeHash32, hash32bytes } from "../../../hashes";
 import { isIVrfCert, IVrfCert, VrfCert } from "../../common/Vrf";
-import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "../../conway/protocol/protocolVersion";
+import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "../protocol/protocolVersion";
 import { IPoolOperationalCert, isIPoolOperationalCert, PoolOperationalCert } from "../../common/certs/PoolOperationalCert";
-import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborSimple, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
-import { isObject } from "@harmoniclabs/obj-utils";
 import { U8Arr, U8Arr32 } from "../../../utils/U8Arr";
 import { forceBigUInt, u32 } from "../../../utils/ints";
 import { blake2b_256 } from "@harmoniclabs/crypto";
