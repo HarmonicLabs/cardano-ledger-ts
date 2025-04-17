@@ -142,7 +142,7 @@ export class AllegraHeaderBody
     /*
     CDDL:
 
-        header_body = [block_number : uint
+    header_body = [block_number : uint
               , slot : uint
               , prev_hash : $hash32 / nil
               , issuer_vkey : $vkey
