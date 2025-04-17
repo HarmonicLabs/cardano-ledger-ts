@@ -122,7 +122,8 @@ export class BabbageHeaderBody
     /*
     CDDL:
 
-        header_body = [block_number : uint
+        header_body = [
+                block_number : uint
               , slot : uint
               , prev_hash : $hash32 / nil
               , issuer_vkey : $vkey
@@ -131,7 +132,8 @@ export class BabbageHeaderBody
               , block_body_size : uint
               , block_body_hash : $hash32
               , operational_cert
-              , protocol_version]
+              , protocol_version
+              ]
     */
 
     static fromCbor( cbor: CanBeCborString ): BabbageHeaderBody
