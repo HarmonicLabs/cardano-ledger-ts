@@ -22,7 +22,7 @@ export function isIMaryUTxO( stuff: any ): stuff is IMaryUTxO
 }
 
 export class MaryUTxO
-    implements IMaryUTxO, ToData, ToJson, ToCbor, Cloneable<MaryUTxO>
+    implements IMaryUTxO, ToJson, ToCbor, Cloneable<MaryUTxO>
 {
     readonly utxoRef!: TxOutRef
     readonly resolved!: MaryTxOut

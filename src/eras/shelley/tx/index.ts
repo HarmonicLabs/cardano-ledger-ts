@@ -1,4 +1,4 @@
-export * from './ShelleyAuxiliaryData';
+export * from './ShelleyCanBeTxOutRef';
 export * from './ShelleyTx';
 export * from './ShelleyTxBody';
 export * from './ShelleyTxOut';

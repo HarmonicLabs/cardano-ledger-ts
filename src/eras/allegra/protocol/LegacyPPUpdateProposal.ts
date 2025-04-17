@@ -3,14 +3,14 @@ import { isObject } from "@harmoniclabs/obj-utils";
 import { GenesisHash } from "../../../hashes/Hash28/GenesisHash";
 import { canBeUInteger, forceBigUInt } from "../../../utils/ints";
 import { Epoch } from "../../common/ledger/Epoch";
-import { ConwayProtocolParameters, isPartialProtocolParameters, partialProtocolParametersFromCborObj, partialProtocolParametersToCborObj, partialProtocolParamsToJson } from "./AllegraProtocolParameters";
+import { AllegraProtocolParameters, isPartialProtocolParameters, partialProtocolParametersFromCborObj, partialProtocolParametersToCborObj, partialProtocolParamsToJson } from "./AllegraProtocolParameters";
 import { Hash28 } from "../../../hashes";
 
 export type LegacyPPUpdateProposal = [ LegacyPPUpdateMap, Epoch ];
 
 export type LegacyPPUpdateMap = {
     genesisHash: Hash28, // GenesisHash
-    changes: Partial<ConwayProtocolParameters>
+    changes: Partial<AllegraProtocolParameters>
 }[];
 
 export function isLegacyPPUpdateMap( something: object ): something is LegacyPPUpdateMap

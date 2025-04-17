@@ -4,7 +4,7 @@ import { ITxOutRef, TxOutRef, isITxOutRef } from "../../../common/TxOutRef";
 import { GovActionType } from "./GovActionType";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { DataConstr, DataI, ToData } from "@harmoniclabs/plutus-data";
-import { IProtocolVersion, isIProtocolVersion, partialProtocolParametersToData, ProtocolVersion } from "../../../common/ledger";
+import { IProtocolVersion, isIProtocolVersion, partialProtocolParametersToData, ProtocolVersion } from "../../protocol";
 import { ToDataVersion } from "../../../../toData/defaultToDataVersion";
 import { maybeData } from "../../../../utils/maybeData";
 import { subCborRefOrUndef } from "../../../../utils/getSubCborRef";

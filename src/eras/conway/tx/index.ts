@@ -4,5 +4,6 @@ export * from './ConwayTxBody';
 export * from './ConwayTxOut';
 export * from './ConwayTxRedeemer';
 export * from './ConwayTxWitnessSet';
-export * from "./ConwayUTxO";
-export * from "./ConwayTxIn";
+export * from './ConwayUTxO';
+export * from './ConwayTxIn';
+export * from './ConwayCanBeTxOutRef';

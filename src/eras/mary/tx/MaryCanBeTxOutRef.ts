@@ -1,12 +1,12 @@
-import { ITxOutRef, ITxOutRefToStr, TxOutRef, TxOutRefStr } from "./TxOutRef";
-import { IUTxO, isIUTxO } from "../conway/tx/ConwayUTxO";
+import { ITxOutRef, ITxOutRefToStr, TxOutRef, TxOutRefStr } from "../../common/TxOutRef";
+import { IMaryUTxO, isIMaryUTxO } from "./MaryUTxO";
 
 
-export type CanBeTxOutRef = ITxOutRef | IUTxO | TxOutRefStr;
+export type CanBeTxOutRef = ITxOutRef | IMaryUTxO | TxOutRefStr;
 
 export function forceTxOutRefStr( canBe: CanBeTxOutRef ): TxOutRefStr
 {
-    return typeof canBe === "string" ? canBe : ITxOutRefToStr( isIUTxO( canBe ) ? canBe.utxoRef : canBe )
+    return typeof canBe === "string" ? canBe : ITxOutRefToStr( isIMaryUTxO( canBe ) ? canBe.utxoRef : canBe )
 }
 
 export function forceTxOutRef( canBe: CanBeTxOutRef ): TxOutRef
@@ -20,7 +20,7 @@ export function forceTxOutRef( canBe: CanBeTxOutRef ): TxOutRef
             index: Number( idx )
         } as any;
     }
-    else _interface = isIUTxO( canBe ) ? canBe.utxoRef : canBe;
+    else _interface = isIMaryUTxO( canBe ) ? canBe.utxoRef : canBe;
 
     return new TxOutRef( _interface );
 }

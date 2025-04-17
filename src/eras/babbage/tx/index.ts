@@ -5,3 +5,4 @@ export * from './BabbageTxOut';
 export * from './BabbageTxRedeemer';
 export * from './BabbageTxWitnessSet';
 export * from './BabbageUTxO';
+export * from './BabbageCanBeTxOutRef';
