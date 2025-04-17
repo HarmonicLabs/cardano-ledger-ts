@@ -1,26 +1,27 @@
 import { CanBeCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { assert } from "../../utils/assert";
 import { Hash } from "../Hash";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 export class Signature extends Hash
 {
     constructor(
         bs: string | Uint8Array | Signature | Hash,
-        readonly subCborRef?: SubCborRef
+        readonly cborRef: SubCborRef | undefined = undefined
     )
     {
         super( bs instanceof Hash ? bs.toBuffer() : bs );
 
-        assert(
-            this._bytes.length === 64,
-            "'Signature' must be an hash of length 64"
-        );
+        if(!(
+            this._bytes.length === 64
+        ))throw new Error("'Signature' must be an hash of length 64");
+
+        this.cborRef = cborRef ?? subCborRefOrUndef( bs );
     }
 
     clone(): Signature
     {
-        return new Signature( this.toBuffer(), this.subCborRef?.clone() );
+        return new Signature( this.toBuffer(), this.cborRef?.clone() );
     }
 
     valueOf(): string

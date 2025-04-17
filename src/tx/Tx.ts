@@ -2,15 +2,13 @@ import { CredentialType, PrivateKey, PubKeyHash } from "../credentials";
 import { Hash28, Hash32, Signature } from "../hashes";
 import { VKeyWitness, VKey, ITxWitnessSet, TxWitnessSet, isITxWitnessSet } from "./TxWitnessSet";
 import { ToCbor, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
-import { signEd25519 } from "@harmoniclabs/crypto";
-import { defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
+import { signEd25519, signEd25519_sync } from "@harmoniclabs/crypto";
 import { InvalidCborFormatError } from "../utils/InvalidCborFormatError";
 import { ToJson } from "../utils/ToJson";
-import { assert } from "../utils/assert";
 import { AuxiliaryData } from "./AuxiliaryData";
 import { ITxBody, TxBody, isITxBody } from "./body";
 import { XPrv } from "@harmoniclabs/bip32_ed25519";
-import { getSubCborRef } from "../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../utils/getSubCborRef";
 
 export interface ITx {
     body: ITxBody
@@ -37,6 +35,56 @@ export class Tx
     readonly isScriptValid!: boolean;
     readonly auxiliaryData?: AuxiliaryData | null | undefined;
 
+    clone(): Tx
+    {
+        return new Tx( this );
+    }
+
+    constructor(
+        tx: ITx,
+        readonly cborRef: SubCborRef | undefined = undefined
+    )
+    {
+        const {
+            body,
+            witnesses,
+            isScriptValid,
+            auxiliaryData
+        } = tx;
+
+        if(!(
+            body instanceof TxBody ||
+            isITxBody( body )
+        )) throw new Error("invalid transaction body; must be instance of 'TxBody'");
+
+        if(!(
+            witnesses instanceof TxWitnessSet ||
+            isITxWitnessSet( witnesses )
+        )) throw new Error("invalid wintesses; must be instance of 'TxWitnessSet'");
+
+        if(!(
+            isScriptValid === undefined ||
+            typeof isScriptValid === "boolean"
+        )) throw new Error("'isScriptValid' ('Tx' third paramter) must be a boolean");
+        
+        if(!(
+            auxiliaryData === undefined ||
+            auxiliaryData === null ||
+            auxiliaryData instanceof AuxiliaryData
+        )) throw new Error("invalid transaction auxiliray data; must be instance of 'AuxiliaryData'");
+
+        this.body = new TxBody( body );
+        this.witnesses = new TxWitnessSet(
+            witnesses,
+            subCborRefOrUndef( witnesses ),
+            getAllRequiredSigners( this.body )
+        );
+        this.isScriptValid = isScriptValid === undefined ? true : isScriptValid;
+        this.auxiliaryData = auxiliaryData;
+        
+        this.cborRef = cborRef ?? subCborRefOrUndef( tx );
+    }
+
     /**
      * checks that the signer is needed
      * if true adds the witness
@@ -45,7 +93,10 @@ export class Tx
      * one might prefer to use this method instead of `signWith`
      * when signature is provided by a third party (example CIP30 wallet)
     **/
-    readonly addVKeyWitness!: ( vkeyWit: VKeyWitness ) => void
+    addVKeyWitness( this: Tx, vkeyWit: VKeyWitness ): void
+    {
+        this.witnesses.addVKeyWitness( vkeyWit )
+    }
     /**
      * checks that the signer is needed
      * if true signs the transaction with the specified key
@@ -65,24 +116,24 @@ export class Tx
         {
             const { pubKey, signature } = signer.sign( this.body.hash.toBuffer() );
             this.addVKeyWitness(
-                new VKeyWitness(
-                    new VKey( pubKey ),
-                    new Signature( signature )
-                )
+                new VKeyWitness({
+                    vkey: new VKey( pubKey ),
+                    signature: new Signature( signature )
+                })
             );
             return;
         }
 
-        const { pubKey, signature } = signEd25519(
+        const { pubKey, signature } = signEd25519_sync(
             this.body.hash.toBuffer(),
             signer instanceof Uint8Array ? signer : signer.toBuffer()
         );
 
         this.addVKeyWitness(
-            new VKeyWitness(
-                new VKey( pubKey ),
-                new Signature( signature )
-            )
+            new VKeyWitness({
+                vkey: new VKey( pubKey ),
+                signature: new Signature( signature )
+            })
         );
     }
 
@@ -115,101 +166,35 @@ export class Tx
      *  - required by withdrawals
      *  - additional spefified in the `requiredSigners` field
      */
-    readonly isComplete!: boolean
+    get isComplete(): boolean
+    {
+        return this.witnesses.isComplete
+    }
     
     get hash(): Hash32 { return this.body.hash; }
 
-    constructor(
-        tx: ITx,
-        readonly subCborRef?: SubCborRef
-    )
+    toCborBytes(): Uint8Array
     {
-        const {
-            body,
-            witnesses,
-            isScriptValid,
-            auxiliaryData
-        } = tx;
-
-        assert(
-            body instanceof TxBody || isITxBody( body ),
-            "invalid transaction body; must be instance of 'TxBody'"
-        );
-        assert(
-            isITxWitnessSet( witnesses ),
-            "invalid wintesses; must be instance of 'TxWitnessSet'"
-        );
-        assert(
-            isScriptValid === undefined || typeof isScriptValid === "boolean",
-            "'isScriptValid' ('Tx' third paramter) must be a boolean"
-        );
-        assert(
-            auxiliaryData === undefined ||
-            auxiliaryData === null ||
-            auxiliaryData instanceof AuxiliaryData,
-            "invalid transaction auxiliray data; must be instance of 'AuxiliaryData'"
-        );
-
-        defineReadOnlyProperty(
-            this,
-            "body",
-            new TxBody( body )
-        );
-        defineReadOnlyProperty(
-            this,
-            "witnesses",
-            witnesses instanceof TxWitnessSet ? witnesses :
-            new TxWitnessSet( witnesses, undefined, getAllRequiredSigners( this.body ) )
-        );
-        defineReadOnlyProperty(
-            this,
-            "isScriptValid",
-            isScriptValid === undefined ? true : isScriptValid
-        );
-        defineReadOnlyProperty(
-            this,
-            "auxiliaryData",
-            auxiliaryData
-        );
-
-        //*
-        defineReadOnlyProperty(
-            this, "addVKeyWitness",
-            addVKeyWitness.bind( this )
-            // ( vkeyWit: VKeyWitness ) => this.witnesses.addVKeyWitness( vkeyWit )
-        );
-
-        Object.defineProperty(
-            this, "isComplete",
-            {
-                // calls the `TxWitnessSet` getter
-                get: () => this.witnesses.isComplete,
-                set: () => {},
-                configurable: false,
-                enumerable: true
-            }
-        );
-        //*/
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
+        return this.toCbor().toBuffer();
     }
-
     toCbor(): CborString
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.subCborRef.toBuffer() );
+            return new CborString( this.cborRef.toBuffer() );
         }
         
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
-            // TODO: validate cbor structure
-            // we assume correctness here
-            return Cbor.parse( this.subCborRef.toBuffer() );
+            // keeps cbor ref
+            return Cbor.parse( this.cborRef.toBuffer() );
         }
 
         return new CborArray([
@@ -228,7 +213,9 @@ export class Tx
     }
     static fromCborObj( cObj: CborObj ): Tx
     {
-        if( !(cObj instanceof CborArray) )
+        if( !(
+            cObj instanceof CborArray
+        ) )
         throw new InvalidCborFormatError("Tx");
         
         const [ _body, _wits, _isValid, _aux ] = cObj.array;
@@ -310,9 +297,4 @@ export function getNSignersNeeded( body: Readonly<TxBody> ): number
 {
     const n = getAllRequiredSigners( body ).length
     return n === 0 ? 1 : n;
-}
-
-function addVKeyWitness( this: Tx, vkeyWit: VKeyWitness ): void
-{
-    this.witnesses.addVKeyWitness( vkeyWit )
 }

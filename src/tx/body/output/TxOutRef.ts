@@ -1,4 +1,3 @@
-import { ByteString } from "@harmoniclabs/bytestring";
 import { ToCbor, CborString, Cbor, CborObj, CborArray, CborUInt, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
 import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
@@ -10,7 +9,8 @@ import { ToJson } from "../../../utils/ToJson";
 import { assert } from "../../../utils/assert";
 import { lexCompare } from "@harmoniclabs/uint8array-utils";
 import { ToDataVersion } from "../../../toData/defaultToDataVersion";
-import { getSubCborRef } from "../../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
+import { isHex } from "../../../utils/hex";
 
 export type TxOutRefStr = `${string}#${number}`;
 
@@ -24,7 +24,7 @@ export function isITxOutRef( stuff: any ): stuff is ITxOutRef
     return (
         isObject( stuff ) &&
         hasOwn( stuff, "id" ) && (
-            (typeof stuff.id === "string" && ByteString.isValidHexValue( stuff.id ) && (stuff.id.length === 64)) ||
+            (typeof stuff.id === "string" && isHex( stuff.id ) && (stuff.id.length === 64)) ||
             (stuff.id instanceof Hash32)
         ) &&
         hasOwn( stuff, "index" ) && (
@@ -72,26 +72,27 @@ export class TxOutRef
     readonly index!: number
 
     constructor(
-        { id, index }: ITxOutRef,
-        readonly subCborRef?: SubCborRef
+        
+        iTxOutRef: ITxOutRef,
+        readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
-            (typeof id === "string" && ByteString.isValidHexValue( id ) && (id.length === 64)) ||
-            (id instanceof Hash32),
-            "tx output id (tx hash) invalid while constructing a 'UTxO'"
-        );
+        const { 
+            id, 
+            index 
+        } = iTxOutRef;    
 
-        defineReadOnlyProperty(
-            this,
-            "id",
-            id instanceof Hash32 ? id : new Hash32( id )
-        );
-        defineReadOnlyProperty(
-            this,
-            "index",
-            Number( forceBigUInt( index ) )
-        );
+        if(!(
+            (typeof id === "string" && isHex( id ) && (id.length === 64)) ||
+            (id instanceof Hash32)           
+        ))throw new Error("tx output id (tx hash) invalid while constructing a 'UTxO'")
+        
+        this.id = id instanceof Hash32 ? id : new Hash32( id )
+
+        this.index = Number( forceBigUInt( index ));
+
+        /* Done: cborRef */
+        this.cborRef = cborRef ?? subCborRefOrUndef( iTxOutRef );
     }
 
     toString(): TxOutRefStr
@@ -134,24 +135,29 @@ export class TxOutRef
         );
     }
 
+    toCborBytes(): Uint8Array
+    {
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
+        return this.toCbor().toBuffer();
+    }
     toCbor(): CborString
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.subCborRef.toBuffer() );
+            return new CborString( this.cborRef.toBuffer() );
         }
         
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return Cbor.parse( this.subCborRef.toBuffer() );
+            return Cbor.parse( this.cborRef.toBuffer() );
         }
         return new CborArray([
             this.id.toCborObj(),

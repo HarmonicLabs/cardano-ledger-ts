@@ -70,11 +70,10 @@
   "include": ["./src"],
   "exclude": [
     "**/__tests__/**/*",
+    "**/cddl-files/**/*",
     "**/*.test.ts",
+    "**/*.cddl",
     "jest_cache",
-    "tsc-out",
-    "src/offchain/tx/builder/buildWorker.ts",
-    "src/onchain/pluts/Script/blueprint"
   ],
   "tsc-alias": {
     "verbose": false,

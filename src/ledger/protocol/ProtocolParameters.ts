@@ -8,7 +8,7 @@ import { freezeAll, isObject } from "@harmoniclabs/obj-utils";
 import { Rational, cborFromRational, isRational, isRationalOrUndefined, tryCborFromRational } from "./Rational";
 import { PParamsPoolVotingThresholds, isPParamsPoolVotingThresholds, poolVotingThresholdsToCborObj, tryGetPParamsPoolVotingThresholdsFromCborObj } from "./PParamsPoolVotingThresholds";
 import { PParamsDrepVotingThresholds, drepVotingThresholdsToCborObj, isPParamsDrepVotingThresholds, tryGetPParamsDrepVotingThresholdsFromCborObj } from "./PParamsDrepVotingThresholds";
-import { IProtocolVerision, isIProtocolVersion, protocolVersionToCborObj, tryIProtocolVersionFromCborObj } from "./protocolVersion";
+import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "../../eras/conway/protocol/protocolVersion";
 import { Data, DataB, DataConstr, DataI, DataList, DataMap, DataPair } from "@harmoniclabs/plutus-data";
 import { fromUtf8 } from "@harmoniclabs/uint8array-utils";
 
@@ -26,7 +26,7 @@ export interface ProtocolParameters {
     monetaryExpansion: Rational,
     treasuryCut: Rational,
     /** @deprecated protocolVersion removed in conway */
-    protocolVersion?: IProtocolVerision,
+    protocolVersion?: IProtocolVersion,
     minPoolCost: Coin,
     utxoCostPerByte: Coin,
     costModels: CostModels,
@@ -302,7 +302,7 @@ export function partialProtocolParametersToCborObj( pps: Partial<ProtocolParamet
         protocolVersion === undefined ? undefined :
         kv(
             14,
-            protocolVersionToCborObj( protocolVersion )
+            new ProtocolVersion( protocolVersion ).toCborObj()
         ),
         mapUIntEntryOrUndefined( 16, pps.minPoolCost ),
         mapUIntEntryOrUndefined( 17, pps.utxoCostPerByte ),
@@ -444,7 +444,10 @@ export function partialProtocolParametersFromCborObj( cObj: CborObj ): Partial<P
         _minfeeRefScriptCostPerByte,
     ] = fields;
 
-    const protocolVersion = tryIProtocolVersionFromCborObj( _protocolVersion )
+    let protocolVersion: ProtocolVersion | undefined;
+    try{
+        protocolVersion =  _protocolVersion ? ProtocolVersion.fromCborObj( _protocolVersion ) : undefined;
+    } catch {}
 
     let executionUnitPrices: [CborPositiveRational, CborPositiveRational] | undefined = undefined;
     if( _execCosts instanceof CborArray )
@@ -504,7 +507,7 @@ export const defaultProtocolParameters: ProtocolParameters = freezeAll({
     poolPledgeInfluence: new CborPositiveRational( 3, 10 ),
     monetaryExpansion: new CborPositiveRational( 3, 1000 ),
     treasuryCut: new CborPositiveRational( 2, 10 ),
-    protocolVersion: [ 8, 0 ],
+    protocolVersion: new ProtocolVersion({ major: 8, minor: 0 }),
     minPoolCost: 340_000_000,
     utxoCostPerByte: 34482,
     costModels: {

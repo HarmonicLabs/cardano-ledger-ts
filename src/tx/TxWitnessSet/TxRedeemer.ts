@@ -1,6 +1,6 @@
 import { ToCbor, CborString, Cbor, CborArray, CborUInt, CanBeCborString, forceCborString, CborObj, CborMapEntry, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
-import { isObject, hasOwn, defineReadOnlyProperty, definePropertyIfNotPresent } from "@harmoniclabs/obj-utils";
+import { isObject, hasOwn } from "@harmoniclabs/obj-utils";
 import { Data, isData, dataToCborObj, dataFromCborObj } from "@harmoniclabs/plutus-data";
 import { ExBudget } from "@harmoniclabs/plutus-machine";
 import { BasePlutsError } from "../../utils/BasePlutsError";
@@ -8,7 +8,7 @@ import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
 import { assert } from "../../utils/assert";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../utils/ints";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 export enum TxRedeemerTag {
     Spend       = 0,
@@ -80,21 +80,31 @@ export class TxRedeemer
      * the actual value of the redeemer
     **/
     readonly data!: Data
-    execUnits!: ExBudget
+    private _execUnits!: ExBudget
+
+    get execUnits(): ExBudget {
+        return this._execUnits;
+    }
+
+    set execUnits(newExUnits: ExBudget) {
+        if (!(newExUnits instanceof ExBudget)) {
+            throw new Error("invalid 'execUnits' setting 'TxRedeemer'");
+        }
+        this._execUnits = newExUnits;
+    }
 
     constructor(
         redeemer: ITxRedeemer,
-        readonly subCborRef?: SubCborRef
+        readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
+        if(!(
             isObject( redeemer ) &&
             hasOwn( redeemer, "tag" ) &&
             hasOwn( redeemer, "index" ) &&
             hasOwn( redeemer, "data" ) &&
-            hasOwn( redeemer, "execUnits" ),
-            "invalid object passed to construct a 'TxRedeemer'"
-        );
+            hasOwn( redeemer, "execUnits" )
+        ))throw new Error( "invalid object passed to construct a 'TxRedeemer'");
 
         const {
             tag,
@@ -103,59 +113,31 @@ export class TxRedeemer
             execUnits
         } = redeemer;
 
-        assert(
-            tag === 0 || tag === 1 || tag === 2 || tag === 3,
-            "invalid redeemer tag"
-        );
-        defineReadOnlyProperty(
-            this,
-            "tag",
-            tag
-        );
+        if(!(
+            tag === 0 || 
+            tag === 1 || 
+            tag === 2 || 
+            tag === 3
+        ))throw new Error("invalid redeemer tag");
+        this.tag = tag;
 
-        assert(
-            canBeUInteger( index ),
-            "invlaid redeemer index"
-        );
-        defineReadOnlyProperty(
-            this,
-            "index",
-            Number( forceBigUInt( index ) )
-        );
+        if(!(
+            canBeUInteger( index )
+        ))throw new Error("invlaid redeemer index");
+        this.index = Number( forceBigUInt( index ) );
 
-        assert(
-            isData( data ),
-            "redeemer's data was not 'Data'"
-        );
-        defineReadOnlyProperty(
-            this,
-            "data",
-            data
-        );
+        if(!(
+            isData( data )
+        ))throw new Error("redeemer's data was not 'Data'");
+        this.data = data;
 
-        assert(
-            execUnits instanceof ExBudget,
-            "invalid 'execUnits' constructing 'TxRedeemer'"
-        );
+        if(!( 
+            execUnits instanceof ExBudget
+        ))throw new Error("invalid 'execUnits' constructing 'TxRedeemer'");
+        this._execUnits = execUnits.clone();
 
-        let _exUnits = execUnits.clone();
-
-        definePropertyIfNotPresent(
-            this,
-            "execUnits",
-            {
-                get: () => _exUnits,
-                set: ( newExUnits: ExBudget ) => {
-                    assert(
-                        newExUnits instanceof ExBudget,
-                        "invalid 'execUnits' constructing 'TxRedeemer'"
-                    );
-                    _exUnits = newExUnits.clone();
-                },
-                enumerable: true,
-                configurable: false
-            }
-        );
+         /* Done: this.cboRref params */
+        this.cborRef = cborRef ?? subCborRefOrUndef( redeemer );
     }
 
     clone(): TxRedeemer
@@ -201,13 +183,18 @@ export class TxRedeemer
         });
     }
 
+    toCborBytes(): Uint8Array
+    {
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
+        return this.toCbor().toBuffer();
+    }
     toCbor(): CborString
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.subCborRef.toBuffer() );
+            return new CborString( this.cborRef.toBuffer() );
         }
         
         return Cbor.encode( this.toCborObj() );

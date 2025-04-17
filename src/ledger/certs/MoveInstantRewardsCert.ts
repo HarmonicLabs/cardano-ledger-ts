@@ -102,15 +102,15 @@ export class MoveInstantRewardsCert
 
     constructor(
         { source, destination }: IMoveInstantRewardsCert,
-        readonly subCborRef?: SubCborRef
+        readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
-            source === InstantRewardsSource.Reserves ||
-            source === InstantRewardsSource.Treasurery,
-            "invalid 'source' while constructing 'MoveInstantRewardsCert'"
-        );
-        assert(
+        if(!(
+            source === InstantRewardsSource.Reserves || 
+            source === InstantRewardsSource.Treasurery
+        )) throw new Error("invalid 'source' while constructing 'MoveInstantRewardsCert'");
+        
+        if(!(
             canBeUInteger( destination ) ||
             (
                 Array.isArray( destination ) &&
@@ -123,25 +123,17 @@ export class MoveInstantRewardsCert
                     )  &&
                     entry.stakeCredentials instanceof Credential
                 ))
-            ),
-            "invalid 'destintaiton' while constructing 'MoveInstantRewardsCert'"
-        );
+            )
+        ))throw new Error("invalid 'destintaiton' while constructing 'MoveInstantRewardsCert'");
 
-        defineReadOnlyProperty(
-            this,
-            "certType",
-            CertificateType.MoveInstantRewards
-        );
-        defineReadOnlyProperty(
-            this,
-            "source",
-            source
-        );
-        defineReadOnlyProperty(
-            this,
-            "destination",
-            destination
-        );
+        this.certType = CertificateType.MoveInstantRewards;
+
+        this.source = source;
+
+        this.destination = destination;
+
+        /* TODO: deprecated */
+        // this.cborRef = cborRef ?? getSubCborRef( this );
     }
 
     toData( version?: ToDataVersion | undefined): DataConstr
@@ -161,13 +153,18 @@ export class MoveInstantRewardsCert
         return [];
     }
 
+    toCborBytes(): Uint8Array
+    {
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
+        return this.toCbor().toBuffer();
+    }
     toCbor(): CborString
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.subCborRef.toBuffer() );
+            return new CborString( this.cborRef.toBuffer() );
         }
         
         return Cbor.encode( this.toCborObj() );
@@ -175,11 +172,11 @@ export class MoveInstantRewardsCert
 
     toCborObj(): CborObj
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return Cbor.parse( this.subCborRef.toBuffer() );
+            return Cbor.parse( this.cborRef.toBuffer() );
         }
         return new CborArray([
             new CborUInt( this.source ),

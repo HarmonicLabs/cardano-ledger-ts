@@ -1,19 +1,19 @@
 import { Cbor, CborArray, CborObj, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { IGovAction } from "./IGovAction";
 import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx";
-import { IProtocolVerision, IProtocolVerisionObj, isIProtocolVersion, protocolVersionAsObj, protocolVersionToCborObj } from "../../ledger/protocol/protocolVersion";
 import { GovActionType } from "./GovActionType";
 import { roDescr } from "../../utils/roDescr";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { DataConstr, DataI, ToData } from "@harmoniclabs/plutus-data";
-import { partialProtocolParametersToData } from "../../ledger";
+import { IProtocolVersion, isIProtocolVersion, partialProtocolParametersToData, ProtocolVersion } from "../../ledger";
 import { ToDataVersion } from "../../toData/defaultToDataVersion";
 import { maybeData } from "../../utils/maybeData";
+import { subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 
 export interface IGovActionInitHardFork {
     govActionId?: ITxOutRef | undefined,
-    protocolVersion: IProtocolVerision
+    protocolVersion: IProtocolVersion
 }
 
 export function isIGovActionInitHardFork( stuff: any ): stuff is IGovActionInitHardFork
@@ -29,29 +29,32 @@ export class GovActionInitHardFork
 {
     readonly govActionType: GovActionType.InitHardFork;
     readonly govActionId: TxOutRef | undefined;
-    readonly protocolVersion: IProtocolVerisionObj;
+    readonly protocolVersion: IProtocolVersion;
 
     constructor(
-        { govActionId, protocolVersion }: IGovActionInitHardFork,
-        readonly subCborRef?: SubCborRef
+        init: IGovActionInitHardFork,
+        readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        Object.defineProperties(
-            this, {
-                govActionType: { value: GovActionType.InitHardFork, ...roDescr },
-                govActionId: { value: govActionId ? new TxOutRef( govActionId ) : undefined, ...roDescr },
-                protocolVersion: { value: protocolVersionAsObj( protocolVersion ), ...roDescr }
-            }
-        );
+        const { govActionId, protocolVersion } = init;
+        this.govActionType = GovActionType.InitHardFork;
+        this.govActionId = govActionId ? new TxOutRef( govActionId ) : undefined;
+        this.protocolVersion = protocolVersion;
+        this.cborRef = cborRef ?? subCborRefOrUndef( init );
     }
 
+    toCborBytes(): Uint8Array
+    {
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
+        return this.toCbor().toBuffer();
+    }
     toCbor(): CborString
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.subCborRef.toBuffer() );
+            return new CborString( this.cborRef.toBuffer() );
         }
         
         return Cbor.encode( this.toCborObj() )
@@ -61,7 +64,7 @@ export class GovActionInitHardFork
         return new CborArray([
             new CborUInt( this.govActionType ),
             this.govActionId?.toCborObj() ?? new CborSimple( null ),
-            protocolVersionToCborObj( this.protocolVersion )
+            new ProtocolVersion( this.protocolVersion ).toCborObj()
         ]);
     }
 

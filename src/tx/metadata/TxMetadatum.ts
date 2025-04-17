@@ -1,11 +1,10 @@
-import { ByteString } from "@harmoniclabs/bytestring";
 import { CborObj, CborMap, CborArray, CborUInt, CborNegInt, CborBytes, CborText, ToCbor, CborString, Cbor, SubCborRef } from "@harmoniclabs/cbor";
 import { has_n_determined_keys, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
-import { isUint8Array, toHex } from "@harmoniclabs/uint8array-utils";
+import { fromHex, isUint8Array, toHex } from "@harmoniclabs/uint8array-utils";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
 import { assert } from "../../utils/assert";
-
+import { subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 export type TxMetadatum
     = TxMetadatumMap
@@ -77,43 +76,46 @@ function isTxMetadatumMapEntry( something: any ): something is TxMetadatumMapEnt
 export class TxMetadatumMap
     implements ToCbor, ToJson
 {
-    readonly map!: TxMetadatumMapEntry[];
+    readonly map!: Readonly<TxMetadatumMapEntry[]>;
 
     constructor(
         map: TxMetadatumMapEntry[],
-        readonly subCborRef?: SubCborRef
+        readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
-            map.every( isTxMetadatumMapEntry ),
-            "invalid entries for TxMetadatumMap"
-        );
+        if(!(
+            map.every( isTxMetadatumMapEntry )
+        ))throw new Error("invalid entries for TxMetadatumMap");
 
-        defineReadOnlyProperty(
-            this,
-            "map",
-            Object.freeze( map )
-        );
+        this.map = Object.freeze( map );
+
+        /* Done: this.cboRref params */
+        this.cborRef = cborRef ?? subCborRefOrUndef( map );
     }
 
+    toCborBytes(): Uint8Array
+    {
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
+        return this.toCbor().toBuffer();
+    }
     toCbor(): CborString
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.subCborRef.toBuffer() );
+            return new CborString( this.cborRef.toBuffer() );
         }
         
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return Cbor.parse( this.subCborRef.toBuffer() );
+            return Cbor.parse( this.cborRef.toBuffer() );
         }
         return new CborMap(
             this.map.map( entry => {
@@ -140,43 +142,46 @@ export class TxMetadatumMap
 export class TxMetadatumList
     implements ToCbor, ToJson
 {
-    readonly list!: TxMetadatum[];
+    readonly list!: Readonly<TxMetadatum[]>;
 
     constructor(
         map: TxMetadatum[],
-        readonly subCborRef?: SubCborRef
+        readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
-            map.every( isTxMetadatum ),
-            "invalid entries for TxMetadatumList"
-        );
+        if(!(
+            map.every( isTxMetadatum )
+        ))throw new Error("invalid entries for TxMetadatumList");
+        
+        this.list = Object.freeze( map );
 
-        defineReadOnlyProperty(
-            this,
-            "list",
-            Object.freeze( map )
-        );
+         /* Done: this.cboRref params */
+        this.cborRef = cborRef ?? subCborRefOrUndef( map );        
     }
 
+    toCborBytes(): Uint8Array
+    {
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
+        return this.toCbor().toBuffer();
+    }
     toCbor(): CborString
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.subCborRef.toBuffer() );
+            return new CborString( this.cborRef.toBuffer() );
         }
         
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return Cbor.parse( this.subCborRef.toBuffer() );
+            return Cbor.parse( this.cborRef.toBuffer() );
         }
         return new CborArray( this.list.map( _ => _.toCborObj() ) );
     }
@@ -195,34 +200,35 @@ export class TxMetadatumInt
 
     constructor(
         n: number | bigint,
-        readonly subCborRef?: SubCborRef
+        readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        defineReadOnlyProperty(
-            this,
-            "n",
-            BigInt( n )
-        );
+        this.n = BigInt( n );
     }
 
+    toCborBytes(): Uint8Array
+    {
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
+        return this.toCbor().toBuffer();
+    }
     toCbor(): CborString
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.subCborRef.toBuffer() );
+            return new CborString( this.cborRef.toBuffer() );
         }
         
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return Cbor.parse( this.subCborRef.toBuffer() );
+            return Cbor.parse( this.cborRef.toBuffer() );
         }
         return this.n < BigInt( 0 ) ? new CborNegInt( this.n ) : new CborUInt( this.n )
     }
@@ -233,42 +239,44 @@ export class TxMetadatumInt
         return { int: this.n.toString() }
     }
 }
-
 export class TxMetadatumBytes
     implements ToCbor, ToJson
 {
     readonly bytes!: Uint8Array
 
     constructor(
-        bytes: Uint8Array | ByteString,
-        readonly subCborRef?: SubCborRef
+        bytes: Uint8Array | string,
+        readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        defineReadOnlyProperty(
-            this,
-            "bytes",
-            isUint8Array( bytes ) ? bytes : bytes.toBuffer()
-        );
+        this.bytes = bytes instanceof Uint8Array ? bytes : fromHex( bytes );
+        /* Done: this.cboRref params */
+        this.cborRef = cborRef ?? subCborRefOrUndef( bytes );
     }
 
+    toCborBytes(): Uint8Array
+    {
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
+        return this.toCbor().toBuffer();
+    }
     toCbor(): CborString
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.subCborRef.toBuffer() );
+            return new CborString( this.cborRef.toBuffer() );
         }
         
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return Cbor.parse( this.subCborRef.toBuffer() );
+            return Cbor.parse( this.cborRef.toBuffer() );
         }
         if( this.bytes.length > 64 )
         {
@@ -303,39 +311,42 @@ export class TxMetadatumText
 
     constructor(
         text: string,
-        readonly subCborRef?: SubCborRef
+        readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
-            typeof text === "string",
-            "invalid text"
-        );
+        if(!(
+            typeof text === "string"
+        ))throw new Error("invalid text");
 
-        defineReadOnlyProperty(
-            this,
-            "text",
-            text
-        );
+        this.text = text;
+        
+     /* Done: this.cboRref params */
+     this.cborRef = cborRef ?? subCborRefOrUndef( text );
     }
 
+    toCborBytes(): Uint8Array
+    {
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
+        return this.toCbor().toBuffer();
+    }
     toCbor(): CborString
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.subCborRef.toBuffer() );
+            return new CborString( this.cborRef.toBuffer() );
         }
         
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return Cbor.parse( this.subCborRef.toBuffer() );
+            return Cbor.parse( this.cborRef.toBuffer() );
         }
         if( this.text.length > 64 )
         {

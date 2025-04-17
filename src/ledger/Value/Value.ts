@@ -1,4 +1,3 @@
-import { ByteString } from "@harmoniclabs/bytestring";
 import { ToCbor, CborString, Cbor, CborObj, CborUInt, CborMap, CborBytes, CborNegInt, CborArray, CanBeCborString, forceCborString, CborMapEntry, SubCborRef } from "@harmoniclabs/cbor";
 import { ToData, DataMap, DataB, DataI, DataPair } from "@harmoniclabs/plutus-data";
 import { lexCompare, toHex, fromHex } from "@harmoniclabs/uint8array-utils";
@@ -8,7 +7,7 @@ import { IValue, isIValue, getEmptyNameQty, getNameQty, IValueAdaEntry, IValueAs
 import { assert } from "../../utils/assert";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { ToDataVersion } from "../../toData/defaultToDataVersion";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 const enum Ord {
     LT = -1,
@@ -35,7 +34,7 @@ const _0n = BigInt( 0 );
 export class Value
     implements ToCbor, ToData
 {
-    readonly map!: NormalizedIValue
+    readonly map!: Readonly<NormalizedIValue>
 
     *[Symbol.iterator]()
     {
@@ -48,13 +47,14 @@ export class Value
 
     constructor(
         map: IValue,
-        readonly subCborRef?: SubCborRef
+        readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        assert(
-            isIValue( map ),
-            "invalid value interface passed to contruct a 'value' instance"
-        );
+        
+        if(!(
+            isIValue( map )
+        ))throw new Error("invalid value interface passed to contruct a 'value' instance");
+
 
         const _map = normalizeIValue( map );
 
@@ -93,30 +93,23 @@ export class Value
             return lexCompare( a.policy.toBuffer(), b.policy.toBuffer() );
         });
 
-        defineReadOnlyProperty(
-            this,
-            "map",
-            Object.freeze( _map )
-        );
+        this.map = Object.freeze( _map );
 
-        Object.defineProperty(
-            this, "lovelaces",
-            {
-                get: (): bigint => BigInt(
-                    getEmptyNameQty(
-                        this.map
-                        .find( ({ policy }) => policy === "" )
-                        ?.assets
-                    ) ?? 0 
-                ),
-                set: () => {},
-                enumerable: true,
-                configurable: false
-            }
-        );
+        
+        /* DONE: this.cborRef */
+        this.cborRef = cborRef ?? subCborRefOrUndef( map );        
     }
 
-    readonly lovelaces!: bigint;
+    get lovelaces(): bigint
+    {
+        return BigInt(
+            getEmptyNameQty(
+                this.map
+                .find( ({ policy }) => policy === "" )
+                ?.assets
+            ) ?? 0 
+        );
+    }
 
     get( policy: Hash28 | Uint8Array | string , assetName: Uint8Array ): bigint
     {
@@ -281,17 +274,17 @@ export class Value
 
     static add( a: Value, b: Value ): Value
     {
-        return new Value( addIValues( a.map, b.map ) );
+        return new Value( addIValues( a.map as IValue, b.map as IValue ) );
     }
 
     static sub( a: Value, b: Value ): Value
     {
-        return new Value( subIValues( a.map, b.map ) );
+        return new Value( subIValues( a.map as IValue, b.map as IValue ) );
     }
 
     clone(): Value
     {
-        return new Value( cloneIValue(this.map ) )
+        return new Value( cloneIValue(this.map as IValue) )
     }
 
     toData( version?: ToDataVersion ): DataMap<DataB,DataMap<DataB,DataI>>
@@ -299,13 +292,11 @@ export class Value
         return new DataMap<DataB,DataMap<DataB,DataI>>(
             this.map.map( ({ policy, assets }) =>
                 new DataPair(
-                    new DataB( new ByteString( policy === "" ? "" : policy.toBuffer() ) ),
+                    new DataB( policy === "" ? "" : policy.toBuffer() ),
                     new DataMap(
                         assets.map( ({ name: assetName }) =>
                             new DataPair(
-                                new DataB(
-                                    new ByteString( assetName )
-                                ),
+                                new DataB( assetName ), 
                                 new DataI( getNameQty( assets, assetName ) ?? 0 )
                             )
                         )
@@ -315,24 +306,29 @@ export class Value
         )
     }
     
+    toCborBytes(): Uint8Array
+    {
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
+        return this.toCbor().toBuffer();
+    }
     toCbor(): CborString
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.subCborRef.toBuffer() );
+            return new CborString( this.cborRef.toBuffer() );
         }
         
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return Cbor.parse( this.subCborRef.toBuffer() );
+            return Cbor.parse( this.cborRef.toBuffer() );
         }
         if( Value.isAdaOnly( this ) ) return new CborUInt( this.lovelaces );
 
@@ -467,7 +463,7 @@ export class Value
     toJSON() { return this.toJson(); }
     toJson(): ValueJson
     {
-        return IValueToJson( this.map );
+        return IValueToJson( this.map as IValue  );
     }
 
     /**

@@ -10,7 +10,7 @@ import { Value } from "./Value";
 import { assert } from "../utils/assert";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { ToDataVersion } from "../toData/defaultToDataVersion";
-import { getSubCborRef } from "../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../utils/getSubCborRef";
 
 export type ITxWithdrawalsEntryBigInt = {
     rewardAccount: StakeAddress,
@@ -66,18 +66,17 @@ export function isITxWithdrawals( stuff: any ): stuff is ITxWithdrawals
 export class TxWithdrawals
     implements ToCbor, ToData
 {
-    readonly map!: TxWithdrawalsMapBigInt
+    readonly map!: Readonly<TxWithdrawalsMapBigInt>
 
     constructor(
         map: ITxWithdrawals,
-        readonly subCborRef?: SubCborRef,
+        readonly cborRef: SubCborRef | undefined = undefined,
         network: NetworkT = "mainnet"
     )
     {
-        assert(
-            isITxWithdrawals( map ),
-            "invalid 'ITxWithdrawalsMap' passed to construct a 'TxWithdrawals'"
-        );
+        if(!(
+            isITxWithdrawals( map )
+        ))throw new Error("invalid 'ITxWithdrawalsMap' passed to construct a 'TxWithdrawals'")
 
         if( Array.isArray( map ) )
         {
@@ -85,38 +84,29 @@ export class TxWithdrawals
                 rewardAccount:
                     entry.rewardAccount instanceof StakeAddress ?
                         entry.rewardAccount.clone() :
-                        new StakeAddress(
+                        new StakeAddress({
                             network,
-                            new Hash28( entry.rewardAccount )
-                        ),
+                            credentials: new Hash28( entry.rewardAccount ),
+                            type: "stakeKey"
+                        }),
                 amount: forceBigUInt( entry.amount )
             }));
+            this.map =  Object.freeze(_map)
 
-            defineReadOnlyProperty(
-                this,
-                "map",
-                Object.freeze( _map )
-            );
         }
         else
         {
-            assert(
-                typeof map === "object",
-                "invalid object passed as 'ITxWithdrawalsMap' to construct a 'TxWithdrawals'"
-            );
+            if(!(
+                typeof map === "object"
+            ))throw new Error("invalid object passed as 'ITxWithdrawalsMap' to construct a 'TxWithdrawals'")
 
-            defineReadOnlyProperty(
-                this,
-                "map",
-                Object.freeze(
-                    Object.keys( map )
-                    .map( rewAccount => Object.freeze({
-                        rewardAccount: StakeAddress.fromString( rewAccount ),
-                        amount: forceBigUInt( (map as any)[rewAccount] )
-                    }))
-                )
-            );
+            this.map = Object.keys( map )
+            .map( rewAccount => Object.freeze({
+                rewardAccount: StakeAddress.fromString( rewAccount ),
+                amount: forceBigUInt( (map as any)[rewAccount] )
+            }))
         }
+        this.cborRef = cborRef ?? subCborRefOrUndef( map );
     }
 
     toTotalWitdrawn(): Value
@@ -140,24 +130,29 @@ export class TxWithdrawals
         );
     }
 
+    toCborBytes(): Uint8Array
+    {
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
+        return this.toCbor().toBuffer();
+    }
     toCbor(): CborString
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.subCborRef.toBuffer() );
+            return new CborString( this.cborRef.toBuffer() );
         }
         
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return Cbor.parse( this.subCborRef.toBuffer() );
+            return Cbor.parse( this.cborRef.toBuffer() );
         }
         return new CborMap(
             this.map.map( entry => {

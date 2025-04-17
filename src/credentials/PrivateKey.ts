@@ -1,5 +1,5 @@
 import { CanBeCborString, CborObj } from "@harmoniclabs/cbor";
-import { deriveEd25519PublicKey, byte } from "@harmoniclabs/crypto";
+import { deriveEd25519PublicKey, byte, deriveEd25519PublicKey_sync } from "@harmoniclabs/crypto";
 import { Hash32 } from "../hashes/Hash32/Hash32";
 import { PublicKey } from "./PublicKey";
 
@@ -9,8 +9,8 @@ export class PrivateKey extends Hash32
     {
         return new PublicKey(
             new Uint8Array(
-                deriveEd25519PublicKey(
-                    Array.from( this.toBuffer() ) as byte[]
+                deriveEd25519PublicKey_sync(
+                    this.toBuffer()
                 )
             )
         );

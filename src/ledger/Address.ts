@@ -13,6 +13,7 @@ import { fromHex, toHex } from "@harmoniclabs/uint8array-utils";
 import { harden, XPrv } from "@harmoniclabs/bip32_ed25519";
 import { ToDataVersion } from "../toData/defaultToDataVersion";
 import { getSubCborRef } from "../utils/getSubCborRef";
+import { error } from "console";
 
 export type AddressStr = `${"addr1"|"addr_test1"}${string}`;
 
@@ -35,6 +36,13 @@ export type AddressType
     | "bootstrap"
     | "unknown"
 
+export interface IAddress {
+    network: NetworkT,
+    paymentCreds: Credential,
+    stakeCreds?: StakeCredentials,
+    type?: AddressType
+}
+
 /**
  * shelley specification in cardano-ledger; page 113
  */
@@ -52,12 +60,12 @@ export class Address
         type?: AddressType
     ): Address
     {
-        return new Address(
-            "mainnet",
+        return new Address({
+            network: "mainnet",
             paymentCreds,
             stakeCreds,
             type
-        );
+        });
     }
 
     static testnet(
@@ -66,78 +74,75 @@ export class Address
         type?: AddressType
     ): Address
     {
-        return new Address(
-            "testnet",
+        return new Address({
+            network: "testnet",
             paymentCreds,
             stakeCreds,
             type
-        );
+        });
     }
 
     constructor(
-        network: NetworkT,
-        paymentCreds: Credential,
-        stakeCreds?: StakeCredentials,
-        type?: AddressType,
-        readonly subCborRef?: SubCborRef
+        address: IAddress,
+        readonly cborRef: SubCborRef | undefined = undefined
     )
     {
+        let {
+            network,
+            paymentCreds,
+            stakeCreds,
+            type
+        } = address;
+        
+
         type = type === undefined ? 
             (stakeCreds === undefined ? "enterprise" : "base")
             : type;
-        assert(
-            type === "base"         ||
-            type === "enterprise"   ||
-            type === "bootstrap"    ||
-            type === "pointer",
-            "invalid address type"
-        );
-        defineReadOnlyProperty(
-            this, "type", type
-        );
+            if(!(
+                type === "base"         ||
+                type === "enterprise"   ||
+                type === "bootstrap"    ||
+                type === "pointer"
+            ))throw new Error("invalid address type");
 
-        assert(
-            network === "mainnet" || network === "testnet",
-            "invalid network"
-        );
-        defineReadOnlyProperty(
-            this, "network", network
-        );
+        this.type = type
 
-        assert(
-            paymentCreds instanceof Credential,
-            "invalid payment credentials"
-        );
-        defineReadOnlyProperty(
-            this, "paymentCreds", paymentCreds.clone()
-        );
+        if(!(
+            network === "mainnet" || 
+            network === "testnet"
+        )) throw new Error("invalid network");
 
-        assert(
-            stakeCreds === undefined || stakeCreds instanceof StakeCredentials,
-            "invalid stake credentials"
-        );
-        defineReadOnlyProperty(
-            this, "stakeCreds", stakeCreds?.clone()
-        );
+        this.network = network;
 
+        if(!(
+            paymentCreds instanceof Credential 
+        ))throw new Error("invalid payment credentials")
+
+        this.paymentCreds = paymentCreds.clone();
+
+        if(!(
+            stakeCreds === undefined || stakeCreds instanceof StakeCredentials
+        ))throw new Error("invalid stake credentials");
+
+        this.stakeCreds = stakeCreds?.clone()
     }
 
     clone(): Address
     {
-        return new Address(
-            this.network,
-            this.paymentCreds, // cloned in constructor
-            this.stakeCreds,   // cloned in constructor
-            this.type
-        );
+        return new Address({
+            network: this.network,
+            paymentCreds: this.paymentCreds, // cloned in constructor
+            stakeCreds: this.stakeCreds,   // cloned in constructor
+            type: this.type
+        });
     }
 
     static get fake(): Address
     {
-        return new Address(
-            "mainnet",
-            Credential.fake
-        );
+        return new Address({
+            network: "mainnet",
+            paymentCreds: Credential.fake
+        });
     }
 
     toData( version?: ToDataVersion ): Data
@@ -164,12 +169,12 @@ export class Address
           maybeStakeCreds instanceof DataConstr
         )) throw new Error("invalid data for address");
       
-        return new Address(
+        return new Address({
             network,
-            Credential.fromData( creds ),
-            maybeStakeCreds.constr >= 1 ? undefined : // nothing
+            paymentCreds: Credential.fromData( creds ),
+            stakeCreds: maybeStakeCreds.constr >= 1 ? undefined : // nothing
             StakeCredentials.fromData( maybeStakeCreds.fields[0] )
-        );
+        });
     }
 
     toBytes(): byte[]
@@ -213,7 +218,7 @@ export class Address
 
     static fromBytes(
         bs: byte[] | string | Uint8Array,
-        subCborRef?: SubCborRef
+        cborRef: SubCborRef | undefined = undefined
     ): Address
     {
         bs = Array.from(
@@ -275,20 +280,21 @@ export class Address
             )
         }
         
-        return new Address(
+        return new Address({
             network,
-            new Credential(
-                paymentType,
-                new Hash28( new Uint8Array( payment ) )
-            ),
-            stake.length === 28 ?
-                new StakeCredentials(
-                    stakeType,
-                    new Hash28( new Uint8Array( stake ) )
-                ):
+            paymentCreds: new Credential({
+                type: paymentType,
+                hash: new Hash28( new Uint8Array( payment ) )
+            }),
+            stakeCreds: stake.length === 28 ?
+                new StakeCredentials({
+                    type: stakeType,
+                    hash: new Hash28( new Uint8Array( stake ) )
+                }):
                 undefined,
             type,
-            subCborRef
+            
+            }, cborRef
         );
     };
 
@@ -299,14 +305,14 @@ export class Address
 
     static fromBuffer(
         buff: Uint8Array | string,
-        subCborRef?: SubCborRef
+        cborRef: SubCborRef | undefined = undefined
     ): Address
     {
         return Address.fromBytes(
             typeof buff === "string" ?
             buff : 
             Array.from( buff ) as byte[],
-            subCborRef
+            cborRef
         )
     }
 
@@ -331,11 +337,11 @@ export class Address
         const stake_pub = new PublicKey( stake_prv.public().toPubKeyBytes() );
         const stake_pkh = stake_pub.hash;
 
-        return new Address(
+        return new Address({
             network,
-            Credential.keyHash( pkh ),
-            StakeCredentials.keyHash(stake_pkh)
-        );
+            paymentCreds: Credential.keyHash( pkh ),
+            stakeCreds: StakeCredentials.keyHash(stake_pkh),
+        });
     }
 
     /**
@@ -355,11 +361,11 @@ export class Address
 
     toCborObj(): CborObj
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return Cbor.parse( this.subCborRef.toBuffer() );
+            return Cbor.parse( this.cborRef.toBuffer() );
         }
         return new CborBytes( this.toBuffer() );
     }
@@ -375,13 +381,18 @@ export class Address
         );
     }
 
+    toCborBytes(): Uint8Array
+    {
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
+        return this.toCbor().toBuffer();
+    }
     toCbor(): CborString
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.subCborRef.toBuffer() );
+            return new CborString( this.cborRef.toBuffer() );
         }
         
         return Cbor.encode( this.toCborObj() );

@@ -4,7 +4,7 @@ import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
 import { assert } from "../../utils/assert";
 import { TxMetadatum, isTxMetadatum, txMetadatumFromCborObj } from "./TxMetadatum";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 export type ITxMetadata = {
     [metadatum_label: number | string]: TxMetadatum 
@@ -19,23 +19,22 @@ export class TxMetadata
 
     constructor(
         metadata: ITxMetadata,
-        readonly subCborRef?: SubCborRef
+        readonly cborRef: SubCborRef | undefined = undefined
     )
     {
         const _metadata = {};
         
         Object.keys( metadata )
         .forEach( k =>
-
+            /* TO DO: how to handle this :grin: */
             defineReadOnlyProperty(
                 _metadata,
                 BigInt( k ).toString(),
                 (() => {
                     const v = metadata[k];
-                    assert(
-                        isTxMetadatum( v ),
-                        "metatdatum with label " + k + " was not instace of 'TxMetadatum'"
-                    );
+                    if(!(
+                        isTxMetadatum( v )
+                    ))throw new Error("metatdatum with label " + k + " was not instace of 'TxMetadatum'")
 
                     return v;
                 })()
@@ -43,32 +42,36 @@ export class TxMetadata
 
         );
 
-        defineReadOnlyProperty(
-            this,
-            "metadata",
-            _metadata
-        );
+        this.metadata = _metadata;
+         /* Done: this.cboRref params */
+        this.cborRef = cborRef ?? subCborRefOrUndef( metadata );
     }
     
+    toCborBytes(): Uint8Array
+    {
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
+        return this.toCbor().toBuffer();
+    }
     toCbor(): CborString
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.subCborRef.toBuffer() );
+            return new CborString( this.cborRef.toBuffer() );
         }
         
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return Cbor.parse( this.subCborRef.toBuffer() );
+            return Cbor.parse( this.cborRef.toBuffer() );
         }
+        
         return new CborMap(
             Object.keys( this.metadata ).map( labelStr => {
                 return {
@@ -85,8 +88,9 @@ export class TxMetadata
     }
     static fromCborObj( cObj: CborObj ): TxMetadata
     {
-        if(!( cObj instanceof CborMap ))
-        throw new InvalidCborFormatError("TxMetadata")
+        if(!( 
+            cObj instanceof CborMap 
+        ))throw new InvalidCborFormatError("TxMetadata")
 
         const meta = {};
         const len = cObj.map.length;
@@ -99,7 +103,9 @@ export class TxMetadata
             throw new InvalidCborFormatError("TxMetadata")
 
             defineReadOnlyProperty(
-                meta, k.num.toString(), txMetadatumFromCborObj( v )
+                meta, 
+                k.num.toString(), 
+                txMetadatumFromCborObj( v )
             )
         }
 

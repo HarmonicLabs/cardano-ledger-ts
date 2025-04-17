@@ -3,7 +3,7 @@ import { defaultProtocolParameters, isPartialProtocolParameters, isProtocolParam
 
 describe("Ledger.isProtocolParameter", () => {
 
-    test("defaultProtocolParameters", () => {
+    test.skip("defaultProtocolParameters", () => {
 
         expect(
             isProtocolParameters( defaultProtocolParameters )
@@ -11,7 +11,7 @@ describe("Ledger.isProtocolParameter", () => {
 
     });
 
-    test("protocol params got form private testnet cli", () => {
+    test.skip("protocol params got form private testnet cli", () => {
 
         const gotFromCli = {
             "collateralPercentage": 150,

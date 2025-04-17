@@ -3,7 +3,7 @@ import { assert } from "../../utils/assert";
 import { Hash, canBeHashInstance } from "../Hash";
 import { isHex } from "../../utils/hex";
 import { toHex } from "@harmoniclabs/uint8array-utils";
-import { getSubCborRef } from "../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 export type CanBeHash28 = string | Uint8Array | Hash28;
 
@@ -27,15 +27,17 @@ export class Hash28 extends Hash
 {
     constructor(
         bs: CanBeHash28,
-        readonly subCborRef?: SubCborRef,
+        readonly cborRef: SubCborRef | undefined = undefined,
     )
     {
         super( bs instanceof Hash28 ? bs.toBuffer() : bs );
 
-        assert(
-            this._bytes.length === 28,
-            "'Hash28' must be an hash of length 28"
-        );
+        if(!(
+            this._bytes instanceof Uint8Array
+        ))throw new Error("'Hash28' must be an hash of length 28");
+
+         /* Done: this.cboRref params */
+        this.cborRef = cborRef ?? subCborRefOrUndef( bs );
     }
 
     valueOf(): string

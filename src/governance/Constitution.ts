@@ -7,6 +7,7 @@ import { isObject } from "@harmoniclabs/obj-utils";
 import { DataConstr } from "@harmoniclabs/plutus-data";
 import { ToDataVersion } from "../toData/defaultToDataVersion";
 import { maybeData } from "../utils/maybeData";
+import { subCborRefOrUndef } from "../utils/getSubCborRef";
 
 export interface IConstitution {
     anchor: IAnchor,
@@ -28,25 +29,29 @@ export class Constitution
     readonly scriptHash: Hash28 | undefined;
 
     constructor(
-        { anchor, scriptHash }: IConstitution,
-        readonly subCborRef?: SubCborRef
+        consti: IConstitution,
+        readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        Object.defineProperties(
-            this, {
-                anchor: { value: new Anchor( anchor ), ...roDescr },
-                scriptHash: { value: canBeHash28( scriptHash ) ? new Hash28( scriptHash ) : undefined, ...roDescr }
-            }
-        );
+        const { anchor, scriptHash } = consti;
+        this.anchor = new Anchor( anchor );
+        this.scriptHash = canBeHash28( scriptHash ) ? new Hash28( scriptHash ) : undefined;
+        
+        this.cborRef = cborRef ?? subCborRefOrUndef( consti );
     }
 
+    toCborBytes(): Uint8Array
+    {
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
+        return this.toCbor().toBuffer();
+    }
     toCbor(): CborString
     {
-        if( this.subCborRef instanceof SubCborRef )
+        if( this.cborRef instanceof SubCborRef )
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.subCborRef.toBuffer() );
+            return new CborString( this.cborRef.toBuffer() );
         }
         
         return Cbor.encode( this.toCborObj() );
