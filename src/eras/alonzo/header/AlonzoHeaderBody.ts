@@ -50,7 +50,7 @@ export function isIAlonzoHeaderBody( thing: any ): thing is IAlonzoHeaderBody
 }
 
 export class AlonzoHeaderBody
-    implements IAlonzoHeaderBody, ToCbor
+    implements IAlonzoHeaderBody, ToCbor, IPraosHeaderBody
 {
     readonly blockNumber: bigint;
     readonly slot: bigint;
@@ -81,6 +81,13 @@ export class AlonzoHeaderBody
         this.blockBodyHash = hash32bytes( hdrBody.blockBodyHash );
         this.opCert = new PoolOperationalCert( hdrBody.opCert );
         this.protocolVersion = new ProtocolVersion( hdrBody.protocolVersion );
+    }
+    getLeaderVrfCert(): VrfCert {
+        return this.leaderVrfResult;
+    }
+
+    getNonceVrfCert(): VrfCert {
+        return this.nonceVrfResult;
     }
 
     leaderVrfOutput(): U8Arr<32>

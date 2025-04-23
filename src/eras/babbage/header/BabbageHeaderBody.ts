@@ -1,6 +1,6 @@
 import { canBeUInteger, CanBeUInteger } from "@harmoniclabs/cbor/dist/utils/ints";
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborSimple, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
-import { blake2b_256 } from "@harmoniclabs/crypto";
+import { blake2b_256, sha2_256_sync } from "@harmoniclabs/crypto";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { canBeHash32, CanBeHash32, hash32bytes } from "../../../hashes";
 import { isIVrfCert, IVrfCert, VrfCert } from "../../common/Vrf";
@@ -9,7 +9,7 @@ import { IPoolOperationalCert, isIPoolOperationalCert, PoolOperationalCert } fro
 import { U8Arr, U8Arr32 } from "../../../utils/U8Arr";
 import { forceBigUInt, u32 } from "../../../utils/ints";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
-
+import { IPraosHeaderBody } from "../../common/interfaces//IPraosHeader";
 export interface IBabbageHeaderBody
 {
     blockNumber: CanBeUInteger;
@@ -45,7 +45,7 @@ export function isIBabbageHeaderBody( thing: any ): thing is IBabbageHeaderBody
 }
 
 export class BabbageHeaderBody
-    implements IBabbageHeaderBody, ToCbor
+    implements IBabbageHeaderBody, ToCbor, IPraosHeaderBody
 {
     readonly blockNumber: bigint;
     readonly slot: bigint;
@@ -57,7 +57,7 @@ export class BabbageHeaderBody
     readonly blockBodyHash: U8Arr<32>;
     readonly opCert: PoolOperationalCert;
     readonly protocolVersion: ProtocolVersion;
-
+   
     constructor(
         hdrBody: IBabbageHeaderBody,
         readonly cborRef: SubCborRef | undefined = undefined
@@ -74,8 +74,36 @@ export class BabbageHeaderBody
         this.blockBodyHash = hash32bytes( hdrBody.blockBodyHash );
         this.opCert = new PoolOperationalCert( hdrBody.opCert );
         this.protocolVersion = new ProtocolVersion( hdrBody.protocolVersion );
+   
+   
+   
     }
+    /* Alonzo HeaderBody
+            this.blockNumber = forceBigUInt( hdrBody.blockNumber );
+            this.slot = forceBigUInt( hdrBody.slot );
+            this.prevHash = typeof hdrBody.prevHash !== "undefined" ? hash32bytes( hdrBody.prevHash ) : undefined;
+            this.issuerPubKey = hash32bytes( hdrBody.issuerPubKey );
+            this.vrfPubKey = hash32bytes( hdrBody.vrfPubKey );
+            this.nonceVrfResult  = new VrfCert( hdrBody.nonceVrfResult  );
+            this.leaderVrfResult = new VrfCert( hdrBody.leaderVrfResult );
+            this.blockBodySize = u32( hdrBody.blockBodySize );
+            this.blockBodyHash = hash32bytes( hdrBody.blockBodyHash );
+            this.opCert = new PoolOperationalCert( hdrBody.opCert );
+            this.protocolVersion = new ProtocolVersion( hdrBody.protocolVersion );
+    */
+    getLeaderVrfCert(): VrfCert {
+        return this.vrfResult;
+    };
+    getNonceVrfCert: () => VrfCert;
 
+    leaderVrfOutput(): U8Arr<32>
+    {
+        return sha2_256_sync(
+            this.vrfResult.proofHash
+        ) as U8Arr<32>;
+    }
+    nonceVrfOutput: () => U8Arr32;      
+    
     clone(): BabbageHeaderBody
     {
         return new BabbageHeaderBody({

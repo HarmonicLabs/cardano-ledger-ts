@@ -1,10 +1,9 @@
 import { isObject } from "@harmoniclabs/obj-utils";
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
-import { IPraosHeader } from "../../common/interfaces/IPraosHeader";
 import { isKesSignature, KesSignature, KesSignatureBytes } from "../../common/Kes";
 import { BabbageHeaderBody, IBabbageHeaderBody, isIBabbageHeaderBody } from "./BabbageHeaderBody";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
-
+import { IPraosHeader } from "../../common/interfaces/IPraosHeader";
 
 export interface IBabbageHeader
 {
@@ -27,7 +26,7 @@ export function isIBabbageHeader( thing: any ): thing is IBabbageHeaderChecked
 }
 
 export class BabbageHeader
-    implements IBabbageHeader, ToCbor
+    implements IBabbageHeader, ToCbor, IPraosHeader
 {
     readonly body: BabbageHeaderBody;
     readonly kesSignature: KesSignature;

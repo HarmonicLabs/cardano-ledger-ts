@@ -27,7 +27,7 @@ export function isIConwayHeader( thing: any ): thing is IConwayHeaderChecked
 }
 
 export class ConwayHeader
-    implements IPraosHeader, IConwayHeader, ToCbor
+    implements IConwayHeader, ToCbor// , IPraosHeader
 {
     readonly body: ConwayHeaderBody;
     readonly kesSignature: KesSignature;

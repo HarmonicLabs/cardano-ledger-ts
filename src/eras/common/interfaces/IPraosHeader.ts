@@ -68,10 +68,12 @@ export interface IPraosHeaderBody extends ToCborBytes {
      * babbage and later: `sha2_256( [0x4e].concat( this.vrfResult.vrfOutput ) )` (0x4e is "N" indicating nonce)
     **/
     nonceVrfOutput: () => U8Arr32;
+
+    getLeaderVrfCert: () => VrfCert;
+    getNonceVrfCert: () => VrfCert;
     /**
      * 
      */
-    leaderVrf
     /**
      * 
      */
