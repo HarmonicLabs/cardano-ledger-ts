@@ -1,10 +1,9 @@
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { isObject } from "@harmoniclabs/obj-utils";
-import { IPraosHeader } from "../../common/interfaces/IPraosHeader";
 import { isKesSignature, KesSignature, KesSignatureBytes } from "../../common/Kes";
 import { ConwayHeaderBody, IConwayHeaderBody, isIConwayHeaderBody } from "./ConwayHeaderBody";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
-
+import { IPraosHeader } from "../../common/interfaces/IPraosHeader";
 
 export interface IConwayHeader
 {
@@ -27,7 +26,7 @@ export function isIConwayHeader( thing: any ): thing is IConwayHeaderChecked
 }
 
 export class ConwayHeader
-    implements IConwayHeader, ToCbor// , IPraosHeader
+    implements IConwayHeader, ToCbor , IPraosHeader
 {
     readonly body: ConwayHeaderBody;
     readonly kesSignature: KesSignature;

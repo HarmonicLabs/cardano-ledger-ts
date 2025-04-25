@@ -74,9 +74,6 @@ export class BabbageHeaderBody
         this.blockBodyHash = hash32bytes( hdrBody.blockBodyHash );
         this.opCert = new PoolOperationalCert( hdrBody.opCert );
         this.protocolVersion = new ProtocolVersion( hdrBody.protocolVersion );
-   
-   
-   
     }
     /* Alonzo HeaderBody
             this.blockNumber = forceBigUInt( hdrBody.blockNumber );
@@ -90,20 +87,17 @@ export class BabbageHeaderBody
             this.blockBodyHash = hash32bytes( hdrBody.blockBodyHash );
             this.opCert = new PoolOperationalCert( hdrBody.opCert );
             this.protocolVersion = new ProtocolVersion( hdrBody.protocolVersion );
-    */
-    getLeaderVrfCert(): VrfCert {
-        return this.vrfResult;
-    };
-    getNonceVrfCert: () => VrfCert;
-
+    */  
+    
+    // just keep the leaderVrfOutput and nonceVrfOutput ones
     leaderVrfOutput(): U8Arr<32>
     {
         return sha2_256_sync(
             this.vrfResult.proofHash
         ) as U8Arr<32>;
     }
-    nonceVrfOutput: () => U8Arr32;      
-    
+    nonceVrfOutput: () => U8Arr32;   
+
     clone(): BabbageHeaderBody
     {
         return new BabbageHeaderBody({

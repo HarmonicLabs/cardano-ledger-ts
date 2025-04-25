@@ -50,7 +50,7 @@ export function isIAllegraHeaderBody( thing: any ): thing is IAllegraHeaderBody
 }
 
 export class AllegraHeaderBody
-    implements IAllegraHeaderBody, ToCbor
+    implements IAllegraHeaderBody, ToCbor, IPraosHeaderBody
 {
     readonly blockNumber: bigint;
     readonly slot: bigint;

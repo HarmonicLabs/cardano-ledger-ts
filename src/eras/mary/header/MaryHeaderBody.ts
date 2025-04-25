@@ -50,7 +50,7 @@ export function isIMaryHeaderBody( thing: any ): thing is IMaryHeaderBody
 }
 
 export class MaryHeaderBody
-    implements IMaryHeaderBody, ToCbor
+    implements IMaryHeaderBody, ToCbor, IPraosHeaderBody
 {
     readonly blockNumber: bigint;
     readonly slot: bigint;

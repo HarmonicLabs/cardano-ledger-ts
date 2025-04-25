@@ -1,10 +1,9 @@
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { isObject } from "@harmoniclabs/obj-utils";
-import { IPraosHeader } from "../../common/interfaces/IPraosHeader";
 import { isKesSignature, KesSignature, KesSignatureBytes } from "../../common/Kes";
 import { MaryHeaderBody, IMaryHeaderBody, isIMaryHeaderBody } from "./MaryHeaderBody";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
-
+import { IPraosHeader } from "../../common/interfaces/IPraosHeader";
 
 export interface IMaryHeader
 {
@@ -27,7 +26,7 @@ export function isIMaryHeader( thing: any ): thing is IMaryHeaderChecked
 }
 
 export class MaryHeader
-    implements IMaryHeader, ToCbor
+    implements IMaryHeader, ToCbor, IPraosHeader
 {
     readonly body: MaryHeaderBody;
     readonly kesSignature: KesSignature;

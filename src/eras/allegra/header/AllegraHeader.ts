@@ -1,10 +1,9 @@
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { isObject } from "@harmoniclabs/obj-utils";
-import { IPraosHeader } from "../../common/interfaces/IPraosHeader";
 import { isKesSignature, KesSignature, KesSignatureBytes } from "../../common/Kes";
 import { AllegraHeaderBody, IAllegraHeaderBody, isIAllegraHeaderBody } from "./AllegraHeaderBody";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
-
+import { IPraosHeader } from "../../common/interfaces/IPraosHeader";
 
 export interface IAllegraHeader
 {
@@ -27,7 +26,7 @@ export function isIAllegraHeader( thing: any ): thing is IAllegraHeaderChecked
 }
 
 export class AllegraHeader
-    implements IAllegraHeader, ToCbor
+    implements IAllegraHeader, ToCbor, IPraosHeader
 {
     readonly body: AllegraHeaderBody;
     readonly kesSignature: KesSignature;

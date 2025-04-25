@@ -69,8 +69,8 @@ export interface IPraosHeaderBody extends ToCborBytes {
     **/
     nonceVrfOutput: () => U8Arr32;
 
-    getLeaderVrfCert: () => VrfCert;
-    getNonceVrfCert: () => VrfCert;
+    // getLeaderVrfCert: () => VrfCert;
+    // getNonceVrfCert: () => VrfCert;
     /**
      * 
      */

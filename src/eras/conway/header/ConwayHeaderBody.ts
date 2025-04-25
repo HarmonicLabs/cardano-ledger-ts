@@ -78,11 +78,7 @@ export class ConwayHeaderBody
         this.protocolVersion = new ProtocolVersion( hdrBody.protocolVersion );
 
     }
-    getLeaderVrfCert(): VrfCert {
-        return this.vrfResult;
-    };
-    getNonceVrfCert: () => VrfCert;
-
+    // just keep the leaderVrfOutput and nonceVrfOutput ones
     leaderVrfOutput(): U8Arr<32>
     {
         return sha2_256_sync(

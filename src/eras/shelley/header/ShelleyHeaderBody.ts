@@ -50,7 +50,7 @@ export function isIShelleyHeaderBody( thing: any ): thing is IShelleyHeaderBody
 }
 
 export class ShelleyHeaderBody
-    implements IShelleyHeaderBody, ToCbor
+    implements IShelleyHeaderBody, ToCbor, IPraosHeaderBody
 {
     readonly blockNumber: bigint;
     readonly slot: bigint;
