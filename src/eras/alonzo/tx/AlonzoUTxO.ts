@@ -96,7 +96,9 @@ export class AlonzoUTxO
     }
     static fromCborObj( cObj: CborObj ): AlonzoUTxO
     {
-        if(!(cObj instanceof CborArray))
+        if(!(
+            cObj instanceof CborArray
+        ))
         throw new InvalidCborFormatError("AlonzoUTxO");
 
         const [ ref, res ] = cObj.array;

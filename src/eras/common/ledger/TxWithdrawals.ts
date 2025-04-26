@@ -169,8 +169,9 @@ export class TxWithdrawals
     }
     static fromCborObj( cObj: CborObj ): TxWithdrawals
     {
-        if(!( cObj instanceof CborMap ))
-        throw new Error(`Invalid CBOR fromat for "TxWithdrawals"`);
+        if(!( 
+            cObj instanceof CborMap 
+        ))throw new Error(`Invalid CBOR fromat for "TxWithdrawals"`);
 
         return new TxWithdrawals(
             cObj.map.map( ({ k, v }) => {

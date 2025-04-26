@@ -137,7 +137,10 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType> {
         return StakeAddress.fromCborObj(Cbor.parse(forceCborString(cStr)));
     }
     static fromCborObj(cObj: CborObj): StakeAddress {
-        if (!(cObj instanceof CborBytes)) throw new Error(`Invalid CBOR format for "Hash"`);
+        
+        if (!(
+            cObj instanceof CborBytes
+        )) throw new Error(`Invalid CBOR format for "Hash"`);
 
         return StakeAddress.fromBytes(cObj.bytes);
     }

@@ -333,8 +333,8 @@ export class ConwayTxWitnessSet
     static fromCborObj( cObj: CborObj ): ConwayTxWitnessSet
     {
         if(!( 
-            cObj instanceof CborMap 
-            // && cObj.map.length >= 8
+            cObj instanceof CborMap &&
+            cObj.map.length >= 8
         ))throw new InvalidCborFormatError("ConwayTxWitnessSet");
 
         let fields: (CborObj | undefined)[] = new Array( 8 ).fill( undefined );

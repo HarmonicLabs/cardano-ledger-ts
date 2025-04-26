@@ -209,8 +209,8 @@ export class ConwayTx
     static fromCborObj( cObj: CborObj ): ConwayTx
     {
         if(!(
-            cObj instanceof CborArray
-            && cObj.array.length >= 4
+            cObj instanceof CborArray &&
+            cObj.array.length >= 4
         ))throw new InvalidCborFormatError("ConwayTx");
         
         const [ _body, _wits, _isValid, _aux ] = cObj.array;

@@ -202,8 +202,8 @@ export class MaryTx
     static fromCborObj( cObj: CborObj ): MaryTx
     {
         if(!(
-            cObj instanceof CborArray
-            && cObj.array.length >= 3
+            cObj instanceof CborArray &&
+            cObj.array.length >= 3
         ))throw new InvalidCborFormatError("MaryTx");
         
         const [ 

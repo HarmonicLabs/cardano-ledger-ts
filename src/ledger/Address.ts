@@ -47,7 +47,7 @@ export interface IAddress {
  * shelley specification in cardano-ledger; page 113
  */
 export class Address
-    implements ToData, ToCbor
+    implements IAddress, ToData, ToCbor
 {
     readonly network!: NetworkT
     readonly paymentCreds!: Credential

@@ -240,8 +240,8 @@ export class ShelleyTxWitnessSet
     static fromCborObj( cObj: CborObj ): ShelleyTxWitnessSet
     {
         if(!( 
-            cObj instanceof CborMap 
-            && cObj.map.length >= 3
+            cObj instanceof CborMap &&
+            cObj.map.length >= 3
         ))throw new InvalidCborFormatError("ShelleyTxWitnessSet");
 
         let fields: (CborObj | undefined)[] = new Array( 3 ).fill( undefined );
