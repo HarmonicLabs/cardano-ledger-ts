@@ -96,8 +96,9 @@ export class BabbageUTxO
     }
     static fromCborObj( cObj: CborObj ): BabbageUTxO
     {
-        if(!(cObj instanceof CborArray))
-        throw new InvalidCborFormatError("BabbageUTxO");
+        if(!(
+            cObj instanceof CborArray
+        ))throw new InvalidCborFormatError("BabbageUTxO");
 
         const [ ref, res ] = cObj.array;
 

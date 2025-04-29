@@ -82,8 +82,10 @@ export class ShelleyUTxO
     }
     static fromCborObj( cObj: CborObj ): ShelleyUTxO
     {
-        if(!(cObj instanceof CborArray))
-        throw new InvalidCborFormatError("ShelleyUTxO");
+        if(!(
+            cObj instanceof CborArray
+            && cObj.array.length >= 2
+        ))throw new InvalidCborFormatError("ShelleyUTxO");
 
         const [ ref, res ] = cObj.array;
 

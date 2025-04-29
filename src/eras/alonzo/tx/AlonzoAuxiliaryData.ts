@@ -194,7 +194,7 @@ export class AlonzoAuxiliaryData
         if(!(
             cObj instanceof CborTag &&
             cObj.data instanceof CborMap &&
-            cObj.data.map.length <= 3
+            cObj.data.map.length >= 3
         ))throw new InvalidCborFormatError("AlonzoAuxiliaryData")
 
         let fields: (CborObj | undefined)[] = new Array( 3 ).fill( undefined );

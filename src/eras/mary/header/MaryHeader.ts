@@ -1,43 +1,43 @@
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { isKesSignature, KesSignature, KesSignatureBytes } from "../../common/Kes";
-import { ShelleyHeaderBody, IShelleyHeaderBody, isIShelleyHeaderBody } from "./ShelleyHeaderBody";
+import { MaryHeaderBody, IMaryHeaderBody, isIMaryHeaderBody } from "./MaryHeaderBody";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
 import { IPraosHeader } from "../../common/interfaces/IPraosHeader";
 
-export interface IShelleyHeader
+export interface IMaryHeader
 {
-    body: IShelleyHeaderBody;
+    body: IMaryHeaderBody;
     kesSignature: KesSignatureBytes;
 }
 
-export interface IShelleyHeaderChecked
+export interface IMaryHeaderChecked
 {
-    body: IShelleyHeaderBody;
+    body: IMaryHeaderBody;
     kesSignature: KesSignature;
 }
 
-export function isIShelleyHeader( thing: any ): thing is IShelleyHeaderChecked
+export function isIMaryHeader( thing: any ): thing is IMaryHeaderChecked
 {
     return isObject( thing ) && (
-        isIShelleyHeaderBody( thing.body ) &&
+        isIMaryHeaderBody( thing.body ) &&
         isKesSignature( thing.kesSignature )
     );
 }
 
-export class ShelleyHeader
-    implements IShelleyHeader, ToCbor, IPraosHeader
+export class MaryHeader
+    implements IMaryHeader, ToCbor, IPraosHeader
 {
-    readonly body: ShelleyHeaderBody;
+    readonly body: MaryHeaderBody;
     readonly kesSignature: KesSignature;
 
     constructor(
-        hdr: IShelleyHeader,
+        hdr: IMaryHeader,
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        if(!isIShelleyHeader(hdr)) throw new Error("Invalid ShelleyHeader");
-        this.body = new ShelleyHeaderBody( hdr.body );
+        if(!isIMaryHeader(hdr)) throw new Error("Invalid MaryHeader");
+        this.body = new MaryHeaderBody( hdr.body );
         this.kesSignature = hdr.kesSignature;
     }
 
@@ -61,20 +61,20 @@ export class ShelleyHeader
         ]);
     }
 
-    static fromCbor( cbor: CanBeCborString ): ShelleyHeader
+    static fromCbor( cbor: CanBeCborString ): MaryHeader
     {
         const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor ).toBuffer();
-        return ShelleyHeader.fromCborObj(
+        return MaryHeader.fromCborObj(
             Cbor.parse( bytes, { keepRef: true } ),
             bytes
         );
     }
-    static fromCborObj( cbor: CborObj, _originalBytes?: Uint8Array ): ShelleyHeader
+    static fromCborObj( cbor: CborObj, _originalBytes?: Uint8Array ): MaryHeader
     {
         if(!(
             cbor instanceof CborArray &&
             cbor.array.length >= 2
-        )) throw new Error("invalid cbor for ShelleyHeader");
+        )) throw new Error("invalid cbor for MaryHeader");
 
         const [
             cHdrBody,
@@ -83,10 +83,10 @@ export class ShelleyHeader
 
         if(!(
             cBodySignature instanceof CborBytes
-        )) throw new Error("invalid cbor for ShelleyHeader");
+        )) throw new Error("invalid cbor for MaryHeader");
 
-        return new ShelleyHeader({
-            body: ShelleyHeaderBody.fromCborObj( cHdrBody ),
+        return new MaryHeader({
+            body: MaryHeaderBody.fromCborObj( cHdrBody ),
             kesSignature: cBodySignature.bytes
         }, getSubCborRef( cbor, _originalBytes ));
     }

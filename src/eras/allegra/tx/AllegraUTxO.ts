@@ -82,8 +82,9 @@ export class AllegraUTxO
     }
     static fromCborObj( cObj: CborObj ): AllegraUTxO
     {
-        if(!(cObj instanceof CborArray))
-        throw new InvalidCborFormatError("AllegraUTxO");
+        if(!(
+            cObj instanceof CborArray
+        ))throw new InvalidCborFormatError("AllegraUTxO");
 
         const [ ref, res ] = cObj.array;
 

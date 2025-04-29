@@ -233,10 +233,10 @@ export class ConwayTxOut
     static fromCborObj( cObj: CborObj ): ConwayTxOut
     {
         if(!(
-            cObj instanceof CborMap ||
-            cObj instanceof CborArray
-            // cObj instanceof CborMap && cObj.map.length >= 3 ||
-            // cObj instanceof CborArray && cObj.array.length >= 3
+            // cObj instanceof CborMap ||
+            // cObj instanceof CborArray
+            cObj instanceof CborMap && cObj.map.length >= 3 ||
+            cObj instanceof CborArray && cObj.array.length >= 3
         )) throw new InvalidCborFormatError("ConwayTxOut");
 
         // legacy

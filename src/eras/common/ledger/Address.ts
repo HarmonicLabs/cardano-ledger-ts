@@ -369,8 +369,9 @@ export class Address
 
     static fromCborObj( buff: CborObj ): Address
     {
-        if(!( buff instanceof CborBytes ))
-        throw new Error(`Invalid CBOR format for "Address"`);
+        if(!( 
+            buff instanceof CborBytes 
+        ))throw new Error(`Invalid CBOR format for "Address"`);
 
         return Address.fromBuffer(
             buff.bytes,

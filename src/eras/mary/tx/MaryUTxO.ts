@@ -82,7 +82,9 @@ export class MaryUTxO
     }
     static fromCborObj( cObj: CborObj ): MaryUTxO
     {
-        if(!(cObj instanceof CborArray))
+        if(!(
+            cObj instanceof CborArray
+        ))
         throw new InvalidCborFormatError("MaryUTxO");
 
         const [ ref, res ] = cObj.array;

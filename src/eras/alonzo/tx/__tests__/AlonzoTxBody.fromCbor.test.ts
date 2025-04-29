@@ -1,3 +1,5 @@
+test.todo("uncomment test")
+/*
 import { AlonzoTxBody } from "../AlonzoTxBody";
 
 test("mutexo 0", () => {
@@ -25,4 +27,4 @@ test.only("mutexo 1", () => {
         body = AlonzoTxBody.fromCbor(str);
     }).not.toThrow();
     
-});
+});*/

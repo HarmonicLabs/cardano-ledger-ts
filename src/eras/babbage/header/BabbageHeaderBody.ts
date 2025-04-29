@@ -1,16 +1,15 @@
 import { canBeUInteger, CanBeUInteger } from "@harmoniclabs/cbor/dist/utils/ints";
+import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborSimple, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
+import { blake2b_256, sha2_256_sync } from "@harmoniclabs/crypto";
+import { isObject } from "@harmoniclabs/obj-utils";
 import { canBeHash32, CanBeHash32, hash32bytes } from "../../../hashes";
 import { isIVrfCert, IVrfCert, VrfCert } from "../../common/Vrf";
-import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "../../conway/protocol/protocolVersion";
+import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "../protocol/protocolVersion";
 import { IPoolOperationalCert, isIPoolOperationalCert, PoolOperationalCert } from "../../common/certs/PoolOperationalCert";
-import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborSimple, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
-import { isObject } from "@harmoniclabs/obj-utils";
 import { U8Arr, U8Arr32 } from "../../../utils/U8Arr";
 import { forceBigUInt, u32 } from "../../../utils/ints";
-import { blake2b_256 } from "@harmoniclabs/crypto";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
-
-
+import { IPraosHeaderBody } from "../../common/interfaces//IPraosHeader";
 export interface IBabbageHeaderBody
 {
     blockNumber: CanBeUInteger;
@@ -46,7 +45,7 @@ export function isIBabbageHeaderBody( thing: any ): thing is IBabbageHeaderBody
 }
 
 export class BabbageHeaderBody
-    implements IBabbageHeaderBody, ToCbor
+    implements IBabbageHeaderBody, ToCbor, IPraosHeaderBody
 {
     readonly blockNumber: bigint;
     readonly slot: bigint;
@@ -58,7 +57,7 @@ export class BabbageHeaderBody
     readonly blockBodyHash: U8Arr<32>;
     readonly opCert: PoolOperationalCert;
     readonly protocolVersion: ProtocolVersion;
-
+   
     constructor(
         hdrBody: IBabbageHeaderBody,
         readonly cborRef: SubCborRef | undefined = undefined
@@ -76,6 +75,28 @@ export class BabbageHeaderBody
         this.opCert = new PoolOperationalCert( hdrBody.opCert );
         this.protocolVersion = new ProtocolVersion( hdrBody.protocolVersion );
     }
+    /* Alonzo HeaderBody
+            this.blockNumber = forceBigUInt( hdrBody.blockNumber );
+            this.slot = forceBigUInt( hdrBody.slot );
+            this.prevHash = typeof hdrBody.prevHash !== "undefined" ? hash32bytes( hdrBody.prevHash ) : undefined;
+            this.issuerPubKey = hash32bytes( hdrBody.issuerPubKey );
+            this.vrfPubKey = hash32bytes( hdrBody.vrfPubKey );
+            this.nonceVrfResult  = new VrfCert( hdrBody.nonceVrfResult  );
+            this.leaderVrfResult = new VrfCert( hdrBody.leaderVrfResult );
+            this.blockBodySize = u32( hdrBody.blockBodySize );
+            this.blockBodyHash = hash32bytes( hdrBody.blockBodyHash );
+            this.opCert = new PoolOperationalCert( hdrBody.opCert );
+            this.protocolVersion = new ProtocolVersion( hdrBody.protocolVersion );
+    */  
+    
+    // just keep the leaderVrfOutput and nonceVrfOutput ones
+    leaderVrfOutput(): U8Arr<32>
+    {
+        return sha2_256_sync(
+            this.vrfResult.proofHash
+        ) as U8Arr<32>;
+    }
+    nonceVrfOutput: () => U8Arr32;   
 
     clone(): BabbageHeaderBody
     {
@@ -123,16 +144,18 @@ export class BabbageHeaderBody
     /*
     CDDL:
 
-    header_body = [block_number : block_no
-                , slot : slot_no
-                , prev_hash : $hash32 / nil
-                , issuer_vkey : $vkey
-                , vrf_vkey : $vrf_vkey
-                , vrf_result : $vrf_cert
-                , block_body_size : uint .size 4
-                , block_body_hash : $hash32
-                , operational_cert
-                , protocol_version]
+        header_body = [
+                block_number : uint
+              , slot : uint
+              , prev_hash : $hash32 / nil
+              , issuer_vkey : $vkey
+              , vrf_vkey : $vrf_vkey
+              , vrf_result : $vrf_cert
+              , block_body_size : uint
+              , block_body_hash : $hash32
+              , operational_cert
+              , protocol_version
+              ]
     */
 
     static fromCbor( cbor: CanBeCborString ): BabbageHeaderBody
@@ -174,16 +197,16 @@ export class BabbageHeaderBody
         )) throw new Error("invalid cbor for BabbageHeaderBody");
 
         return new BabbageHeaderBody({
-            prevHash: cPrevHash.bytes as U8Arr32,
-            slot: cSlotNo.num,
             blockNumber: cBlockNo.num,
+            slot: cSlotNo.num,
+            prevHash: cPrevHash.bytes as U8Arr32,
             issuerPubKey: cIssuerVkey.bytes as U8Arr32,
             vrfPubKey: cVrfVkey.bytes as U8Arr32,
+            vrfResult: VrfCert.fromCborObj( cVrfCert ),
             blockBodySize: cBlockBodySize.num,
             blockBodyHash: cBlockBodyHash.bytes as U8Arr32,
             opCert: PoolOperationalCert.fromCborObj( cOpCert ),
             protocolVersion: ProtocolVersion.fromCborObj( cProtVer ),
-            vrfResult: VrfCert.fromCborObj( cVrfCert ),
         }, getSubCborRef( cHdrBody, _originalBytes ));
     }
 }

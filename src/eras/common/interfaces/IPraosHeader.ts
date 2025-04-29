@@ -1,10 +1,10 @@
-import { ToCborBytes } from "@harmoniclabs/cbor";
-import { U8Arr32 } from "../../../utils/U8Arr";
-import { VrfCert } from "../Vrf";
-import { KesSignature } from "../Kes";
-import { PoolOperationalCert } from "../certs/PoolOperationalCert";
 
-export interface IPraosHeader extends ToCborBytes {
+import { U8Arr32 } from "../../../utils/U8Arr";
+import { VrfCert } from "../../common/Vrf";
+import { KesSignature } from "../../common/Kes";
+import { PoolOperationalCert } from "../../common/certs/PoolOperationalCert";
+
+export interface IPraosHeader{
     /* from `ToCborBytes` */
     /**
      * (if implemented correctly)
@@ -27,7 +27,7 @@ export interface IPraosHeader extends ToCborBytes {
  * 
  * this excludes stuff like block size etc.
  */
-export interface IPraosHeaderBody extends ToCborBytes {
+export interface IPraosHeaderBody {
     /* from `ToCborBytes` */
     /**
      * (if implemented correctly)
@@ -68,10 +68,12 @@ export interface IPraosHeaderBody extends ToCborBytes {
      * babbage and later: `sha2_256( [0x4e].concat( this.vrfResult.vrfOutput ) )` (0x4e is "N" indicating nonce)
     **/
     nonceVrfOutput: () => U8Arr32;
+
+    // getLeaderVrfCert: () => VrfCert;
+    // getNonceVrfCert: () => VrfCert;
     /**
      * 
      */
-    leaderVrf
     /**
      * 
      */

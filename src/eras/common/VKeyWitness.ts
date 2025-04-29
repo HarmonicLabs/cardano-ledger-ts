@@ -87,8 +87,9 @@ export class VKeyWitness
     }
     static fromCborObj( cObj: CborObj ): VKeyWitness
     {
-        if(!(cObj instanceof CborArray))
-        throw new InvalidCborFormatError("VKeyWitness");
+        if(!(
+            cObj instanceof CborArray
+        ))throw new InvalidCborFormatError("VKeyWitness");
 
         return new VKeyWitness({
             vkey: Hash32.fromCborObj( cObj.array[0] ),

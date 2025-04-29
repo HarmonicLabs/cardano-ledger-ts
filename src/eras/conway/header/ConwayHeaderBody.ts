@@ -1,15 +1,15 @@
 import { canBeUInteger, CanBeUInteger } from "@harmoniclabs/cbor/dist/utils/ints";
+import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborSimple, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
+import { blake2b_256, sha2_256_sync } from "@harmoniclabs/crypto";
+import { isObject } from "@harmoniclabs/obj-utils";
 import { canBeHash32, CanBeHash32, hash32bytes } from "../../../hashes";
 import { isIVrfCert, IVrfCert, VrfCert } from "../../common/Vrf";
 import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "../protocol/protocolVersion";
 import { IPoolOperationalCert, isIPoolOperationalCert, PoolOperationalCert } from "../../common/certs/PoolOperationalCert";
-import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborSimple, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
-import { isObject } from "@harmoniclabs/obj-utils";
 import { U8Arr, U8Arr32 } from "../../../utils/U8Arr";
 import { forceBigUInt, u32 } from "../../../utils/ints";
-import { blake2b_256 } from "@harmoniclabs/crypto";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
-
+import { IPraosHeaderBody } from "../../common/interfaces//IPraosHeader";
 
 export interface IConwayHeaderBody
 {
@@ -46,7 +46,7 @@ export function isIConwayHeaderBody( thing: any ): thing is IConwayHeaderBody
 }
 
 export class ConwayHeaderBody
-    implements IConwayHeaderBody, ToCbor
+    implements IConwayHeaderBody, ToCbor, IPraosHeaderBody
 {
     readonly blockNumber: bigint;
     readonly slot: bigint;
@@ -58,6 +58,7 @@ export class ConwayHeaderBody
     readonly blockBodyHash: U8Arr<32>;
     readonly opCert: PoolOperationalCert;
     readonly protocolVersion: ProtocolVersion;
+
 
     constructor(
         hdrBody: IConwayHeaderBody,
@@ -75,7 +76,16 @@ export class ConwayHeaderBody
         this.blockBodyHash = hash32bytes( hdrBody.blockBodyHash );
         this.opCert = new PoolOperationalCert( hdrBody.opCert );
         this.protocolVersion = new ProtocolVersion( hdrBody.protocolVersion );
+
     }
+    // just keep the leaderVrfOutput and nonceVrfOutput ones
+    leaderVrfOutput(): U8Arr<32>
+    {
+        return sha2_256_sync(
+            this.vrfResult.proofHash
+        ) as U8Arr<32>;
+    }
+    nonceVrfOutput: () => U8Arr32;   
 
     clone(): ConwayHeaderBody
     {
@@ -89,7 +99,7 @@ export class ConwayHeaderBody
             blockBodySize: this.blockBodySize,
             blockBodyHash: this.blockBodyHash.slice(),
             opCert: this.opCert.clone(),
-            protocolVersion: this.protocolVersion.clone()
+            protocolVersion: this.protocolVersion.clone(),
         }, this.cborRef?.clone());
     }
 
@@ -122,16 +132,16 @@ export class ConwayHeaderBody
     /*
     CDDL:
 
-    header_body = [block_number : block_no
-                , slot : slot_no
-                , prev_hash : $hash32 / nil
-                , issuer_vkey : $vkey
-                , vrf_vkey : $vrf_vkey
-                , vrf_result : $vrf_cert
-                , block_body_size : uint .size 4
-                , block_body_hash : $hash32
-                , operational_cert
-                , protocol_version]
+        header_body = [block_number : block_no
+              , slot : slot_no
+              , prev_hash : $hash32 / nil
+              , issuer_vkey : $vkey
+              , vrf_vkey : $vrf_vkey
+              , vrf_result : $vrf_cert
+              , block_body_size : uint .size 4
+              , block_body_hash : $hash32
+              , operational_cert
+              , protocol_version]
     */
 
     static fromCbor( cbor: CanBeCborString ): ConwayHeaderBody
@@ -173,16 +183,16 @@ export class ConwayHeaderBody
         )) throw new Error("invalid cbor for ConwayHeaderBody");
 
         return new ConwayHeaderBody({
-            prevHash: cPrevHash.bytes as U8Arr32,
-            slot: cSlotNo.num,
             blockNumber: cBlockNo.num,
+            slot: cSlotNo.num,
+            prevHash: cPrevHash.bytes as U8Arr32,
             issuerPubKey: cIssuerVkey.bytes as U8Arr32,
             vrfPubKey: cVrfVkey.bytes as U8Arr32,
+            vrfResult: VrfCert.fromCborObj( cVrfCert ),
             blockBodySize: cBlockBodySize.num,
             blockBodyHash: cBlockBodyHash.bytes as U8Arr32,
             opCert: PoolOperationalCert.fromCborObj( cOpCert ),
-            protocolVersion: ProtocolVersion.fromCborObj( cProtVer ),
-            vrfResult: VrfCert.fromCborObj( cVrfCert ),
+            protocolVersion: ProtocolVersion.fromCborObj( cProtVer )
         }, getSubCborRef( cHdrBody, _originalBytes ));
     }
 }

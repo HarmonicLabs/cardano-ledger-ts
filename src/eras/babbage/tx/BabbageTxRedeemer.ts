@@ -215,10 +215,10 @@ export class BabbageTxRedeemer
     static fromCborObj( cObj: CborObj ): BabbageTxRedeemer
     {
         if(!(
-            cObj instanceof CborArray 
-            && cObj.array.length >= 4 
-            && cObj.array[0] instanceof CborUInt 
-            && cObj.array[1] instanceof CborUInt
+            cObj instanceof CborArray &&
+            cObj.array.length >= 4 &&
+            cObj.array[0] instanceof CborUInt &&
+            cObj.array[1] instanceof CborUInt
         ))throw new InvalidCborFormatError("BabbageTxRedeemer");
 
         const [ _tag, _index, _data, _execUnits ] = cObj.array;

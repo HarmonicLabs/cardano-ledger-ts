@@ -262,7 +262,8 @@ export class ShelleyTxBody
     static fromCborObj( cObj: CborObj ): ShelleyTxBody
     {
         if(!(
-            cObj instanceof CborMap
+            cObj instanceof CborMap &&
+            cObj.map.length >= 8
         ))throw new InvalidCborFormatError("ShelleyTxBody")
 
         let fields: (CborObj | undefined)[] = new Array( 8 ).fill( undefined );
