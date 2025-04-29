@@ -5,8 +5,6 @@ import { Credential, StakeCredentials, StakeCredentialsType, CredentialType, Pub
 import { Hash28 } from "../hashes";
 import { forceBigUInt } from "../utils/ints";
 import { NetworkT } from "./Network";
-import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
-import { assert } from "../utils/assert";
 import { nothingData, justData } from "../utils/maybeData";
 import UPLCFlatUtils from "../utils/UPLCFlatUtils";
 import { fromHex, toHex } from "@harmoniclabs/uint8array-utils";

@@ -20,8 +20,8 @@ export interface IShelleyHeaderBody
     prevHash: CanBeHash32 | undefined;
     issuerPubKey: CanBeHash32;
     vrfPubKey: CanBeHash32;
-    nonceVrfResult : IVrfCert
-    leaderVrfResult: IVrfCert
+    nonceVrfResult : IVrfCert;
+    leaderVrfResult: IVrfCert;
     /** u32 **/
     blockBodySize: CanBeUInteger;
     blockBodyHash: CanBeHash32;
