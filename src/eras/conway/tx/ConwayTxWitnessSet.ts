@@ -160,12 +160,12 @@ export class ConwayTxWitnessSet
 
         const {
             vkeyWitnesses,
-            bootstrapWitnesses,
-            datums,
             nativeScripts,
+            bootstrapWitnesses,
             plutusV1Scripts,
-            plutusV2Scripts,
+            datums,
             redeemers,
+            plutusV2Scripts,
             plutusV3Scripts
         } = witnesses;
 
