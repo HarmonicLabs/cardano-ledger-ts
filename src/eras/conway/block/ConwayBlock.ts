@@ -106,11 +106,11 @@ export class ConwayBlock
         ] = fields;        
 
         return new ConwayBlock({
-            header: _header,
+            header: ConwayHeader.fromCborObj( _header as CborObj ),
             transactionBodies: [ ConwayTxBody.fromCborObj( cObj ) ],
             transactionWitnessSets: [ ConwayTxWitnessSet.fromCborObj( cObj ) ],
             auxiliaryDataSet: { [ 0 ]: ConwayAuxiliaryData.fromCborObj( cObj ) },
-            invalidTransactions:  _invalidTransactions.array.map( ConwayTxOut.fromCborObj ),
+            invalidTransactions:  []
         
         }, getSubCborRef( cObj ));
     }
@@ -120,6 +120,7 @@ export class ConwayBlock
     }
     toJson()
     {
+        
         return {
             header: this.header,
             transactionBodies: this.transactionBodies.map( txBody => txBody.toJson() ),
