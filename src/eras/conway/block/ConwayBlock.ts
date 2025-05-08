@@ -11,8 +11,6 @@ import { isObject } from "@harmoniclabs/obj-utils";
 import { canBeHash32, CanBeHash32, hash32bytes } from "../../../hashes";
 import { U8Arr, U8Arr32 } from "../../../utils/U8Arr";
 import { forceBigUInt, u32 } from "../../../utils/ints";
-
-
 /*
     CDDL
     block = [header
@@ -78,7 +76,10 @@ export class ConwayBlock implements
 
     };
 
-    toJSON() { return this.toJson(); }
+    toJSON() 
+    { 
+        return this.toJson(); 
+    }
   
     toJson()
     {
