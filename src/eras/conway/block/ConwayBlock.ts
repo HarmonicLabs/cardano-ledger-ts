@@ -1,8 +1,8 @@
 import { CborArray, CborBytes, ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborMapEntry, CanBeCborString, forceCborString, isCborObj } from "@harmoniclabs/cbor";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { IConwayHeader, ConwayHeader, isIConwayHeader } from "../header/ConwayHeader";
-import { IConwayTxWitnessSet, ConwayTxWitnessSet } from "../tx/ConwayTxWitnessSet";
 import { IConwayTxBody, ConwayTxBody } from "../tx/ConwayTxBody";
+import { IConwayTxWitnessSet, ConwayTxWitnessSet } from "../tx/ConwayTxWitnessSet";
 import { IConwayAuxiliaryData, ConwayAuxiliaryData } from "../tx/ConwayAuxiliaryData";
 import { ToJson } from "../../../utils/ToJson"
 import { getSubCborRef } from "../../../utils/getSubCborRef";
@@ -53,6 +53,7 @@ export class ConwayBlock implements
       );
       this.invalidTransactions = block.invalidTransactions;
     }
+
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
@@ -65,25 +66,116 @@ export class ConwayBlock implements
         return Cbor.encode( this.toCborObj() );
     }
 
-    toCborObj(): CborObj 
-    {
-        if( this.cborRef instanceof SubCborRef )return Cbor.parse( this.cborRef.toBuffer() );
-        return new CborMap(
-            ([
-
-            ].filter( elem => elem !== undefined ) as CborMapEntry[])
-        )
-
+    toCborObj(): CborArray {
+        if (this.cborRef instanceof SubCborRef) {
+            return Cbor.parse(this.cborRef.toBuffer()) as CborArray;
+        }
+        return new CborArray([
+            this.header.toCborObj(),
+            new CborArray(this.transactionBodies.map(tb => tb.toCborObj())),
+            new CborArray(this.transactionWitnessSets.map(tws => tws.toCborObj())),
+            new CborMap(
+                Object.entries(this.auxiliaryDataSet).map(([k, v]) => ({
+                    k: new CborUInt(BigInt(k)),
+                    v: v.toCborObj()
+                }))
+            ),
+            new CborArray(
+                (this.invalidTransactions || []).map(it => new CborUInt(BigInt(it)))
+            )
+        ]);
     };
+
+    static fromCbor( cStr: CanBeCborString ): ConwayBlock
+    {
+        return ConwayBlock.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true }) );
+    };
+
+    static fromCborObj(cObj: CborObj): ConwayBlock {
+        if (!(
+            cObj instanceof CborArray && 
+            cObj.array.length >= 5
+        ))throw new InvalidCborFormatError("INvalid cbor for ConwayBlock");
+        
+        const [headerCbor, txBodiesCbor, txWitnessSetsCbor, auxDataSetCbor, invalidTxCbor] = cObj.array;
+
+        // Header
+        const header = ConwayHeader.fromCborObj(headerCbor);
+
+        // Transaction bodies
+        if(!(
+            txBodiesCbor instanceof CborArray
+        ))throw new InvalidCborFormatError("transaction_bodies must be a CBOR array");
+        
+        const transactionBodies = txBodiesCbor.array.map((tbCbor, index) => {
+            if (!isCborObj(tbCbor)) {
+                throw new InvalidCborFormatError(`Invalid CBOR object at transaction_bodies[${index}]`);
+            }
+            return ConwayTxBody.fromCborObj(tbCbor);
+        });
+
+        // Transaction witness sets
+        if(!(
+            txWitnessSetsCbor instanceof CborArray
+        ))throw new InvalidCborFormatError("transaction_witness_sets must be a CBOR array");
+        
+        const transactionWitnessSets = txWitnessSetsCbor.array.map((twsCbor, index) => {
+            if (!isCborObj(twsCbor)) {
+                throw new InvalidCborFormatError(`Invalid CBOR object at transaction_witness_sets[${index}]`);
+            }
+            return ConwayTxWitnessSet.fromCborObj(twsCbor);
+        });
+
+        // Auxiliary data set
+        if(!(
+            auxDataSetCbor instanceof CborMap
+        ))throw new InvalidCborFormatError("ConwayAuxiliaryData");
+        
+        const auxiliaryDataSet: { [transactionIndex: number]: ConwayAuxiliaryData } = {};
+        for (const entry of auxDataSetCbor.map) {
+            const { k, v } = entry;
+            if (!(k instanceof CborUInt)) {
+                throw new InvalidCborFormatError("Invalid Keys in auxiliary_data_set");
+            }
+            const txIndex = Number(k.num);
+            if (!Number.isSafeInteger(txIndex)) {
+                throw new InvalidCborFormatError(`Transaction index ${k.num}`);
+            }
+            if (!isCborObj(v)) {
+                throw new InvalidCborFormatError(`Invalid AUX data CBOR object ${txIndex}`);
+            }
+            auxiliaryDataSet[txIndex] = ConwayAuxiliaryData.fromCborObj(v);
+        }
+
+        // Invalid transactions
+        if(!(
+            invalidTxCbor instanceof CborArray
+        ))throw new InvalidCborFormatError("invalid_transactions must be a CBOR array");
+        
+        const invalidTransactions = invalidTxCbor.array.map((itCbor, index) => {
+            if(!(
+                itCbor instanceof CborUInt
+            ))throw new InvalidCborFormatError(`Invalid type for transaction_index at invalid_transactions[${index}]`);
+            
+            return itCbor.num;
+        });    
+
+        return new ConwayBlock({
+            header,
+            transactionBodies,
+            transactionWitnessSets,
+            auxiliaryDataSet,
+            invalidTransactions
+        }, getSubCborRef( cObj ));
+    }
 
     toJSON() 
     { 
         return this.toJson(); 
-    }
+    };
   
     toJson()
     {
-        
         return {
             header: this.header,
             transactionBodies: this.transactionBodies.map( txBody => txBody.toJson() ),
@@ -97,6 +189,5 @@ export class ConwayBlock implements
             ),
             invalidTransactions: this.invalidTransactions
         };
-    }
-
+    };
   }

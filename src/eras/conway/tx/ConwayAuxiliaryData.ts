@@ -263,7 +263,7 @@ export class ConwayAuxiliaryData
         if(!(
             cObj instanceof CborTag 
             && cObj.data instanceof CborMap 
-            && cObj.data.map.length <= 5
+            && cObj.data.map.length >= 5
         ))throw new InvalidCborFormatError("ConwayAuxiliaryData")
 
         let fields: (CborObj | undefined)[] = new Array( 5 ).fill( undefined );

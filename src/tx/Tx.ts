@@ -213,10 +213,8 @@ export class Tx
     }
     static fromCborObj( cObj: CborObj ): Tx
     {
-        if( !(
-            cObj instanceof CborArray
-        ) )
-        throw new InvalidCborFormatError("Tx");
+        if(!(cObj instanceof CborArray
+        ))throw new InvalidCborFormatError("Tx");
         
         const [ _body, _wits, _isValid, _aux ] = cObj.array;
 
