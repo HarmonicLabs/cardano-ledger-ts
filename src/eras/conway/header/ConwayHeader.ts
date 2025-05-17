@@ -72,8 +72,8 @@ export class ConwayHeader
     static fromCborObj( cbor: CborObj, _originalBytes?: Uint8Array ): ConwayHeader
     {
         if(!(
-            cbor instanceof CborArray &&
-            cbor.array.length >= 2
+            cbor instanceof CborArray 
+            // && cbor.array.length >= 2
         )) throw new Error("invalid cbor for ConwayHeader");
 
         const [

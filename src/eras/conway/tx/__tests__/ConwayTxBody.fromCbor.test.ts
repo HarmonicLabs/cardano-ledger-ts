@@ -1,5 +1,5 @@
 test.todo("uncomment test")
-/*
+
 import { ConwayTxBody } from "../ConwayTxBody";
 
 test("mutexo 0", () => {
@@ -15,7 +15,7 @@ test("mutexo 0", () => {
 
 });
 
-
+/*
 test.only("mutexo 1", () => {
 
     const str = 
@@ -28,4 +28,4 @@ test.only("mutexo 1", () => {
     }).not.toThrow();
    
 });
-*/ 
+*/

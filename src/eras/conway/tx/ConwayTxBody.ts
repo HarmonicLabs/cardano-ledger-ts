@@ -573,11 +573,13 @@ export class ConwayTxBody
     {
         return ConwayTxBody.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
+
     static fromCborObj( cObj: CborObj ): ConwayTxBody
     {
+        // console.log("txBody")
         if(!(
-            cObj instanceof CborMap &&
-            cObj.map.length >= 20 
+            cObj instanceof CborMap 
+            // && cObj.map.length >= 20 
         ))throw new InvalidCborFormatError("ConwayTxBody")
 
         let fields: (CborObj | undefined)[] = new Array( 23 ).fill( undefined );
@@ -618,6 +620,7 @@ export class ConwayTxBody
             _current_treasury,      // 21
             _donation               // 22
         ] = fields;
+        // console.log("fee", _fee);
 
         if( _ins_ === undefined || _outs === undefined || _fee === undefined )
         throw new InvalidCborFormatError("ConwayTxBody");

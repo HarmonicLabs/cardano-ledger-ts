@@ -1,4 +1,5 @@
-import { CborArray, CborBytes, ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborMapEntry, CanBeCborString, forceCborString, isCborObj } from "@harmoniclabs/cbor";
+import { CborArray, CborBytes, ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborMapEntry, CanBeCborString, forceCborString, isCborObj} from "@harmoniclabs/cbor";
+import { toHex } from "@harmoniclabs/uint8array-utils";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { IConwayHeader, ConwayHeader, isIConwayHeader } from "../header/ConwayHeader";
 import { IConwayTxBody, ConwayTxBody } from "../tx/ConwayTxBody";
@@ -41,17 +42,19 @@ export class ConwayBlock implements
         readonly cborRef: SubCborRef | undefined = undefined
     ) 
     {
-      // Validate inputs, e.g., ensure transactionBodies and transactionWitnessSets have same length
-      if (block.transactionBodies.length !== block.transactionWitnessSets.length) {
-        throw new Error("Transaction bodies and witness sets must have the same length");
-      }
-      this.header = new ConwayHeader(block.header);
-      this.transactionBodies = block.transactionBodies.map(tb => new ConwayTxBody(tb));
-      this.transactionWitnessSets = block.transactionWitnessSets.map(tws => new ConwayTxWitnessSet(tws));
-      this.auxiliaryDataSet = Object.fromEntries(
-        Object.entries(block.auxiliaryDataSet).map(([key, value]) => [key, new ConwayAuxiliaryData(value)])
-      );
-      this.invalidTransactions = block.invalidTransactions;
+        console.log("running constructor")
+
+        // make transactionBodies and transactionWitnessSets have same length
+        if (block.transactionBodies.length !== block.transactionWitnessSets.length) {
+            throw new Error("Transaction bodies and witness sets must have the same length");
+        }
+        this.header = new ConwayHeader(block.header);
+        this.transactionBodies = block.transactionBodies.map(tb => new ConwayTxBody(tb));
+        this.transactionWitnessSets = block.transactionWitnessSets.map(tws => new ConwayTxWitnessSet(tws));
+        this.auxiliaryDataSet = Object.fromEntries(
+            Object.entries(block.auxiliaryDataSet).map(([key, value]) => [key, new ConwayAuxiliaryData(value)])
+        );
+        this.invalidTransactions = block.invalidTransactions;
     }
 
     toCborBytes(): Uint8Array
@@ -87,21 +90,43 @@ export class ConwayBlock implements
     };
 
     static fromCbor( cStr: CanBeCborString ): ConwayBlock
-    {
-        return ConwayBlock.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true }) );
+    {   
+        // console.log("cstr", cStr);
+        return ConwayBlock.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: false }) );
     };
 
-    static fromCborObj(cObj: CborObj): ConwayBlock {
-        if (!(
-            cObj instanceof CborArray && 
-            cObj.array.length >= 5
-        ))throw new InvalidCborFormatError("INvalid cbor for ConwayBlock");
+    static fromCborObj( cObj: CborObj ): ConwayBlock 
+    {
+        // console.log("cObj: ", cObj);
         
-        const [headerCbor, txBodiesCbor, txWitnessSetsCbor, auxDataSetCbor, invalidTxCbor] = cObj.array;
+        if(!(
+            cObj instanceof CborArray 
+            // && cObj.map.length >= 20 
+        ))throw new InvalidCborFormatError("Conway Block")
+
+        const [ headerCbor, txBodiesCbor, txWitnessSetsCbor, auxDataSetCbor, invalidTxCbor] = cObj.array;
+        
+        // console.log("headerCbor: ", headerCbor);
+        // console.log("txBodiesCbor", txBodiesCbor.toRawObj());
 
         // Header
-        const header = ConwayHeader.fromCborObj(headerCbor);
+        // const header = ConwayHeader.fromCborObj(headerCbor);
+        // console.log("header", header);
 
+        // Transaction bodies
+        if(!(
+            txBodiesCbor instanceof CborArray
+        ))throw new InvalidCborFormatError("transaction_bodies must be a CBOR array");
+        
+        const transactionBodies = txBodiesCbor.array.map((tbCbor, index) => {
+            // console.log("tbCbor", tbCbor);
+            // console.log(ConwayTxBody.fromCborObj(tbCbor.toRawObj()))
+            // return ConwayTxBody.fromCborObj(tbCbor);
+
+        });
+        return("");
+
+        /*
         // Transaction bodies
         if(!(
             txBodiesCbor instanceof CborArray
@@ -167,6 +192,7 @@ export class ConwayBlock implements
             auxiliaryDataSet,
             invalidTransactions
         }, getSubCborRef( cObj ));
+        */
     }
 
     toJSON() 
