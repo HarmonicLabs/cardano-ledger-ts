@@ -108,7 +108,7 @@ export class ConwayBlock implements
 
         console.log("cObj", cObj.array.length);
 
-        const _block = cObj.array.length > 1 ? cObj.array[1] : cObj.array;
+        const _block = cObj.array.length > 1 ? cObj.array[1] : cObj.array; //compensate if a block comes with Era in tests
        
         if (!(
             _block instanceof CborArray 
