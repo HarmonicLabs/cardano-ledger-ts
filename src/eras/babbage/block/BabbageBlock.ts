@@ -97,9 +97,8 @@ export class BabbageBlock implements
         );
     };
 
-    static fromCborObj( cObj: CborObj, _originalBytes?: Uint8Array ): BabbageBlock 
-    {
-        // console.log("Babbage.fromCborObj", cObj);
+    static fromCborObj(cObj: CborObj, _originalBytes?: Uint8Array): BabbageBlock {
+        // console.log("BabbageBlock.fromCborObj", cObj);
         if (!(cObj instanceof CborArray && cObj.array.length >= 5)) {
             throw new InvalidCborFormatError("Babbage Block must be a CBOR array with at least 5 elements");
         }
@@ -109,76 +108,75 @@ export class BabbageBlock implements
         const _txWitnessSets = cObj.array[2];
         const _auxDataSet = cObj.array[3];
         const _invalidTxs = cObj.array[4];
-               
-        // Header
+
+        // Process header
         if (!(
-            _header instanceof CborArray
-        ))throw new InvalidCborFormatError("Header CBOR must be a CborArray");
+            _header instanceof CborArray 
+            && _header.array.length >= 2
+        ))throw new InvalidCborFormatError("Header must be a CBOR array with at least 2 elements");
         
-        const header = BabbageHeader.fromCborObj(_header);
-        // console.log("header", header);
+        const header = BabbageHeader.fromCborObj(_header); // Assuming BabbageHeader expects [header_body, body_signature]
 
-
-        // Transaction bodies
-        if(!(
+        // Process transaction bodies
+        if (!(
             _txBodies instanceof CborArray
-        ))throw new InvalidCborFormatError("transaction_bodies must be a CBOR array");
+        ))throw new InvalidCborFormatError("Transaction bodies must be a CBOR array");
         
-        const transactionBodies = _txBodies.array.map((tbCbor, index) => {
-            return BabbageTxBody.fromCborObj(tbCbor);
+        const transactionBodies = _txBodies.array.map((tb, index) => {
+            if(!
+                isCborObj(tb)
+            )throw new InvalidCborFormatError(`Invalid CBOR object at transaction_bodies[${index}]`);
+            
+            return BabbageTxBody.fromCborObj(tb);
         });
-        // console.log("transactionBodies", transactionBodies);
 
-        // Transaction witness sets
+        // Process transaction witness sets
         if(!(
             _txWitnessSets instanceof CborArray
-        ))throw new InvalidCborFormatError("transaction_witness_sets must be a CBOR array");
+        ))throw new InvalidCborFormatError("Transaction witness sets must be a CBOR array");
         
-        const transactionWitnessSets = _txWitnessSets.array.map((twsCbor, index) => {
-            if (!isCborObj(twsCbor)) {
+        const transactionWitnessSets = _txWitnessSets.array.map((tws, index) => {
+            if (!isCborObj(tws)) {
                 throw new InvalidCborFormatError(`Invalid CBOR object at transaction_witness_sets[${index}]`);
             }
-            return BabbageTxWitnessSet.fromCborObj(twsCbor);
+            return BabbageTxWitnessSet.fromCborObj(tws);
         });
-        // console.log("transactionWitnessSets", transactionWitnessSets);
 
-        // Auxiliary data set
-        if(!(
+        // Process auxiliary data set
+        if (!(
             _auxDataSet instanceof CborMap
-        ))throw new InvalidCborFormatError("BabbageAuxiliaryData");
+        ))throw new InvalidCborFormatError("Auxiliary data set must be a CBOR map");
         
         const auxiliaryDataSet: { [transactionIndex: number]: BabbageAuxiliaryData } = {};
         for (const entry of _auxDataSet.map) {
             const { k, v } = entry;
             if(!(
                 k instanceof CborUInt
-            ))throw new InvalidCborFormatError("Invalid Keys in auxiliary_data_set");
+            ))throw new InvalidCborFormatError("Invalid key in auxiliary_data_set");
             
             const txIndex = Number(k.num);
-            if (!Number.isSafeInteger(txIndex)) {
-                throw new InvalidCborFormatError(`Transaction index ${k.num}`);
-            }
-            if (!isCborObj(v)) {
-                throw new InvalidCborFormatError(`Invalid AUX data CBOR object ${txIndex}`);
-            }
-            auxiliaryDataSet[txIndex] = BabbageAuxiliaryData.fromCborObj(v);
-           //  console.log("auxiliaryDataSet", auxiliaryDataSet);
-        };
-        
-
-        // Invalid transactions
-        if(!(
-            _invalidTxs instanceof CborArray
-        ))throw new InvalidCborFormatError("invalid_transactions must be a CBOR array");
-        
-        const invalidTransactions = _invalidTxs.array.map((itCbor, index) => {
             if(!(
-                itCbor instanceof CborUInt
+                Number.isSafeInteger(txIndex)
+            ))throw new InvalidCborFormatError(`Invalid transaction index: ${k.num}`);
+            
+            if (!(
+                isCborObj(v)
+            ))throw new InvalidCborFormatError(`Invalid AUX data CBOR object at index ${txIndex}`);
+            
+            auxiliaryDataSet[txIndex] = BabbageAuxiliaryData.fromCborObj(v);
+        }
+
+        // Process invalid transactions
+        if (!(_invalidTxs instanceof CborArray)) {
+            throw new InvalidCborFormatError("Invalid transactions must be a CBOR array");
+        }
+        const invalidTransactions = _invalidTxs.array.map((it, index) => {
+            if(!(
+                it instanceof CborUInt
             ))throw new InvalidCborFormatError(`Invalid type for transaction_index at invalid_transactions[${index}]`);
             
-            return itCbor.num;
+            return it.num;
         });
-        // console.log("invalidTransactions", invalidTransactions);
 
         const conwayBlock = new BabbageBlock({
             header,
@@ -186,9 +184,8 @@ export class BabbageBlock implements
             transactionWitnessSets,
             auxiliaryDataSet,
             invalidTransactions
-        }, getSubCborRef( cObj ));
+        }, getSubCborRef(cObj));
 
-        console.log("conwayBlock", conwayBlock );
         return conwayBlock
     }
 

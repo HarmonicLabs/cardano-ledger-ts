@@ -76,10 +76,14 @@ IMultiEraBlock, ToCbor, ToJson
                 throw new Error(`Unsupported era: ${_era.num}`);
         }
 
-        return new MultiEraBlock({
+        const multiEraBlock =new MultiEraBlock({
             era: Number(_era.num),
             block
         }, getSubCborRef(cObj, _originalBytes));
+
+        console.log("multiEraBlock", multiEraBlock.toJSON());
+
+        return multiEraBlock;
     }
 
     toJSON() 

@@ -172,13 +172,15 @@ export class ConwayBlock implements
             return it.num;
         });
 
-        return new ConwayBlock({
+        const conwayBlock = new ConwayBlock({
             header,
             transactionBodies,
             transactionWitnessSets,
             auxiliaryDataSet,
             invalidTransactions
         }, getSubCborRef(cObj));
+
+        return conwayBlock
     }
 
     toJSON() 
