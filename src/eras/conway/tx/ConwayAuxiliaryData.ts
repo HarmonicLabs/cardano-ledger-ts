@@ -238,7 +238,7 @@ export class ConwayAuxiliaryData
     
     static fromCborObj( cObj: CborObj ): ConwayAuxiliaryData
     {
-        // console.log("ConwayAuxiliaryData.fromCborObj", cObj.data);
+        
         // shelley; metadata only
         if( "data" in cObj && cObj.data instanceof CborMap )
         {
@@ -260,16 +260,18 @@ export class ConwayAuxiliaryData
                 nativeScripts: cObj.array[1].array.map( nativeScriptFromCborObj )
             });
         }
-
+        console.log("ConwayAuxiliaryData.fromCborObj", cObj);
         if(!(
             cObj instanceof CborTag 
             && cObj.data instanceof CborMap 
             // && cObj.data.map.length >= 5
-        ))throw new InvalidCborFormatError("ConwayAuxiliaryData")
+        ))throw new InvalidCborFormatError("ConwayAuxiliaryData");
 
-        let fields: (CborObj | undefined)[] = new Array( 4 ).fill( undefined );
+        
 
-        for( let i = 0; i < 4 ; i++)
+        let fields: (CborObj | undefined)[] = new Array( 5 ).fill( undefined );
+
+        for( let i = 0; i < 5 ; i++)
         {
             const { v } = cObj.data.map.find(
                 ({ k }) => k instanceof CborUInt && Number( k.num ) === i
@@ -279,7 +281,7 @@ export class ConwayAuxiliaryData
 
             fields[i] = v;
         }
-        console.log("fields", fields);
+        // console.log("fields", fields);
 
         const [
             _metadata,
@@ -288,7 +290,7 @@ export class ConwayAuxiliaryData
             _pV2,
             _pV3
         ] = fields;
-        console.log("_native", _native);
+        // console.log("_native", _native);
         
         if(!(
             _native instanceof CborArray &&

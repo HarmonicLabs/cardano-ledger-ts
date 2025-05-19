@@ -233,10 +233,10 @@ export class BabbageTxOut
     static fromCborObj( cObj: CborObj ): BabbageTxOut
     {
         if(!(
-            // cObj instanceof CborMap ||
-            // cObj instanceof CborArray
-            cObj instanceof CborMap && cObj.map.length >= 4 ||
-            cObj instanceof CborArray && cObj.array.length >= 4
+            cObj instanceof CborMap ||
+            cObj instanceof CborArray
+            // cObj instanceof CborMap && cObj.map.length >= 4 ||
+            // cObj instanceof CborArray && cObj.array.length >= 4
             
         )) throw new InvalidCborFormatError("BabbageTxOut");
 

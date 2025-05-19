@@ -80,7 +80,7 @@ export class ConwayHeader
             cHdrBody,
             cBodySignature
         ] = cbor.array;
-        
+        // console.log("ConwayHeader cHdrBody", cHdrBody);
 
         if(!(
             cBodySignature instanceof CborBytes

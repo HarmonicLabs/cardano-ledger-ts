@@ -1,10 +1,10 @@
 import { CborArray, CborBytes, ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborMapEntry, CanBeCborString, forceCborString, isCborObj} from "@harmoniclabs/cbor";
 import { toHex } from "@harmoniclabs/uint8array-utils";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
-import { IConwayHeader, ConwayHeader, isIConwayHeader } from "../header/ConwayHeader";
-import { IConwayTxBody, ConwayTxBody } from "../tx/ConwayTxBody";
-import { IConwayTxWitnessSet, ConwayTxWitnessSet } from "../tx/ConwayTxWitnessSet";
-import { IConwayAuxiliaryData, ConwayAuxiliaryData } from "../tx/ConwayAuxiliaryData";
+import { IBabbageHeader, BabbageHeader, isIBabbageHeader } from "../header/BabbageHeader";
+import { IBabbageTxBody, BabbageTxBody } from "../tx/BabbageTxBody";
+import { IBabbageTxWitnessSet, BabbageTxWitnessSet } from "../tx/BabbageTxWitnessSet";
+import { IBabbageAuxiliaryData, BabbageAuxiliaryData } from "../tx/BabbageAuxiliaryData";
 import { ToJson } from "../../../utils/ToJson"
 import { getSubCborRef } from "../../../utils/getSubCborRef";
 import { canBeUInteger, CanBeUInteger } from "@harmoniclabs/cbor/dist/utils/ints";
@@ -21,24 +21,24 @@ import { forceBigUInt, u32 } from "../../../utils/ints";
         , invalid_transactions : [* transaction_index]]
 */
 
-export interface IConwayBlock {
-    header: IConwayHeader;
-    transactionBodies: IConwayTxBody[];
-    transactionWitnessSets: IConwayTxWitnessSet[];
-    auxiliaryDataSet: { [transactionIndex: number]: IConwayAuxiliaryData };
+export interface IBabbageBlock {
+    header: IBabbageHeader;
+    transactionBodies: IBabbageTxBody[];
+    transactionWitnessSets: IBabbageTxWitnessSet[];
+    auxiliaryDataSet: { [transactionIndex: number]: IBabbageAuxiliaryData };
     invalidTransactions: (number | bigint)[] | undefined;
   }
-export class ConwayBlock implements 
-    IConwayBlock, ToCbor, ToJson 
+export class BabbageBlock implements 
+    IBabbageBlock, ToCbor, ToJson 
 {
-    readonly header: ConwayHeader;
-    readonly transactionBodies: ConwayTxBody[];
-    readonly transactionWitnessSets: ConwayTxWitnessSet[];
-    readonly auxiliaryDataSet: { [transactionIndex: number]: ConwayAuxiliaryData };
+    readonly header: BabbageHeader;
+    readonly transactionBodies: BabbageTxBody[];
+    readonly transactionWitnessSets: BabbageTxWitnessSet[];
+    readonly auxiliaryDataSet: { [transactionIndex: number]: BabbageAuxiliaryData };
     readonly invalidTransactions: (number | bigint)[] | undefined;
   
     constructor(
-        block: IConwayBlock,
+        block: IBabbageBlock,
         readonly cborRef: SubCborRef | undefined = undefined
     ) 
     {
@@ -46,11 +46,11 @@ export class ConwayBlock implements
         if (block.transactionBodies.length !== block.transactionWitnessSets.length) {
             throw new Error("Transaction bodies and witness sets must have the same length");
         }
-        this.header = new ConwayHeader(block.header);
-        this.transactionBodies = block.transactionBodies.map(tb => new ConwayTxBody(tb));
-        this.transactionWitnessSets = block.transactionWitnessSets.map(tws => new ConwayTxWitnessSet(tws));
+        this.header = new BabbageHeader(block.header);
+        this.transactionBodies = block.transactionBodies.map(tb => new BabbageTxBody(tb));
+        this.transactionWitnessSets = block.transactionWitnessSets.map(tws => new BabbageTxWitnessSet(tws));
         this.auxiliaryDataSet = Object.fromEntries(
-            Object.entries(block.auxiliaryDataSet).map(([key, value]) => [key, new ConwayAuxiliaryData(value)])
+            Object.entries(block.auxiliaryDataSet).map(([key, value]) => [key, new BabbageAuxiliaryData(value)])
         );
         this.invalidTransactions = block.invalidTransactions;
     }
@@ -87,23 +87,23 @@ export class ConwayBlock implements
         ]);
     };
 
-    static fromCbor( cbor: CanBeCborString ): ConwayBlock
+    static fromCbor( cbor: CanBeCborString ): BabbageBlock
     {   
-        // console.log("ConwayBlock.fromCbor", cbor);
+        // console.log("BabbageBlock.fromCbor", cbor);
         const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor ).toBuffer();
-        return ConwayBlock.fromCborObj(
+        return BabbageBlock.fromCborObj(
             Cbor.parse( bytes, { keepRef: true } ),
             bytes
         );
     };
 
-    static fromCborObj( cObj: CborObj, _originalBytes?: Uint8Array ): ConwayBlock 
+    static fromCborObj( cObj: CborObj, _originalBytes?: Uint8Array ): BabbageBlock 
     {
        
         if(!(
             cObj instanceof CborArray 
             // && cObj.map.length >= 20 
-        ))throw new InvalidCborFormatError("Conway Block")
+        ))throw new InvalidCborFormatError("Babbage Block")
 
         //console.log("cObj", cObj.array[0]);
 
@@ -125,7 +125,7 @@ export class ConwayBlock implements
             _headerCbor instanceof CborArray
         ))throw new InvalidCborFormatError("Header CBOR must be a CborArray");
         
-        const header = ConwayHeader.fromCborObj(_headerCbor);
+        const header = BabbageHeader.fromCborObj(_headerCbor);
         // console.log("header", header);
 
 
@@ -135,7 +135,7 @@ export class ConwayBlock implements
         ))throw new InvalidCborFormatError("transaction_bodies must be a CBOR array");
         
         const transactionBodies = _txBodiesCbor.array.map((tbCbor, index) => {
-            return ConwayTxBody.fromCborObj(tbCbor);
+            return BabbageTxBody.fromCborObj(tbCbor);
         });
         // console.log("transactionBodies", transactionBodies);
 
@@ -148,16 +148,16 @@ export class ConwayBlock implements
             if (!isCborObj(twsCbor)) {
                 throw new InvalidCborFormatError(`Invalid CBOR object at transaction_witness_sets[${index}]`);
             }
-            return ConwayTxWitnessSet.fromCborObj(twsCbor);
+            return BabbageTxWitnessSet.fromCborObj(twsCbor);
         });
         // console.log("transactionWitnessSets", transactionWitnessSets);
 
         // Auxiliary data set
         if(!(
             _auxDataSetCbor instanceof CborMap
-        ))throw new InvalidCborFormatError("ConwayAuxiliaryData");
+        ))throw new InvalidCborFormatError("BabbageAuxiliaryData");
         
-        const auxiliaryDataSet: { [transactionIndex: number]: ConwayAuxiliaryData } = {};
+        const auxiliaryDataSet: { [transactionIndex: number]: BabbageAuxiliaryData } = {};
         for (const entry of _auxDataSetCbor.map) {
             const { k, v } = entry;
             if (!(k instanceof CborUInt)) {
@@ -170,7 +170,7 @@ export class ConwayBlock implements
             if (!isCborObj(v)) {
                 throw new InvalidCborFormatError(`Invalid AUX data CBOR object ${txIndex}`);
             }
-            auxiliaryDataSet[txIndex] = ConwayAuxiliaryData.fromCborObj(v);
+            auxiliaryDataSet[txIndex] = BabbageAuxiliaryData.fromCborObj(v);
            //  console.log("auxiliaryDataSet", auxiliaryDataSet);
         };
         
@@ -189,7 +189,7 @@ export class ConwayBlock implements
         });
         // console.log("invalidTransactions", invalidTransactions);
 
-        const conwayBlock = new ConwayBlock({
+        const conwayBlock = new BabbageBlock({
             header,
             transactionBodies,
             transactionWitnessSets,

@@ -86,9 +86,11 @@ export class BabbageHeader
             cBodySignature instanceof CborBytes
         )) throw new Error("invalid cbor for BabbageHeader");
 
-        return new BabbageHeader({
+        const babbageHeader = new BabbageHeader({
             body: BabbageHeaderBody.fromCborObj( cHdrBody ),
             kesSignature: cBodySignature.bytes
         }, getSubCborRef( cbor, _originalBytes ));
+
+        return babbageHeader;
     }
 }

@@ -146,7 +146,6 @@ export class ConwayHeaderBody
     static fromCbor( cbor: CanBeCborString ): ConwayHeaderBody
     {
         const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor ).toBuffer();
-        // console.log("ConwayHeaderBody.fromCbor", bytes);
         return ConwayHeaderBody.fromCborObj(
             Cbor.parse( bytes, { keepRef: true } ),
             bytes
@@ -154,11 +153,10 @@ export class ConwayHeaderBody
     }
     static fromCborObj(cHdrBody: CborObj, _originalBytes?: Uint8Array): ConwayHeaderBody 
     {
-        // console.log("Conway cHdrBody", cHdrBody);
         if (!(
-            cHdrBody instanceof CborArray            
-        ))throw new InvalidCborFormatError("ConwayHeaderBody: expected CborArray containing a CborArray");
-        // console.log("cobj:", cHdrBody);
+            cHdrBody instanceof CborArray)            
+        )throw new InvalidCborFormatError("ConwayHeaderBodyy");
+
 
         // Destructure the inner array
         const [
@@ -172,12 +170,7 @@ export class ConwayHeaderBody
             _cBlockBodyHash,    // block_body_hash
             _cOpCert,           // operational_cert
             _cProtVer           // protocol_version
-        ] = cHdrBody instanceof CborArray && cHdrBody.array.length > 1 
-            ? cHdrBody.array 
-            : cHdrBody instanceof CborArray && cHdrBody.array[0] instanceof CborArray 
-            ? cHdrBody.array[0].array 
-            : (() => { throw new InvalidCborFormatError("ConwayHeaderBody: invalid structure for CborArray"); })(); // Sometimes body will come with kes signature in tests
-        // console.log("cHdrBody", );
+        ] = cHdrBody.array.length === 10 ? cHdrBody.array : cHdrBody.array[0].array;
     
         if (!(
             _cBlockNo instanceof CborUInt &&
@@ -204,7 +197,7 @@ export class ConwayHeaderBody
             protocolVersion: ProtocolVersion.fromCborObj(_cProtVer)
         }, getSubCborRef( cHdrBody, _originalBytes))
 
-        console.log("conwayHeaderBody.ts", conwayHeaderBody );
+        // console.log("conwayHeaderBody.ts", conwayHeaderBody );
 
         return conwayHeaderBody;
     }

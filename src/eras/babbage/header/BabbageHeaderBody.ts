@@ -154,10 +154,9 @@ export class BabbageHeaderBody
     static fromCborObj(cHdrBody: CborObj, _originalBytes?: Uint8Array): BabbageHeaderBody 
     {
         // console.log("cHdrBody", cHdrBody);
-        if (!(
-            cHdrBody instanceof CborArray) || 
-            !(cHdrBody.array[0] instanceof CborArray                
-        ))throw new InvalidCborFormatError("BabbageHeaderBody: expected CborArray containing a CborArray");
+        if(!(
+            cHdrBody instanceof CborArray
+        ))throw new InvalidCborFormatError("BabbageHeaderBody");
         // console.log("cobj:", cHdrBody);
 
         // Destructure the inner array
@@ -172,7 +171,7 @@ export class BabbageHeaderBody
             _cBlockBodyHash,    // block_body_hash
             _cOpCert,           // operational_cert
             _cProtVer           // protocol_version
-        ] = cHdrBody.array[0].array;
+        ] = cHdrBody.array.length === 10 ? cHdrBody.array : cHdrBody.array[0].array;
     
     
         if (!(
