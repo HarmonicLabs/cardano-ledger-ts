@@ -351,7 +351,6 @@ export class Address
      * stake key at path   "m/1852'/1815'/0'/2/0"
     */
     static fromEntropy( entropy: Uint8Array | string, network: NetworkT = "mainnet", AccountIndex: number = 0, AddressIndex: number = 0 ): Address
-    
     {
         console.log("Address.fromEntropy Index", AccountIndex, AddressIndex);
         return Address.fromXPrv( XPrv.fromEntropy( entropy ), network, AccountIndex, AddressIndex );

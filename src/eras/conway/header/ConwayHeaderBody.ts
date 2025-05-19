@@ -8,7 +8,7 @@ import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "../protoc
 import { IPoolOperationalCert, isIPoolOperationalCert, PoolOperationalCert } from "../../common/certs/PoolOperationalCert";
 import { U8Arr, U8Arr32 } from "../../../utils/U8Arr";
 import { forceBigUInt, u32 } from "../../../utils/ints";
-import { getSubCborRef } from "../../../utils/getSubCborRef";
+import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
 import { IPraosHeaderBody } from "../../common/interfaces//IPraosHeader";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 export interface IConwayHeaderBody
@@ -25,7 +25,6 @@ export interface IConwayHeaderBody
     opCert: IPoolOperationalCert;
     protocolVersion: IProtocolVersion;
 }
-
 
 export function isIConwayHeaderBody( thing: any ): thing is IConwayHeaderBody
 {
@@ -60,7 +59,6 @@ export class ConwayHeaderBody
     readonly opCert: PoolOperationalCert;
     readonly protocolVersion: ProtocolVersion;
 
-
     constructor(
         hdrBody: IConwayHeaderBody,
         readonly cborRef: SubCborRef | undefined = undefined
@@ -77,6 +75,8 @@ export class ConwayHeaderBody
         this.blockBodyHash = hash32bytes( hdrBody.blockBodyHash );
         this.opCert = new PoolOperationalCert( hdrBody.opCert );
         this.protocolVersion = new ProtocolVersion( hdrBody.protocolVersion );
+
+        this.cborRef = cborRef ?? subCborRefOrUndef( hdrBody );
 
     }
     // just keep the leaderVrfOutput and nonceVrfOutput ones
@@ -117,6 +117,7 @@ export class ConwayHeaderBody
     toCborObj(): CborArray
     {
         if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
+        
         return new CborArray([
             new CborUInt( this.blockNumber ),
             new CborUInt( this.slot ),
@@ -132,9 +133,7 @@ export class ConwayHeaderBody
     }
     /*
     CDDL:
-
-        header_body = [
-                block_number : block_no
+        header_body = [block_number : block_no
               , slot : slot_no
               , prev_hash : $hash32 / nil
               , issuer_vkey : $vkey
@@ -146,18 +145,22 @@ export class ConwayHeaderBody
               , protocol_version]
     */
 
-    static fromCbor( cStr: CanBeCborString ): ConwayHeaderBody
+    static fromCbor( cbor: CanBeCborString ): ConwayHeaderBody
     {
-        // const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor ).toBuffer();
-        return ConwayHeaderBody.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
+        const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor ).toBuffer();
+        // console.log("ConwayHeaderBody.fromCbor", bytes);
+        return ConwayHeaderBody.fromCborObj(
+            Cbor.parse( bytes, { keepRef: true } ),
+            bytes
+        );
     }
-    static fromCborObj(cObj: CborObj): ConwayHeaderBody 
+    static fromCborObj(cHdrBody: CborObj, _originalBytes?: Uint8Array): ConwayHeaderBody 
     {
-        if (!(cObj instanceof CborArray) || cObj.array.length < 1 || !(cObj.array[0] instanceof CborArray)) {
-            throw new InvalidCborFormatError("ConwayHeaderBody: expected CborArray containing a CborArray");
-        }
-
-        console.log("cobj:", cObj);
+        // console.log("Conway cHdrBody", cHdrBody);
+        if (!(
+            cHdrBody instanceof CborArray            
+        ))throw new InvalidCborFormatError("ConwayHeaderBody: expected CborArray containing a CborArray");
+        // console.log("cobj:", cHdrBody);
 
         // Destructure the inner array
         const [
@@ -171,10 +174,8 @@ export class ConwayHeaderBody
             _cBlockBodyHash,    // block_body_hash
             _cOpCert,           // operational_cert
             _cProtVer           // protocol_version
-        ] = cObj.array[0].array;
-    
-        console.log("cBlockNo:", _cProtVer);
-        console.log("cBlockNo is CborUInt:", _cBlockNo instanceof CborUInt);
+        ] = cHdrBody.array; // Ensure we have an array to destructure
+        // console.log("cHdrBody", );
     
         if (!(
             _cBlockNo instanceof CborUInt &&
@@ -187,8 +188,8 @@ export class ConwayHeaderBody
         )) {
             throw new Error("invalid cbor for ConwayHeaderBody");
         }
-    
-        return new ConwayHeaderBody({
+        
+        const conwayHeaderBody = new ConwayHeaderBody({
             blockNumber: Number(_cBlockNo.num),
             slot: _cSlotNo.num,
             prevHash: _cPrevHash?.bytes as U8Arr32 | undefined, // Handle nil case
@@ -199,6 +200,10 @@ export class ConwayHeaderBody
             blockBodyHash: _cBlockBodyHash.bytes as U8Arr32,
             opCert: PoolOperationalCert.fromCborObj(_cOpCert),
             protocolVersion: ProtocolVersion.fromCborObj(_cProtVer)
-        }, getSubCborRef(cObj));
+        }, getSubCborRef( cHdrBody, _originalBytes))
+
+        // console.log("conwayHeaderBody.ts", conwayHeaderBody );
+
+        return conwayHeaderBody;
     }
 }

@@ -80,14 +80,19 @@ export class ConwayHeader
             cHdrBody,
             cBodySignature
         ] = cbor.array;
+        
 
         if(!(
             cBodySignature instanceof CborBytes
-        )) throw new Error("invalid cbor for ConwayHeader");
+        )) throw new Error("invalid cbor for ConwayHeader cBodySignature");
 
-        return new ConwayHeader({
+        const conwayHeader = new ConwayHeader({
             body: ConwayHeaderBody.fromCborObj( cHdrBody ),
             kesSignature: cBodySignature.bytes
-        }, getSubCborRef( cbor, _originalBytes ));
+        }, getSubCborRef( cbor, _originalBytes ))
+
+        // console.log("ConwayHeader", conwayHeader);
+
+        return conwayHeader;
     }
 }

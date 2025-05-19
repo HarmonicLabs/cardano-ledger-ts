@@ -576,7 +576,7 @@ export class ConwayTxBody
 
     static fromCborObj( cObj: CborObj ): ConwayTxBody
     {
-        // console.log("txBody")
+        // console.log("cObj: ", cObj);
         if(!(
             cObj instanceof CborMap 
             // && cObj.map.length >= 20 

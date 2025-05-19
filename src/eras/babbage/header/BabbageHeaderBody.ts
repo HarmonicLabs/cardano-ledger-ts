@@ -10,6 +10,7 @@ import { U8Arr, U8Arr32 } from "../../../utils/U8Arr";
 import { forceBigUInt, u32 } from "../../../utils/ints";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
 import { IPraosHeaderBody } from "../../common/interfaces//IPraosHeader";
+import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 export interface IBabbageHeaderBody
 {
     blockNumber: CanBeUInteger;
@@ -75,20 +76,7 @@ export class BabbageHeaderBody
         this.opCert = new PoolOperationalCert( hdrBody.opCert );
         this.protocolVersion = new ProtocolVersion( hdrBody.protocolVersion );
     }
-    /* Alonzo HeaderBody
-            this.blockNumber = forceBigUInt( hdrBody.blockNumber );
-            this.slot = forceBigUInt( hdrBody.slot );
-            this.prevHash = typeof hdrBody.prevHash !== "undefined" ? hash32bytes( hdrBody.prevHash ) : undefined;
-            this.issuerPubKey = hash32bytes( hdrBody.issuerPubKey );
-            this.vrfPubKey = hash32bytes( hdrBody.vrfPubKey );
-            this.nonceVrfResult  = new VrfCert( hdrBody.nonceVrfResult  );
-            this.leaderVrfResult = new VrfCert( hdrBody.leaderVrfResult );
-            this.blockBodySize = u32( hdrBody.blockBodySize );
-            this.blockBodyHash = hash32bytes( hdrBody.blockBodyHash );
-            this.opCert = new PoolOperationalCert( hdrBody.opCert );
-            this.protocolVersion = new ProtocolVersion( hdrBody.protocolVersion );
-    */  
-    
+
     // just keep the leaderVrfOutput and nonceVrfOutput ones
     leaderVrfOutput(): U8Arr<32>
     {
@@ -143,9 +131,7 @@ export class BabbageHeaderBody
     }
     /*
     CDDL:
-
-        header_body = [
-                block_number : uint
+        header_body = [block_number : uint
               , slot : uint
               , prev_hash : $hash32 / nil
               , issuer_vkey : $vkey
@@ -154,8 +140,7 @@ export class BabbageHeaderBody
               , block_body_size : uint
               , block_body_hash : $hash32
               , operational_cert
-              , protocol_version
-              ]
+              , protocol_version]
     */
 
     static fromCbor( cbor: CanBeCborString ): BabbageHeaderBody
@@ -166,47 +151,55 @@ export class BabbageHeaderBody
             bytes
         );
     }
-    static fromCborObj( cHdrBody: CborObj, _originalBytes?: Uint8Array ): BabbageHeaderBody
+    static fromCborObj(cHdrBody: CborObj, _originalBytes?: Uint8Array): BabbageHeaderBody 
     {
-        if(!(
-            cHdrBody instanceof CborArray &&
-            cHdrBody.array.length >= 10
-        )) throw new Error("invalid cbor for BabbageHeaderBody");
+        // console.log("cHdrBody", cHdrBody);
+        if (!(
+            cHdrBody instanceof CborArray) || 
+            !(cHdrBody.array[0] instanceof CborArray                
+        ))throw new InvalidCborFormatError("BabbageHeaderBody: expected CborArray containing a CborArray");
+        // console.log("cobj:", cHdrBody);
 
+        // Destructure the inner array
         const [
-            cBlockNo,
-            cSlotNo,
-            cPrevHash,
-            cIssuerVkey,
-            cVrfVkey,
-            cVrfCert,
-            cBlockBodySize,
-            cBlockBodyHash,
-            cOpCert,
-            cProtVer
-        ] = cHdrBody.array;
+            _cBlockNo,          // block_number
+            _cSlotNo,           // slot
+            _cPrevHash,         // prev_hash
+            _cIssuerVkey,       // issuer_vkey
+            _cVrfVkey,          // vrf_vkey
+            _cVrfCert,          // vrf_result
+            _cBlockBodySize,    // block_body_size
+            _cBlockBodyHash,    // block_body_hash
+            _cOpCert,           // operational_cert
+            _cProtVer           // protocol_version
+        ] = cHdrBody.array[0].array;
+    
+    
+        if (!(
+            _cBlockNo instanceof CborUInt &&
+            _cSlotNo instanceof CborUInt &&
+            (_cPrevHash instanceof CborBytes || _cPrevHash === undefined) && // Allow nil per CDDL
+            _cIssuerVkey instanceof CborBytes &&
+            _cVrfVkey instanceof CborBytes &&
+            _cBlockBodySize instanceof CborUInt &&
+            _cBlockBodyHash instanceof CborBytes
+        )) {
+            throw new Error("invalid cbor for BabbageHeaderBody");
+        }
+        
+        const babbageHeaderBody = new BabbageHeaderBody({
+            blockNumber: Number(_cBlockNo.num),
+            slot: _cSlotNo.num,
+            prevHash: _cPrevHash?.bytes as U8Arr32 | undefined, // Handle nil case
+            issuerPubKey: _cIssuerVkey.bytes as U8Arr32,
+            vrfPubKey: _cVrfVkey.bytes as U8Arr32,
+            vrfResult: VrfCert.fromCborObj(_cVrfCert),
+            blockBodySize: _cBlockBodySize.num,
+            blockBodyHash: _cBlockBodyHash.bytes as U8Arr32,
+            opCert: PoolOperationalCert.fromCborObj(_cOpCert),
+            protocolVersion: ProtocolVersion.fromCborObj(_cProtVer)
+        }, getSubCborRef( cHdrBody, _originalBytes))
 
-        if(!(
-            cBlockNo instanceof CborUInt        &&
-            cSlotNo  instanceof CborUInt        &&
-            cPrevHash   instanceof CborBytes    &&
-            cIssuerVkey instanceof CborBytes    &&
-            cVrfVkey    instanceof CborBytes    &&
-            cBlockBodySize instanceof CborUInt  &&
-            cBlockBodyHash instanceof CborBytes
-        )) throw new Error("invalid cbor for BabbageHeaderBody");
-
-        return new BabbageHeaderBody({
-            blockNumber: cBlockNo.num,
-            slot: cSlotNo.num,
-            prevHash: cPrevHash.bytes as U8Arr32,
-            issuerPubKey: cIssuerVkey.bytes as U8Arr32,
-            vrfPubKey: cVrfVkey.bytes as U8Arr32,
-            vrfResult: VrfCert.fromCborObj( cVrfCert ),
-            blockBodySize: cBlockBodySize.num,
-            blockBodyHash: cBlockBodyHash.bytes as U8Arr32,
-            opCert: PoolOperationalCert.fromCborObj( cOpCert ),
-            protocolVersion: ProtocolVersion.fromCborObj( cProtVer ),
-        }, getSubCborRef( cHdrBody, _originalBytes ));
+        return babbageHeaderBody;
     }
 }
