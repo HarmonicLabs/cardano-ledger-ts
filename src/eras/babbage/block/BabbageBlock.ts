@@ -99,52 +99,42 @@ export class BabbageBlock implements
 
     static fromCborObj( cObj: CborObj, _originalBytes?: Uint8Array ): BabbageBlock 
     {
-       
-        if(!(
-            cObj instanceof CborArray 
-            // && cObj.map.length >= 20 
-        ))throw new InvalidCborFormatError("Babbage Block")
+        // console.log("Babbage.fromCborObj", cObj);
+        if (!(cObj instanceof CborArray && cObj.array.length >= 5)) {
+            throw new InvalidCborFormatError("Babbage Block must be a CBOR array with at least 5 elements");
+        }
 
-        //console.log("cObj", cObj.array[0]);
-
-        const _block = cObj.array.length > 1 ? cObj.array[1] : cObj.array; //compensate if a block comes with Era in tests
-       
-        if (!(
-            _block instanceof CborArray 
-           //  && _block.array.length >= 5
-        ))throw new InvalidCborFormatError("Block must be a CBOR array with at least five elements");
-
-        const _headerCbor = _block.array[0];
-        const _txBodiesCbor = _block.array[1];
-        const _txWitnessSetsCbor = _block.array[2];
-        const _auxDataSetCbor = _block.array[3];
-        const _invalidTxCbor = _block.array[4];
+        const _header = cObj.array[0];
+        const _txBodies = cObj.array[1];
+        const _txWitnessSets = cObj.array[2];
+        const _auxDataSet = cObj.array[3];
+        const _invalidTxs = cObj.array[4];
                
         // Header
         if (!(
-            _headerCbor instanceof CborArray
+            _header instanceof CborArray
         ))throw new InvalidCborFormatError("Header CBOR must be a CborArray");
         
-        const header = BabbageHeader.fromCborObj(_headerCbor);
+        const header = BabbageHeader.fromCborObj(_header);
         // console.log("header", header);
 
 
         // Transaction bodies
         if(!(
-            _txBodiesCbor instanceof CborArray
+            _txBodies instanceof CborArray
         ))throw new InvalidCborFormatError("transaction_bodies must be a CBOR array");
         
-        const transactionBodies = _txBodiesCbor.array.map((tbCbor, index) => {
+        const transactionBodies = _txBodies.array.map((tbCbor, index) => {
             return BabbageTxBody.fromCborObj(tbCbor);
         });
         // console.log("transactionBodies", transactionBodies);
 
         // Transaction witness sets
         if(!(
-            _txWitnessSetsCbor instanceof CborArray
+            _txWitnessSets instanceof CborArray
         ))throw new InvalidCborFormatError("transaction_witness_sets must be a CBOR array");
         
-        const transactionWitnessSets = _txWitnessSetsCbor.array.map((twsCbor, index) => {
+        const transactionWitnessSets = _txWitnessSets.array.map((twsCbor, index) => {
             if (!isCborObj(twsCbor)) {
                 throw new InvalidCborFormatError(`Invalid CBOR object at transaction_witness_sets[${index}]`);
             }
@@ -154,15 +144,16 @@ export class BabbageBlock implements
 
         // Auxiliary data set
         if(!(
-            _auxDataSetCbor instanceof CborMap
+            _auxDataSet instanceof CborMap
         ))throw new InvalidCborFormatError("BabbageAuxiliaryData");
         
         const auxiliaryDataSet: { [transactionIndex: number]: BabbageAuxiliaryData } = {};
-        for (const entry of _auxDataSetCbor.map) {
+        for (const entry of _auxDataSet.map) {
             const { k, v } = entry;
-            if (!(k instanceof CborUInt)) {
-                throw new InvalidCborFormatError("Invalid Keys in auxiliary_data_set");
-            }
+            if(!(
+                k instanceof CborUInt
+            ))throw new InvalidCborFormatError("Invalid Keys in auxiliary_data_set");
+            
             const txIndex = Number(k.num);
             if (!Number.isSafeInteger(txIndex)) {
                 throw new InvalidCborFormatError(`Transaction index ${k.num}`);
@@ -177,10 +168,10 @@ export class BabbageBlock implements
 
         // Invalid transactions
         if(!(
-            _invalidTxCbor instanceof CborArray
+            _invalidTxs instanceof CborArray
         ))throw new InvalidCborFormatError("invalid_transactions must be a CBOR array");
         
-        const invalidTransactions = _invalidTxCbor.array.map((itCbor, index) => {
+        const invalidTransactions = _invalidTxs.array.map((itCbor, index) => {
             if(!(
                 itCbor instanceof CborUInt
             ))throw new InvalidCborFormatError(`Invalid type for transaction_index at invalid_transactions[${index}]`);

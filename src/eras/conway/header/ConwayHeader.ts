@@ -4,6 +4,7 @@ import { isKesSignature, KesSignature, KesSignatureBytes } from "../../common/Ke
 import { ConwayHeaderBody, IConwayHeaderBody, isIConwayHeaderBody } from "./ConwayHeaderBody";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
 import { IPraosHeader } from "../../common/interfaces/IPraosHeader";
+import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError"
 
 export interface IConwayHeader
 {
@@ -74,7 +75,7 @@ export class ConwayHeader
         if(!(
             cbor instanceof CborArray 
             // && cbor.array.length >= 2
-        )) throw new Error("invalid cbor for ConwayHeader");
+        )) throw new InvalidCborFormatError("invalid cbor for ConwayHeader");
 
         const [
             cHdrBody,
@@ -84,7 +85,7 @@ export class ConwayHeader
 
         if(!(
             cBodySignature instanceof CborBytes
-        )) throw new Error("invalid cbor for ConwayHeader cBodySignature");
+        )) throw new InvalidCborFormatError("invalid cbor for ConwayHeader cBodySignature");
 
         const conwayHeader = new ConwayHeader({
             body: ConwayHeaderBody.fromCborObj( cHdrBody ),
