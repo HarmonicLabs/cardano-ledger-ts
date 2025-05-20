@@ -1,0 +1,67 @@
+{
+  "array": [
+    {
+      "array": [
+        {
+          "uint": "0"
+        },
+        {
+          "uint": "0"
+        },
+        {
+          "simple": null
+        },
+        {
+          "bytes": "6907a24fc62affc690ae4c61044d4874c7c013333a5e94d4669a69dba7a0201f"
+        },
+        {
+          "bytes": "29b2880af81ef578e7506bd7e840db694b08647dc803ee99b25ae9dd3c4e2210"
+        },
+        {
+          "array": [
+            {
+              "bytes": "57768126fd510b5ebf4555725cc04cb8d582c865d41c52aa26fc78583a384820de2d561dc864650a5d70f476eeaaee1472ed6d17cde3d40bbba835cbc3726acf"
+            },
+            {
+              "bytes": "6b77911a16a65a8873c86dafa4017227bbcc56b7ddbee2a12d28366f2b9e6aa0212591d9a47d71cd82e6749027a69b66655b2cedb8277ead6573db8e4c0d627429f6bc56c5be2a8332854edb1ed35d00"
+            }
+          ]
+        },
+        {
+          "array": [
+            {
+              "bytes": "644696bd766ee07a357559282ffa3001b70115a78c4f20a011a611a4a2b23621039f462913c0deb95e50d3652b1897f06012cd42c1082f213b13e13e547d08b1"
+            },
+            {
+              "bytes": "bc20d89f10c103836d264284e35b8affc6defc7cfece3105b9b9e5e63025bada42272ea8e43ab65a9371175566e51fed8a3adb803426e5f8a896bbb93937e5f2562df4b144d3eef57d8eb364bd77250b"
+            }
+          ]
+        },
+        {
+          "uint": "4"
+        },
+        {
+          "bytes": "29571d16f081709b3c48651860077bebf9340abb3fc7133443c54f1f5a5edcf1"
+        },
+        {
+          "bytes": "12963cf7b37ed0cbcd39f8d45c3bc7911137be765944daf77288e369dfaf3adb"
+        },
+        {
+          "uint": "0"
+        },
+        {
+          "uint": "0"
+        },
+        {
+          "bytes": "e2e734e33cc23cd86a11180b9f6e71eecdfef519ec0b067f0b2703a2dc4edafb652c77544c7f383e0f3c8355c7cbbefe35933c6ffa7aedb7861fee5065793a07"
+        },
+        {
+          "uint": "7"
+        },
+        {
+          "uint": "2"
+        }
+      ]
+    }
+  ]
+}

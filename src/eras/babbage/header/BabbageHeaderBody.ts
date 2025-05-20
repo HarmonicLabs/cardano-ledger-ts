@@ -153,7 +153,7 @@ export class BabbageHeaderBody
     }
     static fromCborObj(cHdrBody: CborObj, _originalBytes?: Uint8Array): BabbageHeaderBody 
     {
-        // console.log("cHdrBody", cHdrBody);
+        console.log("cHdrBody Babbage", cHdrBody);
         if(!(
             cHdrBody instanceof CborArray
         ))throw new InvalidCborFormatError("BabbageHeaderBody");

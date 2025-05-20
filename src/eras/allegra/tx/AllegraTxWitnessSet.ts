@@ -87,8 +87,6 @@ export class AllegraTxWitnessSet
         if(!(
             isIAllegraTxWitnessSet( witnesses )
         )) throw new Error("invalid witnesses passed");
-
-
         
         const defGetter = ( name: keyof IAllegraTxWitnessSet, get: () => any ) =>
         {
@@ -141,7 +139,7 @@ export class AllegraTxWitnessSet
             allRequiredSigners.map( sig => sig.toString() ) :
             undefined;
 
-        const noRequiredSigs = _reqSigs === undefined; 
+        const noRequiredSigs = _reqSigs === undefined;
 
         Object.defineProperty(
             this, "isComplete",

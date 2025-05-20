@@ -11,7 +11,7 @@ import { forceBigUInt, u32 } from "../../../utils/ints";
 import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
 import { IPraosHeaderBody } from "../../common/interfaces//IPraosHeader";
 import { concatUint8Array } from "@harmoniclabs/uint8array-utils";
-
+import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 
 export interface IAlonzoHeaderBody
 {
@@ -20,9 +20,8 @@ export interface IAlonzoHeaderBody
     prevHash: CanBeHash32 | undefined;
     issuerPubKey: CanBeHash32;
     vrfPubKey: CanBeHash32;
-    nonceVrfResult : IVrfCert
-    leaderVrfResult: IVrfCert
-    /** u32 **/
+    nonceVrfResult: IVrfCert;
+    leaderVrfResult: IVrfCert;
     blockBodySize: CanBeUInteger;
     blockBodyHash: CanBeHash32;
     opCert: IPoolOperationalCert;
@@ -57,7 +56,7 @@ export class AlonzoHeaderBody
     readonly prevHash: U8Arr<32> | undefined;
     readonly issuerPubKey: U8Arr<32>;
     readonly vrfPubKey: U8Arr<32>;
-    readonly nonceVrfResult : VrfCert;
+    readonly nonceVrfResult: VrfCert;
     readonly leaderVrfResult: VrfCert;
     readonly blockBodySize: number;
     readonly blockBodyHash: U8Arr<32>;
@@ -75,13 +74,14 @@ export class AlonzoHeaderBody
         this.prevHash = typeof hdrBody.prevHash !== "undefined" ? hash32bytes( hdrBody.prevHash ) : undefined;
         this.issuerPubKey = hash32bytes( hdrBody.issuerPubKey );
         this.vrfPubKey = hash32bytes( hdrBody.vrfPubKey );
-        this.nonceVrfResult  = new VrfCert( hdrBody.nonceVrfResult  );
+        this.nonceVrfResult = new VrfCert( hdrBody.nonceVrfResult );
         this.leaderVrfResult = new VrfCert( hdrBody.leaderVrfResult );
         this.blockBodySize = u32( hdrBody.blockBodySize );
         this.blockBodyHash = hash32bytes( hdrBody.blockBodyHash );
         this.opCert = new PoolOperationalCert( hdrBody.opCert );
         this.protocolVersion = new ProtocolVersion( hdrBody.protocolVersion );
     }
+
     getLeaderVrfCert(): VrfCert {
         return this.leaderVrfResult;
     }
@@ -96,7 +96,8 @@ export class AlonzoHeaderBody
             this.leaderVrfResult.proofHash
         ) as U8Arr<32>;
     }
-    nonceVrfOutput(): U8Arr32
+
+    nonceVrfOutput(): U8Arr<32>
     {
         return sha2_256_sync(
             this.nonceVrfResult.proofHash
@@ -125,11 +126,13 @@ export class AlonzoHeaderBody
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
         return this.toCbor().toBuffer();
     }
+
     toCbor(): CborString
     {
         if( this.cborRef instanceof SubCborRef ) return new CborString( this.cborRef.toBuffer() );
         return Cbor.encode( this.toCborObj() );
     }
+
     toCborObj(): CborArray
     {
         return new CborArray([
@@ -146,20 +149,20 @@ export class AlonzoHeaderBody
             this.protocolVersion.toCborObj()
         ]);
     }
+
     /*
     CDDL:
-
         header_body = [block_number : uint
-              , slot : uint
-              , prev_hash : $hash32 / nil
-              , issuer_vkey : $vkey
-              , vrf_vkey : $vrf_vkey
-              , nonce_vrf : $vrf_cert
-              , leader_vrf : $vrf_cert
-              , block_body_size : uint .size 4
-              , block_body_hash : $hash32
-              , operational_cert
-              , protocol_version]
+            , slot : uint
+            , prev_hash : $hash32 / nil
+            , issuer_vkey : $vkey
+            , vrf_vkey : $vrf_vkey
+            , nonce_vrf : $vrf_cert
+            , leader_vrf : $vrf_cert
+            , block_body_size : uint
+            , block_body_hash : $hash32
+            , operational_cert
+            , protocol_version]
     */
 
     static fromCbor( cbor: CanBeCborString ): AlonzoHeaderBody
@@ -170,12 +173,13 @@ export class AlonzoHeaderBody
             bytes
         );
     }
+
     static fromCborObj( cHdrBody: CborObj, _originalBytes?: Uint8Array ): AlonzoHeaderBody
     {
+        console.log("CHdrBody Alonzo", cHdrBody);
         if(!(
-            cHdrBody instanceof CborArray &&
-            cHdrBody.array.length >= 11
-        )) throw new Error("invalid cbor for AlonzoHeaderBody");
+            cHdrBody instanceof CborArray 
+        ))throw new InvalidCborFormatError("invalid cbor for AlonzoHeaderBody; expected array of 11 elements");
 
         const [
             cBlockNo,
@@ -183,7 +187,8 @@ export class AlonzoHeaderBody
             cPrevHash,
             cIssuerVkey,
             cVrfVkey,
-            cVrfCert,
+            cNonceVrfCert,
+            cLeaderVrfCert,
             cBlockBodySize,
             cBlockBodyHash,
             cOpCert,
@@ -191,25 +196,25 @@ export class AlonzoHeaderBody
         ] = cHdrBody.array;
 
         if(!(
-            cBlockNo instanceof CborUInt        &&
-            cSlotNo  instanceof CborUInt        &&
-            cPrevHash   instanceof CborBytes    &&
-            cIssuerVkey instanceof CborBytes    &&
-            cVrfVkey    instanceof CborBytes    &&
-            cBlockBodySize instanceof CborUInt  &&
+            cBlockNo instanceof CborUInt &&
+            cSlotNo instanceof CborUInt &&
+            (cPrevHash instanceof CborBytes || cPrevHash instanceof CborSimple) &&
+            cIssuerVkey instanceof CborBytes &&
+            cVrfVkey instanceof CborBytes &&
+            cBlockBodySize instanceof CborUInt &&
             cBlockBodyHash instanceof CborBytes
-        )) throw new Error("invalid cbor for AlonzoHeaderBody");
+        )) throw new InvalidCborFormatError("invalid cbor for AlonzoHeaderBody");
 
         return new AlonzoHeaderBody({
             blockNumber: cBlockNo.num,
             slot: cSlotNo.num,
-            prevHash: cPrevHash.bytes as U8Arr32,
-            issuerPubKey: cIssuerVkey.bytes as U8Arr32,
-            vrfPubKey: cVrfVkey.bytes as U8Arr32,
-            nonceVrfResult: VrfCert.fromCborObj( cVrfCert ),
-            leaderVrfResult: VrfCert.fromCborObj( cVrfCert ),
+            prevHash: cPrevHash instanceof CborBytes ? cPrevHash.bytes as U8Arr<32> : undefined,
+            issuerPubKey: cIssuerVkey.bytes as U8Arr<32>,
+            vrfPubKey: cVrfVkey.bytes as U8Arr<32>,
+            nonceVrfResult: VrfCert.fromCborObj( cNonceVrfCert ),
+            leaderVrfResult: VrfCert.fromCborObj( cLeaderVrfCert ),
             blockBodySize: cBlockBodySize.num,
-            blockBodyHash: cBlockBodyHash.bytes as U8Arr32,
+            blockBodyHash: cBlockBodyHash.bytes as U8Arr<32>,
             opCert: PoolOperationalCert.fromCborObj( cOpCert ),
             protocolVersion: ProtocolVersion.fromCborObj( cProtVer )
         }, getSubCborRef( cHdrBody, _originalBytes ));

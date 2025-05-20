@@ -81,7 +81,7 @@ IMultiEraBlock, ToCbor, ToJson
             block
         }, getSubCborRef(cObj, _originalBytes));
 
-        console.log("multiEraBlock", multiEraBlock.toJSON());
+        // console.log("multiEraBlock", multiEraBlock.toJSON());
 
         return multiEraBlock;
     }
