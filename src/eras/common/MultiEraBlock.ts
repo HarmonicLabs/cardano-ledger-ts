@@ -3,6 +3,7 @@ import { BabbageBlock } from '../babbage/block/BabbageBlock';
 import { AlonzoBlock } from '../alonzo/block/AlonzoBlock';
 import { MaryBlock } from '../mary/block/MaryBlock';
 import { AllegraBlock } from '../allegra/block/AllegraBlock';
+import { ShelleyBlock } from '../shelley/block/ShelleyBlock';
 import { CborArray, ToCbor, SubCborRef, CborString, Cbor, CborObj, CborUInt, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
 import { ToJson } from "../../utils/ToJson"
 import { getSubCborRef } from "../../utils/getSubCborRef";
@@ -12,14 +13,14 @@ export type CardanoEra = number;
 
 export interface IMultiEraBlock {
     era: CardanoEra;
-    block: ConwayBlock | BabbageBlock | AlonzoBlock | MaryBlock | AllegraBlock;
+    block: ConwayBlock | BabbageBlock | AlonzoBlock | MaryBlock | AllegraBlock | ShelleyBlock;
 }
 
 export class MultiEraBlock implements 
 IMultiEraBlock, ToCbor, ToJson 
 {
     readonly era: CardanoEra;
-    readonly block: ConwayBlock | BabbageBlock | AlonzoBlock | MaryBlock | AllegraBlock;
+    readonly block: ConwayBlock | BabbageBlock | AlonzoBlock | MaryBlock | AllegraBlock | ShelleyBlock;
 
     constructor(
         block: IMultiEraBlock,
@@ -66,7 +67,7 @@ IMultiEraBlock, ToCbor, ToJson
         ))throw new InvalidCborFormatError("Era must be a CborUInt");
         
 
-        let block: ConwayBlock | BabbageBlock | AlonzoBlock | MaryBlock | AllegraBlock;
+        let block: ConwayBlock | BabbageBlock | AlonzoBlock | MaryBlock | AllegraBlock | ShelleyBlock;
         switch (Number(_era.num)) {
             case 7: // Conway era
                 block = ConwayBlock.fromCborObj(_blockData);
@@ -82,6 +83,9 @@ IMultiEraBlock, ToCbor, ToJson
                 break;
             case 3 : // Allegra era
                 block = AllegraBlock.fromCborObj(_blockData);
+                break;
+            case 2: // Shelley era
+                block = ShelleyBlock.fromCborObj(_blockData);
                 break;
             default:
                 throw new Error(`Unsupported era: ${_era.num}`);

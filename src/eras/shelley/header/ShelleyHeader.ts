@@ -5,6 +5,10 @@ import { ShelleyHeaderBody, IShelleyHeaderBody, isIShelleyHeaderBody } from "./S
 import { getSubCborRef } from "../../../utils/getSubCborRef";
 import { IPraosHeader } from "../../common/interfaces/IPraosHeader";
 
+/*CDDL
+header = [header_body, body_signature : $kes_signature]
+*/
+
 export interface IShelleyHeader
 {
     body: IShelleyHeaderBody;

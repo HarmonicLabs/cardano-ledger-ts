@@ -13,8 +13,7 @@ import { IPraosHeaderBody } from "../../common/interfaces/IPraosHeader";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
     /*
     CDDL:
-        header_body = [
-            block_number : uint,
+        header_body = [block_number : uint,
             slot : uint,
             prev_hash : $hash32 / nil,
             issuer_vkey : $vkey,
@@ -24,8 +23,7 @@ import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
             block_body_size : uint,
             block_body_hash : $hash32,
             operational_cert : [kes_vkey : $kes_vkey, sequence_number : uint, kes_period : uint, sigma : $signature],
-            protocol_version : [major : uint, minor : uint]
-        ]
+            protocol_version : [major : uint, minor : uint]]
     */
 export interface IAllegraHeaderBody
 {
