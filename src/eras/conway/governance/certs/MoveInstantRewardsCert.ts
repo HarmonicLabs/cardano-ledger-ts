@@ -187,8 +187,9 @@ export class MoveInstantRewardsCert
 
     static fromCborObj( cObj: CborObj ): MoveInstantRewardsCert
     {
-        if(!( cObj instanceof CborArray ))
-        throw new Error(`Invalid CBOR fromat for "MoveInstantRewardsCert"`);
+        if(!( 
+            cObj instanceof CborArray 
+        ))throw new Error(`Invalid CBOR fromat for "MoveInstantRewardsCert"`);
 
         const [
             _src,

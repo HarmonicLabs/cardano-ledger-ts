@@ -2,15 +2,17 @@ import { TxBody } from "../body/TxBody";
 
 test("mutexo 0", () => {
 
-    const str = 
-    "a300d9010281825820fa8b8effda36dc959a297850e721fcfcbac71dc47215044694bb17a8429900e4185e018182581d60da0eb5ed7611482ec5089b69d870e0c56c1c45180256112398e0835b1b00000002540be400021a00030d40";
+    const str = "a300d9010281825820fa8b8effda36dc959a297850e721fcfcbac71dc47215044694bb17a8429900e4185e018182581d60da0eb5ed7611482ec5089b69d870e0c56c1c45180256112398e0835b1b00000002540be400021a00030d40";
+    // console.log("Body Test", str);
 
     let body!: TxBody;
 
     expect(() => {
         body = TxBody.fromCbor(str);
+        // console.log("testing the body");
     }).not.toThrow();
-
+    
+   
 });
 
 

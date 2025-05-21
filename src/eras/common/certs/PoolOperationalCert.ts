@@ -105,7 +105,7 @@ export class PoolOperationalCert
     {
         if(!(
             cbor instanceof CborArray
-            && cbor.array.length >= 4
+            // && cbor.array.length >= 4
         )) throw new Error("invalid cbor for PoolOperationalCert");
 
         const [

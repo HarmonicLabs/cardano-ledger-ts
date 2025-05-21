@@ -212,8 +212,8 @@ export class AlonzoTx
     static fromCborObj( cObj: CborObj ): AlonzoTx
     {
         if(!(
-            cObj instanceof CborArray
-            && cObj.array.length >= 4
+            cObj instanceof CborArray &&
+            cObj.array.length >= 4
         ))throw new InvalidCborFormatError("AlonzoTx");
         
         const [ _body, _wits, _isValid, _aux ] = cObj.array;

@@ -269,7 +269,8 @@ export class AllegraTxBody
     static fromCborObj( cObj: CborObj ): AllegraTxBody
     {
         if(!(
-            cObj instanceof CborMap
+            cObj instanceof CborMap 
+            // && cObj.map.length >= 9
         ))throw new InvalidCborFormatError("AllegraTxBody")
 
         let fields: (CborObj | undefined)[] = new Array( 9 ).fill( undefined );

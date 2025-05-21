@@ -1,4 +1,4 @@
-import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
+import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CanBeCborString, forceCborString, CborText } from "@harmoniclabs/cbor";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { TxMetadatum, isTxMetadatum, txMetadatumFromCborObj } from "../../tx";
 import { subCborRefOrUndef, getSubCborRef } from "../../utils/getSubCborRef";
@@ -87,21 +87,25 @@ export class TxMetadata
     }
 
     static fromCborObj( cObj: CborObj ): TxMetadata
+    
     {
+        // console.log("txMetadata fromCborObj: ", cObj )
         if(!( 
             cObj instanceof CborMap 
-            && cObj.map.length >= 0
+            // && cObj.map.length >= 1
         ))throw new InvalidCborFormatError("TxMetadata")
 
         const meta = {};
         const len = cObj.map.length;
+        // console.log("txMetadata fromCborObj: ", len )
 
         for( let i = 0; i < len; i++ )
         {
             const { k, v } = cObj.map[i];
-
+            // console.log("txMetadata fromCborObj k: ", k )
+            // console.log("txMetadata fromCborObj v: ", v )
             if(!( k instanceof CborUInt ))
-            throw new InvalidCborFormatError("TxMetadata")
+            throw new InvalidCborFormatError("TxMetadata: " + k)
 
             defineReadOnlyProperty(
                 meta, 
@@ -116,7 +120,7 @@ export class TxMetadata
     toJSON() { return this.toJson(); }
     toJson()
     {
-        const json = {}
+        const json = {};
 
         const ks = Object.keys( this.metadata );
 
@@ -125,8 +129,7 @@ export class TxMetadata
             defineReadOnlyProperty(
                 json, k, this.metadata[k].toJson()
             )
-        }
-
+        };
         return json as any;
-    }
+    };
 }

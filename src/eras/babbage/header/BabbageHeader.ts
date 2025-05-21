@@ -1,10 +1,9 @@
 import { isObject } from "@harmoniclabs/obj-utils";
-import { IPraosHeader } from "../../common/interfaces/IPraosHeader";
+import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { isKesSignature, KesSignature, KesSignatureBytes } from "../../common/Kes";
 import { BabbageHeaderBody, IBabbageHeaderBody, isIBabbageHeaderBody } from "./BabbageHeaderBody";
-import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
-
+import { IPraosHeader } from "../../common/interfaces/IPraosHeader";
 
 export interface IBabbageHeader
 {
@@ -27,7 +26,7 @@ export function isIBabbageHeader( thing: any ): thing is IBabbageHeaderChecked
 }
 
 export class BabbageHeader
-    implements IPraosHeader, IBabbageHeader, ToCbor
+    implements IBabbageHeader, ToCbor, IPraosHeader
 {
     readonly body: BabbageHeaderBody;
     readonly kesSignature: KesSignature;
@@ -87,9 +86,11 @@ export class BabbageHeader
             cBodySignature instanceof CborBytes
         )) throw new Error("invalid cbor for BabbageHeader");
 
-        return new BabbageHeader({
+        const babbageHeader = new BabbageHeader({
             body: BabbageHeaderBody.fromCborObj( cHdrBody ),
             kesSignature: cBodySignature.bytes
         }, getSubCborRef( cbor, _originalBytes ));
+
+        return babbageHeader;
     }
 }

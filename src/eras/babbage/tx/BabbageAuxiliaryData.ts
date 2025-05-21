@@ -204,11 +204,12 @@ export class BabbageAuxiliaryData
     }
     static fromCborObj( cObj: CborObj ): BabbageAuxiliaryData
     {
+        // console.log("BabbageAuxiliaryData.fromCborObj", cObj);
         // shelley; metadata only
-        if( cObj instanceof CborMap )
+        if( "data" in cObj && cObj.data instanceof CborMap )
         {
             return new BabbageAuxiliaryData({
-                metadata: TxMetadata.fromCborObj( cObj )
+                metadata: TxMetadata.fromCborObj( cObj.data  )
             });
         }
 
@@ -216,7 +217,8 @@ export class BabbageAuxiliaryData
         if( cObj instanceof CborArray )
         {
             if(!(
-                cObj.array[1] instanceof CborArray
+                cObj.array[1] instanceof CborArray 
+                // && cObj.array[1].length >= 5               
             ))throw new InvalidCborFormatError("BabbageAuxiliaryData")
 
             return new BabbageAuxiliaryData({
@@ -224,17 +226,18 @@ export class BabbageAuxiliaryData
                 nativeScripts: cObj.array[1].array.map( nativeScriptFromCborObj )
             });
         }
-
+        
         if(!(
-            cObj instanceof CborTag &&
-            cObj.data instanceof CborMap &&
-            cObj.data.map.length <= 4
-        ))
-        throw new InvalidCborFormatError("BabbageAuxiliaryData")
+            cObj instanceof CborTag 
+            && cObj.data instanceof CborMap 
+            // && cObj.data.map.length >= 4
+        ))throw new InvalidCborFormatError("BabbageAuxiliaryData");
+
+        
 
         let fields: (CborObj | undefined)[] = new Array( 4 ).fill( undefined );
 
-        for( let i = 0; i < 4; i++)
+        for( let i = 0; i < 4 ; i++)
         {
             const { v } = cObj.data.map.find(
                 ({ k }) => k instanceof CborUInt && Number( k.num ) === i
@@ -244,6 +247,7 @@ export class BabbageAuxiliaryData
 
             fields[i] = v;
         }
+        // console.log("fields", fields);
 
         const [
             _metadata,
@@ -251,12 +255,11 @@ export class BabbageAuxiliaryData
             _pV1,
             _pV2,
         ] = fields;
-
-        if(!(
-            _native instanceof CborArray &&
-            _pV1 instanceof CborArray &&
-            _pV2 instanceof CborArray
-        ))throw new InvalidCborFormatError("BabbageAuxiliaryData")
+        // console.log("_native", _native);
+    
+        if (_native !== undefined && !(_native instanceof CborArray)) throw new InvalidCborFormatError("AlonzoAuxiliaryData native")
+        if (_pV1 !== undefined && !(_pV1 instanceof CborArray)) throw new InvalidCborFormatError("AlonzoAuxiliaryData pV1")
+        if (_pV2 !== undefined && !(_pV2 instanceof CborArray)) throw new InvalidCborFormatError("AlonzoAuxiliaryData pV2")
 
         return new BabbageAuxiliaryData({
             metadata: _metadata === undefined ? undefined : TxMetadata.fromCborObj( _metadata ),
@@ -280,7 +283,7 @@ export class BabbageAuxiliaryData
                         scriptType: ScriptType.PlutusV2,
                         bytes: Cbor.encode( cbor ).toBuffer()
                     })
-                )             
+                )            
         }, getSubCborRef( cObj ));
     }
 

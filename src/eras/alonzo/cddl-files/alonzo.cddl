@@ -106,12 +106,10 @@ block = [header
         , auxiliary_data_set : {* transaction_index => auxiliary_data}
         , invalid_transactions : [* transaction_index]]
 
-bootstrap_witness = [
-                      public_key : $vkey
+bootstrap_witness = [public_key : $vkey
                     , signature : $signature
                     , chain_code : bytes .size 32
-                    , attributes : bytes
-                    ]
+                    , attributes : bytes]
 
 ; The real bounded_bytes does not have this limit. it instead has
 ; a different limit which cannot be expressed in CDDL.
@@ -168,8 +166,7 @@ header = [header_body, body_signature : $kes_signature]
 
 ;  block_body_size: merkle triple root
 ; 
-header_body = [
-                block_number : uint
+header_body = [block_number : uint
               , slot : uint
               , prev_hash : $hash32 / nil
               , issuer_vkey : $vkey
@@ -179,8 +176,7 @@ header_body = [
               , block_body_size : uint
               , block_body_hash : $hash32
               , operational_cert
-              , protocol_version
-              ]
+              , protocol_version]
 
 int64 = -9223372036854775808 .. 9223372036854775807
 
@@ -577,3 +573,5 @@ constr<a0> = #6.121([* a0])
 multiasset<a0> = {* policy_id => {* asset_name => a0}}
 
 set<a0> = [* a0]
+
+[

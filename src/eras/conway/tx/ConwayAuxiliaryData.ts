@@ -238,11 +238,12 @@ export class ConwayAuxiliaryData
     
     static fromCborObj( cObj: CborObj ): ConwayAuxiliaryData
     {
+        
         // shelley; metadata only
-        if( cObj instanceof CborMap )
+        if( "data" in cObj && cObj.data instanceof CborMap )
         {
             return new ConwayAuxiliaryData({
-                metadata: TxMetadata.fromCborObj( cObj )
+                metadata: TxMetadata.fromCborObj( cObj.data  )
             });
         }
 
@@ -250,8 +251,8 @@ export class ConwayAuxiliaryData
         if( cObj instanceof CborArray )
         {
             if(!(
-                cObj.array[1] instanceof CborArray
-                && cObj.array.length >= 5               
+                cObj.array[1] instanceof CborArray 
+                // && cObj.array[1].length >= 5               
             ))throw new InvalidCborFormatError("ConwayAuxiliaryData")
 
             return new ConwayAuxiliaryData({
@@ -259,12 +260,14 @@ export class ConwayAuxiliaryData
                 nativeScripts: cObj.array[1].array.map( nativeScriptFromCborObj )
             });
         }
-
+        console.log("ConwayAuxiliaryData.fromCborObj", cObj);
         if(!(
             cObj instanceof CborTag 
             && cObj.data instanceof CborMap 
-            && cObj.data.map.length <= 5
-        ))throw new InvalidCborFormatError("ConwayAuxiliaryData")
+            // && cObj.data.map.length >= 5
+        ))throw new InvalidCborFormatError("ConwayAuxiliaryData");
+
+        
 
         let fields: (CborObj | undefined)[] = new Array( 5 ).fill( undefined );
 
@@ -278,6 +281,7 @@ export class ConwayAuxiliaryData
 
             fields[i] = v;
         }
+        // console.log("fields", fields);
 
         const [
             _metadata,
@@ -286,13 +290,12 @@ export class ConwayAuxiliaryData
             _pV2,
             _pV3
         ] = fields;
-
-        if(!(
-            _native instanceof CborArray &&
-            _pV1 instanceof CborArray &&
-            _pV2 instanceof CborArray &&
-            _pV3 instanceof CborArray
-        ))throw new InvalidCborFormatError("ConwayAuxiliaryData")
+        // console.log("_native", _native);
+        
+        if (_native !== undefined && !(_native instanceof CborArray)) throw new InvalidCborFormatError("AlonzoAuxiliaryData native")
+        if (_pV1 !== undefined && !(_pV1 instanceof CborArray)) throw new InvalidCborFormatError("AlonzoAuxiliaryData pV1")
+        if (_pV2 !== undefined && !(_pV2 instanceof CborArray)) throw new InvalidCborFormatError("AlonzoAuxiliaryData pV2")
+        if (_pV3 !== undefined && !(_pV3 instanceof CborArray)) throw new InvalidCborFormatError("AlonzoAuxiliaryData pV3")
 
         return new ConwayAuxiliaryData({
             metadata: _metadata === undefined ? undefined : TxMetadata.fromCborObj( _metadata ),

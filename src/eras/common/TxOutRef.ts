@@ -170,8 +170,9 @@ export class TxOutRef
     }
     static fromCborObj( cObj: CborObj ): TxOutRef
     {
-        if(!(cObj instanceof CborArray ))
-        throw new InvalidCborFormatError("TxOutRef");
+        if(!(
+            cObj instanceof CborArray 
+        ))throw new InvalidCborFormatError("TxOutRef");
 
         const [ _id, _index ] = cObj.array;
 

@@ -210,11 +210,10 @@ export class ConwayTx
     {
         if(!(
             cObj instanceof CborArray
-            && cObj.array.length >= 4
+            // && cObj.array.length >= 4
         ))throw new InvalidCborFormatError("ConwayTx");
         
         const [ _body, _wits, _isValid, _aux ] = cObj.array;
-
         if(!(
             _isValid instanceof CborSimple &&
             typeof (_isValid.simple) === "boolean"
@@ -222,12 +221,13 @@ export class ConwayTx
 
         const noConwayAuxiliaryData = _aux instanceof CborSimple && (_aux.simple === null || _aux.simple === undefined);
 
-        return new ConwayTx({
+        const conwayTx = new ConwayTx({
             body: ConwayTxBody.fromCborObj( _body ),
             witnesses: ConwayTxWitnessSet.fromCborObj( _wits ),
             isScriptValid: _isValid.simple,
             auxiliaryData: noConwayAuxiliaryData ? undefined : ConwayAuxiliaryData.fromCborObj( _aux )
         }, getSubCborRef( cObj ))
+        return conwayTx;
     }
 
     toJSON() { 

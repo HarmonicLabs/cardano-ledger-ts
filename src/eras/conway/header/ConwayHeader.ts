@@ -1,10 +1,10 @@
+import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { isObject } from "@harmoniclabs/obj-utils";
-import { IPraosHeader } from "../../common/interfaces/IPraosHeader";
 import { isKesSignature, KesSignature, KesSignatureBytes } from "../../common/Kes";
 import { ConwayHeaderBody, IConwayHeaderBody, isIConwayHeaderBody } from "./ConwayHeaderBody";
-import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
-
+import { IPraosHeader } from "../../common/interfaces/IPraosHeader";
+import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError"
 
 export interface IConwayHeader
 {
@@ -27,7 +27,7 @@ export function isIConwayHeader( thing: any ): thing is IConwayHeaderChecked
 }
 
 export class ConwayHeader
-    implements IPraosHeader, IConwayHeader, ToCbor
+    implements IConwayHeader, ToCbor , IPraosHeader
 {
     readonly body: ConwayHeaderBody;
     readonly kesSignature: KesSignature;
@@ -73,22 +73,27 @@ export class ConwayHeader
     static fromCborObj( cbor: CborObj, _originalBytes?: Uint8Array ): ConwayHeader
     {
         if(!(
-            cbor instanceof CborArray &&
-            cbor.array.length >= 2
-        )) throw new Error("invalid cbor for ConwayHeader");
+            cbor instanceof CborArray 
+            // && cbor.array.length >= 2
+        )) throw new InvalidCborFormatError("invalid cbor for ConwayHeader");
 
         const [
             cHdrBody,
             cBodySignature
         ] = cbor.array;
+        // console.log("ConwayHeader cHdrBody", cHdrBody);
 
         if(!(
             cBodySignature instanceof CborBytes
-        )) throw new Error("invalid cbor for ConwayHeader");
+        )) throw new InvalidCborFormatError("invalid cbor for ConwayHeader cBodySignature");
 
-        return new ConwayHeader({
+        const conwayHeader = new ConwayHeader({
             body: ConwayHeaderBody.fromCborObj( cHdrBody ),
             kesSignature: cBodySignature.bytes
-        }, getSubCborRef( cbor, _originalBytes ));
+        }, getSubCborRef( cbor, _originalBytes ))
+
+        // console.log("ConwayHeader", conwayHeader);
+
+        return conwayHeader;
     }
 }

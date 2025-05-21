@@ -1,10 +1,13 @@
+import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { isObject } from "@harmoniclabs/obj-utils";
-import { IPraosHeader } from "../../common/interfaces/IPraosHeader";
 import { isKesSignature, KesSignature, KesSignatureBytes } from "../../common/Kes";
 import { ShelleyHeaderBody, IShelleyHeaderBody, isIShelleyHeaderBody } from "./ShelleyHeaderBody";
-import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
+import { IPraosHeader } from "../../common/interfaces/IPraosHeader";
 
+/*CDDL
+header = [header_body, body_signature : $kes_signature]
+*/
 
 export interface IShelleyHeader
 {
@@ -27,7 +30,7 @@ export function isIShelleyHeader( thing: any ): thing is IShelleyHeaderChecked
 }
 
 export class ShelleyHeader
-    implements IPraosHeader, IShelleyHeader, ToCbor
+    implements IShelleyHeader, ToCbor, IPraosHeader
 {
     readonly body: ShelleyHeaderBody;
     readonly kesSignature: KesSignature;

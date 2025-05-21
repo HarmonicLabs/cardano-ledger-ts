@@ -2,16 +2,16 @@ import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborBytes, Ca
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { toHex } from "@harmoniclabs/uint8array-utils";
 import { isUint8Array } from "util/types";
-import { Hash32, Signature } from "../../hashes";
+import { Hash, Hash32, Signature } from "../../hashes";
 import { VKey } from "../../tx";
 import { subCborRefOrUndef, getSubCborRef } from "../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
 
 export interface IBootstrapWitness {
-    pubKey: Hash32;
+    pubKey: Hash | Hash32;
     signature: Signature;
-    chainCode: Hash32;
+    chainCode: Hash | Hash32;
     attributes: Uint8Array;
 }
 export class BootstrapWitness
@@ -19,7 +19,7 @@ export class BootstrapWitness
 {
     readonly pubKey!: VKey;
     readonly signature!: Signature;
-    readonly chainCode!: Hash32;
+    readonly chainCode!: Hash | Hash32;
     readonly attributes!: Uint8Array;
 
     constructor(
@@ -34,21 +34,27 @@ export class BootstrapWitness
             attributes 
         } = witness;
         
+        // console.log("pubkKey: ", pubKey, pubKey.toString() );
         if(!(
-            pubKey instanceof Hash32
-        ))throw new Error("invalid 'pubKey' constructing 'BootstrapWitness'");
+            pubKey instanceof Hash32 
+            || pubKey instanceof Hash
+        ))throw new Error("invalid 'pubKey' constructing 'BootstrapWitness': " +  pubKey);
         this.pubKey =  pubKey instanceof VKey ? pubKey : new VKey( pubKey )
 
+        // console.log("signature: ", signature, signature.toString() );
         if(!(
             signature instanceof Signature
         ))throw new Error("invalid 'signature' constructing 'BootstrapWitness'");
         this.signature = signature;
 
+        // console.log("chainCode: ", chainCode, chainCode.toString() );
         if(!(
-            chainCode instanceof Hash32
+            chainCode instanceof Hash32 
+            || chainCode instanceof Hash
         ))throw new Error("invalid 'chainCode' constructing 'BootstrapWitness'");
         this.chainCode = chainCode;
-
+        
+        // console.log("attributes: ", attributes, toHex( attributes ) );
         if(!(
             isUint8Array( attributes )
         ))throw new Error("invalid 'attributes' constructing 'BootstrapWitness'");
@@ -110,9 +116,9 @@ export class BootstrapWitness
     static fromCborObj( cObj: CborObj ): BootstrapWitness
     {
         if(!(
-            cObj instanceof CborArray 
-            && cObj.array[3] instanceof CborBytes
-            && cObj.array.length >= 4
+            cObj instanceof CborArray &&
+            cObj.array[3] instanceof CborBytes 
+            // && cObj.array.length >= 4
         ))throw new InvalidCborFormatError("BootstrapWitness");
 
         const [ _pubKey, _signature, _chainCode, _attributes ] = cObj.array;

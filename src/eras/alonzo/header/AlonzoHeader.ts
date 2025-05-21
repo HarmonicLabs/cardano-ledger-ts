@@ -1,10 +1,9 @@
+import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { isObject } from "@harmoniclabs/obj-utils";
-import { IPraosHeader } from "../../common/interfaces/IPraosHeader";
 import { isKesSignature, KesSignature, KesSignatureBytes } from "../../common/Kes";
 import { AlonzoHeaderBody, IAlonzoHeaderBody, isIAlonzoHeaderBody } from "./AlonzoHeaderBody";
-import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
-
+import { IPraosHeader } from "../../common/interfaces/IPraosHeader";
 
 export interface IAlonzoHeader
 {
@@ -27,7 +26,7 @@ export function isIAlonzoHeader( thing: any ): thing is IAlonzoHeaderChecked
 }
 
 export class AlonzoHeader
-    implements IPraosHeader, IAlonzoHeader, ToCbor
+    implements IAlonzoHeader, ToCbor, IPraosHeader
 {
     readonly body: AlonzoHeaderBody;
     readonly kesSignature: KesSignature;

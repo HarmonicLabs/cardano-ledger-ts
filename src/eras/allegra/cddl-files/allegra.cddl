@@ -77,12 +77,10 @@ block = [
         , transaction_witness_sets : [* transaction_witness_set]
         , auxiliary_data_set : {* transaction_index => auxiliary_data}]
 
-bootstrap_witness = [
-					  public_key : $vkey
+bootstrap_witness = [public_key : $vkey
                     , signature : $signature
                     , chain_code : bytes .size 32
-                    , attributes : bytes
-					]
+                    , attributes : bytes]
 
 certificate = [
                   stake_registration
@@ -123,6 +121,7 @@ header_body = [block_number : uint
               , block_body_hash : $hash32
               , operational_cert
               , protocol_version]
+           
 
 int64 = -9223372036854775808 .. 9223372036854775807
 

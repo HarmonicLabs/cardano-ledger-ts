@@ -5,8 +5,6 @@ import { Credential, StakeCredentials, StakeCredentialsType, CredentialType, Pub
 import { Hash28 } from "../hashes";
 import { forceBigUInt } from "../utils/ints";
 import { NetworkT } from "./Network";
-import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
-import { assert } from "../utils/assert";
 import { nothingData, justData } from "../utils/maybeData";
 import UPLCFlatUtils from "../utils/UPLCFlatUtils";
 import { fromHex, toHex } from "@harmoniclabs/uint8array-utils";
@@ -47,7 +45,7 @@ export interface IAddress {
  * shelley specification in cardano-ledger; page 113
  */
 export class Address
-    implements ToData, ToCbor
+    implements IAddress, ToData, ToCbor
 {
     readonly network!: NetworkT
     readonly paymentCreds!: Credential
@@ -353,7 +351,6 @@ export class Address
      * stake key at path   "m/1852'/1815'/0'/2/0"
     */
     static fromEntropy( entropy: Uint8Array | string, network: NetworkT = "mainnet", AccountIndex: number = 0, AddressIndex: number = 0 ): Address
-    
     {
         console.log("Address.fromEntropy Index", AccountIndex, AddressIndex);
         return Address.fromXPrv( XPrv.fromEntropy( entropy ), network, AccountIndex, AddressIndex );

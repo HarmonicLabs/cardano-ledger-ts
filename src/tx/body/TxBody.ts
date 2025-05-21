@@ -573,8 +573,10 @@ export class TxBody
     }
     static fromCborObj( cObj: CborObj ): TxBody
     {
-        if(!(cObj instanceof CborMap))
-        throw new InvalidCborFormatError("TxBody")
+        if(!(
+            cObj instanceof CborMap
+            // && cObj.map.length >= 20 
+        ))throw new InvalidCborFormatError("TxBody")
 
         let fields: (CborObj | undefined)[] = new Array( 23 ).fill( undefined );
 
@@ -614,6 +616,8 @@ export class TxBody
             _current_treasury,      // 21
             _donation               // 22
         ] = fields;
+
+        // console.log("fields", fields)
 
         if( _ins_ === undefined || _outs === undefined || _fee === undefined )
         throw new InvalidCborFormatError("TxBody");
