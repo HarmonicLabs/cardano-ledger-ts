@@ -97,12 +97,12 @@ export class TxMetadata
 
         const meta = {};
         const len = cObj.map.length;
-        console.log("txMetadata fromCborObj: ", len )
+        // console.log("txMetadata fromCborObj: ", len )
 
         for( let i = 0; i < len; i++ )
         {
             const { k, v } = cObj.map[i];
-            console.log("txMetadata fromCborObj k: ", k )
+            // console.log("txMetadata fromCborObj k: ", k )
             // console.log("txMetadata fromCborObj v: ", v )
             if(!( k instanceof CborUInt ))
             throw new InvalidCborFormatError("TxMetadata: " + k)

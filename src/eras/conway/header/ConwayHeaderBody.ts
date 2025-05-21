@@ -157,8 +157,6 @@ export class ConwayHeaderBody
             cHdrBody instanceof CborArray)            
         )throw new InvalidCborFormatError("ConwayHeaderBodyy");
 
-
-        // Destructure the inner array
         const [
             _cBlockNo,          // block_number
             _cSlotNo,           // slot
@@ -170,7 +168,11 @@ export class ConwayHeaderBody
             _cBlockBodyHash,    // block_body_hash
             _cOpCert,           // operational_cert
             _cProtVer           // protocol_version
-        ] = cHdrBody.array.length === 10 ? cHdrBody.array : cHdrBody.array[0].array;
+        ] = cHdrBody instanceof CborArray && cHdrBody.array.length === 10 
+            ? cHdrBody.array 
+            : cHdrBody instanceof CborArray && cHdrBody.array[0] instanceof CborArray 
+                ? cHdrBody.array[0].array 
+                : (() => { throw new InvalidCborFormatError("ConwayHeaderBody"); })();
     
         if (!(
             _cBlockNo instanceof CborUInt &&

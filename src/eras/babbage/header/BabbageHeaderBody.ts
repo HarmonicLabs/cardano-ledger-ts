@@ -159,7 +159,6 @@ export class BabbageHeaderBody
         ))throw new InvalidCborFormatError("BabbageHeaderBody");
         // console.log("cobj:", cHdrBody);
 
-        // Destructure the inner array
         const [
             _cBlockNo,          // block_number
             _cSlotNo,           // slot
@@ -171,8 +170,11 @@ export class BabbageHeaderBody
             _cBlockBodyHash,    // block_body_hash
             _cOpCert,           // operational_cert
             _cProtVer           // protocol_version
-        ] = cHdrBody.array.length === 10 ? cHdrBody.array : cHdrBody.array[0].array;
-    
+        ] = cHdrBody instanceof CborArray && cHdrBody.array.length === 10 
+            ? cHdrBody.array 
+            : cHdrBody instanceof CborArray && cHdrBody.array[0] instanceof CborArray 
+                ? cHdrBody.array[0].array 
+                : (() => { throw new InvalidCborFormatError("BabbageHeaderBody"); })();
     
         if (!(
             _cBlockNo instanceof CborUInt &&

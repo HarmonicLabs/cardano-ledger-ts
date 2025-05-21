@@ -184,9 +184,8 @@ export class MaryHeaderBody
         if (!(
             cHdrBody instanceof CborArray 
             // && cHdrBody.array.length === 15
-        ))throw new InvalidCborFormatError("invalid cbor for MaryHeaderBody; expected array of 15 elements");
+        ))throw new InvalidCborFormatError("MaryHeaderBody");
     
-
         const [
             _cBlockNo,
             _cSlotNo,
@@ -203,7 +202,11 @@ export class MaryHeaderBody
             _cOpCertSigma,
             _cProtMajor,
             _cProtMinor
-        ] = cHdrBody.array.length === 15 ? cHdrBody.array : cHdrBody.array[0].array;;
+        ] = cHdrBody instanceof CborArray && cHdrBody.array.length === 15 
+            ? cHdrBody.array 
+            : cHdrBody instanceof CborArray && cHdrBody.array[0] instanceof CborArray 
+                ? cHdrBody.array[0].array 
+                : (() => { throw new InvalidCborFormatError("MaryHeaderBody"); })();
 
         if (!(
             _cBlockNo instanceof CborUInt &&
