@@ -120,7 +120,7 @@ export class TxMetadata
     toJSON() { return this.toJson(); }
     toJson()
     {
-        const json = {}
+        const json = {};
 
         const ks = Object.keys( this.metadata );
 
@@ -129,8 +129,7 @@ export class TxMetadata
             defineReadOnlyProperty(
                 json, k, this.metadata[k].toJson()
             )
-        }
-
+        };
         return json as any;
-    }
+    };
 }
