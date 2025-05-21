@@ -292,12 +292,10 @@ export class ConwayAuxiliaryData
         ] = fields;
         // console.log("_native", _native);
         
-        if(!(
-            _native instanceof CborArray &&
-            _pV1 instanceof CborArray &&
-            _pV2 instanceof CborArray &&
-            _pV3 instanceof CborArray
-        ))throw new InvalidCborFormatError("AuxiliaryData")
+        if (_native !== undefined && !(_native instanceof CborArray)) throw new InvalidCborFormatError("AlonzoAuxiliaryData native")
+        if (_pV1 !== undefined && !(_pV1 instanceof CborArray)) throw new InvalidCborFormatError("AlonzoAuxiliaryData pV1")
+        if (_pV2 !== undefined && !(_pV2 instanceof CborArray)) throw new InvalidCborFormatError("AlonzoAuxiliaryData pV2")
+        if (_pV3 !== undefined && !(_pV3 instanceof CborArray)) throw new InvalidCborFormatError("AlonzoAuxiliaryData pV3")
 
         return new ConwayAuxiliaryData({
             metadata: _metadata === undefined ? undefined : TxMetadata.fromCborObj( _metadata ),

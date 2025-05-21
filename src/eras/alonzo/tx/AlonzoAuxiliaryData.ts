@@ -193,8 +193,8 @@ export class AlonzoAuxiliaryData
 
         if(!(
             cObj instanceof CborTag &&
-            cObj.data instanceof CborMap &&
-            cObj.data.map.length >= 3
+            cObj.data instanceof CborMap 
+            // && cObj.data.map.length >= 3
         ))throw new InvalidCborFormatError("AlonzoAuxiliaryData")
 
         let fields: (CborObj | undefined)[] = new Array( 3 ).fill( undefined );
@@ -216,11 +216,8 @@ export class AlonzoAuxiliaryData
             _pV1
         ] = fields;
 
-        if(!(
-                _native instanceof CborArray
-            && _pV1 instanceof CborArray
-        ))
-        throw new InvalidCborFormatError("AlonzoAuxiliaryData")
+        if (_native !== undefined && !(_native instanceof CborArray)) throw new InvalidCborFormatError("AlonzoAuxiliaryData native")
+        if (_pV1 !== undefined && !(_pV1 instanceof CborArray)) throw new InvalidCborFormatError("AlonzoAuxiliaryData pV1")
 
         return new AlonzoAuxiliaryData({
             metadata: _metadata === undefined ? undefined : TxMetadata.fromCborObj( _metadata ),

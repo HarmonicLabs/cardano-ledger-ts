@@ -381,8 +381,8 @@ export class AlonzoTxBody
     static fromCborObj( cObj: CborObj ): AlonzoTxBody
     {
         if(!(
-            cObj instanceof CborMap &&
-            cObj.map.length >= 16
+            cObj instanceof CborMap 
+            // && cObj.map.length >= 16
         ))throw new InvalidCborFormatError("AlonzoTxBody")
 
         let fields: (CborObj | undefined)[] = new Array( 16 ).fill( undefined );

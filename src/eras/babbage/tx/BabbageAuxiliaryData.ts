@@ -204,7 +204,7 @@ export class BabbageAuxiliaryData
     }
     static fromCborObj( cObj: CborObj ): BabbageAuxiliaryData
     {
-        
+        console.log("BabbageAuxiliaryData.fromCborObj", cObj);
         // shelley; metadata only
         if( "data" in cObj && cObj.data instanceof CborMap )
         {
@@ -226,7 +226,7 @@ export class BabbageAuxiliaryData
                 nativeScripts: cObj.array[1].array.map( nativeScriptFromCborObj )
             });
         }
-        console.log("BabbageAuxiliaryData.fromCborObj", cObj);
+        
         if(!(
             cObj instanceof CborTag 
             && cObj.data instanceof CborMap 
@@ -256,12 +256,10 @@ export class BabbageAuxiliaryData
             _pV2,
         ] = fields;
         // console.log("_native", _native);
-        
-        if(!(
-            _native instanceof CborArray &&
-            _pV1 instanceof CborArray &&
-            _pV2 instanceof CborArray
-        ))throw new InvalidCborFormatError("AuxiliaryData")
+    
+        if (_native !== undefined && !(_native instanceof CborArray)) throw new InvalidCborFormatError("AlonzoAuxiliaryData native")
+        if (_pV1 !== undefined && !(_pV1 instanceof CborArray)) throw new InvalidCborFormatError("AlonzoAuxiliaryData pV1")
+        if (_pV2 !== undefined && !(_pV2 instanceof CborArray)) throw new InvalidCborFormatError("AlonzoAuxiliaryData pV2")
 
         return new BabbageAuxiliaryData({
             metadata: _metadata === undefined ? undefined : TxMetadata.fromCborObj( _metadata ),

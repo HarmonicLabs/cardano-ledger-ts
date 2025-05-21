@@ -240,8 +240,8 @@ export class MaryTxWitnessSet
     static fromCborObj( cObj: CborObj ): MaryTxWitnessSet
     {
         if(!( 
-            cObj instanceof CborMap &&
-            cObj.map.length >= 3
+            cObj instanceof CborMap 
+            // && cObj.map.length >= 3
         ))throw new InvalidCborFormatError("MaryTxWitnessSet");
 
         let fields: (CborObj | undefined)[] = new Array( 3 ).fill( undefined );

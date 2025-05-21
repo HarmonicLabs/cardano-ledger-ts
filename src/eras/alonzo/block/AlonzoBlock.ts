@@ -1,17 +1,12 @@
 import { CborArray, CborBytes, ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborMapEntry, CanBeCborString, forceCborString, isCborObj} from "@harmoniclabs/cbor";
-import { toHex } from "@harmoniclabs/uint8array-utils";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
-import { IBabbageHeader, BabbageHeader, isIBabbageHeader } from "../header/BabbageHeader";
-import { IBabbageTxBody, BabbageTxBody } from "../tx/BabbageTxBody";
-import { IBabbageTxWitnessSet, BabbageTxWitnessSet } from "../tx/BabbageTxWitnessSet";
-import { IBabbageAuxiliaryData, BabbageAuxiliaryData } from "../tx/BabbageAuxiliaryData";
+import { IAlonzoHeader, AlonzoHeader, isIAlonzoHeader } from "../header/AlonzoHeader";
+import { IAlonzoTxBody, AlonzoTxBody } from "../tx/AlonzoTxBody";
+import { IAlonzoTxWitnessSet, AlonzoTxWitnessSet } from "../tx/AlonzoTxWitnessSet";
+import { IAlonzoAuxiliaryData, AlonzoAuxiliaryData } from "../tx/AlonzoAuxiliaryData";
 import { ToJson } from "../../../utils/ToJson"
 import { getSubCborRef } from "../../../utils/getSubCborRef";
-import { canBeUInteger, CanBeUInteger } from "@harmoniclabs/cbor/dist/utils/ints";
-import { isObject } from "@harmoniclabs/obj-utils";
-import { canBeHash32, CanBeHash32, hash32bytes } from "../../../hashes";
-import { U8Arr, U8Arr32 } from "../../../utils/U8Arr";
-import { forceBigUInt, u32 } from "../../../utils/ints";
+
 /*
     CDDL
     block = [header
@@ -21,24 +16,24 @@ import { forceBigUInt, u32 } from "../../../utils/ints";
         , invalid_transactions : [* transaction_index]]
 */
 
-export interface IBabbageBlock {
-    header: IBabbageHeader;
-    transactionBodies: IBabbageTxBody[];
-    transactionWitnessSets: IBabbageTxWitnessSet[];
-    auxiliaryDataSet: { [transactionIndex: number]: IBabbageAuxiliaryData };
+export interface IAlonzoBlock {
+    header: IAlonzoHeader;
+    transactionBodies: IAlonzoTxBody[];
+    transactionWitnessSets: IAlonzoTxWitnessSet[];
+    auxiliaryDataSet: { [transactionIndex: number]: IAlonzoAuxiliaryData };
     invalidTransactions: (number | bigint)[] | undefined;
   }
-export class BabbageBlock implements 
-    IBabbageBlock, ToCbor, ToJson 
+export class AlonzoBlock implements 
+    IAlonzoBlock, ToCbor, ToJson 
 {
-    readonly header: BabbageHeader;
-    readonly transactionBodies: BabbageTxBody[];
-    readonly transactionWitnessSets: BabbageTxWitnessSet[];
-    readonly auxiliaryDataSet: { [transactionIndex: number]: BabbageAuxiliaryData };
+    readonly header: AlonzoHeader;
+    readonly transactionBodies: AlonzoTxBody[];
+    readonly transactionWitnessSets: AlonzoTxWitnessSet[];
+    readonly auxiliaryDataSet: { [transactionIndex: number]: AlonzoAuxiliaryData };
     readonly invalidTransactions: (number | bigint)[] | undefined;
   
     constructor(
-        block: IBabbageBlock,
+        block: IAlonzoBlock,
         readonly cborRef: SubCborRef | undefined = undefined
     ) 
     {
@@ -46,11 +41,11 @@ export class BabbageBlock implements
         if (block.transactionBodies.length !== block.transactionWitnessSets.length) {
             throw new Error("Transaction bodies and witness sets must have the same length");
         }
-        this.header = new BabbageHeader(block.header);
-        this.transactionBodies = block.transactionBodies.map(tb => new BabbageTxBody(tb));
-        this.transactionWitnessSets = block.transactionWitnessSets.map(tws => new BabbageTxWitnessSet(tws));
+        this.header = new AlonzoHeader(block.header);
+        this.transactionBodies = block.transactionBodies.map(tb => new AlonzoTxBody(tb));
+        this.transactionWitnessSets = block.transactionWitnessSets.map(tws => new AlonzoTxWitnessSet(tws));
         this.auxiliaryDataSet = Object.fromEntries(
-            Object.entries(block.auxiliaryDataSet).map(([key, value]) => [key, new BabbageAuxiliaryData(value)])
+            Object.entries(block.auxiliaryDataSet).map(([key, value]) => [key, new AlonzoAuxiliaryData(value)])
         );
         this.invalidTransactions = block.invalidTransactions;
     }
@@ -87,20 +82,20 @@ export class BabbageBlock implements
         ]);
     };
 
-    static fromCbor( cbor: CanBeCborString ): BabbageBlock
+    static fromCbor( cbor: CanBeCborString ): AlonzoBlock
     {   
-        // console.log("BabbageBlock.fromCbor", cbor);
+        // console.log("AlonzoBlock.fromCbor", cbor);
         const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor ).toBuffer();
-        return BabbageBlock.fromCborObj(
+        return AlonzoBlock.fromCborObj(
             Cbor.parse( bytes, { keepRef: true } ),
             bytes
         );
     };
 
-    static fromCborObj(cObj: CborObj, _originalBytes?: Uint8Array): BabbageBlock {
-        // console.log("BabbageBlock.fromCborObj", cObj);
+    static fromCborObj(cObj: CborObj, _originalBytes?: Uint8Array): AlonzoBlock {
+        // console.log("AlonzoBlock.fromCborObj", cObj);
         if (!(cObj instanceof CborArray && cObj.array.length >= 5)) {
-            throw new InvalidCborFormatError("Babbage Block must be a CBOR array with at least 5 elements");
+            throw new InvalidCborFormatError("Alonzo Block must be a CBOR array with at least 5 elements");
         }
 
         const _header = cObj.array[0];
@@ -109,13 +104,15 @@ export class BabbageBlock implements
         const _auxDataSet = cObj.array[3];
         const _invalidTxs = cObj.array[4];
 
+        // console.log("_txWitnessSets Alonzo: ", _txWitnessSets);
+
         // Process header
         if (!(
             _header instanceof CborArray 
             && _header.array.length >= 2
         ))throw new InvalidCborFormatError("Header must be a CBOR array with at least 2 elements");
         
-        const header = BabbageHeader.fromCborObj(_header); // Assuming BabbageHeader expects [header_body, body_signature]
+        const header = AlonzoHeader.fromCborObj(_header); // Assuming AlonzoHeader expects [header_body, body_signature]
 
         // Process transaction bodies
         if (!(
@@ -127,7 +124,7 @@ export class BabbageBlock implements
                 isCborObj(tb)
             )throw new InvalidCborFormatError(`Invalid CBOR object at transaction_bodies[${index}]`);
             
-            return BabbageTxBody.fromCborObj(tb);
+            return AlonzoTxBody.fromCborObj(tb);
         });
 
         // Process transaction witness sets
@@ -139,7 +136,7 @@ export class BabbageBlock implements
             if (!isCborObj(tws)) {
                 throw new InvalidCborFormatError(`Invalid CBOR object at transaction_witness_sets[${index}]`);
             }
-            return BabbageTxWitnessSet.fromCborObj(tws);
+            return AlonzoTxWitnessSet.fromCborObj(tws);
         });
 
         // Process auxiliary data set
@@ -147,7 +144,7 @@ export class BabbageBlock implements
             _auxDataSet instanceof CborMap
         ))throw new InvalidCborFormatError("Auxiliary data set must be a CBOR map");
         
-        const auxiliaryDataSet: { [transactionIndex: number]: BabbageAuxiliaryData } = {};
+        const auxiliaryDataSet: { [transactionIndex: number]: AlonzoAuxiliaryData } = {};
         for (const entry of _auxDataSet.map) {
             const { k, v } = entry;
             if(!(
@@ -163,7 +160,7 @@ export class BabbageBlock implements
                 isCborObj(v)
             ))throw new InvalidCborFormatError(`Invalid AUX data CBOR object at index ${txIndex}`);
             
-            auxiliaryDataSet[txIndex] = BabbageAuxiliaryData.fromCborObj(v);
+            auxiliaryDataSet[txIndex] = AlonzoAuxiliaryData.fromCborObj(v);
         }
 
         // Process invalid transactions
@@ -178,7 +175,7 @@ export class BabbageBlock implements
             return it.num;
         });
 
-        const conwayBlock = new BabbageBlock({
+        const alonzoBlock = new AlonzoBlock({
             header,
             transactionBodies,
             transactionWitnessSets,
@@ -186,7 +183,7 @@ export class BabbageBlock implements
             invalidTransactions
         }, getSubCborRef(cObj));
 
-        return conwayBlock
+        return alonzoBlock
     }
 
     toJSON() 

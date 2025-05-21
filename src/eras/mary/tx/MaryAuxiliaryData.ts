@@ -9,7 +9,7 @@ import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 
-export interface IAlonzoAuxiliaryData {
+export interface IMaryAuxiliaryData {
     metadata?: TxMetadata;
     nativeScripts?: (NativeScript | Script<ScriptType.NativeScript>)[];
 }
@@ -22,7 +22,7 @@ function scriptArrToCbor( scripts: Script[] ): CborArray
 }
 
 export class MaryAuxiliaryData
-    implements IAlonzoAuxiliaryData, ToCbor, ToJson
+    implements IMaryAuxiliaryData, ToCbor, ToJson
 {
     readonly metadata?: TxMetadata;
     readonly nativeScripts?: Script<ScriptType.NativeScript>[];
@@ -46,7 +46,7 @@ export class MaryAuxiliaryData
     }
 
     constructor(
-        auxData: IAlonzoAuxiliaryData,
+        auxData: IMaryAuxiliaryData,
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
@@ -183,9 +183,7 @@ export class MaryAuxiliaryData
             _native
         ] = fields;
 
-        if(!(
-            _native instanceof CborArray
-        ))throw new InvalidCborFormatError("MaryAuxiliaryData")
+        if (_native !== undefined && !(_native instanceof CborArray)) throw new InvalidCborFormatError("AlonzoAuxiliaryData native")
 
         return new MaryAuxiliaryData({
             metadata: _metadata === undefined ? undefined : TxMetadata.fromCborObj( _metadata ),

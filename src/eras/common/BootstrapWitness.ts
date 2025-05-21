@@ -36,7 +36,7 @@ export class BootstrapWitness
         
         if(!(
             pubKey instanceof Hash32
-        ))throw new Error("invalid 'pubKey' constructing 'BootstrapWitness'");
+        ))throw new Error("invalid 'pubKey' constructing 'BootstrapWitness': " +  pubKey);
         this.pubKey =  pubKey instanceof VKey ? pubKey : new VKey( pubKey )
 
         if(!(
@@ -111,8 +111,8 @@ export class BootstrapWitness
     {
         if(!(
             cObj instanceof CborArray &&
-            cObj.array[3] instanceof CborBytes &&
-            cObj.array.length >= 4
+            cObj.array[3] instanceof CborBytes 
+            // && cObj.array.length >= 4
         ))throw new InvalidCborFormatError("BootstrapWitness");
 
         const [ _pubKey, _signature, _chainCode, _attributes ] = cObj.array;

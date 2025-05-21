@@ -9,10 +9,24 @@ import { IPoolOperationalCert, isIPoolOperationalCert, PoolOperationalCert } fro
 import { U8Arr, U8Arr32 } from "../../../utils/U8Arr";
 import { forceBigUInt, u32 } from "../../../utils/ints";
 import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
-import { IPraosHeaderBody } from "../../common/interfaces//IPraosHeader";
-import { concatUint8Array } from "@harmoniclabs/uint8array-utils";
-
-
+import { IPraosHeaderBody } from "../../common/interfaces/IPraosHeader";
+import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
+    /*
+    CDDL:
+        header_body = [
+            block_number : uint,
+            slot : uint,
+            prev_hash : $hash32 / nil,
+            issuer_vkey : $vkey,
+            vrf_vkey : $vrf_vkey,
+            nonce_vrf : $vrf_cert,
+            leader_vrf : $vrf_cert,
+            block_body_size : uint,
+            block_body_hash : $hash32,
+            operational_cert : [kes_vkey : $kes_vkey, sequence_number : uint, kes_period : uint, sigma : $signature],
+            protocol_version : [major : uint, minor : uint]
+        ]
+    */
 export interface IAllegraHeaderBody
 {
     blockNumber: CanBeUInteger;
@@ -20,8 +34,8 @@ export interface IAllegraHeaderBody
     prevHash: CanBeHash32 | undefined;
     issuerPubKey: CanBeHash32;
     vrfPubKey: CanBeHash32;
-    nonceVrfResult : IVrfCert
-    leaderVrfResult: IVrfCert
+    nonceVrfResult: IVrfCert;
+    leaderVrfResult: IVrfCert;
     /** u32 **/
     blockBodySize: CanBeUInteger;
     blockBodyHash: CanBeHash32;
@@ -32,19 +46,19 @@ export interface IAllegraHeaderBody
 export function isIAllegraHeaderBody( thing: any ): thing is IAllegraHeaderBody
 {
     return isObject( thing ) && (
-        thing instanceof AllegraHeaderBody // already validated at construction, shortcut
-        || (
-            canBeUInteger( thing.blockNumber )
-            && canBeUInteger( thing.slot )
-            && (thing.prevHash === undefined || canBeHash32( thing.prevHash ))
-            && canBeHash32( thing.issuerPubKey )
-            && canBeHash32( thing.vrfPubKey )
-            && isIVrfCert( thing.nonceVrfResult )
-            && isIVrfCert( thing.leaderVrfResult )
-            && canBeUInteger( thing.blockBodySize )
-            && canBeHash32( thing.blockBodyHash )
-            && isIPoolOperationalCert( thing.opCert )
-            && isIProtocolVersion( thing.protocolVersion )
+        thing instanceof AllegraHeaderBody ||
+        (
+            canBeUInteger( thing.blockNumber ) &&
+            canBeUInteger( thing.slot ) &&
+            (thing.prevHash === undefined || canBeHash32( thing.prevHash )) &&
+            canBeHash32( thing.issuerPubKey ) &&
+            canBeHash32( thing.vrfPubKey ) &&
+            isIVrfCert( thing.nonceVrfResult ) &&
+            isIVrfCert( thing.leaderVrfResult ) &&
+            canBeUInteger( thing.blockBodySize ) &&
+            canBeHash32( thing.blockBodyHash ) &&
+            isIPoolOperationalCert( thing.opCert ) &&
+            isIProtocolVersion( thing.protocolVersion )
         )
     );
 }
@@ -57,7 +71,7 @@ export class AllegraHeaderBody
     readonly prevHash: U8Arr<32> | undefined;
     readonly issuerPubKey: U8Arr<32>;
     readonly vrfPubKey: U8Arr<32>;
-    readonly nonceVrfResult : VrfCert;
+    readonly nonceVrfResult: VrfCert;
     readonly leaderVrfResult: VrfCert;
     readonly blockBodySize: number;
     readonly blockBodyHash: U8Arr<32>;
@@ -75,12 +89,20 @@ export class AllegraHeaderBody
         this.prevHash = typeof hdrBody.prevHash !== "undefined" ? hash32bytes( hdrBody.prevHash ) : undefined;
         this.issuerPubKey = hash32bytes( hdrBody.issuerPubKey );
         this.vrfPubKey = hash32bytes( hdrBody.vrfPubKey );
-        this.nonceVrfResult  = new VrfCert( hdrBody.nonceVrfResult  );
+        this.nonceVrfResult = new VrfCert( hdrBody.nonceVrfResult );
         this.leaderVrfResult = new VrfCert( hdrBody.leaderVrfResult );
         this.blockBodySize = u32( hdrBody.blockBodySize );
         this.blockBodyHash = hash32bytes( hdrBody.blockBodyHash );
         this.opCert = new PoolOperationalCert( hdrBody.opCert );
         this.protocolVersion = new ProtocolVersion( hdrBody.protocolVersion );
+    }
+
+    getLeaderVrfCert(): VrfCert {
+        return this.leaderVrfResult;
+    }
+
+    getNonceVrfCert(): VrfCert {
+        return this.nonceVrfResult;
     }
 
     leaderVrfOutput(): U8Arr<32>
@@ -89,7 +111,8 @@ export class AllegraHeaderBody
             this.leaderVrfResult.proofHash
         ) as U8Arr<32>;
     }
-    nonceVrfOutput(): U8Arr32
+
+    nonceVrfOutput(): U8Arr<32>
     {
         return sha2_256_sync(
             this.nonceVrfResult.proofHash
@@ -118,11 +141,13 @@ export class AllegraHeaderBody
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
         return this.toCbor().toBuffer();
     }
+
     toCbor(): CborString
     {
         if( this.cborRef instanceof SubCborRef ) return new CborString( this.cborRef.toBuffer() );
         return Cbor.encode( this.toCborObj() );
     }
+
     toCborObj(): CborArray
     {
         return new CborArray([
@@ -135,25 +160,14 @@ export class AllegraHeaderBody
             this.leaderVrfResult.toCborObj(),
             new CborUInt( this.blockBodySize ),
             new CborBytes( this.blockBodyHash ),
-            this.opCert.toCborObj(),
-            this.protocolVersion.toCborObj()
+            new CborBytes( this.opCert.kesPubKey ),
+            new CborUInt( this.opCert.sequenceNumber ),
+            new CborUInt( this.opCert.kesPeriod ),
+            new CborBytes( this.opCert.signature ),
+            new CborUInt( this.protocolVersion.major ),
+            new CborUInt( this.protocolVersion.minor )
         ]);
     }
-    /*
-    CDDL:
-
-    header_body = [block_number : uint
-              , slot : uint
-              , prev_hash : $hash32 / nil
-              , issuer_vkey : $vkey
-              , vrf_vkey : $vrf_vkey
-              , nonce_vrf : $vrf_cert
-              , leader_vrf : $vrf_cert
-              , block_body_size : uint .size 4
-              , block_body_hash : $hash32
-              , operational_cert
-              , protocol_version]
-    */
 
     static fromCbor( cbor: CanBeCborString ): AllegraHeaderBody
     {
@@ -163,48 +177,80 @@ export class AllegraHeaderBody
             bytes
         );
     }
+
     static fromCborObj( cHdrBody: CborObj, _originalBytes?: Uint8Array ): AllegraHeaderBody
     {
-        if(!(
-            cHdrBody instanceof CborArray &&
-            cHdrBody.array.length >= 10
-        )) throw new Error("invalid cbor for AllegraHeaderBody");
+        // console.log("cHdrBody Allegra", cHdrBody);
+        if (!(
+            cHdrBody instanceof CborArray 
+            // && cHdrBody.array.length === 15
+        ))throw new InvalidCborFormatError("invalid cbor for AllegraHeaderBody; expected array of 15 elements");
+    
 
         const [
-            cBlockNo,
-            cSlotNo,
-            cPrevHash,
-            cIssuerVkey,
-            cVrfVkey,
-            cVrfCert,
-            cBlockBodySize,
-            cBlockBodyHash,
-            cOpCert,
-            cProtVer
-        ] = cHdrBody.array;
+            _cBlockNo,
+            _cSlotNo,
+            _cPrevHash,
+            _cIssuerVkey,
+            _cVrfVkey,
+            _cNonceVrfCert,
+            _cLeaderVrfCert,
+            _cBlockBodySize,
+            _cBlockBodyHash,
+            _cOpCertHotVkey,
+            _cOpCertSeqNum,
+            _cOpCertKesPeriod,
+            _cOpCertSigma,
+            _cProtMajor,
+            _cProtMinor
+        ] = cHdrBody.array.length === 15 ? cHdrBody.array : cHdrBody.array[0].array;;
 
-        if(!(
-            cBlockNo instanceof CborUInt        &&
-            cSlotNo  instanceof CborUInt        &&
-            cPrevHash   instanceof CborBytes    &&
-            cIssuerVkey instanceof CborBytes    &&
-            cVrfVkey    instanceof CborBytes    &&
-            cBlockBodySize instanceof CborUInt  &&
-            cBlockBodyHash instanceof CborBytes
-        )) throw new Error("invalid cbor for AllegraHeaderBody");
+        if (!(
+            _cBlockNo instanceof CborUInt &&
+            _cSlotNo instanceof CborUInt &&
+            (_cPrevHash instanceof CborBytes || _cPrevHash instanceof CborSimple) &&
+            _cIssuerVkey instanceof CborBytes && _cIssuerVkey.bytes.length === 32 &&
+            _cVrfVkey instanceof CborBytes && _cVrfVkey.bytes.length === 32 &&
+            _cNonceVrfCert instanceof CborArray &&
+            _cLeaderVrfCert instanceof CborArray &&
+            _cBlockBodySize instanceof CborUInt &&
+            _cBlockBodyHash instanceof CborBytes && _cBlockBodyHash.bytes.length === 32 &&
+            _cOpCertHotVkey instanceof CborBytes && _cOpCertHotVkey.bytes.length === 32 &&
+            _cOpCertSeqNum instanceof CborUInt &&
+            _cOpCertKesPeriod instanceof CborUInt &&
+            _cOpCertSigma instanceof CborBytes && _cOpCertSigma.bytes.length === 64 &&
+            _cProtMajor instanceof CborUInt &&
+            _cProtMinor instanceof CborUInt
+        )) {
+            throw new Error("invalid types in AllegraHeaderBody");
+        }
+
+        const prevHash = _cPrevHash instanceof CborBytes ? hash32bytes(_cPrevHash.bytes) : undefined;
+
+        const opCert = new PoolOperationalCert({
+            kesPubKey: hash32bytes(_cOpCertHotVkey.bytes),
+            sequenceNumber: forceBigUInt(_cOpCertSeqNum.num),
+            kesPeriod: forceBigUInt(_cOpCertKesPeriod.num),
+            signature: _cOpCertSigma.bytes as U8Arr<64>
+        });
+
+        const protocolVersion = new ProtocolVersion({
+            major: u32(_cProtMajor.num),
+            minor: u32(_cProtMinor.num)
+        });
 
         return new AllegraHeaderBody({
-            blockNumber: cBlockNo.num,
-            slot: cSlotNo.num,
-            prevHash: cPrevHash.bytes as U8Arr32,
-            issuerPubKey: cIssuerVkey.bytes as U8Arr32,
-            vrfPubKey: cVrfVkey.bytes as U8Arr32,
-            nonceVrfResult: VrfCert.fromCborObj( cVrfCert ),
-            leaderVrfResult: VrfCert.fromCborObj( cVrfCert ),
-            blockBodySize: cBlockBodySize.num,
-            blockBodyHash: cBlockBodyHash.bytes as U8Arr32,
-            opCert: PoolOperationalCert.fromCborObj( cOpCert ),
-            protocolVersion: ProtocolVersion.fromCborObj( cProtVer )
-        }, getSubCborRef( cHdrBody, _originalBytes ));
+            blockNumber: forceBigUInt(_cBlockNo.num),
+            slot: forceBigUInt(_cSlotNo.num),
+            prevHash,
+            issuerPubKey: hash32bytes(_cIssuerVkey.bytes),
+            vrfPubKey: hash32bytes(_cVrfVkey.bytes),
+            nonceVrfResult: VrfCert.fromCborObj(_cNonceVrfCert),
+            leaderVrfResult: VrfCert.fromCborObj(_cLeaderVrfCert),
+            blockBodySize: u32(_cBlockBodySize.num),
+            blockBodyHash: hash32bytes(_cBlockBodyHash.bytes),
+            opCert,
+            protocolVersion
+        }, getSubCborRef(cHdrBody, _originalBytes));
     }
 }

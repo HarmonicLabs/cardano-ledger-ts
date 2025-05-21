@@ -1,8 +1,10 @@
-import { CborArray, CborBytes, ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborMapEntry, CanBeCborString, forceCborString, isCborObj} from "@harmoniclabs/cbor";
-import { ToJson } from "../../utils/ToJson"
-import { canBeUInteger, CanBeUInteger } from "@harmoniclabs/cbor/dist/utils/ints";
 import { ConwayBlock } from '../conway/block/ConwayBlock';
 import { BabbageBlock } from '../babbage/block/BabbageBlock';
+import { AlonzoBlock } from '../alonzo/block/AlonzoBlock';
+import { MaryBlock } from '../mary/block/MaryBlock';
+import { AllegraBlock } from '../allegra/block/AllegraBlock';
+import { CborArray, ToCbor, SubCborRef, CborString, Cbor, CborObj, CborUInt, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
+import { ToJson } from "../../utils/ToJson"
 import { getSubCborRef } from "../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError"
 
@@ -10,14 +12,14 @@ export type CardanoEra = number;
 
 export interface IMultiEraBlock {
     era: CardanoEra;
-    block: ConwayBlock | BabbageBlock; 
+    block: ConwayBlock | BabbageBlock | AlonzoBlock | MaryBlock | AllegraBlock;
 }
 
 export class MultiEraBlock implements 
 IMultiEraBlock, ToCbor, ToJson 
 {
     readonly era: CardanoEra;
-    readonly block: ConwayBlock | BabbageBlock;
+    readonly block: ConwayBlock | BabbageBlock | AlonzoBlock | MaryBlock | AllegraBlock;
 
     constructor(
         block: IMultiEraBlock,
@@ -64,13 +66,22 @@ IMultiEraBlock, ToCbor, ToJson
         ))throw new InvalidCborFormatError("Era must be a CborUInt");
         
 
-        let block: ConwayBlock | BabbageBlock ;
+        let block: ConwayBlock | BabbageBlock | AlonzoBlock | MaryBlock | AllegraBlock;
         switch (Number(_era.num)) {
             case 7: // Conway era
                 block = ConwayBlock.fromCborObj(_blockData);
                 break;
             case 6: // Babbage era
                 block = BabbageBlock.fromCborObj(_blockData);
+                break;
+            case 5: // Alonzo era
+                block = AlonzoBlock.fromCborObj(_blockData);
+                break;
+            case 4: // Mary era
+                block = MaryBlock.fromCborObj(_blockData);
+                break;
+            case 3 : // Allegra era
+                block = AllegraBlock.fromCborObj(_blockData);
                 break;
             default:
                 throw new Error(`Unsupported era: ${_era.num}`);
@@ -80,9 +91,7 @@ IMultiEraBlock, ToCbor, ToJson
             era: Number(_era.num),
             block
         }, getSubCborRef(cObj, _originalBytes));
-
         // console.log("multiEraBlock", multiEraBlock.toJSON());
-
         return multiEraBlock;
     }
 

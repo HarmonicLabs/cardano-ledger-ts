@@ -106,12 +106,10 @@ block = [header
         , auxiliary_data_set : {* transaction_index => auxiliary_data}
         , invalid_transactions : [* transaction_index]]
 
-bootstrap_witness = [
-                      public_key : $vkey
+bootstrap_witness = [public_key : $vkey
                     , signature : $signature
                     , chain_code : bytes .size 32
-                    , attributes : bytes
-                    ]
+                    , attributes : bytes]
 
 ; The real bounded_bytes does not have this limit. it instead has
 ; a different limit which cannot be expressed in CDDL.
@@ -575,3 +573,5 @@ constr<a0> = #6.121([* a0])
 multiasset<a0> = {* policy_id => {* asset_name => a0}}
 
 set<a0> = [* a0]
+
+[

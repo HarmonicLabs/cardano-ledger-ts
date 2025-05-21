@@ -298,8 +298,8 @@ export class MaryTxBody
     static fromCborObj( cObj: CborObj ): MaryTxBody
     {
         if(!(
-            cObj instanceof CborMap &&
-            cObj.map.length >= 10
+            cObj instanceof CborMap 
+            // && cObj.map.length >= 10
         ))throw new InvalidCborFormatError("MaryTxBody")
 
         let fields: (CborObj | undefined)[] = new Array( 10 ).fill( undefined );

@@ -214,10 +214,10 @@ export class AlonzoTxOut
     static fromCborObj( cObj: CborObj ): AlonzoTxOut
     {
         if(!(
-            // cObj instanceof CborMap || 
-            // cObj instanceof CborArray
-            cObj instanceof CborMap && cObj.map.length >= 3 ||
-            cObj instanceof CborArray && cObj.array.length >= 3
+            cObj instanceof CborMap || 
+            cObj instanceof CborArray
+            // cObj instanceof CborMap && cObj.map.length >= 3 ||
+            // cObj instanceof CborArray && cObj.array.length >= 3
             
         )) throw new InvalidCborFormatError("AlonzoTxOut");
 

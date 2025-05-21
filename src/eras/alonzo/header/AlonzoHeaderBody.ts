@@ -10,9 +10,24 @@ import { U8Arr, U8Arr32 } from "../../../utils/U8Arr";
 import { forceBigUInt, u32 } from "../../../utils/ints";
 import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
 import { IPraosHeaderBody } from "../../common/interfaces//IPraosHeader";
-import { concatUint8Array } from "@harmoniclabs/uint8array-utils";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 
+    /*
+    CDDL:
+        header_body = [
+            block_number : uint,
+            slot : uint,
+            prev_hash : $hash32 / nil,
+            issuer_vkey : $vkey,
+            vrf_vkey : $vrf_vkey,
+            nonce_vrf : $vrf_cert,
+            leader_vrf : $vrf_cert,
+            block_body_size : uint,
+            block_body_hash : $hash32,
+            operational_cert : [kes_vkey : $kes_vkey, sequence_number : uint, kes_period : uint, sigma : $signature],
+            protocol_version : [major : uint, minor : uint]
+        ]
+    */
 export interface IAlonzoHeaderBody
 {
     blockNumber: CanBeUInteger;
@@ -22,6 +37,7 @@ export interface IAlonzoHeaderBody
     vrfPubKey: CanBeHash32;
     nonceVrfResult: IVrfCert;
     leaderVrfResult: IVrfCert;
+    /** u32 **/
     blockBodySize: CanBeUInteger;
     blockBodyHash: CanBeHash32;
     opCert: IPoolOperationalCert;
@@ -31,19 +47,19 @@ export interface IAlonzoHeaderBody
 export function isIAlonzoHeaderBody( thing: any ): thing is IAlonzoHeaderBody
 {
     return isObject( thing ) && (
-        thing instanceof AlonzoHeaderBody // already validated at construction, shortcut
-        || (
-            canBeUInteger( thing.blockNumber )
-            && canBeUInteger( thing.slot )
-            && (thing.prevHash === undefined || canBeHash32( thing.prevHash ))
-            && canBeHash32( thing.issuerPubKey )
-            && canBeHash32( thing.vrfPubKey )
-            && isIVrfCert( thing.nonceVrfResult )
-            && isIVrfCert( thing.leaderVrfResult )
-            && canBeUInteger( thing.blockBodySize )
-            && canBeHash32( thing.blockBodyHash )
-            && isIPoolOperationalCert( thing.opCert )
-            && isIProtocolVersion( thing.protocolVersion )
+        thing instanceof AlonzoHeaderBody ||
+        (
+            canBeUInteger( thing.blockNumber ) &&
+            canBeUInteger( thing.slot ) &&
+            (thing.prevHash === undefined || canBeHash32( thing.prevHash )) &&
+            canBeHash32( thing.issuerPubKey ) &&
+            canBeHash32( thing.vrfPubKey ) &&
+            isIVrfCert( thing.nonceVrfResult ) &&
+            isIVrfCert( thing.leaderVrfResult ) &&
+            canBeUInteger( thing.blockBodySize ) &&
+            canBeHash32( thing.blockBodyHash ) &&
+            isIPoolOperationalCert( thing.opCert ) &&
+            isIProtocolVersion( thing.protocolVersion )
         )
     );
 }
@@ -145,25 +161,14 @@ export class AlonzoHeaderBody
             this.leaderVrfResult.toCborObj(),
             new CborUInt( this.blockBodySize ),
             new CborBytes( this.blockBodyHash ),
-            this.opCert.toCborObj(),
-            this.protocolVersion.toCborObj()
+            new CborBytes( this.opCert.kesPubKey ),
+            new CborUInt( this.opCert.sequenceNumber ),
+            new CborUInt( this.opCert.kesPeriod ),
+            new CborBytes( this.opCert.signature ),
+            new CborUInt( this.protocolVersion.major ),
+            new CborUInt( this.protocolVersion.minor )
         ]);
     }
-
-    /*
-    CDDL:
-        header_body = [block_number : uint
-            , slot : uint
-            , prev_hash : $hash32 / nil
-            , issuer_vkey : $vkey
-            , vrf_vkey : $vrf_vkey
-            , nonce_vrf : $vrf_cert
-            , leader_vrf : $vrf_cert
-            , block_body_size : uint
-            , block_body_hash : $hash32
-            , operational_cert
-            , protocol_version]
-    */
 
     static fromCbor( cbor: CanBeCborString ): AlonzoHeaderBody
     {
@@ -176,47 +181,77 @@ export class AlonzoHeaderBody
 
     static fromCborObj( cHdrBody: CborObj, _originalBytes?: Uint8Array ): AlonzoHeaderBody
     {
-        console.log("CHdrBody Alonzo", cHdrBody);
-        if(!(
+        // console.log("cHdrBody Alonzo", cHdrBody);
+        if (!(
             cHdrBody instanceof CborArray 
-        ))throw new InvalidCborFormatError("invalid cbor for AlonzoHeaderBody; expected array of 11 elements");
+            // && cHdrBody.array.length === 15
+        ))throw new InvalidCborFormatError("invalid cbor for AlonzoHeaderBody; expected array of 15 elements");
+    
 
         const [
-            cBlockNo,
-            cSlotNo,
-            cPrevHash,
-            cIssuerVkey,
-            cVrfVkey,
-            cNonceVrfCert,
-            cLeaderVrfCert,
-            cBlockBodySize,
-            cBlockBodyHash,
-            cOpCert,
-            cProtVer
-        ] = cHdrBody.array;
+            _cBlockNo,
+            _cSlotNo,
+            _cPrevHash,
+            _cIssuerVkey,
+            _cVrfVkey,
+            _cNonceVrfCert,
+            _cLeaderVrfCert,
+            _cBlockBodySize,
+            _cBlockBodyHash,
+            _cOpCertHotVkey,
+            _cOpCertSeqNum,
+            _cOpCertKesPeriod,
+            _cOpCertSigma,
+            _cProtMajor,
+            _cProtMinor
+        ] = cHdrBody.array.length === 15 ? cHdrBody.array : cHdrBody.array[0].array;;
 
-        if(!(
-            cBlockNo instanceof CborUInt &&
-            cSlotNo instanceof CborUInt &&
-            (cPrevHash instanceof CborBytes || cPrevHash instanceof CborSimple) &&
-            cIssuerVkey instanceof CborBytes &&
-            cVrfVkey instanceof CborBytes &&
-            cBlockBodySize instanceof CborUInt &&
-            cBlockBodyHash instanceof CborBytes
-        )) throw new InvalidCborFormatError("invalid cbor for AlonzoHeaderBody");
+        if (!(
+            _cBlockNo instanceof CborUInt &&
+            _cSlotNo instanceof CborUInt &&
+            (_cPrevHash instanceof CborBytes || _cPrevHash instanceof CborSimple) &&
+            _cIssuerVkey instanceof CborBytes && _cIssuerVkey.bytes.length === 32 &&
+            _cVrfVkey instanceof CborBytes && _cVrfVkey.bytes.length === 32 &&
+            _cNonceVrfCert instanceof CborArray &&
+            _cLeaderVrfCert instanceof CborArray &&
+            _cBlockBodySize instanceof CborUInt &&
+            _cBlockBodyHash instanceof CborBytes && _cBlockBodyHash.bytes.length === 32 &&
+            _cOpCertHotVkey instanceof CborBytes && _cOpCertHotVkey.bytes.length === 32 &&
+            _cOpCertSeqNum instanceof CborUInt &&
+            _cOpCertKesPeriod instanceof CborUInt &&
+            _cOpCertSigma instanceof CborBytes && _cOpCertSigma.bytes.length === 64 &&
+            _cProtMajor instanceof CborUInt &&
+            _cProtMinor instanceof CborUInt
+        )) {
+            throw new Error("invalid types in AlonzoHeaderBody");
+        }
+
+        const prevHash = _cPrevHash instanceof CborBytes ? hash32bytes(_cPrevHash.bytes) : undefined;
+
+        const opCert = new PoolOperationalCert({
+            kesPubKey: hash32bytes(_cOpCertHotVkey.bytes),
+            sequenceNumber: forceBigUInt(_cOpCertSeqNum.num),
+            kesPeriod: forceBigUInt(_cOpCertKesPeriod.num),
+            signature: _cOpCertSigma.bytes as U8Arr<64>
+        });
+
+        const protocolVersion = new ProtocolVersion({
+            major: u32(_cProtMajor.num),
+            minor: u32(_cProtMinor.num)
+        });
 
         return new AlonzoHeaderBody({
-            blockNumber: cBlockNo.num,
-            slot: cSlotNo.num,
-            prevHash: cPrevHash instanceof CborBytes ? cPrevHash.bytes as U8Arr<32> : undefined,
-            issuerPubKey: cIssuerVkey.bytes as U8Arr<32>,
-            vrfPubKey: cVrfVkey.bytes as U8Arr<32>,
-            nonceVrfResult: VrfCert.fromCborObj( cNonceVrfCert ),
-            leaderVrfResult: VrfCert.fromCborObj( cLeaderVrfCert ),
-            blockBodySize: cBlockBodySize.num,
-            blockBodyHash: cBlockBodyHash.bytes as U8Arr<32>,
-            opCert: PoolOperationalCert.fromCborObj( cOpCert ),
-            protocolVersion: ProtocolVersion.fromCborObj( cProtVer )
-        }, getSubCborRef( cHdrBody, _originalBytes ));
+            blockNumber: forceBigUInt(_cBlockNo.num),
+            slot: forceBigUInt(_cSlotNo.num),
+            prevHash,
+            issuerPubKey: hash32bytes(_cIssuerVkey.bytes),
+            vrfPubKey: hash32bytes(_cVrfVkey.bytes),
+            nonceVrfResult: VrfCert.fromCborObj(_cNonceVrfCert),
+            leaderVrfResult: VrfCert.fromCborObj(_cLeaderVrfCert),
+            blockBodySize: u32(_cBlockBodySize.num),
+            blockBodyHash: hash32bytes(_cBlockBodyHash.bytes),
+            opCert,
+            protocolVersion
+        }, getSubCborRef(cHdrBody, _originalBytes));
     }
 }

@@ -238,8 +238,8 @@ export class AllegraTxWitnessSet
     static fromCborObj( cObj: CborObj ): AllegraTxWitnessSet
     {
         if(!( 
-            cObj instanceof CborMap &&
-            cObj.map.length >= 3
+            cObj instanceof CborMap 
+            // && cObj.map.length >= 3
         ))throw new InvalidCborFormatError("AllegraTxWitnessSet");
 
         let fields: (CborObj | undefined)[] = new Array( 3 ).fill( undefined );
