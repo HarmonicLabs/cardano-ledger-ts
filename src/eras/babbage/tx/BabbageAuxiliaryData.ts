@@ -204,7 +204,7 @@ export class BabbageAuxiliaryData
     }
     static fromCborObj( cObj: CborObj ): BabbageAuxiliaryData
     {
-        console.log("BabbageAuxiliaryData.fromCborObj", cObj);
+        // console.log("BabbageAuxiliaryData.fromCborObj", cObj);
         // shelley; metadata only
         if( "data" in cObj && cObj.data instanceof CborMap )
         {
