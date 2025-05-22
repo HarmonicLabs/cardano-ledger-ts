@@ -243,7 +243,7 @@ export class AllegraTx
  *  - required by withdrawals
  *  - additional specified in the `requiredSigners` field
  */
-export function getAllRequiredSigners( body: Readonly<AllegraTxBody> ): Hash28[]
+function getAllRequiredSigners( body: Readonly<AllegraTxBody> ): Hash28[]
 {
     return (
         // required for spending pubKey utxo
@@ -275,7 +275,7 @@ export function getAllRequiredSigners( body: Readonly<AllegraTxBody> ): Hash28[]
     ).filter( ( elem, i, thisArr ) => thisArr.indexOf( elem ) === i );
 }
 
-export function getNSignersNeeded( body: Readonly<AllegraTxBody> ): number
+function getNSignersNeeded( body: Readonly<AllegraTxBody> ): number
 {
     const n = getAllRequiredSigners( body ).length
     return n === 0 ? 1 : n;

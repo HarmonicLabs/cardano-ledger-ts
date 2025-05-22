@@ -5,8 +5,7 @@ import { freezeAll, isObject } from "@harmoniclabs/obj-utils";
 import type { Epoch } from "../../common/ledger/Epoch";
 import type { Coin } from "../../common/ledger/Coin";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../../utils/ints";
-import { Rational, cborFromRational, isRational, isRationalOrUndefined, tryCborFromRational } from "./Rational";
-import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "./protocolVersion";
+import { Rational, IProtocolVersion, isRational, isIProtocolVersion, isRationalOrUndefined, tryCborFromRational, ProtocolVersion } from "../../common";
 
 export interface ShelleyProtocolParameters {
     txFeePerByte: CanBeUInteger,
@@ -25,7 +24,7 @@ export interface ShelleyProtocolParameters {
     minPoolCost: Coin
 }
 
-export function isProtocolParameters( something: any ): something is ShelleyProtocolParameters
+export function isShelleyProtocolParameters( something: any ): something is ShelleyProtocolParameters
 {
     const expectedKeys = [
         "txFeePerByte",
@@ -85,7 +84,7 @@ export function isProtocolParameters( something: any ): something is ShelleyProt
     return true;
 }
 
-export function isPartialProtocolParameters( something: object ): something is Partial<ShelleyProtocolParameters>
+export function isPartialShelleyProtocolParameters( something: object ): something is Partial<ShelleyProtocolParameters>
 {
     if( !isObject( something ) ) return false;
 
@@ -146,7 +145,7 @@ function kv( k: number, v: CborObj | undefined ): CborMapEntry | undefined
     };
 }
 
-export function partialProtocolParametersToCborObj( pps: Partial<ShelleyProtocolParameters> ): CborMap
+export function partialShelleyProtocolParametersToCborObj( pps: Partial<ShelleyProtocolParameters> ): CborMap
 {
     const {
         protocolVersion
@@ -174,9 +173,9 @@ export function partialProtocolParametersToCborObj( pps: Partial<ShelleyProtocol
     ].filter( elem => elem !== undefined ) as CborMapEntry[])
 }
 
-export function partialProtocolParametersToData( pps: Partial<ShelleyProtocolParameters> ): Data
+export function partialShelleyProtocolParametersToData( pps: Partial<ShelleyProtocolParameters> ): Data
 {
-    return cborToDataLitteral( partialProtocolParametersToCborObj( pps ) );
+    return cborToDataLitteral( partialShelleyProtocolParametersToCborObj( pps ) );
 }
 
 function cborToDataLitteral( cbor: CborObj ): Data
@@ -223,7 +222,7 @@ function cborToDataLitteral( cbor: CborObj ): Data
 
 const maxProtocolParamsEntries = 17;
 
-export function partialProtocolParametersFromCborObj( cObj: CborObj ): Partial<ShelleyProtocolParameters>
+export function partialShelleyProtocolParametersFromCborObj( cObj: CborObj ): Partial<ShelleyProtocolParameters>
 {
     if(!( cObj instanceof CborMap ))
     throw new Error(`Invalid CBOR format for "Partial<ShelleyProtocolParameters>"`)
@@ -286,7 +285,7 @@ export function partialProtocolParametersFromCborObj( cObj: CborObj ): Partial<S
     }
 }
 
-export const defaultProtocolParameters: ShelleyProtocolParameters = freezeAll({
+export const defaultShelleyProtocolParameters: ShelleyProtocolParameters = freezeAll({
     txFeePerByte: 44,
     txFeeFixed: 155381,
     maxBlockBodySize: 65536,
@@ -303,7 +302,7 @@ export const defaultProtocolParameters: ShelleyProtocolParameters = freezeAll({
     minPoolCost: 340_000_000
 } as ShelleyProtocolParameters)
 
-export function partialProtocolParamsToJson( pp: Partial<ShelleyProtocolParameters> )
+export function partialShelleyProtocolParamsToJson( pp: Partial<ShelleyProtocolParameters> )
 {
     return {
         ...pp,

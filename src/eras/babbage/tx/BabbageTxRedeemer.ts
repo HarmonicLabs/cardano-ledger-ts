@@ -18,19 +18,6 @@ export enum BabbageTxRedeemerTag {
 
 Object.freeze( BabbageTxRedeemerTag );
 
-/** @deprecated */
-export function txRdmrTagToString( tag: BabbageTxRedeemerTag ): string
-{
-    switch( tag )
-    {
-        case BabbageTxRedeemerTag.Cert: return "Cert";
-        case BabbageTxRedeemerTag.Mint: return "Mint";
-        case BabbageTxRedeemerTag.Spend: return "Spend";
-        case BabbageTxRedeemerTag.Withdraw: return "Withdraw";
-        default: return "";
-    }
-}
-
 export type BabbageTxRedeemerTagStr<Tag extends BabbageTxRedeemerTag> =
     Tag extends BabbageTxRedeemerTag.Spend     ? "Spend"       :
     Tag extends BabbageTxRedeemerTag.Mint      ? "Mint"        :

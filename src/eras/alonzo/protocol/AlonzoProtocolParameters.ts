@@ -6,9 +6,8 @@ import { Data, DataB, DataConstr, DataI, DataList, DataMap, DataPair } from "@ha
 import type { Epoch } from "../../common/ledger/Epoch";
 import type { Coin } from "../../common/ledger/Coin";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../../utils/ints";
-import { Rational, cborFromRational, isRational, isRationalOrUndefined, tryCborFromRational } from "./Rational";
-import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "./protocolVersion";
 import { fromUtf8 } from "@harmoniclabs/uint8array-utils";
+import { Rational, IProtocolVersion, isRational, isIProtocolVersion, isRationalOrUndefined, tryCborFromRational, ProtocolVersion } from "../../common";
 
 export interface AlonzoProtocolParameters {
     txFeePerByte: CanBeUInteger,
@@ -41,7 +40,7 @@ export interface AlonzoProtocolParameters {
     maxCollateralInputs: CanBeUInteger,
 }
 
-export function isProtocolParameters(something: any): something is AlonzoProtocolParameters {
+export function isAlonzoProtocolParameters(something: any): something is AlonzoProtocolParameters {
     const expectedKeys = [
         "txFeePerByte",
         "txFeeFixed",
@@ -132,7 +131,7 @@ export function isProtocolParameters(something: any): something is AlonzoProtoco
     return true;
 }
 
-export function isPartialProtocolParameters(something: object): something is Partial<AlonzoProtocolParameters> {
+export function isPartialAlonzoProtocolParameters(something: object): something is Partial<AlonzoProtocolParameters> {
     if (!isObject(something)) return false;
 
     const pp: Partial<AlonzoProtocolParameters> = something;
@@ -221,7 +220,7 @@ function kv(k: number, v: CborObj | undefined): CborMapEntry | undefined {
     };
 }
 
-export function partialProtocolParametersToCborObj(pps: Partial<AlonzoProtocolParameters>): CborMap {
+export function partialAlonzoProtocolParametersToCborObj(pps: Partial<AlonzoProtocolParameters>): CborMap {
     const {
         protocolVersion,
         executionUnitPrices,
@@ -276,8 +275,8 @@ export function partialProtocolParametersToCborObj(pps: Partial<AlonzoProtocolPa
     ].filter(elem => elem !== undefined) as CborMapEntry[]);
 }
 
-export function partialProtocolParametersToData(pps: Partial<AlonzoProtocolParameters>): Data {
-    return cborToDataLitteral(partialProtocolParametersToCborObj(pps));
+export function partialAlonzoProtocolParametersToData(pps: Partial<AlonzoProtocolParameters>): Data {
+    return cborToDataLitteral(partialAlonzoProtocolParametersToCborObj(pps));
 }
 
 function cborToDataLitteral(cbor: CborObj): Data {
@@ -314,7 +313,7 @@ function cborToDataLitteral(cbor: CborObj): Data {
 
 const maxProtocolParamsEntries = 25;
 
-export function partialProtocolParametersFromCborObj(cObj: CborObj): Partial<AlonzoProtocolParameters> {
+export function partialAlonzoProtocolParametersFromCborObj(cObj: CborObj): Partial<AlonzoProtocolParameters> {
     if (!(cObj instanceof CborMap))
         throw new Error(`Invalid CBOR format for "Partial<AlonzoProtocolParameters>"`);
 
@@ -398,7 +397,7 @@ export function partialProtocolParametersFromCborObj(cObj: CborObj): Partial<Alo
     };
 }
 
-export const defaultProtocolParameters: AlonzoProtocolParameters = freezeAll({
+export const defaultAlonzoProtocolParameters: AlonzoProtocolParameters = freezeAll({
     txFeePerByte: 44, // minFeeA, fixed fee component (historical value for Alonzo)
     txFeeFixed: 155381, // minFeeB, per-byte fee component (historical value for Alonzo)
     maxBlockBodySize: 73728, // Increased from Shelley/Mary to accommodate scripts (historical approximation)
@@ -428,7 +427,7 @@ export const defaultProtocolParameters: AlonzoProtocolParameters = freezeAll({
     maxCollateralInputs: 3 // Maximum number of collateral inputs for script transactions
 } as AlonzoProtocolParameters);
 
-export function partialProtocolParamsToJson(pp: Partial<AlonzoProtocolParameters>) {
+export function partialAlonzoProtocolParamsToJson(pp: Partial<AlonzoProtocolParameters>) {
     return {
         ...pp,
         poolPledgeInfluence: typeof pp.poolPledgeInfluence === "number" ? pp.poolPledgeInfluence : pp.poolPledgeInfluence?.toNumber(),

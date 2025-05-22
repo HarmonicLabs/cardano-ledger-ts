@@ -255,7 +255,7 @@ export class AlonzoTx
  *  - required by withdrawals
  *  - additional specified in the `requiredSigners` field
  */
-export function getAllRequiredSigners( body: Readonly<AlonzoTxBody> ): Hash28[]
+function getAllRequiredSigners( body: Readonly<AlonzoTxBody> ): Hash28[]
 {
     return (
         // required for spending pubKey utxo
@@ -292,7 +292,7 @@ export function getAllRequiredSigners( body: Readonly<AlonzoTxBody> ): Hash28[]
     ).filter( ( elem, i, thisArr ) => thisArr.indexOf( elem ) === i );
 }
 
-export function getNSignersNeeded( body: Readonly<AlonzoTxBody> ): number
+function getNSignersNeeded( body: Readonly<AlonzoTxBody> ): number
 {
     const n = getAllRequiredSigners( body ).length
     return n === 0 ? 1 : n;

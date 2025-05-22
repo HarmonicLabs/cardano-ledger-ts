@@ -20,21 +20,6 @@ export enum ConwayTxRedeemerTag {
 
 Object.freeze( ConwayTxRedeemerTag );
 
-/** @deprecated */
-export function txRdmrTagToString( tag: ConwayTxRedeemerTag ): string
-{
-    switch( tag )
-    {
-        case ConwayTxRedeemerTag.Cert: return "Cert";
-        case ConwayTxRedeemerTag.Mint: return "Mint";
-        case ConwayTxRedeemerTag.Spend: return "Spend";
-        case ConwayTxRedeemerTag.Withdraw: return "Withdraw";
-        case ConwayTxRedeemerTag.Voting: return "Voting";
-        case ConwayTxRedeemerTag.Proposing: return "Proposing";
-        default: return "";
-    }
-}
-
 export type ConwayTxRedeemerTagStr<Tag extends ConwayTxRedeemerTag> =
     Tag extends ConwayTxRedeemerTag.Spend     ? "Spend"       :
     Tag extends ConwayTxRedeemerTag.Mint      ? "Mint"        :

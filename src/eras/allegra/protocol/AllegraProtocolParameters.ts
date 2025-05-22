@@ -5,8 +5,7 @@ import type { Epoch } from "../../common/ledger/Epoch";
 import type { Coin } from "../../common/ledger/Coin";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../../utils/ints";
 import { freezeAll, isObject } from "@harmoniclabs/obj-utils";
-import { Rational, cborFromRational, isRational, isRationalOrUndefined, tryCborFromRational } from "./Rational";
-import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "./protocolVersion";
+import { IProtocolVersion, isIProtocolVersion, isRational, isRationalOrUndefined, ProtocolVersion, Rational, tryCborFromRational } from "../../common";
 
 
 export interface AllegraProtocolParameters {
@@ -26,7 +25,7 @@ export interface AllegraProtocolParameters {
     minPoolCost: Coin
 }
 
-export function isProtocolParameters( something: any ): something is AllegraProtocolParameters
+export function isAllegraProtocolParameters( something: any ): something is AllegraProtocolParameters
 {
     const expectedKeys = [
         "txFeePerByte",
@@ -86,7 +85,7 @@ export function isProtocolParameters( something: any ): something is AllegraProt
     return true;
 }
 
-export function isPartialProtocolParameters( something: object ): something is Partial<AllegraProtocolParameters>
+export function isPartialAllegraProtocolParameters( something: object ): something is Partial<AllegraProtocolParameters>
 {
     if( !isObject( something ) ) return false;
 
@@ -147,7 +146,7 @@ function kv( k: number, v: CborObj | undefined ): CborMapEntry | undefined
     };
 }
 
-export function partialProtocolParametersToCborObj( pps: Partial<AllegraProtocolParameters> ): CborMap
+export function partialAllegraProtocolParametersToCborObj( pps: Partial<AllegraProtocolParameters> ): CborMap
 {
     const {
         protocolVersion
@@ -175,9 +174,9 @@ export function partialProtocolParametersToCborObj( pps: Partial<AllegraProtocol
     ].filter( elem => elem !== undefined ) as CborMapEntry[])
 }
 
-export function partialProtocolParametersToData( pps: Partial<AllegraProtocolParameters> ): Data
+export function partialAllegraProtocolParametersToData( pps: Partial<AllegraProtocolParameters> ): Data
 {
-    return cborToDataLitteral( partialProtocolParametersToCborObj( pps ) );
+    return cborToDataLitteral( partialAllegraProtocolParametersToCborObj( pps ) );
 }
 
 function cborToDataLitteral( cbor: CborObj ): Data
@@ -224,7 +223,7 @@ function cborToDataLitteral( cbor: CborObj ): Data
 
 const maxProtocolParamsEntries = 17;
 
-export function partialProtocolParametersFromCborObj( cObj: CborObj ): Partial<AllegraProtocolParameters>
+export function partialAllegraProtocolParametersFromCborObj( cObj: CborObj ): Partial<AllegraProtocolParameters>
 {
     if(!( cObj instanceof CborMap ))
     throw new Error(`Invalid CBOR format for "Partial<AllegraProtocolParameters>"`)
@@ -287,7 +286,7 @@ export function partialProtocolParametersFromCborObj( cObj: CborObj ): Partial<A
     }
 }
 
-export const defaultProtocolParameters: AllegraProtocolParameters = freezeAll({
+export const defaultAllegraProtocolParameters: AllegraProtocolParameters = freezeAll({
     txFeePerByte: 44,
     txFeeFixed: 155381,
     maxBlockBodySize: 65536,
@@ -304,7 +303,7 @@ export const defaultProtocolParameters: AllegraProtocolParameters = freezeAll({
     minPoolCost: 340_000_000
 } as AllegraProtocolParameters)
 
-export function partialProtocolParamsToJson( pp: Partial<AllegraProtocolParameters> )
+export function partialAllegraProtocolParamsToJson( pp: Partial<AllegraProtocolParameters> )
 {
     return {
         ...pp,

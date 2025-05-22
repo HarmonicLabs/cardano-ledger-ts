@@ -5,12 +5,11 @@ import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../../utils/ints"
 import { CostModels, costModelsFromCborObj, costModelsToCborObj, costModelsToJson, defaultV1Costs, defaultV2Costs, defaultV3Costs, isCostModels } from "@harmoniclabs/cardano-costmodels-ts";
 import { ExBudget, ExBudgetJson } from "@harmoniclabs/plutus-machine";
 import { freezeAll, isObject } from "@harmoniclabs/obj-utils";
-import { Rational, cborFromRational, isRational, isRationalOrUndefined, tryCborFromRational } from "./Rational";
 import { PParamsPoolVotingThresholds, isPParamsPoolVotingThresholds, poolVotingThresholdsToCborObj, tryGetPParamsPoolVotingThresholdsFromCborObj } from "./PParamsPoolVotingThresholds";
 import { PParamsDrepVotingThresholds, drepVotingThresholdsToCborObj, isPParamsDrepVotingThresholds, tryGetPParamsDrepVotingThresholdsFromCborObj } from "./PParamsDrepVotingThresholds";
-import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "./protocolVersion";
 import { Data, DataB, DataConstr, DataI, DataList, DataMap, DataPair } from "@harmoniclabs/plutus-data";
 import { fromUtf8 } from "@harmoniclabs/uint8array-utils";
+import { Rational, isRational, isRationalOrUndefined, tryCborFromRational } from "../../common";
 
 export interface ConwayProtocolParameters {
     txFeePerByte: CanBeUInteger,
@@ -54,7 +53,7 @@ export interface ConwayProtocolParameters {
     minfeeRefScriptCostPerByte: Rational
 }
 
-export function isProtocolParameters(something: any): something is ConwayProtocolParameters {
+export function isConwayProtocolParameters(something: any): something is ConwayProtocolParameters {
     const expectedKeys = [
         "txFeePerByte",
         "txFeeFixed",
@@ -156,7 +155,7 @@ export function isProtocolParameters(something: any): something is ConwayProtoco
     return true;
 }
 
-export function isPartialProtocolParameters(something: object): something is Partial<ConwayProtocolParameters> {
+export function isPartialConwayProtocolParameters(something: object): something is Partial<ConwayProtocolParameters> {
     if (!isObject(something)) return false;
 
     const pp: Partial<ConwayProtocolParameters> = something;
@@ -247,7 +246,7 @@ function kv(k: number, v: CborObj | undefined): CborMapEntry | undefined {
     };
 }
 
-export function partialProtocolParametersToCborObj(pps: Partial<ConwayProtocolParameters>): CborMap {
+export function partialConwayProtocolParametersToCborObj(pps: Partial<ConwayProtocolParameters>): CborMap {
     const {
         executionUnitPrices,
         maxTxExecutionUnits,
@@ -305,8 +304,8 @@ export function partialProtocolParametersToCborObj(pps: Partial<ConwayProtocolPa
     ].filter(elem => elem !== undefined) as CborMapEntry[]);
 }
 
-export function partialProtocolParametersToData(pps: Partial<ConwayProtocolParameters>): Data {
-    return cborToDataLitteral(partialProtocolParametersToCborObj(pps));
+export function partialConwayProtocolParametersToData(pps: Partial<ConwayProtocolParameters>): Data {
+    return cborToDataLitteral(partialConwayProtocolParametersToCborObj(pps));
 }
 
 function cborToDataLitteral(cbor: CborObj): Data {
@@ -343,7 +342,7 @@ function cborToDataLitteral(cbor: CborObj): Data {
 
 const maxProtocolParamsEntries = 34;
 
-export function partialProtocolParametersFromCborObj(cObj: CborObj): Partial<ConwayProtocolParameters> {
+export function partialConwayProtocolParametersFromCborObj(cObj: CborObj): Partial<ConwayProtocolParameters> {
     if (!(cObj instanceof CborMap))
         throw new Error(`Invalid CBOR format for "Partial<ConwayProtocolParameters>"`);
 
@@ -439,7 +438,7 @@ export function partialProtocolParametersFromCborObj(cObj: CborObj): Partial<Con
     };
 }
 
-export const defaultProtocolParameters: ConwayProtocolParameters = freezeAll({
+export const defaultConwayProtocolParameters: ConwayProtocolParameters = freezeAll({
     txFeePerByte: 44, // minFeeA, fixed fee component (historical value for Conway)
     txFeeFixed: 155381, // minFeeB, per-byte fee component (historical value for Conway)
     maxBlockBodySize: 90112, // Consistent with Babbage, may be adjusted (historical approximation)
@@ -497,7 +496,7 @@ export const defaultProtocolParameters: ConwayProtocolParameters = freezeAll({
     minfeeRefScriptCostPerByte: CborPositiveRational.fromNumber(0.5) // Cost per byte for reference scripts (approximation)
 } as ConwayProtocolParameters);
 
-export function partialProtocolParamsToJson(pp: Partial<ConwayProtocolParameters>) {
+export function partialConwayProtocolParamsToJson(pp: Partial<ConwayProtocolParameters>) {
     return {
         ...pp,
         poolPledgeInfluence: typeof pp.poolPledgeInfluence === "number" ? pp.poolPledgeInfluence : pp.poolPledgeInfluence?.toNumber(),

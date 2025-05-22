@@ -6,18 +6,20 @@ import { ToJson } from "../../../utils/ToJson";
 import { IShelleyTxOut, isIShelleyTxOut, ShelleyTxOut } from "./ShelleyTxOut";
 import { ITxOutRef, isITxOutRef, TxOutRef } from "../../common/TxOutRef";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
+import { hasUtxoRef, HasUtxoRef } from "../../common/HasUtxoRef";
 
-export interface IShelleyUTxO {
-    utxoRef: ITxOutRef,
+export interface IShelleyUTxO extends HasUtxoRef {
+    // utxoRef: ITxOutRef,
     resolved: IShelleyTxOut
 }
 
 export function isIShelleyUTxO( stuff: any ): stuff is IShelleyUTxO
 {
     return (
-        isObject( stuff ) &&
-        hasOwn( stuff, "utxoRef" ) && isITxOutRef( stuff.utxoRef ) &&
-        hasOwn( stuff, "resolved" ) && isIShelleyTxOut( stuff.resolved )
+        isObject( stuff )
+        // && hasOwn( stuff, "utxoRef" ) && isITxOutRef( stuff.utxoRef )
+        && hasUtxoRef( stuff )
+        && hasOwn( stuff, "resolved" ) && isIShelleyTxOut( stuff.resolved )
     );
 }
 

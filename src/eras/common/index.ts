@@ -6,4 +6,8 @@ export * from "./TxOutRef";
 export * from "./VKey";
 export * from "./VKeyWitness";
 export * from "./Vrf";
+export * from "./CanBeTxOutRef";
+export * from "./HasUtxoRef";
+export * from "./protocolVersion";
+export * from "./Rational";
 

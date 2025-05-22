@@ -1,16 +1,18 @@
 import { CborMap, CborObj, CborArray, CborUInt } from "@harmoniclabs/cbor";
 import { isObject } from "@harmoniclabs/obj-utils";
-import { GenesisHash } from "../../../hashes/Hash28/GenesisHash";
-import { canBeUInteger, forceBigUInt } from "../../../utils/ints";
-import { Epoch } from "../../common/ledger/Epoch";
-import { ShelleyProtocolParameters, isPartialProtocolParameters, partialProtocolParametersFromCborObj, partialProtocolParametersToCborObj, partialProtocolParamsToJson } from "./ShelleyProtocolParameters";
-import { Hash28 } from "../../../hashes";
+import { GenesisHash } from "../../hashes/Hash28/GenesisHash";
+import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../utils/ints";
+import { Epoch } from "./ledger/Epoch";
+import { Hash28 } from "../../hashes";
+import { isRational, Rational } from "./Rational";
 
 export type LegacyPPUpdateProposal = [ LegacyPPUpdateMap, Epoch ];
 
+export type AnyEraPartialParams = { [paramName: string ]: Rational | CanBeUInteger };
+
 export type LegacyPPUpdateMap = {
     genesisHash: Hash28, // GenesisHash
-    changes: Partial<ShelleyProtocolParameters>
+    changes: AnyEraPartialParams
 }[];
 
 export function isLegacyPPUpdateMap( something: object ): something is LegacyPPUpdateMap
@@ -19,9 +21,13 @@ export function isLegacyPPUpdateMap( something: object ): something is LegacyPPU
         Array.isArray( something ) &&
         something.every( entry => {
             return (
-                isObject( entry ) &&
-                entry.genesisHash instanceof GenesisHash &&
-                isPartialProtocolParameters( entry.changes )
+                isObject( entry )
+                && entry.genesisHash instanceof GenesisHash
+                && isObject( entry.changes )
+                && Object.entries( entry.changes ).every( ([paramName, value]) => 
+                    typeof paramName === "string"
+                    && ( canBeUInteger( value ) || isRational( value ) )
+                )
             )
         })
     );
@@ -37,7 +43,10 @@ export function isLegacyPPUpdateProposal( something: any ): something is LegacyP
     );
 }
 
-export function protocolUpdateToJson( pUp: LegacyPPUpdateProposal ): object
+export function protocolUpdateToJson(
+    pUp: LegacyPPUpdateProposal,
+    partialProtocolParamsToJson: ( params: AnyEraPartialParams ) => any
+): object
 {
     return {
         epoch: forceBigUInt( pUp[1] ).toString(),
@@ -48,7 +57,10 @@ export function protocolUpdateToJson( pUp: LegacyPPUpdateProposal ): object
     }
 }
 
-export function LegacyPPUpdateMapToCborObj( ppUpdate: LegacyPPUpdateMap ): CborMap
+export function LegacyPPUpdateMapToCborObj(
+    ppUpdate: LegacyPPUpdateMap,
+    partialProtocolParametersToCborObj: ( params: AnyEraPartialParams ) => CborObj
+): CborMap
 {
     return new CborMap(
         ppUpdate.map( entry => {
@@ -60,7 +72,10 @@ export function LegacyPPUpdateMapToCborObj( ppUpdate: LegacyPPUpdateMap ): CborM
     )
 }
 
-export function LegacyPPUpdateMapFromCborObj( cObj: CborObj ): LegacyPPUpdateMap
+export function LegacyPPUpdateMapFromCborObj(
+    cObj: CborObj,
+    partialProtocolParametersFromCborObj: ( cObj: CborObj ) => AnyEraPartialParams
+): LegacyPPUpdateMap
 {
     if(!(cObj instanceof CborMap))
     throw new Error(`Invalid CBOR format for "LegacyPPUpdateProposal"`);
@@ -71,7 +86,10 @@ export function LegacyPPUpdateMapFromCborObj( cObj: CborObj ): LegacyPPUpdateMap
     }));
 }
 
-export function LegacyPPUpdateProposalToCborObj( protocolUpdate: LegacyPPUpdateProposal ): CborObj
+export function LegacyPPUpdateProposalToCborObj(
+    protocolUpdate: LegacyPPUpdateProposal,
+    LegacyPPUpdateMapToCborObj: ( params: LegacyPPUpdateMap ) => CborObj
+): CborObj
 {
     return new CborArray([
         LegacyPPUpdateMapToCborObj( protocolUpdate[0] ),
@@ -79,7 +97,10 @@ export function LegacyPPUpdateProposalToCborObj( protocolUpdate: LegacyPPUpdateP
     ])
 }
 
-export function LegacyPPUpdateProposalFromCborObj( cObj: CborObj ): LegacyPPUpdateProposal
+export function LegacyPPUpdateProposalFromCborObj(
+    cObj: CborObj,
+    LegacyPPUpdateMapFromCborObj: ( cObj: CborObj ) => LegacyPPUpdateMap
+): LegacyPPUpdateProposal
 {
     if(!(cObj instanceof CborArray))
     throw new Error(`Invalid CBOR format for "LegacyPPUpdateProposal"`);

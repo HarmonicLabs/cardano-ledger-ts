@@ -28,9 +28,9 @@ updid = blake2b-256
 hash = blake2b-256
 
 blake2b-224 = bytes .size 28
-
+[
 addressid = blake2b-224
-stakeholderid = blake2b-224
+stakeholderid = blake2b-224]
 
 epochid = u64
 slotid = [ epoch: epochid, slot : u64 ]

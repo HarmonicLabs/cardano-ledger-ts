@@ -41,7 +41,7 @@ export interface BabbageProtocolParameters {
     maxCollateralInputs: CanBeUInteger,
 }
 
-export function isProtocolParameters(something: any): something is BabbageProtocolParameters {
+export function isBabbageProtocolParameters(something: any): something is BabbageProtocolParameters {
     const expectedKeys = [
         "txFeePerByte",
         "txFeeFixed",
@@ -132,7 +132,7 @@ export function isProtocolParameters(something: any): something is BabbageProtoc
     return true;
 }
 
-export function isPartialProtocolParameters(something: object): something is Partial<BabbageProtocolParameters> {
+export function isPartialBabbageProtocolParameters(something: object): something is Partial<BabbageProtocolParameters> {
     if (!isObject(something)) return false;
 
     const pp: Partial<BabbageProtocolParameters> = something;
@@ -221,7 +221,7 @@ function kv(k: number, v: CborObj | undefined): CborMapEntry | undefined {
     };
 }
 
-export function partialProtocolParametersToCborObj(pps: Partial<BabbageProtocolParameters>): CborMap {
+export function partialBabbageProtocolParametersToCborObj(pps: Partial<BabbageProtocolParameters>): CborMap {
     const {
         protocolVersion,
         executionUnitPrices,
@@ -276,8 +276,8 @@ export function partialProtocolParametersToCborObj(pps: Partial<BabbageProtocolP
     ].filter(elem => elem !== undefined) as CborMapEntry[]);
 }
 
-export function partialProtocolParametersToData(pps: Partial<BabbageProtocolParameters>): Data {
-    return cborToDataLitteral(partialProtocolParametersToCborObj(pps));
+export function partialBabbageProtocolParametersToData(pps: Partial<BabbageProtocolParameters>): Data {
+    return cborToDataLitteral(partialBabbageProtocolParametersToCborObj(pps));
 }
 
 function cborToDataLitteral(cbor: CborObj): Data {
@@ -314,7 +314,7 @@ function cborToDataLitteral(cbor: CborObj): Data {
 
 const maxProtocolParamsEntries = 25;
 
-export function partialProtocolParametersFromCborObj(cObj: CborObj): Partial<BabbageProtocolParameters> {
+export function partialBabbageProtocolParametersFromCborObj(cObj: CborObj): Partial<BabbageProtocolParameters> {
     if (!(cObj instanceof CborMap))
         throw new Error(`Invalid CBOR format for "Partial<BabbageProtocolParameters>"`);
 
@@ -398,7 +398,7 @@ export function partialProtocolParametersFromCborObj(cObj: CborObj): Partial<Bab
     };
 }
 
-export const defaultProtocolParameters: BabbageProtocolParameters = freezeAll({
+export const defaultBabbageProtocolParameters: BabbageProtocolParameters = freezeAll({
     txFeePerByte: 44, // minFeeA, fixed fee component (historical value for Babbage)
     txFeeFixed: 155381, // minFeeB, per-byte fee component (historical value for Babbage)
     maxBlockBodySize: 90112, // Increased in Babbage for performance (historical approximation, up from 73728 in Alonzo)
@@ -429,7 +429,7 @@ export const defaultProtocolParameters: BabbageProtocolParameters = freezeAll({
     maxCollateralInputs: 3 // Unchanged, maximum number of collateral inputs
 } as BabbageProtocolParameters);
 
-export function partialProtocolParamsToJson(pp: Partial<BabbageProtocolParameters>) {
+export function partialBabbageProtocolParamsToJson(pp: Partial<BabbageProtocolParameters>) {
     return {
         ...pp,
         poolPledgeInfluence: typeof pp.poolPledgeInfluence === "number" ? pp.poolPledgeInfluence : pp.poolPledgeInfluence?.toNumber(),

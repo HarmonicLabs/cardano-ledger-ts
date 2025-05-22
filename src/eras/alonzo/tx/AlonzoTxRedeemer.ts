@@ -18,19 +18,6 @@ export enum AlonzoTxRedeemerTag {
 
 Object.freeze( AlonzoTxRedeemerTag );
 
-/** @deprecated */
-export function txRdmrTagToString( tag: AlonzoTxRedeemerTag ): string
-{
-    switch( tag )
-    {
-        case AlonzoTxRedeemerTag.Cert: return "Cert";
-        case AlonzoTxRedeemerTag.Mint: return "Mint";
-        case AlonzoTxRedeemerTag.Spend: return "Spend";
-        case AlonzoTxRedeemerTag.Withdraw: return "Withdraw";
-        default: return "";
-    }
-}
-
 export type AlonzoTxRedeemerTagStr<Tag extends AlonzoTxRedeemerTag> =
     Tag extends AlonzoTxRedeemerTag.Spend     ? "Spend"       :
     Tag extends AlonzoTxRedeemerTag.Mint      ? "Mint"        :

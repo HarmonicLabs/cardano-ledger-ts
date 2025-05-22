@@ -3,10 +3,9 @@ import type { Coin } from "../../common/ledger/Coin";
 import { CborPositiveRational, CborUInt, CborObj, CborMapEntry, CborMap, CborArray, CborNegInt, CborBytes, CborTag, CborText } from "@harmoniclabs/cbor";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../../utils/ints";
 import { freezeAll, isObject } from "@harmoniclabs/obj-utils";
-import { Rational, cborFromRational, isRational, isRationalOrUndefined, tryCborFromRational } from "./Rational";
-import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "./protocolVersion";
 import { Data, DataB, DataConstr, DataI, DataList, DataMap, DataPair } from "@harmoniclabs/plutus-data";
 import { fromUtf8 } from "@harmoniclabs/uint8array-utils";
+import { Rational, IProtocolVersion, isRational, isIProtocolVersion, isRationalOrUndefined, tryCborFromRational, ProtocolVersion } from "../../common";
 
 export interface MaryProtocolParameters {
     txFeePerByte: CanBeUInteger,
@@ -27,7 +26,7 @@ export interface MaryProtocolParameters {
     maxValueSize: CanBeUInteger
 };
 
-export function isProtocolParameters(something: any): something is MaryProtocolParameters {
+export function isMaryProtocolParameters(something: any): something is MaryProtocolParameters {
     const expectedKeys = [
         "txFeePerByte",
         "txFeeFixed",
@@ -85,7 +84,7 @@ export function isProtocolParameters(something: any): something is MaryProtocolP
     return true;
 }
 
-export function isPartialProtocolParameters(something: object): something is Partial<MaryProtocolParameters> {
+export function isPartialMaryProtocolParameters(something: object): something is Partial<MaryProtocolParameters> {
     if (!isObject(something)) return false;
 
     const pp: Partial<MaryProtocolParameters> = something;
@@ -139,7 +138,7 @@ function kv(k: number, v: CborObj | undefined): CborMapEntry | undefined {
     };
 }
 
-export function partialProtocolParametersToCborObj(pps: Partial<MaryProtocolParameters>): CborMap {
+export function partialMaryProtocolParametersToCborObj(pps: Partial<MaryProtocolParameters>): CborMap {
     const {
         protocolVersion
     } = pps;
@@ -168,8 +167,8 @@ export function partialProtocolParametersToCborObj(pps: Partial<MaryProtocolPara
     ].filter(elem => elem !== undefined) as CborMapEntry[]);
 }
 
-export function partialProtocolParametersToData(pps: Partial<MaryProtocolParameters>): Data {
-    return cborToDataLitteral(partialProtocolParametersToCborObj(pps));
+export function partialMaryProtocolParametersToData(pps: Partial<MaryProtocolParameters>): Data {
+    return cborToDataLitteral(partialMaryProtocolParametersToCborObj(pps));
 }
 
 function cborToDataLitteral(cbor: CborObj): Data {
@@ -206,7 +205,7 @@ function cborToDataLitteral(cbor: CborObj): Data {
 
 const maxProtocolParamsEntries = 23;
 
-export function partialProtocolParametersFromCborObj(cObj: CborObj): Partial<MaryProtocolParameters> {
+export function partialMaryProtocolParametersFromCborObj(cObj: CborObj): Partial<MaryProtocolParameters> {
     if (!(cObj instanceof CborMap))
         throw new Error(`Invalid CBOR format for "Partial<MaryProtocolParameters>"`);
 
@@ -273,7 +272,7 @@ export function partialProtocolParametersFromCborObj(cObj: CborObj): Partial<Mar
     };
 }
 
-export const defaultProtocolParameters: MaryProtocolParameters = freezeAll({
+export const defaultMaryProtocolParameters: MaryProtocolParameters = freezeAll({
     txFeePerByte: 44, // minFeeB, historically correct for Mary
     txFeeFixed: 155381, // minFeeA, historically correct for Mary
     maxBlockBodySize: 65536, // Matches Shelley/Allegra, may have been increased slightly in Mary
@@ -292,7 +291,7 @@ export const defaultProtocolParameters: MaryProtocolParameters = freezeAll({
     maxValueSize: 5000, // Relevant for multi-asset values in Mary
 } as MaryProtocolParameters);
 
-export function partialProtocolParamsToJson(pp: Partial<MaryProtocolParameters>) {
+export function partialMaryProtocolParamsToJson(pp: Partial<MaryProtocolParameters>) {
     return {
         ...pp,
         poolPledgeInfluence: typeof pp.poolPledgeInfluence === "number" ? pp.poolPledgeInfluence : pp.poolPledgeInfluence?.toNumber(),
