@@ -93,7 +93,7 @@ export function LegacyPPUpdateProposalToCborObj(
 {
     return new CborArray([
         LegacyPPUpdateMapToCborObj( protocolUpdate[0] ),
-        new CborUInt( forceBigUInt( protocolUpdate[1] ) )
+        new CborUInt( forceBigUInt( protocolUpdate[1] ))
     ])
 }
 

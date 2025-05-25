@@ -72,6 +72,7 @@ export class ConwayHeader
     }
     static fromCborObj( cbor: CborObj, _originalBytes?: Uint8Array ): ConwayHeader
     {
+        // console.log("ConwayHeader.fromCborObj", cbor)
         if(!(
             cbor instanceof CborArray 
             // && cbor.array.length >= 2
@@ -82,6 +83,7 @@ export class ConwayHeader
             cBodySignature
         ] = cbor.array;
         // console.log("ConwayHeader cHdrBody", cHdrBody);
+        // console.log("ConwayHeader cBodySignature", cBodySignature);
 
         if(!(
             cBodySignature instanceof CborBytes

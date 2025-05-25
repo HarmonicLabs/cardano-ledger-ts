@@ -8,8 +8,7 @@ import { GovActionType } from "./GovActionType";
 import { IGovAction } from "./IGovAction";
 import { ToDataVersion } from "../../../../toData/defaultToDataVersion";
 import { maybeData } from "../../../../utils/maybeData";
-import { isPartialProtocolParameters, partialProtocolParametersToCborObj, partialProtocolParametersToData, ConwayProtocolParameters } from "../../protocol";
-
+import { isPartialConwayProtocolParameters, partialConwayProtocolParametersToCborObj, partialConwayProtocolParametersToData, ConwayProtocolParameters } from "../../protocol";
 export interface IGovActionParameterChange {
     govActionId?: ITxOutRef | undefined,
     protocolParamsUpdate: Partial<ConwayProtocolParameters>,
@@ -20,7 +19,7 @@ export function isIGovActionParameterChange( stuff: any ): stuff is IGovActionPa
 {
     return isObject( stuff ) && (
         ( stuff.govActionId === undefined || isITxOutRef( stuff.govActionId ) ) &&
-        isPartialProtocolParameters( stuff.protocolParamsUpdate ) &&
+        isPartialConwayProtocolParameters( stuff.protocolParamsUpdate ) &&
         ( stuff.policyHash === undefined || canBeHash28( stuff.policyHash ) )
     );
 }
@@ -70,7 +69,7 @@ export class GovActionParameterChange
         return new CborArray([
             new CborUInt( this.govActionType ),
             this.govActionId?.toCborObj() ?? new CborSimple( null ),
-            partialProtocolParametersToCborObj( this.protocolParamsUpdate ),
+            partialConwayProtocolParametersToCborObj( this.protocolParamsUpdate ),
             this.policyHash?.toCborObj() ?? new CborSimple( null )
         ]);
     }
@@ -81,7 +80,7 @@ export class GovActionParameterChange
         return new DataConstr(
             0, [
                 maybeData( this.govActionId?.toData( v ) ),
-                partialProtocolParametersToData( this.protocolParamsUpdate ),
+                partialConwayProtocolParametersToData( this.protocolParamsUpdate ),
                 maybeData( this.policyHash?.toData( v ) )
             ]
         );

@@ -4,7 +4,8 @@ import { blake2b_256 } from "@harmoniclabs/crypto";
 import { hasOwn, isObject } from "@harmoniclabs/obj-utils";
 import { AuxiliaryDataHash, Hash32 } from "../../../hashes";
 import { Coin, TxWithdrawals, ITxWithdrawals, Value, NetworkT, isCertificate, canBeTxWithdrawals, forceTxWithdrawals, isIValue, certificateFromCborObj, certificatesToDepositLovelaces, Certificate } from "../../common/ledger";
-import { LegacyPPUpdateProposal, isLegacyPPUpdateProposal, LegacyPPUpdateProposalToCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson } from "../protocol"
+import { LegacyPPUpdateProposal, isLegacyPPUpdateProposal, LegacyPPUpdateProposalToCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, LegacyPPUpdateMap, LegacyPPUpdateMapFromCborObj } from "../../common/LegacyPPUpdateProposal";
+import { partialMaryProtocolParametersToCborObj, MaryProtocolParameters, defaultMaryProtocolParameters, partialMaryProtocolParamsToJson, partialMaryProtocolParametersFromCborObj } from "../protocol";
 import { MaryTxOut, isIMaryTxOut } from "./";
 import { TxOutRef } from "../../common/TxOutRef";
 import { MaryUTxO, isIMaryUTxO, } from "./MaryUTxO";
@@ -271,7 +272,10 @@ export class MaryTxBody
             this.protocolUpdate === undefined ? undefined :
             {
                 k: new CborUInt( 6 ),
-                v: LegacyPPUpdateProposalToCborObj( this.protocolUpdate )
+                v: LegacyPPUpdateProposalToCborObj( 
+                    this.protocolUpdate,
+                    () => partialMaryProtocolParametersToCborObj(defaultMaryProtocolParameters as Partial<MaryProtocolParameters> ) 
+                )
             },
             this.auxDataHash === undefined ? undefined :
             {
@@ -354,7 +358,7 @@ export class MaryTxBody
             ttl,
             certs:                      _certs_ !== undefined ? getCborSet( _certs_ ).map( certificateFromCborObj ) : undefined,
             withdrawals:                _withdrawals === undefined ? undefined : TxWithdrawals.fromCborObj( _withdrawals ),
-            protocolUpdate:             _pUp === undefined ? undefined : LegacyPPUpdateProposalFromCborObj( _pUp ),
+            protocolUpdate:             _pUp === undefined ? undefined : LegacyPPUpdateProposalFromCborObj( _pUp, (cObj) => LegacyPPUpdateMapFromCborObj( cObj, partialMaryProtocolParametersFromCborObj as any ) ),
             auxDataHash:                _auxDataHash === undefined ? undefined : AuxiliaryDataHash.fromCborObj( _auxDataHash ),
             validityIntervalStart:      _validityStart instanceof CborUInt ? _validityStart.num : undefined,
             mint:                       _mint === undefined ? undefined : Value.fromCborObj( _mint ),
@@ -372,7 +376,7 @@ export class MaryTxBody
             ttl: this.ttl?.toString(),
             certs: this.certs?.map( c => c.toJson() ),
             withdrawals: this.withdrawals?.toJson() ,
-            protocolUpdate: this.protocolUpdate === undefined ? undefined : protocolUpdateToJson( this.protocolUpdate ),
+            protocolUpdate: this.protocolUpdate === undefined ? undefined : protocolUpdateToJson( this.protocolUpdate, partialMaryProtocolParamsToJson ),
             auxDataHash: this.auxDataHash?.toString() , // hash 32
             validityIntervalStart: this.validityIntervalStart?.toString(),
             mint: this.mint?.toJson(),

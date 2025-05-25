@@ -1,9 +1,9 @@
-import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CanBeCborString, forceCborString, CborText } from "@harmoniclabs/cbor";
+import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
-import { TxMetadatum, isTxMetadatum, txMetadatumFromCborObj } from "../../tx";
-import { subCborRefOrUndef, getSubCborRef } from "../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
+import { TxMetadatum, isTxMetadatum, txMetadatumFromCborObj } from "./TxMetadatum";
+import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 export type ITxMetadata = {
     [metadatum_label: number | string]: TxMetadatum 
@@ -37,7 +37,6 @@ export class TxMetadata
                     return v;
                 })()
             )
-
         );
 
         this.metadata = _metadata;
@@ -50,6 +49,7 @@ export class TxMetadata
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
         return this.toCbor().toBuffer();
     }
+
     toCbor(): CborString
     {
         if( this.cborRef instanceof SubCborRef )
@@ -87,9 +87,7 @@ export class TxMetadata
     }
 
     static fromCborObj( cObj: CborObj ): TxMetadata
-    
     {
-        // console.log("txMetadata fromCborObj: ", cObj )
         if(!( 
             cObj instanceof CborMap 
             // && cObj.map.length >= 1
@@ -97,13 +95,10 @@ export class TxMetadata
 
         const meta = {};
         const len = cObj.map.length;
-        // console.log("txMetadata fromCborObj: ", len )
 
         for( let i = 0; i < len; i++ )
         {
             const { k, v } = cObj.map[i];
-            // console.log("txMetadata fromCborObj k: ", k )
-            // console.log("txMetadata fromCborObj v: ", v )
             if(!( k instanceof CborUInt ))
             throw new InvalidCborFormatError("TxMetadata: " + k)
 
@@ -118,6 +113,7 @@ export class TxMetadata
     }
 
     toJSON() { return this.toJson(); }
+
     toJson()
     {
         const json = {};

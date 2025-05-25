@@ -2,7 +2,7 @@ import { Cbor, CborArray, CborMap, CborPositiveRational, CborSimple, CborString,
 import { DataConstr, DataI, DataList, DataMap, DataPair, ToData } from "@harmoniclabs/plutus-data";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { Epoch } from "../../../common/ledger/Epoch";
-import { Rational, cborFromRational, isRational } from "../../protocol/Rational";
+import { Rational, cborFromRational, isRational } from "../../../common/Rational";
 import { ITxOutRef, TxOutRef, isITxOutRef } from "../../../common/TxOutRef";
 import { IGovAction } from "./IGovAction";
 import { GovActionType } from "./GovActionType";

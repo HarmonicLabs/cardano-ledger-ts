@@ -3,7 +3,6 @@ import { has_n_determined_keys, defineReadOnlyProperty } from "@harmoniclabs/obj
 import { fromHex, isUint8Array, toHex } from "@harmoniclabs/uint8array-utils";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
-import { assert } from "../../utils/assert";
 import { subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 export type TxMetadatum

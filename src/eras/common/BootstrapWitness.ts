@@ -120,8 +120,6 @@ export class BootstrapWitness
             cObj.array[3] instanceof CborBytes 
             // && cObj.array.length >= 4
         ))throw new InvalidCborFormatError("BootstrapWitness");
-
-        const [ _pubKey, _signature, _chainCode, _attributes ] = cObj.array;
         
         return new BootstrapWitness(
             {

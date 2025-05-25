@@ -1,10 +1,9 @@
-import { CborObj, CborMap, CborArray, CborUInt, CborNegInt, CborBytes, CborText, ToCbor, SubCborRef, CborString, Cbor } from "@harmoniclabs/cbor";
-import { has_n_determined_keys } from "@harmoniclabs/obj-utils";
-import { fromHex, toHex } from "@harmoniclabs/uint8array-utils";
-import { subCborRefOrUndef } from "../../utils/getSubCborRef";
+import { CborObj, CborMap, CborArray, CborUInt, CborNegInt, CborBytes, CborText, ToCbor, CborString, Cbor, SubCborRef } from "@harmoniclabs/cbor";
+import { has_n_determined_keys, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
+import { fromHex, isUint8Array, toHex } from "@harmoniclabs/uint8array-utils";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
-
+import { subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 export type TxMetadatum
     = TxMetadatumMap

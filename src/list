@@ -1,0 +1,13 @@
+TxMetadatum
+TxMetadata
+
+PParamsDrepVotingThresholds src/eras/conway/protocol/PParamsDrepVotingThresholds.ts
+PParamsDrepVotingThresholds src/ledger/protocol/PParamsDrepVotingThresholds.ts
+
+
+PParamsPoolVotingThresholds src/eras/conway/protocol/PParamsPoolVotingThresholds.ts
+PParamsPoolVotingThresholds src/ledger/protocol/PParamsPoolVotingThresholds.ts
+
+Rational src/eras/common/Rational.ts
+Rational src/ledger/common/Rational.ts
+

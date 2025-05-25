@@ -2,7 +2,6 @@ import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CanBeCborString, 
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
-import { assert } from "../../utils/assert";
 import { TxMetadatum, isTxMetadatum, txMetadatumFromCborObj } from "./TxMetadatum";
 import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
@@ -26,7 +25,6 @@ export class TxMetadata
         
         Object.keys( metadata )
         .forEach( k =>
-            /* TO DO: how to handle this :grin: */
             defineReadOnlyProperty(
                 _metadata,
                 BigInt( k ).toString(),
@@ -39,7 +37,6 @@ export class TxMetadata
                     return v;
                 })()
             )
-
         );
 
         this.metadata = _metadata;
@@ -52,6 +49,7 @@ export class TxMetadata
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
         return this.toCbor().toBuffer();
     }
+
     toCbor(): CborString
     {
         if( this.cborRef instanceof SubCborRef )
@@ -63,6 +61,7 @@ export class TxMetadata
         
         return Cbor.encode( this.toCborObj() );
     }
+
     toCborObj(): CborObj
     {
         if( this.cborRef instanceof SubCborRef )
@@ -86,6 +85,7 @@ export class TxMetadata
     {
         return TxMetadata.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
+
     static fromCborObj( cObj: CborObj ): TxMetadata
     {
         if(!( 
@@ -113,6 +113,7 @@ export class TxMetadata
     }
 
     toJSON() { return this.toJson(); }
+
     toJson()
     {
         const json = {}
@@ -125,7 +126,6 @@ export class TxMetadata
                 json, k, this.metadata[k].toJson()
             )
         }
-
         return json as any;
     }
 }

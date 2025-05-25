@@ -4,4 +4,4 @@ export * from './AlonzoTxBody';
 export * from './AlonzoTxOut';
 export * from './AlonzoTxRedeemer';
 export * from './AlonzoTxWitnessSet';
-export * from './AlonzoCanBeTxOutRef';
+// export * from '../../common/CanBeTxOutRef';

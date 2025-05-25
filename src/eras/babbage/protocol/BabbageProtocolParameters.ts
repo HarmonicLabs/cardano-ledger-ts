@@ -6,7 +6,7 @@ import { Data, DataB, DataConstr, DataI, DataList, DataMap, DataPair } from "@ha
 import type { Epoch } from "../../common/ledger/Epoch";
 import type { Coin } from "../../common/ledger/Coin";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../../utils/ints";
-import { Rational, cborFromRational, isRational, isRationalOrUndefined, tryCborFromRational } from "./Rational";
+import { Rational, cborFromRational, isRational, isRationalOrUndefined, tryCborFromRational } from "../../common/Rational";
 import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "./protocolVersion";
 import { fromUtf8 } from "@harmoniclabs/uint8array-utils";
 

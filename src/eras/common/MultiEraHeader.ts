@@ -1,9 +1,9 @@
-import { ConwayBlock } from '../conway/block/ConwayBlock';
-import { BabbageBlock } from '../babbage/block/BabbageBlock';
-import { AlonzoBlock } from '../alonzo/block/AlonzoBlock';
-import { MaryBlock } from '../mary/block/MaryBlock';
-import { AllegraBlock } from '../allegra/block/AllegraBlock';
-import { ShelleyBlock } from '../shelley/block/ShelleyBlock';
+import { ConwayHeader } from '../conway/header/ConwayHeader';
+import { BabbageHeader } from '../babbage/header/BabbageHeader';
+import { AlonzoHeader } from '../alonzo/header/AlonzoHeader';
+import { MaryHeader } from '../mary/header/MaryHeader';
+import { AllegraHeader } from '../allegra/header/AllegraHeader';
+import { ShelleyHeader } from '../shelley/header/ShelleyHeader';
 import { CborArray, ToCbor, SubCborRef, CborString, Cbor, CborObj, CborUInt, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
 import { ToJson } from "../../utils/ToJson"
 import { getSubCborRef } from "../../utils/getSubCborRef";
@@ -11,24 +11,24 @@ import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError"
 
 export type CardanoEra = number;
 
-export interface IMultiEraBlock {
+export interface IMultiEraHeader {
     era: CardanoEra;
-    block: ConwayBlock | BabbageBlock | AlonzoBlock | MaryBlock | AllegraBlock | ShelleyBlock;
+    header: ConwayHeader | BabbageHeader | AlonzoHeader | MaryHeader | AllegraHeader | ShelleyHeader;
 }
 
-export class MultiEraBlock implements 
-IMultiEraBlock, ToCbor, ToJson 
+export class MultiEraHeader implements 
+IMultiEraHeader, ToCbor, ToJson 
 {
     readonly era: CardanoEra;
-    readonly block: ConwayBlock | BabbageBlock | AlonzoBlock | MaryBlock | AllegraBlock | ShelleyBlock;
+    readonly header: ConwayHeader | BabbageHeader | AlonzoHeader | MaryHeader | AllegraHeader | ShelleyHeader;
 
     constructor(
-        block: IMultiEraBlock,
+        header: IMultiEraHeader,
         readonly cborRef: SubCborRef | undefined = undefined
     ) 
     { 
-        this.era = block.era;
-        this.block = block.block;
+        this.era = header.era;
+        this.header = header.header;
     }
 
     toCborBytes(): Uint8Array {
@@ -45,59 +45,62 @@ IMultiEraBlock, ToCbor, ToJson
         if (this.cborRef instanceof SubCborRef) return Cbor.parse(this.cborRef.toBuffer()) as CborArray;
         return new CborArray([
             new CborUInt(BigInt(this.era)),
-            this.block.toCborObj()
+            this.header.toCborObj()
         ]);
     }
 
-    static fromCbor(cbor: CanBeCborString): MultiEraBlock {
+    static fromCbor(cbor: CanBeCborString): MultiEraHeader {
         const bytes = cbor instanceof Uint8Array ? cbor : forceCborString(cbor).toBuffer();
-        return MultiEraBlock.fromCborObj(Cbor.parse(bytes, { keepRef: true }), bytes);
+        return MultiEraHeader.fromCborObj(Cbor.parse(bytes, { keepRef: true }), bytes);
     }
 
-    static fromCborObj(cObj: CborObj, _originalBytes?: Uint8Array): MultiEraBlock {
+    static fromCborObj(cObj: CborObj, _originalBytes?: Uint8Array): MultiEraHeader 
+    {
+        // console.log("multiEraHeader.fromCborObj", cObj);
         if(!(
             cObj instanceof CborArray 
             && cObj.array.length >= 2
-        ))throw new InvalidCborFormatError("Invalid CBOR for MultiEraBlock");
+        ))throw new InvalidCborFormatError("Invalid CBOR for MultiEraHeader");
 
         const _era = cObj.array[0];
-        const _blockData = cObj.array[1];
+        const _headerData = cObj.array[1];
+        console.log("_multiEraHeaderData", _headerData)
 
-        if(!(_era instanceof CborUInt
-
+        if(!(
+            _era instanceof CborUInt
         ))throw new InvalidCborFormatError("Era must be a CborUInt");
         
 
-        let block: ConwayBlock | BabbageBlock | AlonzoBlock | MaryBlock | AllegraBlock | ShelleyBlock;
+        let header: ConwayHeader | BabbageHeader | AlonzoHeader | MaryHeader | AllegraHeader | ShelleyHeader;
         switch (Number(_era.num)) {
             case 7: // Conway era
-                block = ConwayBlock.fromCborObj(_blockData);
+                header = ConwayHeader.fromCborObj(_headerData);
                 break;
             case 6: // Babbage era
-                block = BabbageBlock.fromCborObj(_blockData);
+                header = BabbageHeader.fromCborObj(_headerData);
                 break;
             case 5: // Alonzo era
-                block = AlonzoBlock.fromCborObj(_blockData);
+                header = AlonzoHeader.fromCborObj(_headerData);
                 break;
             case 4: // Mary era
-                block = MaryBlock.fromCborObj(_blockData);
+                header = MaryHeader.fromCborObj(_headerData);
                 break;
             case 3 : // Allegra era
-                block = AllegraBlock.fromCborObj(_blockData);
+                header = AllegraHeader.fromCborObj(_headerData);
                 break;
             case 2: // Shelley era
-                block = ShelleyBlock.fromCborObj(_blockData);
+                header = ShelleyHeader.fromCborObj(_headerData);
                 break;
             default:
                 throw new Error(`Unsupported era: ${_era.num}`);
         }
 
-        const multiEraBlock =new MultiEraBlock({
+        const multiEraHeader =new MultiEraHeader({
             era: Number(_era.num),
-            block
+            header
         }, getSubCborRef(cObj, _originalBytes));
-        // console.log("multiEraBlock", multiEraBlock.toJSON());
-        return multiEraBlock;
+        // console.log("multiEraHeader", multiEraHeader.toJSON());
+        return multiEraHeader;
     }
 
     toJSON() 
@@ -108,7 +111,7 @@ IMultiEraBlock, ToCbor, ToJson
     toJson() {
         return {
             era: this.era,
-            block: this.block.toJson()
+            header: this.header
         };
     }
 }

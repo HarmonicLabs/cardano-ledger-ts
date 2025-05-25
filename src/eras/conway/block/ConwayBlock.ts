@@ -103,13 +103,18 @@ export class ConwayBlock implements
         const _auxDataSet = cObj.array[3];
         const _invalidTxs = cObj.array[4];
 
+        console.log("_header Conway: ", _header);
+
         // Process header
         if (!(
             _header instanceof CborArray 
             && _header.array.length >= 2
         ))throw new InvalidCborFormatError("Header must be a CBOR array with at least 2 elements");
         
+        // console.log("ConwayBlock header: ", _header);
+
         const header = ConwayHeader.fromCborObj(_header); // Assuming ConwayHeader expects [header_body, body_signature]
+
 
         // Process transaction bodies
         if (!(

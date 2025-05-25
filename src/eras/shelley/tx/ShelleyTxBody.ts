@@ -2,16 +2,15 @@ import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborA
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
 import { blake2b_256 } from "@harmoniclabs/crypto";
 import { hasOwn, isObject } from "@harmoniclabs/obj-utils";
-import { PubKeyHash } from "../../../credentials";
 import { AuxiliaryDataHash, ScriptDataHash, CanBeHash28, Hash32, canBeHash28 } from "../../../hashes";
-import { Coin, TxWithdrawals, ITxWithdrawals, Value, NetworkT, isCertificate, canBeTxWithdrawals, forceTxWithdrawals, isIValue, certificateFromCborObj, certificatesToDepositLovelaces, Certificate } from "../../common/ledger";
-import { LegacyPPUpdateProposal, isLegacyPPUpdateProposal, LegacyPPUpdateProposalToCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson } from "../protocol"
+import { Coin, TxWithdrawals, ITxWithdrawals, Value, NetworkT, isCertificate, canBeTxWithdrawals, forceTxWithdrawals, certificateFromCborObj, certificatesToDepositLovelaces, Certificate } from "../../common/ledger";
+import { LegacyPPUpdateProposal, isLegacyPPUpdateProposal, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, LegacyPPUpdateMapFromCborObj } from "../../common/LegacyPPUpdateProposal";
+import { partialShelleyProtocolParametersToCborObj, ShelleyProtocolParameters, defaultShelleyProtocolParameters, partialShelleyProtocolParamsToJson, partialShelleyProtocolParametersFromCborObj } from "../protocol";
 import { ShelleyTxOut, isIShelleyTxOut} from "./";
 import { TxOutRef } from "../../common/TxOutRef";
 import { ShelleyUTxO, isIShelleyUTxO, } from "./ShelleyUTxO";
 import { getCborSet } from "../../../utils/getCborSet";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
-import { maybeBigUint } from "../../../utils/ints";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 
@@ -245,7 +244,7 @@ export class ShelleyTxBody
             this.protocolUpdate === undefined ? undefined :
             {
                 k: new CborUInt( 6 ),
-                v: LegacyPPUpdateProposalToCborObj( this.protocolUpdate )
+                v: () => partialShelleyProtocolParametersToCborObj(defaultShelleyProtocolParameters as Partial<ShelleyProtocolParameters> )
             },
             this.auxDataHash === undefined ? undefined :
             {
@@ -316,7 +315,7 @@ export class ShelleyTxBody
             ttl,
             certs:                      _certs_ !== undefined ? getCborSet( _certs_ ).map( certificateFromCborObj ) : undefined,
             withdrawals:                _withdrawals === undefined ? undefined : TxWithdrawals.fromCborObj( _withdrawals ),
-            protocolUpdate:             _pUp === undefined ? undefined : LegacyPPUpdateProposalFromCborObj( _pUp ),
+            protocolUpdate:             _pUp === undefined ? undefined : LegacyPPUpdateProposalFromCborObj( _pUp, (cObj) => LegacyPPUpdateMapFromCborObj( cObj, partialShelleyProtocolParametersFromCborObj as any ) ),
             auxDataHash:                _auxDataHash === undefined ? undefined : AuxiliaryDataHash.fromCborObj( _auxDataHash ),
         }, getSubCborRef( cObj ));
     }
@@ -332,7 +331,7 @@ export class ShelleyTxBody
             ttl: this.ttl?.toString(),
             certs: this.certs?.map( c => c.toJson() ),
             withdrawals: this.withdrawals?.toJson() ,
-            protocolUpdate: this.protocolUpdate === undefined ? undefined : protocolUpdateToJson( this.protocolUpdate ),
+            protocolUpdate: this.protocolUpdate === undefined ? undefined : protocolUpdateToJson( this.protocolUpdate, partialShelleyProtocolParamsToJson ),
             auxDataHash: this.auxDataHash?.toString() , // hash 32
         }
     }
