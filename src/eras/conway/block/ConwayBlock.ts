@@ -92,18 +92,16 @@ export class ConwayBlock implements
     };
 
     static fromCborObj(cObj: CborObj, _originalBytes?: Uint8Array): ConwayBlock {
-        // console.log("ConwayBlock.fromCborObj", cObj);
-        if (!(cObj instanceof CborArray && cObj.array.length >= 5)) {
-            throw new InvalidCborFormatError("Conway Block must be a CBOR array with at least 5 elements");
-        }
-
+        if (!(
+            cObj instanceof CborArray && 
+            cObj.array.length >= 5
+        ))throw new InvalidCborFormatError("Conway Block must be a CBOR array with at least 5 elements");
+        
         const _header = cObj.array[0];
         const _txBodies = cObj.array[1];
         const _txWitnessSets = cObj.array[2];
         const _auxDataSet = cObj.array[3];
         const _invalidTxs = cObj.array[4];
-
-        console.log("_header Conway: ", _header);
 
         // Process header
         if (!(
@@ -111,10 +109,7 @@ export class ConwayBlock implements
             && _header.array.length >= 2
         ))throw new InvalidCborFormatError("Header must be a CBOR array with at least 2 elements");
         
-        // console.log("ConwayBlock header: ", _header);
-
-        const header = ConwayHeader.fromCborObj(_header); // Assuming ConwayHeader expects [header_body, body_signature]
-
+        const header = ConwayHeader.fromCborObj(_header);
 
         // Process transaction bodies
         if (!(
@@ -166,9 +161,10 @@ export class ConwayBlock implements
         }
 
         // Process invalid transactions
-        if (!(_invalidTxs instanceof CborArray)) {
-            throw new InvalidCborFormatError("Invalid transactions must be a CBOR array");
-        }
+        if (!(
+            _invalidTxs instanceof CborArray
+        ))throw new InvalidCborFormatError("Invalid transactions must be a CBOR array");
+        
         const invalidTransactions = _invalidTxs.array.map((it, index) => {
             if(!(
                 it instanceof CborUInt

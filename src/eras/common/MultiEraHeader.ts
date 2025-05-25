@@ -64,7 +64,7 @@ IMultiEraHeader, ToCbor, ToJson
 
         const _era = cObj.array[0];
         const _headerData = cObj.array[1];
-        console.log("_multiEraHeaderData", _headerData)
+        // console.log("_multiEraHeaderData", _headerData)
 
         if(!(
             _era instanceof CborUInt
