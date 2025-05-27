@@ -1,5 +1,3 @@
-//test.todo("uncomment test")
-
 import { AllegraHeader } from "../AllegraHeader";
 import { AllegraHeaderBody } from "../AllegraHeaderBody";
 

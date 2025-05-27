@@ -72,6 +72,7 @@
     "**/__tests__/**/*",
     "**/cddl-files/**/*",
     "**/*.test.ts",
+    "**/*.cbor",
     "**/*.cddl",
     "jest_cache",
   ],

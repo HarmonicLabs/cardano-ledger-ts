@@ -1,6 +1,3 @@
-// if you pass a block with multi era it will throw an error
-test.todo("uncomment test")
-
 import { MultiEraBlock } from "../MultiEraBlock";
 
 test("MultiEraBlock block Conway", () => {
