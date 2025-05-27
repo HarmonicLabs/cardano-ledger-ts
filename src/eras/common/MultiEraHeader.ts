@@ -101,6 +101,7 @@ IMultiEraHeader, ToCbor, ToJson
             header
         }, getSubCborRef(cObj, _originalBytes));
         
+        /*
         console.log("multiEraHeader", 
             JSON.stringify(multiEraHeader.toJSON(),
             (k, v) => {
@@ -111,6 +112,7 @@ IMultiEraHeader, ToCbor, ToJson
             2 // indentation
           )
         );
+        //*/
 
         return multiEraHeader;
     }

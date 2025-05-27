@@ -175,7 +175,7 @@ export class TxOut
 
         if( !Value.isPositive( this.value ) )
         {
-            console.log(
+            console.error(
                 JSON.stringify(
                     this.toJson(),
                     undefined,
