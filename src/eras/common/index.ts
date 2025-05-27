@@ -10,4 +10,6 @@ export * from "./CanBeTxOutRef";
 export * from "./HasUtxoRef";
 export * from "./protocolVersion";
 export * from "./Rational";
-
+export * from "./MultiEraBlock";
+export * from "./MultiEraHeader";
+export * from "./types/CardanoEra";

@@ -8,8 +8,7 @@ import { CborArray, ToCbor, SubCborRef, CborString, Cbor, CborObj, CborUInt, Can
 import { ToJson } from "../../utils/ToJson"
 import { getSubCborRef } from "../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError"
-
-export type CardanoEra = number;
+import { CardanoEra } from "./types/CardanoEra";
 
 export interface IMultiEraBlock {
     era: CardanoEra;

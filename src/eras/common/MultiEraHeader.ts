@@ -9,8 +9,7 @@ import { ToJson } from "../../utils/ToJson"
 import { getSubCborRef } from "../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError"
 import { toHex } from "@harmoniclabs/uint8array-utils";
-
-export type CardanoEra = number;
+import { CardanoEra } from "./types/CardanoEra";
 
 export interface IMultiEraHeader {
     era: CardanoEra;
