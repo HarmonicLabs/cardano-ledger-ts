@@ -8,6 +8,7 @@ import { CborArray, ToCbor, SubCborRef, CborString, Cbor, CborObj, CborUInt, Can
 import { ToJson } from "../../utils/ToJson"
 import { getSubCborRef } from "../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError"
+import { toHex } from "@harmoniclabs/uint8array-utils";
 
 export type CardanoEra = number;
 
@@ -99,7 +100,18 @@ IMultiEraHeader, ToCbor, ToJson
             era: Number(_era.num),
             header
         }, getSubCborRef(cObj, _originalBytes));
-        // console.log("multiEraHeader", multiEraHeader.toJSON());
+        
+        console.log("multiEraHeader", 
+            JSON.stringify(multiEraHeader.toJSON(),
+            (k, v) => {
+              if (typeof v === "bigint") return v.toString();
+              if (v instanceof Uint8Array) return toHex(v);
+              return v;
+            },
+            2 // indentation
+          )
+        );
+
         return multiEraHeader;
     }
 
