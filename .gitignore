@@ -8,7 +8,7 @@ coverage/
 .npmrc*
 
 # npm pack
-*.tgz
+# *.tgz
 
 # output of build
 dist
