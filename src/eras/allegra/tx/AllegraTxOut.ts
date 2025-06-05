@@ -53,10 +53,10 @@ export class AllegraTxOut
         }
         if(!(
             address instanceof Address
-        )) throw new Error("invlaid 'address' while constructing 'AllegraTxOut'");
+        )) throw new Error("invalid 'address' while constructing 'AllegraTxOut'");
         if(!(
             value instanceof Value
-        )) throw new Error("invlaid 'value' while constructing 'AllegraTxOut'");
+        )) throw new Error("invalid 'value' while constructing 'AllegraTxOut'");
 
         this.address = address;
         this.value = value;
