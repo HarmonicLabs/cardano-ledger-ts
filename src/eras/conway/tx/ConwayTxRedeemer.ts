@@ -109,7 +109,7 @@ export class ConwayTxRedeemer
 
         if(!(
             canBeUInteger( index )
-        ))throw new Error("invlaid redeemer index");
+        ))throw new Error("invalid redeemer index");
         this.index = Number( forceBigUInt( index ) );
 
         if(!(

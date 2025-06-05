@@ -67,11 +67,11 @@ export class ConwayTxOut
         }
         if(!(
             address instanceof Address
-        )) throw new Error("invlaid 'address' while constructing 'ConwayTxOut'");
+        )) throw new Error("invalid 'address' while constructing 'ConwayTxOut'");
 
         if(!(
             value instanceof Value
-        )) throw new Error("invlaid 'value' while constructing 'ConwayTxOut'");
+        )) throw new Error("invalid 'value' while constructing 'ConwayTxOut'");
 
         this.address = address;
 
