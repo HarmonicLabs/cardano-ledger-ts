@@ -90,6 +90,7 @@ export class TxMetadata
     {
         if(!( 
             cObj instanceof CborMap 
+            // && cObj.map.length >= 1
         ))throw new InvalidCborFormatError("TxMetadata")
 
         const meta = {};
@@ -98,9 +99,8 @@ export class TxMetadata
         for( let i = 0; i < len; i++ )
         {
             const { k, v } = cObj.map[i];
-
             if(!( k instanceof CborUInt ))
-            throw new InvalidCborFormatError("TxMetadata")
+            throw new InvalidCborFormatError("TxMetadata: " + k)
 
             defineReadOnlyProperty(
                 meta, 
@@ -116,7 +116,7 @@ export class TxMetadata
 
     toJson()
     {
-        const json = {}
+        const json = {};
 
         const ks = Object.keys( this.metadata );
 
@@ -125,7 +125,7 @@ export class TxMetadata
             defineReadOnlyProperty(
                 json, k, this.metadata[k].toJson()
             )
-        }
+        };
         return json as any;
-    }
+    };
 }

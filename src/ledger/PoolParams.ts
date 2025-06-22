@@ -4,7 +4,7 @@ import { PubKeyHash } from "../credentials/PubKeyHash";
 import { CanBeHash32, Hash32, canBeHash32 } from "../hashes/Hash32/Hash32";
 import { PoolKeyHash } from "../hashes/Hash28/PoolKeyHash";
 import { VRFKeyHash } from "../hashes/Hash32/VRFKeyHash";
-import { CborPositiveRational, CborObj, CborUInt, CborArray, CborSimple, CborText, CborTag, CborBytes, SubCborRef } from "@harmoniclabs/cbor";
+import { CborPositiveRational, CborObj, CborUInt, CborArray, CborSimple, CborText, CborTag, CborBytes, SubCborRef, Cbor } from "@harmoniclabs/cbor";
 import { CanBeHash28, Hash28, canBeHash28 } from "../hashes";
 import { canBeUInteger, forceBigUInt } from "../utils/ints";
 import { PoolRelay, isPoolRelay, poolRelayToCborObj, poolRelayFromCborObj, poolRelayToJson } from "./PoolRelay";
@@ -95,7 +95,6 @@ export class PoolParams
             hasOwn( params, "owners" ) &&
             hasOwn( params, "relays" )
         ))throw new Error("invalid pool parameters passed to construct a 'PoopParams' instance")
-
 
         const {
             operator,
@@ -193,6 +192,28 @@ export class PoolParams
                     this.metadata.hash.toCborObj()
                 ])
         ]) as any;
+    }
+    
+    toCborObj(): CborObj
+    {
+        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() );
+
+        return new CborArray([
+            this.operator.toCborObj(),
+            this.vrfKeyHash.toCborObj(),
+            new CborUInt( this.pledge ),
+            new CborUInt( this.cost ),
+            this.margin,
+            this.rewardAccount.toCborObj(),
+            new CborArray( this.owners.map( owner => owner.toCborObj() ) ),
+            new CborArray( this.relays.map( poolRelayToCborObj ) ),
+            this.metadata === undefined || this.metadata === null ?
+                new CborSimple( null ) :
+                new CborArray([
+                    new CborText( this.metadata.poolMetadataUrl ),
+                    this.metadata.hash.toCborObj()
+                ])
+        ])
     }
 
     static fromCborObjArray([

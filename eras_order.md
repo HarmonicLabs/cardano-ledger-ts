@@ -21,3 +21,4 @@ Order of eras to respect:
 - check `fromCborObj` has correct decoding (IMPORTANT pay attention to CDDL)
 
 Repeat for all classes outside of `eras`.
+

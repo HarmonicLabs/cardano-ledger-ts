@@ -1,10 +1,10 @@
 import { Cbor, CborArray, CborObj, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
-import { IGovAction } from "./IGovAction";
-import { ITxOutRef, TxOutRef, isITxOutRef } from "../../../common/TxOutRef";
-import { GovActionType } from "./GovActionType";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { DataConstr, DataI, ToData } from "@harmoniclabs/plutus-data";
-import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "../../../common/protocolVersion";
+import { IGovAction } from "./IGovAction";
+import { ITxOutRef, TxOutRef, isITxOutRef } from "../../../common/tx/TxOutRef";
+import { GovActionType } from "./GovActionType";
+import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "../../../common/ledger/protocol/protocolVersion";
 import { ToDataVersion } from "../../../../toData/defaultToDataVersion";
 import { maybeData } from "../../../../utils/maybeData";
 import { subCborRefOrUndef } from "../../../../utils/getSubCborRef";

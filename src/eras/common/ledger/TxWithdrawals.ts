@@ -7,7 +7,7 @@ import { Address } from "./Address";
 import { CanBeHash28, Hash28, canBeHash28 } from "../../../hashes";
 import { canBeUInteger, forceBigUInt } from "../../../utils/ints";
 import { Coin } from "./Coin";
-import { Value } from "../Value";
+import { Value } from "./Value";
 import { ToDataVersion } from "../../../toData/defaultToDataVersion";
 import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
 
@@ -95,7 +95,8 @@ export class TxWithdrawals
         }
         else
         {
-            if(!( typeof map === "object"
+            if(!( 
+                typeof map === "object"
             ))throw new Error("invalid object passed as 'ITxWithdrawalsMap' to construct a 'TxWithdrawals'")
 
             this.map = Object.keys( map )
@@ -176,8 +177,9 @@ export class TxWithdrawals
         return new TxWithdrawals(
             cObj.map.map( ({ k, v }) => {
 
-                if(!( v instanceof CborUInt ))
-                throw new Error(`Invalid CBOR fromat for "TxWithdrawals"`);
+                if(!( 
+                    v instanceof CborUInt 
+                ))throw new Error(`Invalid CBOR fromat for "TxWithdrawals"`);
 
                 return {
                     rewardAccount: StakeAddress.fromCborObj( k ),

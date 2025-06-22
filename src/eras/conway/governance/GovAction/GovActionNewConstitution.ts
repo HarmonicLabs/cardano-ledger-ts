@@ -1,11 +1,11 @@
 import { Cbor, CborArray, CborObj, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
+import { isObject } from "@harmoniclabs/obj-utils";
 import { DataConstr, DataI, ToData } from "@harmoniclabs/plutus-data";
 import { IGovAction } from "./IGovAction";
-import { ITxOutRef, TxOutRef, isITxOutRef } from "../../../common/TxOutRef";
+import { ITxOutRef, TxOutRef, isITxOutRef } from "../../../common/tx/TxOutRef";
 import { Constitution, IConstitution, isIConstitution } from "../Constitution";
 import { GovActionType } from "./GovActionType";
 import { roDescr } from "../../../../utils/roDescr";
-import { isObject } from "@harmoniclabs/obj-utils";
 import { ToDataVersion } from "../../../../toData/defaultToDataVersion";
 import { maybeData } from "../../../../utils/maybeData";
 

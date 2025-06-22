@@ -1,12 +1,12 @@
-import { defaultProtocolParameters, isPartialProtocolParameters, isProtocolParameters } from "../AlonzoProtocolParameters"
+import { defaultAlonzoProtocolParameters, isPartialAlonzoProtocolParameters, isAlonzoProtocolParameters } from "../AlonzoProtocolParameters"
 
 
-describe("Ledger.isProtocolParameter", () => {
+describe("Ledger.isAlonzoProtocolParameters", () => {
 
-    test.skip("defaultProtocolParameters", () => {
+    test.skip("defaultAlonzoProtocolParameters", () => {
 
         expect(
-            isProtocolParameters( defaultProtocolParameters )
+            isAlonzoProtocolParameters( defaultAlonzoProtocolParameters )
         ).toBe( true );
 
     });
@@ -406,7 +406,7 @@ describe("Ledger.isProtocolParameter", () => {
         // ).toBe( true )
 
         expect(
-            isPartialProtocolParameters( gotFromCli )
+            isPartialAlonzoProtocolParameters( gotFromCli )
         ).toBe( true )
     })
 })

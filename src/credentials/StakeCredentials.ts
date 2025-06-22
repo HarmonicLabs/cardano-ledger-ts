@@ -4,8 +4,6 @@ import { Hash28 } from "../hashes/Hash28/Hash28";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../utils/ints";
 import { Credential, CredentialType, ValidatorHash } from "./Credential";
 import { StakeKeyHash } from "./StakeKeyHash";
-import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils"
-import { assert } from "../utils/assert";
 import { ToDataVersion, definitelyToDataVersion } from "../toData/defaultToDataVersion";
 import { getSubCborRef, subCborRefOrUndef } from "../utils/getSubCborRef";
 import { PubKeyHash } from "./PubKeyHash";

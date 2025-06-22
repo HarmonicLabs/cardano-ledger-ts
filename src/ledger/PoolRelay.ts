@@ -2,7 +2,6 @@ import { CborObj, CborArray, CborUInt, CborSimple, CborBytes, CborText } from "@
 import { isUint8Array, readUInt16BE, readUInt8 } from "@harmoniclabs/uint8array-utils";
 import { CanBeUInteger, forceBigUInt, canBeUInteger } from "../utils/ints";
 import { hasOwn, isObject } from "@harmoniclabs/obj-utils";
-import { assert } from "../utils/assert";
 
 export type IpPoolRelay = ({
     ipv4: Uint8Array
@@ -84,11 +83,6 @@ function portCheck( something: any ): boolean
     );
 }
 
-/* TO DO: 
-    export function isIpPoolRelay<T extends object>( something: T ): something is (T & IpPoolRelay)
-    [12:19 PM]Michele | Harmonic: make it just 
-    export function isIpPoolRelay( something: any ): something is IpPoolRelay
-*/
 export function isIpPoolRelay( something: any ): something is IpPoolRelay
 {
     const {
@@ -141,8 +135,7 @@ export function isPoolRelay( something: any ): something is PoolRelay
 
 export function poolRelayToCborObj( poolRelay: PoolRelay ): CborObj
 {
-    /* TO DO: ask if this needs cborRef  */
-    /* TO DO: It would make sense to make IpPoolRelay, DnsPoolRelay, and MultiHostPoolRelay classes */
+    /* TO DO: make IpPoolRelay, DnsPoolRelay, and MultiHostPoolRelay classes */
     if(!(
         isPoolRelay( poolRelay )
     ))throw new Error("can't convert ot CborObj using 'poolRelayToCborObj' if the input is not a 'PoolRelay'")

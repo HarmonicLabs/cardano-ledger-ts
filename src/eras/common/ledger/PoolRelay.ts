@@ -135,8 +135,7 @@ export function isPoolRelay( something: any ): something is PoolRelay
 
 export function poolRelayToCborObj( poolRelay: PoolRelay ): CborObj
 {
-    /* TO DO: ask if this needs cborRef  */
-    /* TO DO: It would make sense to make IpPoolRelay, DnsPoolRelay, and MultiHostPoolRelay classes */
+    /* TO DO: make IpPoolRelay, DnsPoolRelay, and MultiHostPoolRelay classes */
     if(!(
         isPoolRelay( poolRelay )
     ))throw new Error("can't convert ot CborObj using 'poolRelayToCborObj' if the input is not a 'PoolRelay'")

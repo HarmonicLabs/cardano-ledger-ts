@@ -1,11 +1,11 @@
 import { CborArray, CborBytes, ToCbor, CborString, Cbor, CborTag, CborMap, CborUInt, CborMapEntry, CanBeCborString, forceCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { blake2b_256 } from "@harmoniclabs/crypto";
+import { hasOwn } from "@harmoniclabs/obj-utils";
 import { AuxiliaryDataHash } from "../../hashes";
 import { NativeScript, nativeScriptFromCborObj } from "../../script/NativeScript";
 import { PlutusScriptJsonFormat, Script, ScriptType } from "../../script/Script";
 import { ToJson } from "../../utils/ToJson";
-import { TxMetadata } from "../metadata";
-import { hasOwn } from "@harmoniclabs/obj-utils";
+import { TxMetadata } from "../metadata/TxMetadata";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 

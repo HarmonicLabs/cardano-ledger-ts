@@ -1,3 +1,3 @@
-export * from "./PParamsDrepVotingThresholds";
-export * from "./PParamsPoolVotingThresholds";
+export * from "./ConwayPParamsDrepVotingThresholds";
+export * from "./ConwayPParamsPoolVotingThresholds";
 export * from "./ConwayProtocolParameters";

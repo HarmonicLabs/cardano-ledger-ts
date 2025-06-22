@@ -1,17 +1,17 @@
 import { ToCbor, CborString, Cbor, CborObj, CborArray, CborBytes, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
-import { Hash32 } from "../../hashes/Hash32/Hash32";
+import { Hash32, Hash } from "../../hashes";
 import { Signature } from "../../hashes/Signature";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
-import { VKey } from "../../eras/common/VKey";
+import { VKey } from "../../eras/common/TxWitnessSet/VKey";
 import { isUint8Array, toHex } from "@harmoniclabs/uint8array-utils";
 import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 export interface IBootstrapWitness {
-    pubKey: Hash32;
+    pubKey: Hash | Hash32;
     signature: Signature;
-    chainCode: Hash32;
+    chainCode: Hash | Hash32;
     attributes: Uint8Array;
 }
 export class BootstrapWitness
@@ -19,7 +19,7 @@ export class BootstrapWitness
 {
     readonly pubKey!: VKey;
     readonly signature!: Signature;
-    readonly chainCode!: Hash32;
+    readonly chainCode!: Hash | Hash32;
     readonly attributes!: Uint8Array;
 
     constructor(
@@ -36,7 +36,8 @@ export class BootstrapWitness
         
         if(!(
             pubKey instanceof Hash32
-        ))throw new Error("invalid 'pubKey' constructing 'BootstrapWitness'");
+            || pubKey instanceof Hash
+        ))throw new Error("invalid 'pubKey' constructing 'BootstrapWitness': " +  pubKey);
         this.pubKey =  pubKey instanceof VKey ? pubKey : new VKey( pubKey )
 
         if(!(
@@ -46,6 +47,7 @@ export class BootstrapWitness
 
         if(!(
             chainCode instanceof Hash32
+            || chainCode instanceof Hash
         ))throw new Error("invalid 'chainCode' constructing 'BootstrapWitness'");
         this.chainCode = chainCode;
 
@@ -69,7 +71,10 @@ export class BootstrapWitness
 
     toCborBytes(): Uint8Array
     {
-        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
+        if( 
+            this.cborRef instanceof SubCborRef 
+        ) return this.cborRef.toBuffer();
+
         return this.toCbor().toBuffer();
     }
     toCbor(): CborString
@@ -91,6 +96,7 @@ export class BootstrapWitness
             // we assume correctness here
             return Cbor.parse( this.cborRef.toBuffer() );
         }
+
         return new CborArray([
             this.pubKey.toCborObj(),
             this.signature.toCborObj(),
@@ -108,6 +114,7 @@ export class BootstrapWitness
         if(!(
             cObj instanceof CborArray &&
             cObj.array[3] instanceof CborBytes
+            // && cObj.array.length >= 4
         ))throw new InvalidCborFormatError("BootstrapWitness");
 
         return new BootstrapWitness(

@@ -1,7 +1,7 @@
 import { ToCbor, CborString, Cbor, CborMap, CborUInt, CborArray, CborTag, CborBytes, CborMapEntry, CanBeCborString, forceCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { isObject, hasOwn } from "@harmoniclabs/obj-utils";
-import { Address, AddressStr, Value, IValue, isAddressStr, isIValue } from "../../../ledger";
+import { Address, AddressStr, Value, IValue, isAddressStr, isIValue } from "../../common/ledger";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 import { BasePlutsError } from "../../../utils/BasePlutsError";

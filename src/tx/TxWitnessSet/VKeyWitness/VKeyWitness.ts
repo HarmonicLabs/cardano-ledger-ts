@@ -1,14 +1,10 @@
-
 import { ToCbor, CborString, Cbor, CborObj, CborArray, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
-import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
-import { Hash32 } from "../../../hashes/Hash32/Hash32";
-import { Signature } from "../../../hashes/Signature";
+import { Hash32, Signature } from "../../../hashes";
+import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
-import { VKey } from "../../../eras/common/VKey";
-import { assert } from "../../../utils/assert";
-import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
+import { VKey } from "../../../eras/common/TxWitnessSet/VKey";
 
 export interface IVkey {
     vkey: Hash32,
@@ -89,8 +85,9 @@ export class VKeyWitness
     }
     static fromCborObj( cObj: CborObj ): VKeyWitness
     {
-        if(!(cObj instanceof CborArray))
-        throw new InvalidCborFormatError("VKeyWitness");
+        if(!(
+            cObj instanceof CborArray
+        ))throw new InvalidCborFormatError("VKeyWitness");
 
         return new VKeyWitness({
             vkey: Hash32.fromCborObj( cObj.array[0] ),

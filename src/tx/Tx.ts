@@ -1,6 +1,8 @@
 import { CredentialType, PrivateKey, PubKeyHash } from "../credentials";
 import { Hash28, Hash32, Signature } from "../hashes";
-import { VKeyWitness, VKey, ITxWitnessSet, TxWitnessSet, isITxWitnessSet } from "./TxWitnessSet";
+import { ITxWitnessSet, TxWitnessSet, isITxWitnessSet } from "./TxWitnessSet";
+import { VKeyWitness } from "./TxWitnessSet/VKeyWitness/VKeyWitness";
+import { VKey } from "./TxWitnessSet/VKey";
 import { ToCbor, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { signEd25519, signEd25519_sync } from "@harmoniclabs/crypto";
 import { InvalidCborFormatError } from "../utils/InvalidCborFormatError";
@@ -279,7 +281,7 @@ export function getAllRequiredSigners( body: Readonly<TxBody> ): Hash28[]
         // requred for withdrawal
         .concat(
             body.withdrawals?.map
-            .map( ({ rewardAccount }) => rewardAccount.credentials.clone() )
+            .map( ({ rewardAccount }: any) => rewardAccount.credentials.clone() )
             ?? []
         )
         // requred signers explicitly specified by the tx

@@ -5,7 +5,7 @@ import { Anchor, IAnchor } from "./Anchor";
 import { Vote, voteToCborObj } from "./Vote";
 import { IVoter, Voter, isIVoter } from "./Voter";
 import { IVotingProcedure, VotingProcedure } from "./VotingProcedure";
-import { ITxOutRef, TxOutRef, isITxOutRef } from "../../common/TxOutRef";
+import { ITxOutRef, TxOutRef, isITxOutRef } from "../../common/tx/TxOutRef";
 
 export interface IVotingProceduresEntry {
     voter: IVoter,

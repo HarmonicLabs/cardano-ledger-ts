@@ -4,7 +4,7 @@ import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-util
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 import { IAllegraTxOut, isIAllegraTxOut, AllegraTxOut } from "./AllegraTxOut";
-import { ITxOutRef, isITxOutRef, TxOutRef } from "../../common/TxOutRef";
+import { ITxOutRef, isITxOutRef, TxOutRef } from "../../common/tx/TxOutRef";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
 
 export interface IAllegraUTxO {

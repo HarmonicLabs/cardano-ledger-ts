@@ -55,7 +55,10 @@ export class AllegraBlock implements
   
     toCbor(): CborString
     {
-        if( this.cborRef instanceof SubCborRef ) return new CborString( this.cborRef.toBuffer() );
+        if( 
+            this.cborRef instanceof SubCborRef 
+        ) return new CborString( this.cborRef.toBuffer() );
+
         return Cbor.encode( this.toCborObj() );
     }
 
