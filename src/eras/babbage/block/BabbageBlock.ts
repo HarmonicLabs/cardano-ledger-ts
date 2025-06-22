@@ -1,5 +1,4 @@
 import { CborArray, CborBytes, ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborMapEntry, CanBeCborString, forceCborString, isCborObj} from "@harmoniclabs/cbor";
-import { toHex } from "@harmoniclabs/uint8array-utils";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { IBabbageHeader, BabbageHeader, isIBabbageHeader } from "../header/BabbageHeader";
 import { IBabbageTxBody, BabbageTxBody } from "../tx/BabbageTxBody";
@@ -7,11 +6,6 @@ import { IBabbageTxWitnessSet, BabbageTxWitnessSet } from "../tx/BabbageTxWitnes
 import { IBabbageAuxiliaryData, BabbageAuxiliaryData } from "../tx/BabbageAuxiliaryData";
 import { ToJson } from "../../../utils/ToJson"
 import { getSubCborRef } from "../../../utils/getSubCborRef";
-import { canBeUInteger, CanBeUInteger } from "@harmoniclabs/cbor/dist/utils/ints";
-import { isObject } from "@harmoniclabs/obj-utils";
-import { canBeHash32, CanBeHash32, hash32bytes } from "../../../hashes";
-import { U8Arr, U8Arr32 } from "../../../utils/U8Arr";
-import { forceBigUInt, u32 } from "../../../utils/ints";
 /*
     CDDL
     block = [header

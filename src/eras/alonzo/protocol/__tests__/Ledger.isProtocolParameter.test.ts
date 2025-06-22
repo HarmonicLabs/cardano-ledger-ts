@@ -1,6 +1,5 @@
 import { defaultAlonzoProtocolParameters, isPartialAlonzoProtocolParameters, isAlonzoProtocolParameters } from "../AlonzoProtocolParameters"
 
-
 describe("Ledger.isAlonzoProtocolParameters", () => {
 
     test.skip("defaultAlonzoProtocolParameters", () => {

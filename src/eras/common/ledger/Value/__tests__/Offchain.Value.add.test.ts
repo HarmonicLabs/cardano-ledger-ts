@@ -1,4 +1,4 @@
-import { Hash32 } from "../../../../../hashes/";
+import { Hash28 } from "../../../../../hashes/";
 import { Value } from "../Value";
 
 describe.skip("Value.add", () => {
@@ -66,26 +66,26 @@ describe.skip("Value.add", () => {
                 Value.add(
                     new Value([
                         {
-                            policy: new Hash32( "aa".repeat(32) ),
-                            assets: { "a": 1 }
+                            policy: new Hash28( "aa".repeat(28) ),
+                            assets: [{ name: "a", quantity: 1 }]
                         }
                     ]),
                     new Value([
                         {
-                            policy: new Hash32( "bb".repeat(32) ),
-                            assets: { "b": 2 }
+                            policy: new Hash28( "bb".repeat(28) ),
+                            assets: [{ name: "b", quantity: 2 }]
                         }
                     ])
                 )
             ).toEqual(
                 new Value([
                     {
-                        policy: new Hash32( "aa".repeat(32) ),
-                        assets: { "a": 1 }
+                        policy: new Hash28( "aa".repeat(28) ),
+                        assets: [{ name: "a", quantity: 1 }]
                     },
                     {
-                        policy: new Hash32( "bb".repeat(32) ),
-                        assets: { "b": 2 }
+                        policy: new Hash28( "bb".repeat(28) ),
+                        assets: [{ name: "b", quantity: 2 }]
                     }
                 ])
             );
@@ -102,30 +102,30 @@ describe.skip("Value.add", () => {
                 Value.add(
                     new Value([
                         {
-                            policy: new Hash32( "aa".repeat(32) ),
-                            assets: { "a": 1 }
+                            policy: new Hash28( "aa".repeat(28) ),
+                            assets: [{ name: "a", quantity: 1 }]
                         },
                         {
-                            policy: new Hash32( "bb".repeat(32) ),
-                            assets: { "b": 3 }
+                            policy: new Hash28( "bb".repeat(28) ),
+                            assets: [{ name: "b", quantity: 3 }]
                         }
                     ]),
                     new Value([
                         {
-                            policy: new Hash32( "bb".repeat(32) ),
-                            assets: { "b": 2 }
+                            policy: new Hash28( "bb".repeat(28) ),
+                            assets: [{ name: "b", quantity: 2 }]
                         }
                     ])
                 )
             ).toEqual(
                 new Value([
                     {
-                        policy: new Hash32( "bb".repeat(32) ),
-                        assets: { "b": 5n }
+                        policy: new Hash28( "bb".repeat(28) ),
+                        assets: [{ name: "b", quantity: 5n }]
                     },
                     {
-                        policy: new Hash32( "aa".repeat(32) ),
-                        assets: { "a": 1 }
+                        policy: new Hash28( "aa".repeat(28) ),
+                        assets: [{ name: "a", quantity: 1 }]
                     }
                 ])
             );
@@ -138,33 +138,33 @@ describe.skip("Value.add", () => {
                 Value.add(
                     new Value([
                         {
-                            policy: new Hash32( "aa".repeat(32) ),
-                            assets: { "a": 1 }
+                            policy: new Hash28( "aa".repeat(28) ),
+                            assets: [{ name: "a", quantity: 1 }]
                         },
                         {
-                            policy: new Hash32( "bb".repeat(32) ),
-                            assets: { "a": 3 }
+                            policy: new Hash28( "bb".repeat(28) ),
+                            assets: [{ name: "a", quantity: 3 }]
                         }
                     ]),
                     new Value([
                         {
-                            policy: new Hash32( "bb".repeat(32) ),
-                            assets: { "b": 2 }
+                            policy: new Hash28( "bb".repeat(28) ),
+                            assets: [{ name: "b", quantity: 2 }]
                         }
                     ])
                 )
             ).toEqual(
                 new Value([
                     {
-                        policy: new Hash32( "bb".repeat(32) ),
-                        assets: {
-                            "b": 2,
-                            "a": 3
-                        }
+                        policy: new Hash28( "bb".repeat(28) ),
+                        assets: [
+                            { name: "b", quantity: 2 },
+                            { name: "a", quantity: 3 }
+                        ]
                     },
                     {
-                        policy: new Hash32( "aa".repeat(32) ),
-                        assets: { "a": 1 }
+                        policy: new Hash28( "aa".repeat(28) ),
+                        assets: [{ name: "a", quantity: 1 }]
                     }
                 ])
             );
