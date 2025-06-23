@@ -3,11 +3,12 @@ import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, C
 import { signEd25519_sync, signEd25519 } from "@harmoniclabs/crypto"
 import { PrivateKey, CredentialType, PubKeyHash } from "../../../credentials"
 import { Signature, Hash32, Hash28 } from "../../../hashes"
-import { VKeyWitness, VKey } from "../../common"
 import { BabbageTxWitnessSet, IBabbageTxWitnessSet, isIBabbageTxWitnessSet, BabbageTxBody, IBabbageTxBody, isIBabbageTxBody, BabbageAuxiliaryData } from "./"
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef"
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError"
 import { ToJson } from "../../../utils/ToJson"
+import { VKey } from "../../../tx/TxWitnessSet/VKey"
+import { VKeyWitness } from "../../../tx/TxWitnessSet/VKeyWitness/VKeyWitness"
 
 export interface IBabbageTx {
     body: IBabbageTxBody

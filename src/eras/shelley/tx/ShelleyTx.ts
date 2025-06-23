@@ -1,13 +1,15 @@
 import { XPrv } from "@harmoniclabs/bip32_ed25519"
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborString, forceCborString } from "@harmoniclabs/cbor"
-import { signEd25519_sync, signEd25519 } from "@harmoniclabs/crypto"
+import { signEd25519_sync } from "@harmoniclabs/crypto"
 import { PrivateKey, CredentialType, PubKeyHash } from "../../../credentials"
 import { Signature, Hash32, Hash28 } from "../../../hashes"
 import { IShelleyTxBody, IShelleyTxWitnessSet, ShelleyTxBody, ShelleyTxWitnessSet, isIShelleyTxBody, isIShelleyTxWitnessSet} from "./";
-import { VKeyWitness, VKey, TxMetadata } from "../../common";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef"
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError"
 import { ToJson } from "../../../utils/ToJson"
+import { VKey } from "../../../tx/TxWitnessSet/VKey"
+import { VKeyWitness } from "../../../tx/TxWitnessSet/VKeyWitness/VKeyWitness"
+import { TxMetadata } from "../../common"
 
 export interface IShelleyTx {
     body: IShelleyTxBody
