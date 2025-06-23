@@ -1,14 +1,14 @@
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString, isCborObj } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
-import { Data, isData, dataToCborObj, dataFromCborObj } from "@harmoniclabs/plutus-data";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { Script, ScriptType, nativeScriptToCborObj } from "../../../script";
 import { Hash28 } from "../../../hashes";
-import { VKeyWitness, BootstrapWitness } from "../../common";
 import { isCborSet, getCborSet } from "../../../utils/getCborSet";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
+import { BootstrapWitness } from "../../../tx/TxWitnessSet/BootstrapWitness";
+import { VKeyWitness } from "../../../tx/TxWitnessSet/VKeyWitness/VKeyWitness";
 
 export interface IMaryTxWitnessSet {
     vkeyWitnesses?: VKeyWitness[],

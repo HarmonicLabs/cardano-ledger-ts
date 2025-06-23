@@ -4,11 +4,12 @@ import { Data, isData, dataToCborObj, dataFromCborObj } from "@harmoniclabs/plut
 import { isObject } from "@harmoniclabs/obj-utils";
 import { Script, ScriptType, nativeScriptToCborObj } from "../../../script";
 import { Hash28 } from "../../../hashes";
-import { VKeyWitness, BootstrapWitness } from "../../common";
 import { isCborSet, getCborSet } from "../../../utils/getCborSet";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
+import { BootstrapWitness } from "../../../tx/TxWitnessSet/BootstrapWitness";
+import { VKeyWitness } from "../../../tx/TxWitnessSet/VKeyWitness/VKeyWitness";
 
 export interface IAllegraTxWitnessSet {
     vkeyWitnesses?: VKeyWitness[],

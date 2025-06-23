@@ -5,12 +5,12 @@ import { isObject } from "@harmoniclabs/obj-utils";
 import { Script, ScriptType, nativeScriptToCborObj } from "../../../script";
 import { Hash28 } from "../../../hashes";
 import { ConwayTxRedeemer } from "./ConwayTxRedeemer";
-import { VKeyWitness } from "../../common/TxWitnessSet/VKeyWitness";
 import { isCborSet, getCborSet } from "../../../utils/getCborSet";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
-import { BootstrapWitness } from "../../common/TxWitnessSet/BootstrapWitness";
+import { BootstrapWitness } from "../../../tx/TxWitnessSet/BootstrapWitness";
+import { VKeyWitness } from "../../../tx/TxWitnessSet/VKeyWitness/VKeyWitness";
 
 export interface IConwayTxWitnessSet {
     vkeyWitnesses?: VKeyWitness[],
