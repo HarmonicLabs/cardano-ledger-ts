@@ -53,10 +53,10 @@ export class ShelleyTxOut
         }
         if(!(
             address instanceof Address
-        )) throw new Error("invlaid 'address' while constructing 'ShelleyTxOut'");
+        )) throw new Error("invalid 'address' while constructing 'ShelleyTxOut'");
         if(!(
             value instanceof Value
-        )) throw new Error("invlaid 'value' while constructing 'ShelleyTxOut'");
+        )) throw new Error("invalid 'value' while constructing 'ShelleyTxOut'");
 
         this.address = address;
         this.value = value;
