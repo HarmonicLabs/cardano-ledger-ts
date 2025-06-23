@@ -3,13 +3,13 @@ import { isObject } from "@harmoniclabs/obj-utils";
 import { DataConstr, DataI, DataList, DataMap, DataPair, ToData } from "@harmoniclabs/plutus-data";
 import { Epoch } from "../../ledger/Epoch";
 import { Rational, cborFromRational, isRational } from "../../ledger/protocol/Rational";
-import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx/body/output/TxOutRef";
 import { IGovAction } from "./IGovAction";
 import { GovActionType } from "./GovActionType";
 import { Credential } from "../../credentials";import { roDescr } from "../../utils/roDescr";
 import { canBeUInteger, forceBigUInt } from "../../utils/ints";
 import { ToDataVersion } from "../../toData/defaultToDataVersion";
 import { maybeData } from "../../utils/maybeData";
+import { isITxOutRef, ITxOutRef, TxOutRef } from "../../eras/common/tx/TxOutRef";
 
 export interface INewCommitteeEntry {
     coldCredential: Credential,
