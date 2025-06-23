@@ -1,4 +1,4 @@
-import { defaultProtocolParameters, isPartialProtocolParameters, isProtocolParameters } from "../MaryProtocolParameters"
+import { defaultMaryProtocolParameters, isPartialMaryProtocolParameters, isMaryProtocolParameters } from "../MaryProtocolParameters"
 
 
 describe("Ledger.isProtocolParameter", () => {
@@ -6,7 +6,7 @@ describe("Ledger.isProtocolParameter", () => {
     test.skip("defaultProtocolParameters", () => {
 
         expect(
-            isProtocolParameters( defaultProtocolParameters )
+            isMaryProtocolParameters( defaultMaryProtocolParameters )
         ).toBe( true );
 
     });
@@ -406,7 +406,7 @@ describe("Ledger.isProtocolParameter", () => {
         // ).toBe( true )
 
         expect(
-            isPartialProtocolParameters( gotFromCli )
+            isPartialMaryProtocolParameters( gotFromCli )
         ).toBe( true )
     })
 })

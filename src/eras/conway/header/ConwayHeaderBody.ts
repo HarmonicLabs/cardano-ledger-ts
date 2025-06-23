@@ -3,9 +3,9 @@ import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborMap, CborSimp
 import { blake2b_256, sha2_256_sync } from "@harmoniclabs/crypto";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { canBeHash32, CanBeHash32, hash32bytes, Signature, Hash32, Hash28 } from "../../../hashes";
-import { isIVrfCert, IVrfCert, VrfCert } from "../../common/Vrf";
-import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "../../common/protocolVersion";
-import { IPoolOperationalCert, isIPoolOperationalCert, PoolOperationalCert } from "../../common/certs/PoolOperationalCert";
+import { isIVrfCert, IVrfCert, VrfCert } from "../../common/ledger/Vrf";
+import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "../../common/ledger/protocol";
+import { IPoolOperationalCert, isIPoolOperationalCert, PoolOperationalCert } from "../../common/ledger/certs/PoolOperationalCert";
 import { U8Arr, U8Arr32 } from "../../../utils/U8Arr";
 import { forceBigUInt, u32 } from "../../../utils/ints";
 import { getSubCborRef } from "../../../utils/getSubCborRef";

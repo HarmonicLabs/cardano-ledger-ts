@@ -1,6 +1,6 @@
 import { isObject } from "@harmoniclabs/obj-utils";
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
-import { isKesSignature, KesSignature, KesSignatureBytes } from "../../common/Kes";
+import { isKesSignature, KesSignature, KesSignatureBytes } from "../../common/ledger/Kes";
 import { BabbageHeaderBody, IBabbageHeaderBody, isIBabbageHeaderBody } from "./BabbageHeaderBody";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
 import { IPraosHeader } from "../../common/interfaces/IPraosHeader";

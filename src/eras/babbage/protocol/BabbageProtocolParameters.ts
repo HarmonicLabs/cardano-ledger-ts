@@ -6,10 +6,10 @@ import { Data, DataB, DataConstr, DataI, DataList, DataMap, DataPair } from "@ha
 import type { Epoch } from "../../common/ledger/Epoch";
 import type { Coin } from "../../common/ledger/Coin";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../../utils/ints";
-import { Rational, cborFromRational, isRational, isRationalOrUndefined, tryCborFromRational } from "../../common/Rational";
-import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "./protocolVersion";
+import { Rational, cborFromRational, isRational, isRationalOrUndefined, tryCborFromRational } from "../../common/ledger/protocol/Rational";
+import { IProtocolVersion, isIProtocolVersion } from "../../common/ledger/protocol";
 import { fromUtf8 } from "@harmoniclabs/uint8array-utils";
-
+import { ProtocolVersion } from "../../common/ledger/protocol/protocolVersion";
 export interface BabbageProtocolParameters {
     txFeePerByte: CanBeUInteger,
     txFeeFixed: CanBeUInteger,

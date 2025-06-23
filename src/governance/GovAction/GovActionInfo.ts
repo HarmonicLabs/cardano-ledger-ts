@@ -1,7 +1,5 @@
 import { Cbor, CborArray, CborObj, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { IGovAction } from "./IGovAction";
-import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx";
-import { Constitution, IConstitution } from "../Constitution";
 import { GovActionType } from "./GovActionType";
 import { roDescr } from "../../utils/roDescr";
 import { isObject } from "@harmoniclabs/obj-utils";

@@ -11,7 +11,6 @@ import { fromHex, toHex } from "@harmoniclabs/uint8array-utils";
 import { harden, XPrv } from "@harmoniclabs/bip32_ed25519";
 import { ToDataVersion } from "../toData/defaultToDataVersion";
 import { getSubCborRef } from "../utils/getSubCborRef";
-import { error } from "console";
 
 export type AddressStr = `${"addr1"|"addr_test1"}${string}`;
 
@@ -352,7 +351,7 @@ export class Address
     */
     static fromEntropy( entropy: Uint8Array | string, network: NetworkT = "mainnet", AccountIndex: number = 0, AddressIndex: number = 0 ): Address
     {
-        console.error("Address.fromEntropy Index", AccountIndex, AddressIndex);
+        // console.error("Address.fromEntropy Index", AccountIndex, AddressIndex);
         return Address.fromXPrv( XPrv.fromEntropy( entropy ), network, AccountIndex, AddressIndex );
     }
 
@@ -369,8 +368,9 @@ export class Address
 
     static fromCborObj( buff: CborObj ): Address
     {
-        if(!( buff instanceof CborBytes ))
-        throw new Error(`Invalid CBOR format for "Address"`);
+        if(!( 
+            buff instanceof CborBytes 
+        ))throw new Error(`Invalid CBOR format for "Address"`);
 
         return Address.fromBuffer(
             buff.bytes,

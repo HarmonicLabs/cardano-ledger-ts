@@ -7,7 +7,9 @@ import type { Epoch } from "../../common/ledger/Epoch";
 import type { Coin } from "../../common/ledger/Coin";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../../utils/ints";
 import { fromUtf8 } from "@harmoniclabs/uint8array-utils";
-import { Rational, IProtocolVersion, isRational, isIProtocolVersion, isRationalOrUndefined, tryCborFromRational, ProtocolVersion } from "../../common";
+import { Rational, isRational, isRationalOrUndefined, tryCborFromRational } from "../../common/ledger/protocol/Rational";
+import { IProtocolVersion, isIProtocolVersion } from "../../common/ledger/protocol";
+import { ProtocolVersion } from "../../common/ledger/protocol/protocolVersion";
 
 export interface AlonzoProtocolParameters {
     txFeePerByte: CanBeUInteger,

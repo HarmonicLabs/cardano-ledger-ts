@@ -1,4 +1,4 @@
-import { defaultProtocolParameters, isPartialProtocolParameters, isProtocolParameters } from "../ConwayProtocolParameters"
+import { defaultConwayProtocolParameters, isPartialConwayProtocolParameters, isConwayProtocolParameters } from "../ConwayProtocolParameters"
 
 
 describe("Ledger.isProtocolParameter", () => {
@@ -6,7 +6,7 @@ describe("Ledger.isProtocolParameter", () => {
     test.skip("defaultProtocolParameters", () => {
 
         expect(
-            isProtocolParameters( defaultProtocolParameters )
+            isConwayProtocolParameters( defaultConwayProtocolParameters )
         ).toBe( true );
 
     });
@@ -406,7 +406,7 @@ describe("Ledger.isProtocolParameter", () => {
         // ).toBe( true )
 
         expect(
-            isPartialProtocolParameters( gotFromCli )
+            isPartialConwayProtocolParameters( gotFromCli )
         ).toBe( true )
     })
 })

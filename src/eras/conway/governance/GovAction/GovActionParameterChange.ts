@@ -2,7 +2,7 @@ import { Cbor, CborArray, CborSimple, CborString, CborUInt, SubCborRef, ToCbor }
 import { isObject } from "@harmoniclabs/obj-utils";
 import { Data, DataConstr, ToData } from "@harmoniclabs/plutus-data";
 import { CanBeHash28, Hash28, canBeHash28, canBeHash32 } from "../../../../hashes";
-import { ITxOutRef, TxOutRef, isITxOutRef } from "../../../common/TxOutRef";
+import { ITxOutRef, TxOutRef, isITxOutRef } from "../../../common/tx/TxOutRef";
 import { roDescr } from "../../../../utils/roDescr";
 import { GovActionType } from "./GovActionType";
 import { IGovAction } from "./IGovAction";

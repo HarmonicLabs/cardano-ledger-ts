@@ -1,6 +1,7 @@
 import { ITxOutRef, ITxOutRefToStr, TxOutRef, TxOutRefStr } from "./TxOutRef";
 import { IUTxO, isIUTxO } from "./UTxO";
 
+
 export type CanBeTxOutRef = ITxOutRef | IUTxO | TxOutRefStr;
 
 export function forceTxOutRefStr( canBe: CanBeTxOutRef ): TxOutRefStr

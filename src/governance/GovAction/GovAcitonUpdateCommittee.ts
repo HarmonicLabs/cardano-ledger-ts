@@ -1,13 +1,13 @@
 import { Cbor, CborArray, CborMap, CborPositiveRational, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
-import { Epoch } from "../../ledger";
+import { isObject } from "@harmoniclabs/obj-utils";
+import { DataConstr, DataI, DataList, DataMap, DataPair, ToData } from "@harmoniclabs/plutus-data";
+import { Epoch } from "../../ledger/Epoch";
 import { Rational, cborFromRational, isRational } from "../../ledger/protocol/Rational";
-import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx";
+import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx/body/output/TxOutRef";
 import { IGovAction } from "./IGovAction";
 import { GovActionType } from "./GovActionType";
 import { Credential } from "../../credentials";import { roDescr } from "../../utils/roDescr";
 import { canBeUInteger, forceBigUInt } from "../../utils/ints";
-import { isObject } from "@harmoniclabs/obj-utils";
-import { DataConstr, DataI, DataList, DataMap, DataPair, ToData } from "@harmoniclabs/plutus-data";
 import { ToDataVersion } from "../../toData/defaultToDataVersion";
 import { maybeData } from "../../utils/maybeData";
 

@@ -5,14 +5,13 @@ import { hasOwn, isObject } from "@harmoniclabs/obj-utils";
 import { PubKeyHash } from "../../../credentials";
 import { AuxiliaryDataHash, ScriptDataHash, CanBeHash28, Hash32, canBeHash28 } from "../../../hashes";
 import { Coin, TxWithdrawals, ITxWithdrawals, Value, NetworkT, isCertificate, canBeTxWithdrawals, forceTxWithdrawals, isIValue, certificateFromCborObj, certificatesToDepositLovelaces, Certificate } from "../../common/ledger";
-import { LegacyPPUpdateProposal, isLegacyPPUpdateProposal, LegacyPPUpdateProposalToCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, LegacyPPUpdateMapFromCborObj } from "../../common/LegacyPPUpdateProposal";
+import { LegacyPPUpdateProposal, isLegacyPPUpdateProposal, LegacyPPUpdateProposalToCborObj, LegacyPPUpdateProposalFromCborObj, protocolUpdateToJson, LegacyPPUpdateMapFromCborObj } from "../../common/ledger/protocol/LegacyPPUpdateProposal";
 import { partialAlonzoProtocolParametersToCborObj, AlonzoProtocolParameters, defaultAlonzoProtocolParameters, partialAlonzoProtocolParamsToJson, partialAlonzoProtocolParametersFromCborObj } from "../protocol";
-import { TxOutRef } from "../../common/TxOutRef";
+import { TxOutRef } from "../../common/tx/TxOutRef";
 import { AlonzoTxOut, isIAlonzoTxOut,  } from "./";
 import { AlonzoUTxO, isIAlonzoUTxO, } from "./AlonzoUTxO";
 import { getCborSet } from "../../../utils/getCborSet";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
-import { maybeBigUint } from "../../../utils/ints";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 

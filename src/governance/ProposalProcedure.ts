@@ -1,5 +1,6 @@
 import { Cbor, CborArray, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
-import { Coin, StakeAddress } from "../ledger";
+import { Coin } from "../ledger/Coin";
+import { StakeAddress } from "../ledger/StakeAddress";
 import { Anchor, IAnchor, isIAnchor } from "./Anchor";
 import { GovActionLike, isGovActionLike, toRealGovAction } from "./GovAction/GovActionLike";
 import { forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";

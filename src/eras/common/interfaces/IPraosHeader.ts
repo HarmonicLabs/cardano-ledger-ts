@@ -1,8 +1,8 @@
 
 import { U8Arr32 } from "../../../utils/U8Arr";
-import { VrfCert } from "../../common/Vrf";
-import { KesSignature } from "../../common/Kes";
-import { PoolOperationalCert } from "../../common/certs/PoolOperationalCert";
+import { VrfCert } from "../ledger/Vrf";
+import { KesSignature } from "../../common/ledger/Kes";
+import { PoolOperationalCert } from "../ledger/certs/PoolOperationalCert";
 
 export interface IPraosHeader{
     /* from `ToCborBytes` */
