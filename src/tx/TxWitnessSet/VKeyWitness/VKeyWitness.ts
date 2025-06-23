@@ -4,7 +4,7 @@ import { Hash32, Signature } from "../../../hashes";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
-import { VKey } from "../../../eras/common/TxWitnessSet/VKey";
+import { VKey } from "../../TxWitnessSet/VKey";
 
 export interface IVkey {
     vkey: Hash32,

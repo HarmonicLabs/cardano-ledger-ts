@@ -1,11 +1,11 @@
 import { ToCbor, CborString, Cbor, CborObj, CborArray, CborBytes, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
+import { isUint8Array, toHex } from "@harmoniclabs/uint8array-utils";
 import { Hash32, Hash } from "../../hashes";
 import { Signature } from "../../hashes/Signature";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
-import { VKey } from "../../eras/common/TxWitnessSet/VKey";
-import { isUint8Array, toHex } from "@harmoniclabs/uint8array-utils";
+import { VKey } from "../TxWitnessSet/VKey";
 import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
 export interface IBootstrapWitness {

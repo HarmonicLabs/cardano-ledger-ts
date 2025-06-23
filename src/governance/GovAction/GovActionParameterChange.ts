@@ -1,6 +1,6 @@
 import { Cbor, CborArray, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { CanBeHash28, Hash28, canBeHash28, canBeHash32 } from "../../hashes";
-import { ITxOutRef, TxOutRef, isITxOutRef } from "../../eras/common/tx";
+import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx/body/output/TxOutRef";
 import { roDescr } from "../../utils/roDescr";
 import { GovActionType } from "./GovActionType";
 import { IGovAction } from "./IGovAction";

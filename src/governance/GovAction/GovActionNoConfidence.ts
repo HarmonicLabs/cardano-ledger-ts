@@ -1,7 +1,7 @@
 import { Cbor, CborArray, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { DataConstr, ToData } from "@harmoniclabs/plutus-data";
-import { ITxOutRef, TxOutRef, isITxOutRef } from "../../eras/common/tx";
+import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx/body/output/TxOutRef";
 import { IGovAction } from "./IGovAction";
 import { GovActionType } from "./GovActionType";
 import { roDescr } from "../../utils/roDescr";
