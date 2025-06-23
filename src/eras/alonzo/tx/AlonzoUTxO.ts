@@ -5,7 +5,7 @@ import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-util
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 import { IAlonzoTxOut, isIAlonzoTxOut, AlonzoTxOut } from "./AlonzoTxOut";
-import { ITxOutRef, isITxOutRef, TxOutRef } from "../../common/TxOutRef";
+import { ITxOutRef, isITxOutRef, TxOutRef } from "../../common/tx/TxOutRef";
 import { lexCompare } from "@harmoniclabs/uint8array-utils";
 import { ToDataVersion } from "../../../toData/defaultToDataVersion";
 import { getSubCborRef } from "../../../utils/getSubCborRef";

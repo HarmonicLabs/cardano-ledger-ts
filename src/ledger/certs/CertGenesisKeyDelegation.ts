@@ -74,6 +74,10 @@ export class CertGenesisKeyDelegation
     }
     toCborObj(): CborArray
     {
+        if( 
+            this.cborRef instanceof SubCborRef 
+        ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
+
         return new CborArray([
             new CborUInt( this.certType ),
             this.genesisHash.toCborObj(),

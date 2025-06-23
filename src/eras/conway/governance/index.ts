@@ -7,3 +7,4 @@ export * from "./Vote";
 export * from "./Voter";
 export * from "./VotingProcedure";
 export * from "./VotingProcedures";
+export * from "./certs";

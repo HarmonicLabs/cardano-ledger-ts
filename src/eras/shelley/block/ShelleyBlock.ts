@@ -3,7 +3,7 @@ import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { IShelleyHeader, ShelleyHeader } from "../header/ShelleyHeader";
 import { IShelleyTxBody, ShelleyTxBody } from "../tx/ShelleyTxBody";
 import { IShelleyTxWitnessSet, ShelleyTxWitnessSet } from "../tx/ShelleyTxWitnessSet";
-import { ITxMetadata, TxMetadata } from "../../common/TxMetadata";
+import { ITxMetadata, TxMetadata } from "../../common/tx";
 import { ToJson } from "../../../utils/ToJson";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
 

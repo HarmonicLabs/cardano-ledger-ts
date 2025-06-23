@@ -9,7 +9,7 @@ import { VRFKeyHash } from "../../../hashes/Hash32/VRFKeyHash";
 import { CanBeHash28, Hash28, canBeHash28 } from "../../../hashes";
 import { canBeUInteger, forceBigUInt } from "../../../utils/ints";
 import { PoolRelay, isPoolRelay, poolRelayToCborObj, poolRelayFromCborObj, poolRelayToJson } from "./PoolRelay";
-import { Rational, cborFromRational, isRational } from "../../common/Rational";
+import { Rational, cborFromRational, isRational } from "./protocol/Rational";
 import { StakeAddress } from "./StakeAddress";
 import { Network } from "./Network";
 import { getCborSet } from "../../../utils/getCborSet";

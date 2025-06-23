@@ -1,11 +1,12 @@
+import { freezeAll, isObject } from "@harmoniclabs/obj-utils";
+import { Data, DataB, DataConstr, DataI, DataList, DataMap, DataPair } from "@harmoniclabs/plutus-data";
+import { fromUtf8 } from "@harmoniclabs/uint8array-utils";
 import type { Epoch } from "../../common/ledger/Epoch";
 import type { Coin } from "../../common/ledger/Coin";
 import { CborPositiveRational, CborUInt, CborObj, CborMapEntry, CborMap, CborArray, CborNegInt, CborBytes, CborTag, CborText } from "@harmoniclabs/cbor";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../../utils/ints";
-import { freezeAll, isObject } from "@harmoniclabs/obj-utils";
-import { Data, DataB, DataConstr, DataI, DataList, DataMap, DataPair } from "@harmoniclabs/plutus-data";
-import { fromUtf8 } from "@harmoniclabs/uint8array-utils";
-import { Rational, IProtocolVersion, isRational, isIProtocolVersion, isRationalOrUndefined, tryCborFromRational, ProtocolVersion } from "../../common";
+import { Rational, isRational, isRationalOrUndefined, tryCborFromRational } from "../../common/ledger/protocol";
+import { IProtocolVersion, isIProtocolVersion, ProtocolVersion } from "../../../ledger/protocol/protocolVersion";
 
 export interface MaryProtocolParameters {
     txFeePerByte: CanBeUInteger,

@@ -5,7 +5,8 @@ import type { Epoch } from "../../common/ledger/Epoch";
 import type { Coin } from "../../common/ledger/Coin";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../../utils/ints";
 import { freezeAll, isObject } from "@harmoniclabs/obj-utils";
-import { IProtocolVersion, isIProtocolVersion, isRational, isRationalOrUndefined, ProtocolVersion, Rational, tryCborFromRational } from "../../common";
+import { IProtocolVersion, isIProtocolVersion, isRational, isRationalOrUndefined, Rational, tryCborFromRational } from "../../common";
+import { ProtocolVersion } from "../../common/ledger/protocol/protocolVersion";
 
 
 export interface AllegraProtocolParameters {

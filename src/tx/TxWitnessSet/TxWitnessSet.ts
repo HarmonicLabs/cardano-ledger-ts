@@ -9,7 +9,7 @@ import { ToJson } from "../../utils/ToJson";
 import { assert } from "../../utils/assert";
 import { BootstrapWitness } from "./BootstrapWitness";
 import { TxRedeemer } from "./TxRedeemer";
-import { VKeyWitness } from "./VKeyWitness";
+import { VKeyWitness } from "./VKeyWitness/VKeyWitness";
 import { getCborSet, isCborSet } from "../../utils/getCborSet";
 import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 

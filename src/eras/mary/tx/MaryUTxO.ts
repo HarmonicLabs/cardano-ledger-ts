@@ -4,7 +4,7 @@ import { isObject, hasOwn } from "@harmoniclabs/obj-utils";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 import { IMaryTxOut, isIMaryTxOut, MaryTxOut } from "./MaryTxOut";
-import { ITxOutRef, isITxOutRef, TxOutRef } from "../../common/TxOutRef";
+import { ITxOutRef, isITxOutRef, TxOutRef } from "../../common/tx/TxOutRef";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
 
 export interface IMaryUTxO {

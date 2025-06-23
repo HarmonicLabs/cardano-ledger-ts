@@ -44,7 +44,7 @@ export interface IAddress {
  * shelley specification in cardano-ledger; page 113
  */
 export class Address
-    implements ToData, ToCbor
+    implements IAddress, ToData, ToCbor
 {
     readonly network!: NetworkT
     readonly paymentCreds!: Credential
@@ -257,7 +257,7 @@ export class Address
             case "pointer":
                 if( payload.length < 28 )
                 {
-                    console.log( toHex( new Uint8Array( payload ) ) )
+                    console.error( toHex( new Uint8Array( payload ) ) )
                     throw new Error(
                         "address' payload is incorrect; payload.length: " + payload.length.toString()
                     );
@@ -350,9 +350,8 @@ export class Address
      * stake key at path   "m/1852'/1815'/0'/2/0"
     */
     static fromEntropy( entropy: Uint8Array | string, network: NetworkT = "mainnet", AccountIndex: number = 0, AddressIndex: number = 0 ): Address
-    
     {
-        console.log("Address.fromEntropy Index", AccountIndex, AddressIndex);
+        // console.log("Address.fromEntropy Index", AccountIndex, AddressIndex);
         return Address.fromXPrv( XPrv.fromEntropy( entropy ), network, AccountIndex, AddressIndex );
     }
 

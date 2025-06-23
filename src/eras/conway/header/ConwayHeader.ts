@@ -1,6 +1,6 @@
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { isObject } from "@harmoniclabs/obj-utils";
-import { isKesSignature, KesSignature, KesSignatureBytes } from "../../common/Kes";
+import { isKesSignature, KesSignature, KesSignatureBytes } from "../../common/ledger/Kes";
 import { ConwayHeaderBody, IConwayHeaderBody, isIConwayHeaderBody } from "./ConwayHeaderBody";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
 import { IPraosHeader } from "../../common/interfaces/IPraosHeader";
@@ -55,7 +55,10 @@ export class ConwayHeader
     /* header = [header_body, body_signature : $kes_signature] */
     toCborObj(): CborArray
     {
-        if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
+        if( 
+            this.cborRef instanceof SubCborRef 
+        ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
+        
         return new CborArray([
             this.body.toCborObj(),
             new CborBytes( this.kesSignature )

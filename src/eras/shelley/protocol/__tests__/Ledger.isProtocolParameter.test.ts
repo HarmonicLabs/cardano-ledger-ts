@@ -1,12 +1,12 @@
-import { defaultProtocolParameters, isPartialProtocolParameters, isProtocolParameters } from "../ShelleyProtocolParameters"
+import { defaultShelleyProtocolParameters, isPartialShelleyProtocolParameters, isShelleyProtocolParameters } from "../ShelleyProtocolParameters"
 
 
-describe("Ledger.isProtocolParameter", () => {
+describe("Ledger.isShelleyProtocolParameters", () => {
 
-    test.skip("defaultProtocolParameters", () => {
+    test.skip("defaultShelleyProtocolParameters", () => {
 
         expect(
-            isProtocolParameters( defaultProtocolParameters )
+            isShelleyProtocolParameters( defaultShelleyProtocolParameters )
         ).toBe( true );
 
     });
@@ -406,7 +406,7 @@ describe("Ledger.isProtocolParameter", () => {
         // ).toBe( true )
 
         expect(
-            isPartialProtocolParameters( gotFromCli )
+            isPartialShelleyProtocolParameters( gotFromCli )
         ).toBe( true )
     })
 })

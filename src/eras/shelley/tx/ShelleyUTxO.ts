@@ -4,9 +4,9 @@ import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-util
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 import { IShelleyTxOut, isIShelleyTxOut, ShelleyTxOut } from "./ShelleyTxOut";
-import { ITxOutRef, isITxOutRef, TxOutRef } from "../../common/TxOutRef";
+import { ITxOutRef, isITxOutRef, TxOutRef } from "../../common/tx/TxOutRef";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
-import { hasUtxoRef, HasUtxoRef } from "../../common/HasUtxoRef";
+import { hasUtxoRef, HasUtxoRef } from "../../common/tx/HasUtxoRef";
 
 export interface IShelleyUTxO extends HasUtxoRef {
     // utxoRef: ITxOutRef,

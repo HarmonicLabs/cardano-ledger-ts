@@ -1,14 +1,14 @@
-import type { Epoch } from "../../common/ledger/Epoch";
-import type { Coin } from "../../common/ledger/Coin";
-import { CborPositiveRational, CborUInt, CborObj, CborMapEntry, CborMap, CborArray, CborNegInt, CborBytes, CborTag, CborText } from "@harmoniclabs/cbor";
-import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../../utils/ints";
-import { CostModels, costModelsFromCborObj, costModelsToCborObj, costModelsToJson, defaultV1Costs, defaultV2Costs, defaultV3Costs, isCostModels } from "@harmoniclabs/cardano-costmodels-ts";
+import { fromUtf8 } from "@harmoniclabs/uint8array-utils";
 import { ExBudget, ExBudgetJson } from "@harmoniclabs/plutus-machine";
 import { freezeAll, isObject } from "@harmoniclabs/obj-utils";
-import { PParamsPoolVotingThresholds, isPParamsPoolVotingThresholds, poolVotingThresholdsToCborObj, tryGetPParamsPoolVotingThresholdsFromCborObj } from "./PParamsPoolVotingThresholds";
-import { PParamsDrepVotingThresholds, drepVotingThresholdsToCborObj, isPParamsDrepVotingThresholds, tryGetPParamsDrepVotingThresholdsFromCborObj } from "./PParamsDrepVotingThresholds";
 import { Data, DataB, DataConstr, DataI, DataList, DataMap, DataPair } from "@harmoniclabs/plutus-data";
-import { fromUtf8 } from "@harmoniclabs/uint8array-utils";
+import { CborPositiveRational, CborUInt, CborObj, CborMapEntry, CborMap, CborArray, CborNegInt, CborBytes, CborTag, CborText } from "@harmoniclabs/cbor";
+import { CostModels, costModelsFromCborObj, costModelsToCborObj, costModelsToJson, defaultV1Costs, defaultV2Costs, defaultV3Costs, isCostModels } from "@harmoniclabs/cardano-costmodels-ts";
+import type { Epoch } from "../../common/ledger/Epoch";
+import type { Coin } from "../../common/ledger/Coin";
+import { CanBeUInteger, canBeUInteger, forceBigUInt } from "../../../utils/ints";
+import { ConwayPParamsPoolVotingThresholds, isConwayPParamsPoolVotingThresholds, conwayPoolVotingThresholdsToCborObj, tryGetConwayPParamsPoolVotingThresholdsFromCborObj } from "./ConwayPParamsPoolVotingThresholds";
+import { ConwayPParamsDrepVotingThresholds, isConwayPParamsDrepVotingThresholds, conwayDrepVotingThresholdsToCborObj, tryGetConwayPParamsDrepVotingThresholdsFromCborObj } from "./ConwayPParamsDrepVotingThresholds";
 import { Rational, isRational, isRationalOrUndefined, tryCborFromRational } from "../../common";
 
 export interface ConwayProtocolParameters {
@@ -42,8 +42,8 @@ export interface ConwayProtocolParameters {
     collateralPercentage: CanBeUInteger,
     maxCollateralInputs: CanBeUInteger,
     // Conway (governance params)
-    poolVotingThresholds: PParamsPoolVotingThresholds,
-    drepVotingThresholds: PParamsDrepVotingThresholds,
+    poolVotingThresholds: ConwayPParamsPoolVotingThresholds,
+    drepVotingThresholds: ConwayPParamsDrepVotingThresholds,
     minCommitteSize: CanBeUInteger,
     committeeTermLimit: Epoch,
     governanceActionValidityPeriod: Epoch,
@@ -148,8 +148,8 @@ export function isConwayProtocolParameters(something: any): something is ConwayP
 
     if (!(
         isCostModels(pp.costModels) &&
-        isPParamsPoolVotingThresholds(pp.poolVotingThresholds) &&
-        isPParamsDrepVotingThresholds(pp.drepVotingThresholds)
+        isConwayPParamsPoolVotingThresholds(pp.poolVotingThresholds) &&
+        isConwayPParamsDrepVotingThresholds(pp.drepVotingThresholds)
     )) return false;
 
     return true;
@@ -221,8 +221,8 @@ export function isPartialConwayProtocolParameters(something: object): something 
 
     if (!(
         (pp.costModels === undefined || isCostModels(pp.costModels)) &&
-        (pp.poolVotingThresholds === undefined || isPParamsPoolVotingThresholds(pp.poolVotingThresholds)) &&
-        (pp.drepVotingThresholds === undefined || isPParamsDrepVotingThresholds(pp.drepVotingThresholds))
+        (pp.poolVotingThresholds === undefined || isConwayPParamsPoolVotingThresholds(pp.poolVotingThresholds)) &&
+        (pp.drepVotingThresholds === undefined || isConwayPParamsDrepVotingThresholds(pp.drepVotingThresholds))
     )) return false;
 
     return true;
@@ -292,8 +292,8 @@ export function partialConwayProtocolParametersToCborObj(pps: Partial<ConwayProt
         mapUIntEntryOrUndefined(22, pps.maxValueSize),
         mapUIntEntryOrUndefined(23, pps.collateralPercentage),
         mapUIntEntryOrUndefined(24, pps.maxCollateralInputs),
-        pps.poolVotingThresholds ? kv(25, poolVotingThresholdsToCborObj(pps.poolVotingThresholds)) : undefined, 
-        pps.drepVotingThresholds ? kv(26, drepVotingThresholdsToCborObj(pps.drepVotingThresholds)) : undefined,
+        pps.poolVotingThresholds ? kv(25, conwayPoolVotingThresholdsToCborObj(pps.poolVotingThresholds)) : undefined, 
+        pps.drepVotingThresholds ? kv(26, conwayDrepVotingThresholdsToCborObj(pps.drepVotingThresholds)) : undefined,
         mapUIntEntryOrUndefined(27, pps.minCommitteSize),
         mapUIntEntryOrUndefined(28, pps.committeeTermLimit),
         mapUIntEntryOrUndefined(29, pps.governanceActionValidityPeriod),
@@ -426,8 +426,8 @@ export function partialConwayProtocolParametersFromCborObj(cObj: CborObj): Parti
         maxValueSize: fromUIntOrUndef(_maxValueSize),
         collateralPercentage: fromUIntOrUndef(_collatearalPerc),
         maxCollateralInputs: fromUIntOrUndef(_maxCollIns),
-        poolVotingThresholds: tryGetPParamsPoolVotingThresholdsFromCborObj(_poolVotingThresholds),
-        drepVotingThresholds: tryGetPParamsDrepVotingThresholdsFromCborObj(_drepVotingThresholds),
+        poolVotingThresholds: tryGetConwayPParamsPoolVotingThresholdsFromCborObj(_poolVotingThresholds),
+        drepVotingThresholds: tryGetConwayPParamsDrepVotingThresholdsFromCborObj(_drepVotingThresholds),
         minCommitteSize: fromUIntOrUndef(_minCommitteSize),
         committeeTermLimit: fromUIntOrUndef(_committeeTermLimit),
         governanceActionValidityPeriod: fromUIntOrUndef(_govActionValidityPeriod),
@@ -474,7 +474,7 @@ export const defaultConwayProtocolParameters: ConwayProtocolParameters = freezeA
         hardForkInitiation: CborPositiveRational.fromNumber(0.51),
         motionNoConfidence: CborPositiveRational.fromNumber(0.51),
         securityRelevantVotingThresholds: CborPositiveRational.fromNumber(0.51)
-    } as PParamsPoolVotingThresholds,
+    } as ConwayPParamsPoolVotingThresholds,
     drepVotingThresholds: {
         motionNoConfidence: CborPositiveRational.fromNumber(0.51),
         committeeNormal: CborPositiveRational.fromNumber(0.51),
@@ -486,7 +486,7 @@ export const defaultConwayProtocolParameters: ConwayProtocolParameters = freezeA
         ppTechnicalGroup: CborPositiveRational.fromNumber(0.51),
         ppGovGroup: CborPositiveRational.fromNumber(0.51),
         treasuryWithdrawal: CborPositiveRational.fromNumber(0.51)
-    } as PParamsDrepVotingThresholds,
+    } as ConwayPParamsDrepVotingThresholds,
     minCommitteSize: 7, // Reasonable default for minimum constitutional committee size
     committeeTermLimit: 200, // Epochs, reasonable term limit for committee members
     governanceActionValidityPeriod: 10, // Epochs, validity period for governance actions

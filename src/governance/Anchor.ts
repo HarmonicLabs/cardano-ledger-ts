@@ -1,7 +1,6 @@
 import { Cbor, CborArray, CborBytes, CborObj, CborString, CborText, SubCborRef } from "@harmoniclabs/cbor";
-import { CanBeHash32, Hash32, canBeHash32 } from "../hashes";
-import { roDescr } from "../utils/roDescr";
 import { isObject } from "@harmoniclabs/obj-utils";
+import { CanBeHash32, Hash32, canBeHash32 } from "../hashes";
 import { getSubCborRef, subCborRefOrUndef } from "../utils/getSubCborRef";
 
 export interface IAnchor {
