@@ -37,6 +37,19 @@ export function scriptTypeToNumber( scriptType: LitteralScriptType ): number
     throw new Error(`Invalid ScriptType: ${scriptType}`);
 }
 
+export function scriptTypeFromNumber( n: number ): ScriptType
+{
+    switch( n )
+    {
+        case 0: return ScriptType.NativeScript;
+        case 1: return ScriptType.PlutusV1;
+        case 2: return ScriptType.PlutusV2;
+        case 3: return ScriptType.PlutusV3;
+    }
+
+    throw new Error(`Invalid ScriptType number: ${n}`);
+}
+
 export const defaultScriptType = ScriptType.PlutusV3;
 
 export type PlutusScriptType = ScriptType.PlutusV1 | ScriptType.PlutusV2 | ScriptType.PlutusV3 | "PlutusScriptV1" | "PlutusScriptV2" | "PlutusScriptV3"
@@ -111,17 +124,12 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
     }
 
     constructor(
-        script: IScript<T>,
+        scriptType: T,
+        bytes: Uint8Array | (T extends ScriptType.NativeScript ? NativeScript : PlutusScriptJsonFormat),
         readonly cborRef: SubCborRef | undefined = undefined
     )
     
     {
-        // console.log("type: ", this.type);
-        let { 
-            scriptType, 
-            bytes 
-        } = script;
-
         if(!(
             scriptType === ScriptType.NativeScript  ||
             scriptType === ScriptType.PlutusV1      ||
@@ -187,15 +195,16 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
             );
         };
 
-        this.cborRef = cborRef ?? subCborRefOrUndef( script );
+        this.cborRef = cborRef;
     }
 
     clone(): Script<T>
     {
-        return new Script({
-            scriptType: this.type as any,
-            bytes: Uint8Array.prototype.slice.call( this.bytes )
-        });
+        return new Script(
+            this.type,
+            this.bytes,
+            this.cborRef instanceof SubCborRef ? this.cborRef.clone() : undefined
+        );
     }
 
     toJSON() { return this.toJson(); }
@@ -229,16 +238,16 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
 
         if( t !== ScriptType.NativeScript )
         {
-            return new Script({ 
-                scriptType: t, 
-                bytes: fromHex( json.cborHex ) 
-            });
+            return new Script(
+                t,
+                fromHex( json.cborHex )
+            );
         }
 
-        return new Script({
-            scriptType: ScriptType.NativeScript,
-            bytes: json as NativeScript
-        });
+        return new Script(
+            ScriptType.NativeScript,
+            json as NativeScript,
+        )
     }
 
     /**
@@ -299,10 +308,11 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         // read tx_witness_set
         if( cObj instanceof CborBytes )
         {
-            return new Script({
-                scriptType: defType,
-                bytes: Cbor.encode( cObj ).toBuffer()
-            });
+            return new Script(
+                defType,
+                cObj.bytes,
+                getSubCborRef( cObj )
+            );
         }
 
         if(!(
@@ -313,23 +323,23 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         throw new Error(`Invalid CBOR format for "Script"`);
 
         const n = Number(cObj.array[0].num);
-        const t = n === 0 ? ScriptType.NativeScript :
-            n === 1 ? ScriptType.PlutusV1 :
-            ScriptType.PlutusV2;
+        const t = scriptTypeFromNumber( n ); 
+        
 
         if( t === ScriptType.NativeScript )
-        return new Script({
-            scriptType: t, 
-            bytes: Cbor.encode( cObj.array[1] ).toBuffer() 
-    });
+        return new Script(
+            t,
+            Cbor.encode( cObj.array[1] ).toBuffer(),
+            getSubCborRef( cObj )
+        );
 
         if(!( cObj.array[1] instanceof CborBytes ))
         throw new Error(`Invalid CBOR format for "Script"`);
 
-        return new Script({
-            scriptType: t, 
-            bytes:cObj.array[1].bytes
-        }, 
-        getSubCborRef( cObj ) );
+        return new Script(
+            t,
+            cObj.array[1].bytes,
+            getSubCborRef( cObj )
+        );
     }
 }
