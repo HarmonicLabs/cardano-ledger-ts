@@ -1,12 +1,12 @@
 import { Cbor, CborArray, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { DataConstr, ToData } from "@harmoniclabs/plutus-data";
-import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx/body/output/TxOutRef";
 import { IGovAction } from "./IGovAction";
 import { GovActionType } from "./GovActionType";
 import { roDescr } from "../../utils/roDescr";
 import { ToDataVersion } from "../../toData/defaultToDataVersion";
 import { maybeData } from "../../utils/maybeData";
+import { isITxOutRef, ITxOutRef, TxOutRef } from "../../eras/common/tx/TxOutRef";
 
 export interface IGovActionNoConfidence {
     govActionId?: ITxOutRef | undefined,

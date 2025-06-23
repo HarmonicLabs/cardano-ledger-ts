@@ -1,14 +1,14 @@
 import { Cbor, CborArray, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
-import { CanBeHash28, Hash28, canBeHash28, canBeHash32 } from "../../hashes";
-import { ITxOutRef, TxOutRef, isITxOutRef } from "../../tx/body/output/TxOutRef";
+import { CanBeHash28, Hash28, canBeHash28 } from "../../hashes";
 import { roDescr } from "../../utils/roDescr";
 import { GovActionType } from "./GovActionType";
 import { IGovAction } from "./IGovAction";
 import { isObject } from "@harmoniclabs/obj-utils";
-import { Data, DataConstr, ToData } from "@harmoniclabs/plutus-data";
+import { DataConstr, ToData } from "@harmoniclabs/plutus-data";
 import { ToDataVersion } from "../../toData/defaultToDataVersion";
 import { maybeData } from "../../utils/maybeData";
 import { isPartialProtocolParameters, partialProtocolParametersToCborObj, partialProtocolParametersToData, ProtocolParameters } from "../../ledger/protocol/ProtocolParameters";
+import { isITxOutRef, ITxOutRef, TxOutRef } from "../../eras/common/tx/TxOutRef";
 
 export interface IGovActionParameterChange {
     govActionId?: ITxOutRef | undefined,

@@ -1,4 +1,4 @@
-import { ITxOutRef, ITxOutRefToStr, TxOutRef, TxOutRefStr } from "./TxOutRef";
+import { ITxOutRef, ITxOutRefToStr, TxOutRef, TxOutRefStr } from "../../../eras/common/tx/TxOutRef";
 import { IUTxO, isIUTxO } from "./UTxO";
 
 

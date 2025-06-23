@@ -14,11 +14,12 @@ import { Coin } from "../../ledger/Coin"
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
 import { CanBeUInteger, canBeUInteger, forceBigUInt, maybeBigUint } from "../../utils/ints";
-import { UTxO, TxOut, isIUTxO, isITxOut, TxOutRef } from "./output";
+import { UTxO, TxOut, isIUTxO, isITxOut } from "./output";
 import { IVotingProcedures, VotingProcedures, isIVotingProceduresEntry } from "../../governance/VotingProcedures";
 import { IProposalProcedure, ProposalProcedure, isIProposalProcedure } from "../../governance/ProposalProcedure";
 import { getCborSet } from "../../utils/getCborSet";
 import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
+import { TxOutRef } from "../../eras/common";
 
 export interface ITxBody {
     inputs: [ UTxO, ...UTxO[] ],

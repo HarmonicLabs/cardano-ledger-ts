@@ -5,10 +5,9 @@ import { ToData, Data, DataConstr } from "@harmoniclabs/plutus-data";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 import { ITxOut, isITxOut, TxOut } from "./TxOut";
-import { ITxOutRef, isITxOutRef, TxOutRef } from "./TxOutRef";
-import { lexCompare } from "@harmoniclabs/uint8array-utils";
 import { ToDataVersion } from "../../../toData/defaultToDataVersion";
 import { getSubCborRef } from "../../../utils/getSubCborRef";
+import { ITxOutRef, isITxOutRef, TxOutRef } from "../../../eras/common/tx/TxOutRef";
 
 export interface IUTxO {
     utxoRef: ITxOutRef,
@@ -136,5 +135,3 @@ export class UTxO
         return TxOutRef.sort( a.utxoRef, b.utxoRef );
     }
 }
-
-export { TxOutRef };
