@@ -14,6 +14,29 @@ export enum ScriptType {
 }
 Object.freeze( ScriptType );
 
+export function scriptTypeToNumber( scriptType: LitteralScriptType ): number
+{
+    switch( scriptType )
+    {
+        case ScriptType.NativeScript: return 0;
+        case ScriptType.PlutusV1:     return 1;
+        case ScriptType.PlutusV2:     return 2;
+        case ScriptType.PlutusV3:     return 3;
+    }
+    if( typeof scriptType === "string" )
+    {
+        switch( scriptType )
+        {
+            case "NativeScript": return 0;
+            case "PlutusScriptV1": return 1;
+            case "PlutusScriptV2": return 2;
+            case "PlutusScriptV3": return 3;
+        }
+    }
+
+    throw new Error(`Invalid ScriptType: ${scriptType}`);
+}
+
 export const defaultScriptType = ScriptType.PlutusV3;
 
 export type PlutusScriptType = ScriptType.PlutusV1 | ScriptType.PlutusV2 | ScriptType.PlutusV3 | "PlutusScriptV1" | "PlutusScriptV2" | "PlutusScriptV3"
@@ -41,6 +64,10 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
      * format expected by `cardano-cli`
      * 
      * for standard ledger format (as defined in CDDL) use `toCbor` method
+     * 
+     * this one is used in the witness set
+     * 
+     * @deprecated
     **/
     readonly cbor!: T extends ScriptType.NativeScript ? never : CborString;
     
@@ -148,7 +175,8 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         this.bytes = bytes;
         /** TO DO: check for accuracy */
         if (this.type !== ScriptType.NativeScript) {
-            (this as any).cbor = Cbor.encode(
+            /// @ts-ignore Type 'CborString' is not assignable to type 'T extends ScriptType.NativeScript ? never : CborString'.
+            this.cbor = Cbor.encode(
                 new CborBytes(
                     Cbor.encode(
                         new CborBytes(
@@ -251,7 +279,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
 
         return new CborArray([
             new CborUInt(
-                this.type === ScriptType.PlutusV1 ? 1 : 2
+                scriptTypeToNumber( this.type as ScriptType )
             ),
             new CborBytes(
                 Cbor.encode(

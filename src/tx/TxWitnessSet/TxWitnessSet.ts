@@ -1,4 +1,4 @@
-import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString, isCborObj, SubCborRef } from "@harmoniclabs/cbor";
+import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString, isCborObj, SubCborRef, CborBytes } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { Data, isData, dataToCborObj, dataFromCborObj } from "@harmoniclabs/plutus-data";
@@ -285,7 +285,7 @@ export class TxWitnessSet
                     k: new CborUInt( 3 ),
                     v: new CborArray(
                         this.plutusV1Scripts
-                        .map( script =>  Cbor.parse( script.cbor ) )
+                        .map( encodePlutusScriptForWitnessSet )
                     )
                 },
 
@@ -310,7 +310,7 @@ export class TxWitnessSet
                     k: new CborUInt( 6 ),
                     v: new CborArray(
                         this.plutusV2Scripts
-                        .map( script => Cbor.parse( script.cbor ) )
+                        .map( encodePlutusScriptForWitnessSet )
                     )
                 },
 
@@ -319,7 +319,7 @@ export class TxWitnessSet
                     k: new CborUInt( 7 ),
                     v: new CborArray(
                         this.plutusV3Scripts
-                        .map( script => Cbor.parse( script.cbor ) )
+                        .map( encodePlutusScriptForWitnessSet )
                     )
                 },
             ]
@@ -344,7 +344,7 @@ export class TxWitnessSet
                 ({ k }) => k instanceof CborUInt && Number( k.num ) === i
             ) ?? { v: undefined };
 
-            if( v === undefined || !isCborObj( v ) ) continue;
+            if( v === undefined || !isCborObj( v ) ) continue;encodePlutusScriptForWitnessSet
 
             fields[i] = v;
         }
@@ -422,4 +422,12 @@ function witnessRedeemersFromCborObj( cbor: CborObj ): TxRedeemer[]
         return cbor.map.map( TxRedeemer.fromCborMapEntry );
     }
     else throw new Error("invalid format for witness set redeemers field");
+}
+
+function encodePlutusScriptForWitnessSet(
+    script: Script
+): CborBytes
+{
+    // return Cbor.parse( script.cbor ) as CborBytes
+    return new CborBytes( script.bytes );
 }
