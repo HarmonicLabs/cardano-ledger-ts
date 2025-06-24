@@ -5,11 +5,10 @@ import { ToData, DataMap, DataConstr, DataI, DataPair } from "@harmoniclabs/plut
 import { CanBeHash28, Hash28, canBeHash28 } from "../hashes";
 import { canBeUInteger, forceBigUInt } from "../utils/ints";
 import { Coin } from "./Coin";
-import { Value } from "./Value";
-import { assert } from "../utils/assert";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { ToDataVersion } from "../toData/defaultToDataVersion";
 import { getSubCborRef, subCborRefOrUndef } from "../utils/getSubCborRef";
+import { Value } from "../eras/common/ledger/Value/Value";
 
 export type ITxWithdrawalsEntryBigInt = {
     rewardAccount: StakeAddress,

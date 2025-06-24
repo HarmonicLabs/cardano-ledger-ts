@@ -6,7 +6,6 @@ import { AuxiliaryDataHash, ScriptDataHash, Hash32, CanBeHash28, canBeHash28 } f
 import { canBeTxWithdrawals, forceTxWithdrawals } from "../../ledger/TxWithdrawals";
 import { NetworkT } from "../../ledger/Network";
 import { LegacyPPUpdateProposal, LegacyPPUpdateProposalFromCborObj, LegacyPPUpdateProposalToCborObj, protocolUpdateToJson, isLegacyPPUpdateProposal } from "../../ledger/protocol/LegacyPPUpdateProposal";
-import { Value, isIValue } from "../../ledger/Value";
 import { Certificate, isCertificate,  certificateFromCborObj } from "../../ledger/certs/Certificate";
 import { certificatesToDepositLovelaces } from "../../ledger/certs/ICert";
 import { TxWithdrawals, ITxWithdrawals } from "../../ledger/TxWithdrawals";
@@ -19,7 +18,9 @@ import { IVotingProcedures, VotingProcedures, isIVotingProceduresEntry } from ".
 import { IProposalProcedure, ProposalProcedure, isIProposalProcedure } from "../../governance/ProposalProcedure";
 import { getCborSet } from "../../utils/getCborSet";
 import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
-import { TxOutRef } from "../../eras/common";
+import { Value } from "../../eras/common/ledger/Value/Value";
+import { isIValue } from "../../eras/common/ledger/Value/IValue";
+import { TxOutRef } from "../../eras/common/tx/TxOutRef";
 
 export interface ITxBody {
     inputs: [ UTxO, ...UTxO[] ],
