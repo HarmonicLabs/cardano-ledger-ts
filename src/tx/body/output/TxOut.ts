@@ -3,7 +3,6 @@ import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { isObject, hasOwn } from "@harmoniclabs/obj-utils";
 import { Data, isData, ToData, DataConstr, dataToCbor, dataFromCborObj } from "@harmoniclabs/plutus-data";
 import { Hash32 } from "../../../hashes";
-import { Value, IValue, isIValue } from "../../../ledger/Value";
 import { Script } from "../../../script";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
@@ -12,6 +11,8 @@ import { BasePlutsError } from "../../../utils/BasePlutsError";
 import { ToDataVersion } from "../../../toData/defaultToDataVersion";
 import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
 import { Address, AddressStr, isAddressStr } from "../../../eras/common/ledger/Address";
+import { isIValue, IValue } from "../../../eras/common/ledger/Value/IValue";
+import { Value } from "../../../eras/common/ledger/Value/Value";
 
 
 export interface ITxOut {
