@@ -334,19 +334,16 @@ export class AlonzoTxWitnessSet
             vkeyWitnesses: _vkey === undefined ? undefined : getCborSet( _vkey ).map( VKeyWitness.fromCborObj ),
             nativeScripts: _native === undefined ? undefined : 
                 getCborSet( _native ).map( nativeCborObj => 
-                    new Script({
-                        scriptType: ScriptType.NativeScript, 
-                        bytes: Cbor.encode( nativeCborObj ).toBuffer()
-                    })
+                    new Script(
+                        ScriptType.NativeScript, 
+                        Cbor.encode( nativeCborObj ).toBuffer()
+                    )
                 ),
             bootstrapWitnesses: _bootstrap === undefined ? undefined :
                 getCborSet( _bootstrap ).map( BootstrapWitness.fromCborObj ),
             plutusV1Scripts: _plutusV1 === undefined ? undefined :
                 getCborSet( _plutusV1 ).map( cbor =>
-                    new Script({
-                        scriptType: ScriptType.PlutusV1,
-                        bytes: Cbor.encode( cbor ).toBuffer()
-                    })
+                    Script.plutusV1( Cbor.encode( cbor ).toBuffer() )
                 ),
             datums: _dats === undefined ? undefined :
                 getCborSet( _dats ).map( dataFromCborObj ),

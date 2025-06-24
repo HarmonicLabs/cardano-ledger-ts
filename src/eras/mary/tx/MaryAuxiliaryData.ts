@@ -80,10 +80,10 @@ export class MaryAuxiliaryData
             this.nativeScripts = nativeScripts?.map( nativeScript =>
                 nativeScript instanceof Script
                     ? nativeScript :
-                    new Script({
-                        scriptType: ScriptType.NativeScript, 
-                        bytes: nativeScript 
-                    })
+                    new Script(
+                        ScriptType.NativeScript, 
+                        nativeScript 
+                    )
                     
             );
         }
@@ -189,10 +189,7 @@ export class MaryAuxiliaryData
             metadata: _metadata === undefined ? undefined : TxMetadata.fromCborObj( _metadata ),
             nativeScripts:_native === undefined ? undefined : 
                 _native.array.map( nativeCborObj => 
-                    new Script({
-                        scriptType: ScriptType.NativeScript, 
-                        bytes: Cbor.encode( nativeCborObj ).toBuffer()
-                    })
+                    new Script( ScriptType.NativeScript, Cbor.encode( nativeCborObj ).toBuffer() )
                 )           
         }, getSubCborRef( cObj ));
     }

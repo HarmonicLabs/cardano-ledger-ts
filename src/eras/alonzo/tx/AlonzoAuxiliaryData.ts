@@ -83,11 +83,10 @@ export class AlonzoAuxiliaryData
             this.nativeScripts = nativeScripts?.map( nativeScript =>
                 nativeScript instanceof Script
                     ? nativeScript :
-                    new Script({
-                        scriptType: ScriptType.NativeScript, 
-                        bytes: nativeScript 
-                    })
-                    
+                    new Script(
+                        ScriptType.NativeScript, 
+                        nativeScript 
+                    )
             );
         }
         else
@@ -108,10 +107,7 @@ export class AlonzoAuxiliaryData
             this.plutusV1Scripts = plutusV1Scripts?.map( plutusScript =>
                 plutusScript instanceof Script
                     ? plutusScript :
-                    new Script({
-                        scriptType: ScriptType.PlutusV1, 
-                        bytes: plutusScript 
-                    })
+                    Script.fromJson( plutusScript )
             )
         }
         else
@@ -223,17 +219,14 @@ export class AlonzoAuxiliaryData
             metadata: _metadata === undefined ? undefined : TxMetadata.fromCborObj( _metadata ),
             nativeScripts:_native === undefined ? undefined : 
                 _native.array.map( nativeCborObj => 
-                    new Script({
-                        scriptType: ScriptType.NativeScript, 
-                        bytes: Cbor.encode( nativeCborObj ).toBuffer()
-                    })
+                    new Script(
+                        ScriptType.NativeScript, 
+                        Cbor.encode( nativeCborObj ).toBuffer()
+                    )
                 ),
             plutusV1Scripts: _pV1 === undefined ? undefined :
                 _pV1.array.map( cbor =>
-                    new Script({
-                        scriptType: ScriptType.PlutusV1,
-                        bytes: Cbor.encode( cbor ).toBuffer()
-                    })
+                    Script.plutusV1( Cbor.encode( cbor ).toBuffer() )
                 )            
         }, getSubCborRef( cObj ));
     }

@@ -325,10 +325,7 @@ export class BabbageTxOut
             ))
             throw new InvalidCborFormatError("BabbageTxOut");
 
-            refScript = new Script( {
-                scriptType: ScriptType.PlutusV2, 
-                bytes: _refScript.data.buffer 
-            });
+            refScript = Script.fromCbor( _refScript.data.bytes );
         }
 
         if( _addr === undefined || _amt === undefined )

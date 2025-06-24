@@ -274,10 +274,7 @@ export class ShelleyTxWitnessSet
             vkeyWitnesses: _vkey === undefined ? undefined : getCborSet( _vkey ).map( VKeyWitness.fromCborObj ),
             nativeScripts: _native === undefined ? undefined : 
                 getCborSet( _native ).map( nativeCborObj => 
-                    new Script({
-                        scriptType: ScriptType.NativeScript, 
-                        bytes: Cbor.encode( nativeCborObj ).toBuffer()
-                    })
+                    new Script( ScriptType.NativeScript,  Cbor.encode( nativeCborObj ).toBuffer() )
                 ),
             bootstrapWitnesses: _bootstrap === undefined ? undefined : getCborSet( _bootstrap ).map( BootstrapWitness.fromCborObj )
         }, getSubCborRef( cObj ));

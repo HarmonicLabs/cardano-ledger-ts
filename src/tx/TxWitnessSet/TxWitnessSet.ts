@@ -375,36 +375,27 @@ export class TxWitnessSet
             vkeyWitnesses: _vkey === undefined ? undefined : getCborSet( _vkey ).map( VKeyWitness.fromCborObj ),
             nativeScripts: _native === undefined ? undefined : 
                 getCborSet( _native ).map( nativeCborObj => 
-                    new Script({
-                        scriptType: ScriptType.NativeScript, 
-                        bytes: Cbor.encode( nativeCborObj ).toBuffer()
-                    })
+                    new Script(
+                        ScriptType.NativeScript, 
+                        Cbor.encode( nativeCborObj ).toBuffer()
+                    )
                 ),
             bootstrapWitnesses: _bootstrap === undefined ? undefined :
                 getCborSet( _bootstrap ).map( BootstrapWitness.fromCborObj ),
             plutusV1Scripts: _plutusV1 === undefined ? undefined :
                 getCborSet( _plutusV1 ).map( cbor =>
-                    new Script({
-                        scriptType: ScriptType.PlutusV1,
-                        bytes: Cbor.encode( cbor ).toBuffer()
-                    })
+                    Script.plutusV1( Cbor.encode( cbor ).toBuffer() )
                 ),
             datums: _dats === undefined ? undefined :
                 getCborSet( _dats ).map( dataFromCborObj ),
             redeemers: _reds === undefined ? undefined : witnessRedeemersFromCborObj( _reds ),
             plutusV2Scripts: _plutusV2 === undefined ? undefined :
                 getCborSet( _plutusV2 ).map( cbor =>
-                    new Script({
-                        scriptType: ScriptType.PlutusV2,
-                        bytes: Cbor.encode( cbor ).toBuffer()
-                    })
+                    Script.plutusV2( Cbor.encode( cbor ).toBuffer() )
                 ),
             plutusV3Scripts: _plutusV3 === undefined ? undefined :
                 getCborSet( _plutusV3 ).map( cbor =>
-                    new Script({
-                        scriptType: ScriptType.PlutusV3,
-                        bytes: Cbor.encode( cbor ).toBuffer()
-                    })
+                    Script.plutusV3( Cbor.encode( cbor ).toBuffer() )
                 ),
         }, getSubCborRef( cObj ));
     }
