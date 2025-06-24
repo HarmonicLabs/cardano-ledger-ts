@@ -1,6 +1,5 @@
 import { StakeAddress, StakeAddressBech32 } from "./StakeAddress";
 import { NetworkT } from "./Network";
-import { Address } from "./Address";
 import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { ToData, DataMap, DataConstr, DataI, DataPair } from "@harmoniclabs/plutus-data";
 import { CanBeHash28, Hash28, canBeHash28 } from "../hashes";
