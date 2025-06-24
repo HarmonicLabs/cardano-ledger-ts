@@ -89,10 +89,7 @@ export class AuxiliaryData
             this.nativeScripts = nativeScripts?.map( nativeScript =>
                 nativeScript instanceof Script
                     ? nativeScript :
-                    new Script({
-                        scriptType: ScriptType.NativeScript, 
-                        bytes: nativeScript 
-                    })
+                    new Script( ScriptType.NativeScript, nativeScript )
                     
             );
         }
@@ -114,10 +111,7 @@ export class AuxiliaryData
             this.plutusV1Scripts = plutusV1Scripts?.map( plutusScript =>
                 plutusScript instanceof Script
                     ? plutusScript :
-                    new Script({
-                        scriptType: ScriptType.PlutusV1, 
-                        bytes: plutusScript 
-                    })
+                    Script.fromJson( plutusScript )
             )
         }
         else
@@ -138,11 +132,7 @@ export class AuxiliaryData
             this.plutusV2Scripts = plutusV2Scripts?.map( plutusScript =>
                 plutusScript instanceof Script
                     ? plutusScript :
-                    new Script({ 
-                        scriptType: ScriptType.PlutusV2, 
-                        bytes: plutusScript 
-
-                    })
+                    Script.fromJson( plutusScript )
             )
         }
         else
@@ -162,10 +152,7 @@ export class AuxiliaryData
                 this.plutusV3Scripts = plutusV3Scripts?.map( plutusScript =>
                     plutusScript instanceof Script
                         ? plutusScript :
-                        new Script({
-                            scriptType: ScriptType.PlutusV3, 
-                            bytes: plutusScript 
-                        })
+                        Script.fromJson( plutusScript )
                 )
             }
             else
@@ -293,31 +280,22 @@ export class AuxiliaryData
             metadata: _metadata === undefined ? undefined : TxMetadata.fromCborObj( _metadata ),
             nativeScripts:_native === undefined ? undefined : 
                 _native.array.map( nativeCborObj => 
-                    new Script({
-                        scriptType: ScriptType.NativeScript, 
-                        bytes: Cbor.encode( nativeCborObj ).toBuffer()
-                    })
+                    new Script(
+                        ScriptType.NativeScript, 
+                        Cbor.encode( nativeCborObj ).toBuffer()
+                    )
                 ),
             plutusV1Scripts: _pV1 === undefined ? undefined :
                 _pV1.array.map( cbor =>
-                    new Script({
-                        scriptType: ScriptType.PlutusV1,
-                        bytes: Cbor.encode( cbor ).toBuffer()
-                    })
+                    Script.plutusV1( Cbor.encode( cbor ).toBuffer() )
                 ),
             plutusV2Scripts: _pV2 === undefined ? undefined :
                 _pV2.array.map( cbor =>
-                    new Script({
-                        scriptType: ScriptType.PlutusV2,
-                        bytes: Cbor.encode( cbor ).toBuffer()
-                    })
+                    Script.plutusV2( Cbor.encode( cbor ).toBuffer() )
                 ),
             plutusV3Scripts: _pV3 === undefined ? undefined :
                 _pV3.array.map( cbor =>
-                    new Script({
-                        scriptType: ScriptType.PlutusV3,
-                        bytes: Cbor.encode( cbor ).toBuffer()
-                    })
+                    Script.plutusV3( Cbor.encode( cbor ).toBuffer() )
                 )                
         }, getSubCborRef( cObj ));
     }

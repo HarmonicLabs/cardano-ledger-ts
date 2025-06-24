@@ -123,6 +123,35 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         return this._hash;
     }
 
+    static native( script: NativeScript ): Script<ScriptType.NativeScript>
+    {
+        return new Script(
+            ScriptType.NativeScript,
+            script
+        );
+    }
+    static plutusV1( script: Uint8Array ): Script<ScriptType.PlutusV1>
+    {
+        return new Script(
+            ScriptType.PlutusV1,
+            script
+        );
+    }
+    static plutusV2( script: Uint8Array ): Script<ScriptType.PlutusV2>
+    {
+        return new Script(
+            ScriptType.PlutusV2,
+            script
+        );
+    }
+    static plutusV3( script: Uint8Array ): Script<ScriptType.PlutusV3>
+    {
+        return new Script(
+            ScriptType.PlutusV3,
+            script
+        );
+    }
+
     constructor(
         scriptType: T,
         bytes: Uint8Array | (T extends ScriptType.NativeScript ? NativeScript : PlutusScriptJsonFormat),
@@ -232,7 +261,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         }
     }
 
-    static fromJson( json: any & { type: string } ): Script
+    static fromJson<T extends LitteralScriptType = LitteralScriptType>( json: any & { type: string } ): Script<T>
     {
         const t = json.type;
 
@@ -247,7 +276,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         return new Script(
             ScriptType.NativeScript,
             json as NativeScript,
-        )
+        ) as Script<T>;
     }
 
     /**
