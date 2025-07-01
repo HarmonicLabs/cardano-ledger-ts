@@ -419,6 +419,13 @@ function encodePlutusScriptForWitnessSet(
     script: Script
 ): CborBytes
 {
+    return new CborBytes(
+        Cbor.encode(
+            new CborBytes(
+                Uint8Array.prototype.slice.call(script.bytes)
+            )
+        ).toBuffer()
+    )
     // return Cbor.parse( script.cbor ) as CborBytes
-    return new CborBytes( script.bytes );
+    // return new CborBytes( script.bytes );
 }
