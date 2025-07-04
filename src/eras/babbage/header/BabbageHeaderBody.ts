@@ -80,9 +80,7 @@ export class BabbageHeaderBody
     // just keep the leaderVrfOutput and nonceVrfOutput ones
     leaderVrfOutput(): U8Arr<32>
     {
-        return sha2_256_sync(
-            this.vrfResult.proofHash
-        ) as U8Arr<32>;
+        return blake2b_256(this.vrfResult.proofHash) as U8Arr32;
     }
     nonceVrfOutput: () => U8Arr32;   
 
