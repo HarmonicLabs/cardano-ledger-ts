@@ -261,10 +261,13 @@ export class Value
         return { policy, assets: assets.map( normalizeIValueAsset ) };
     }
 
-    static add( a: Value, ...rest: Value[] ): Value
+    static add( a: Value, b: Value, ...rest: Value[] ): Value
     {
-        let b: Value;
-        while( b = rest.shift()! ) a = new Value( addIValues( a.map as IValue, b.map as IValue ) );
+        a = new Value( addIValues( a.map as IValue, b.map as IValue ) );
+        while( b = rest.shift()! ) {
+            if( !(b instanceof Value) ) break;
+            a = new Value( addIValues( a.map as IValue, b.map as IValue ) );
+        }
         return a;
     }
 
