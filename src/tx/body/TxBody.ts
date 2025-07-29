@@ -446,6 +446,19 @@ export class TxBody
         this.cborRef = cborRef ?? subCborRefOrUndef( body );
     }
 
+    utxoAt( idx: number ): UTxO | undefined
+    {
+        if( typeof idx !== "number" || idx < 0 || idx >= this.inputs.length ) return undefined;
+        if( !Number.isSafeInteger( idx ) ) return undefined;
+        return new UTxO({
+            utxoRef: new TxOutRef({
+                id: this.hash,
+                index: idx
+            }),
+            resolved: this.outputs[ idx ]
+        });
+    }
+
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();

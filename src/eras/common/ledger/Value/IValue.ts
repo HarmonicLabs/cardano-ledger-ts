@@ -12,8 +12,9 @@ export type NormalizedIValue = (NormalizedIValuePolicyEntry | NormalizedIValueAd
 
 export function normalizeIValue( val: IValue ): NormalizedIValue
 {
-    return val.map<NormalizedIValuePolicyEntry | NormalizedIValueAdaEntry>(({ policy, assets }) => {
-
+    return val
+    .map<NormalizedIValuePolicyEntry | NormalizedIValueAdaEntry>(({ policy, assets }) =>
+    {
         if( policy === "" )
         return {
             policy: "",
@@ -41,9 +42,11 @@ export function normalizeIValue( val: IValue ): NormalizedIValue
                     quantity: BigInt( quantity )
                 };
             })
+            .filter(({ quantity }) => quantity !== BigInt(0))
             .sort(( a, b ) => lexCompare( a.name, b.name ) )
         } as NormalizedIValuePolicyEntry
     })
+    .filter(({ assets }) => assets.length > 0)
     .sort(( a, b ) => {
         if( a.policy === "" ) return -1;
         if( b.policy === "" ) return 1;
