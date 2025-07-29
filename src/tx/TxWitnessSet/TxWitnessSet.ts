@@ -267,7 +267,7 @@ export class TxWitnessSet
                     v: new CborArray(
                         this.nativeScripts.map( 
                             nativeScript => nativeScript instanceof Script ?
-                            Cbor.parse( nativeScript.cbor ) :
+                            nativeScript.toCborObj() :
                             nativeScriptToCborObj( nativeScript ) )
                     )
                 },

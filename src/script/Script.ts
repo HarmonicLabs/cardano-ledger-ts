@@ -82,7 +82,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
      * 
      * @deprecated
     **/
-    readonly cbor!: T extends ScriptType.NativeScript ? never : CborString;
+    readonly cbor!: CborString;
     
     // --------- hash ---- //
     private _hash!: Hash28;
@@ -212,7 +212,6 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         this.bytes = bytes;
         /** TO DO: check for accuracy */
         if (this.type !== ScriptType.NativeScript) {
-            /// @ts-ignore Type 'CborString' is not assignable to type 'T extends ScriptType.NativeScript ? never : CborString'.
             this.cbor = Cbor.encode(
                 new CborBytes(
                     Cbor.encode(
@@ -222,9 +221,29 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
                     ).toBuffer()
                 )
             );
-        };
+        }
+        else {
+            this.cbor = new CborString( this.bytes );
+        }
 
         this.cborRef = cborRef;
+    }
+
+    /*
+    apply( ...args: ScriptApplyArg[] ): Script<T>
+    {
+        if( this.type === ScriptType.NativeScript ) return this.clone();
+        
+    }
+    //*/
+
+    nativeScript(): NativeScript | undefined
+    {
+        if( this.type === ScriptType.NativeScript )
+        {
+            return nativeScriptFromCbor( new CborString( this.bytes ) );
+        }
+        return undefined;
     }
 
     clone(): Script<T>

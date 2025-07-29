@@ -81,7 +81,6 @@ export class AllegraBlock implements
 
     static fromCbor( cbor: CanBeCborString ): AllegraBlock
     {   
-        // console.log("AllegraBlock.fromCbor", cbor);
         const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor ).toBuffer();
         return AllegraBlock.fromCborObj(
             Cbor.parse( bytes, { keepRef: true } ),
@@ -90,13 +89,10 @@ export class AllegraBlock implements
     };
 
     static fromCborObj(cObj: CborObj, _originalBytes?: Uint8Array): AllegraBlock {
-        // console.log("AllegraBlock.fromCborObj", cObj);
         if (!(
             cObj instanceof CborArray 
         ))throw new InvalidCborFormatError("Allegra Block must be a CBOR array with at least 5 elements");
         
-        // console.log("cObj Allegra: ", cObj);
-
         const _header = cObj.array[0];
         const _txBodies = cObj.array[1];
         const _txWitnessSets = cObj.array[2];
