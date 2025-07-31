@@ -199,7 +199,7 @@ export class BabbageHeaderBody
             blockBodyHash: _cBlockBodyHash.bytes as U8Arr32,
             opCert: PoolOperationalCert.fromCborObj(_cOpCert),
             protocolVersion: ProtocolVersion.fromCborObj(_cProtVer)
-        }, getSubCborRef( cHdrBody, _originalBytes))
+        }, getSubCborRef( cHdrBody, _originalBytes ))
 
         return babbageHeaderBody;
     }

@@ -100,19 +100,6 @@ IMultiEraHeader, ToCbor, ToJson
             header
         }, getSubCborRef(cObj, _originalBytes));
         
-        
-        console.log("multiEraHeader", 
-            JSON.stringify(multiEraHeader.toJSON(),
-            (k, v) => {
-              if (typeof v === "bigint") return v.toString();
-              if (v instanceof Uint8Array) return toHex(v);
-              return v;
-            },
-            2 // indentation
-          )
-        );
-        
-
         return multiEraHeader;
     }
 

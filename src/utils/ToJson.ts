@@ -3,13 +3,3 @@ export interface ToJson {
     toJSON: () => any
     toJson: () => any
 }
-
-export function logJson( jsonLike: ToJson, indent: number = 4 ): void
-{
-    const obj = typeof jsonLike !== "undefined" && typeof (jsonLike as any).toJson === "function" ? (jsonLike as any).toJson() : jsonLike
-
-    console.log(
-        JSON.stringify( obj, undefined, indent ),
-        Error().stack?.split("\n")[2]
-    );
-}

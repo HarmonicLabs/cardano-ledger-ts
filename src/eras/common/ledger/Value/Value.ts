@@ -48,11 +48,9 @@ export class Value
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        
         if(!(
             isIValue( map )
         ))throw new Error("invalid value interface passed to contruct a 'value' instance");
-
 
         const _map = normalizeIValue( map );
 
@@ -79,15 +77,8 @@ export class Value
         }
 
         _map.sort((a,b) => {
-            if( a.policy === "" )
-            {
-                if( b.policy === "" ) return Ord.EQ;
-                return Ord.LT;
-            };
-            if( b.policy === "" )
-            {
-                return Ord.GT;
-            }
+            if( a.policy === "" ) return Ord.LT;
+            if( b.policy === "" ) return Ord.GT;
             return lexCompare( a.policy.toBuffer(), b.policy.toBuffer() );
         });
 
@@ -270,9 +261,14 @@ export class Value
         return { policy, assets: assets.map( normalizeIValueAsset ) };
     }
 
-    static add( a: Value, b: Value ): Value
+    static add( a: Value, b: Value, ...rest: Value[] ): Value
     {
-        return new Value( addIValues( a.map as IValue, b.map as IValue ) );
+        a = new Value( addIValues( a.map as IValue, b.map as IValue ) );
+        while( b = rest.shift()! ) {
+            if( !(b instanceof Value) ) break;
+            a = new Value( addIValues( a.map as IValue, b.map as IValue ) );
+        }
+        return a;
     }
 
     static sub( a: Value, b: Value ): Value
@@ -337,18 +333,22 @@ export class Value
             .map( entry => {
                 const assets = entry.assets;
                 const policy = entry.policy;
+                const valueMap = assets
+                .map( ({ name: assetName, quantity: amt }) => {
+                    if( amt === BigInt(0) ) return undefined;
+                    return {
+                        k: new CborBytes( assetName.slice() ),
+                        v: amt < 0 ? new CborNegInt( amt ) : new CborUInt( amt )
+                    };
+                })
+                .filter( assetEntry => assetEntry !== undefined ) as CborMapEntry[];
+                if( valueMap.length === 0 ) return undefined;
                 return {
                     k: policy === "" ? new CborBytes( new Uint8Array(0) ) : policy.toCborObj(),
-                    v: new CborMap(
-                        assets.map( ({ name: assetName, quantity: amt }) => {
-                            return {
-                                k: new CborBytes( assetName.slice() ),
-                                v: amt < 0 ? new CborNegInt( amt ) : new CborUInt( amt )
-                            };
-                        })
-                    )
+                    v: new CborMap( valueMap )
                 };
             })
+            .filter( entry => entry !== undefined ) as CborMapEntry[]
         );
 
         if( this.lovelaces === BigInt(0) ) return multiasset;

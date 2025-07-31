@@ -8,7 +8,7 @@ import { signEd25519, signEd25519_sync } from "@harmoniclabs/crypto";
 import { InvalidCborFormatError } from "../utils/InvalidCborFormatError";
 import { ToJson } from "../utils/ToJson";
 import { AuxiliaryData } from "./AuxiliaryData";
-import { ITxBody, TxBody, isITxBody } from "./body";
+import { ITxBody, TxBody, UTxO, isITxBody } from "./body";
 import { XPrv } from "@harmoniclabs/bip32_ed25519";
 import { getSubCborRef, subCborRefOrUndef } from "../utils/getSubCborRef";
 
@@ -85,6 +85,11 @@ export class Tx
         this.auxiliaryData = auxiliaryData;
         
         this.cborRef = cborRef ?? subCborRefOrUndef( tx );
+    }
+
+    utxoAt( idx: number ): UTxO | undefined
+    {
+        return this.body.utxoAt( idx );
     }
 
     /**
