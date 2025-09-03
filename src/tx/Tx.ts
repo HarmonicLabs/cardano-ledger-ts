@@ -44,7 +44,7 @@ export class Tx
 
     constructor(
         tx: ITx,
-        readonly cborRef: SubCborRef | undefined = undefined
+        public cborRef: SubCborRef | undefined = undefined
     )
     {
         const {
@@ -102,6 +102,7 @@ export class Tx
     **/
     addVKeyWitness( this: Tx, vkeyWit: VKeyWitness ): void
     {
+        if( this.cborRef ) this.cborRef = undefined;
         this.witnesses.addVKeyWitness( vkeyWit )
     }
     /**

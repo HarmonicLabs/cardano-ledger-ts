@@ -116,15 +116,13 @@ export class TxWitnessSet
 
     constructor(
         witnesses: ITxWitnessSet,
-        readonly cborRef: SubCborRef | undefined = undefined,
+        public cborRef: SubCborRef | undefined = undefined,
         allRequiredSigners: Hash28[] | undefined = undefined,
     )
     {
         if(!(
             isITxWitnessSet( witnesses )
         )) throw new Error("invalid witnesses passed");
-
-
         
         const defGetter = ( name: keyof ITxWitnessSet, get: () => any ) =>
         {
@@ -205,7 +203,9 @@ export class TxWitnessSet
             }
         );
 
-        this.addVKeyWitness = ( vkeyWit: VKeyWitness ) => {_vkeyWits.push( vkeyWit.clone() );
+        this.addVKeyWitness = ( vkeyWit: VKeyWitness ) => {
+            if( this.cborRef ) this.cborRef = undefined;
+            _vkeyWits.push( vkeyWit.clone() );
         }
 
         /* DONE: this.cboRref params */
