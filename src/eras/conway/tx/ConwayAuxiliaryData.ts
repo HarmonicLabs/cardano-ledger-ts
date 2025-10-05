@@ -249,7 +249,7 @@ export class ConwayAuxiliaryData
             });
         };
         /* 
-            some blocks have auxiliary data as plain CborMap (metadata only old format) instead of CborTag(259, CborMap) for Babbage
+            some blocks have auxiliary data as plain CborMap (metadata only old format) instead of CborTag(259, CborMap) for post Alonzo
             some blocks use legacy auxiliary data encoding.(face palm)
         */
         if( cObj instanceof CborMap )
