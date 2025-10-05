@@ -180,7 +180,7 @@ export class ConwayBlock implements
             auxiliaryDataSet,
             invalidTransactions
         }, getSubCborRef(cObj));
-
+        // console.log("conwayBlock", conwayBlock);
         return conwayBlock
     }
 

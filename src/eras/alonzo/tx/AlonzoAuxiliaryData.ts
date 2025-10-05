@@ -186,7 +186,24 @@ export class AlonzoAuxiliaryData
                 nativeScripts: cObj.array[1].array.map( nativeScriptFromCborObj )
             });
         }
-
+                /* 
+            some blocks have auxiliary data as plain CborMap (metadata only old format) instead of CborTag(259, CborMap) for Babbage
+            some blocks use legacy auxiliary data encoding.(face palm)
+        */
+            if( cObj instanceof CborMap )
+                {
+        
+                    return new AlonzoAuxiliaryData({
+                        metadata: TxMetadata.fromCborObj( cObj )
+                    }, getSubCborRef( cObj ));
+                };
+        /*
+        ;             metadata: shelley
+        ; transaction_metadata: shelley-ma
+        ; NEW
+        ;   #6.259(0 ==> metadata): alonzo onwards
+        ;       3: [* plutus_v1_script]
+        */
         if(!(
             cObj instanceof CborTag &&
             cObj.data instanceof CborMap 

@@ -103,14 +103,14 @@ export class AllegraHeaderBody
         return this.nonceVrfResult;
     }
 
-    leaderVrfOutput(): U8Arr<32>
+    getLeaderVrfOutput(): U8Arr<32>
     {
         return sha2_256_sync(
             this.leaderVrfResult.proofHash
         ) as U8Arr<32>;
     }
 
-    nonceVrfOutput(): U8Arr<32>
+    getNonceVrfOutput(): U8Arr<32>
     {
         return sha2_256_sync(
             this.nonceVrfResult.proofHash

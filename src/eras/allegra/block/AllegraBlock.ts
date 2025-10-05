@@ -20,8 +20,7 @@ export interface IAllegraBlock {
     transactionBodies: IAllegraTxBody[];
     transactionWitnessSets: IAllegraTxWitnessSet[];
     auxiliaryDataSet: { [transactionIndex: number]: IAllegraAuxiliaryData };
-
-  }
+}
 export class AllegraBlock implements 
     IAllegraBlock, ToCbor, ToJson 
 {

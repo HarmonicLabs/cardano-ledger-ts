@@ -1,11 +1,11 @@
 Order of eras to respect:
 
-1) Conway
-2) Babbage
-3) Alonzo
+7) Conway
+6) Babbage
+5) Alonzo
 4) Mary
-5) Allegra
-6) Shelley
+3) Allegra
+2) Shelley
 
 7) Byron (DON'T DO THIS)
 
