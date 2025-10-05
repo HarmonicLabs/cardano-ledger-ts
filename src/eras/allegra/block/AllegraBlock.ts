@@ -157,15 +157,13 @@ export class AllegraBlock implements
             auxiliaryDataSet[txIndex] = AllegraAuxiliaryData.fromCborObj(v);
         }
 
-        const conwayBlock = new AllegraBlock({
+        return new AllegraBlock({
             header,
             transactionBodies,
             transactionWitnessSets,
             auxiliaryDataSet
         }, getSubCborRef(cObj));
-
-        return conwayBlock
-    }
+    };
 
     toJSON() 
     { 
