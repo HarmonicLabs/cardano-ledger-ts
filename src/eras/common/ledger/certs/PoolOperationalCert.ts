@@ -52,7 +52,8 @@ export class PoolOperationalCert
         readonly cborRef: SubCborRef | undefined = undefined
     )
     {
-        if(!isIPoolOperationalCert(cert)) throw new Error("Invalid PoolOperationalCert");
+        if (!isIPoolOperationalCert(cert)) throw new Error("Invalid PoolOperationalCert");
+        
         this.kesPubKey = cert.kesPubKey;
         this.sequenceNumber = forceBigUInt( cert.sequenceNumber );
         this.kesPeriod      = forceBigUInt( cert.kesPeriod );

@@ -1,4 +1,4 @@
-import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString, isCborObj } from "@harmoniclabs/cbor";
+import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString, isCborObj, CborBytes } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { Data, isData, dataToCborObj, dataFromCborObj } from "@harmoniclabs/plutus-data";
 import { isObject } from "@harmoniclabs/obj-utils";
@@ -265,7 +265,7 @@ export class ConwayTxWitnessSet
                     v: new CborArray(
                         this.nativeScripts.map( 
                             nativeScript => nativeScript instanceof Script ?
-                            Cbor.parse( nativeScript.cbor ) :
+                            Cbor.parse( nativeScript.toCbor() ) :
                             nativeScriptToCborObj( nativeScript ) )
                     )
                 },
@@ -283,7 +283,7 @@ export class ConwayTxWitnessSet
                     k: new CborUInt( 3 ),
                     v: new CborArray(
                         this.plutusV1Scripts
-                        .map( script =>  Cbor.parse( script.cbor ) )
+                        .map( Script.encodePlutusScriptForWitnessSet )
                     )
                 },
 
@@ -308,7 +308,7 @@ export class ConwayTxWitnessSet
                     k: new CborUInt( 6 ),
                     v: new CborArray(
                         this.plutusV2Scripts
-                        .map( script => Cbor.parse( script.cbor ) )
+                        .map( Script.encodePlutusScriptForWitnessSet )
                     )
                 },
 
@@ -317,7 +317,7 @@ export class ConwayTxWitnessSet
                     k: new CborUInt( 7 ),
                     v: new CborArray(
                         this.plutusV3Scripts
-                        .map( script => Cbor.parse( script.cbor ) )
+                        .map( Script.encodePlutusScriptForWitnessSet )
                     )
                 },
             ]
@@ -415,4 +415,4 @@ function witnessRedeemersFromCborObj( cbor: CborObj ): ConwayTxRedeemer[]
         return cbor.map.map( ConwayTxRedeemer.fromCborMapEntry );
     }
     else throw new Error("invalid format for witness set redeemers field");
-}
+};

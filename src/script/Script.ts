@@ -70,6 +70,7 @@ export interface IScript<T extends LitteralScriptType = LitteralScriptType> {
 export class Script<T extends LitteralScriptType = LitteralScriptType>
     implements ToCbor
 {
+
     readonly type!: T;
     readonly bytes!: Uint8Array;
 
@@ -211,12 +212,21 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
 
         this.bytes = bytes;
         /** TO DO: check for accuracy */
+        /**
+         * format expected by `cardano-cli`
+         * 
+         * for standard ledger format (as defined in CDDL) use `toCbor` method
+         * 
+         * this one is used in the witness set
+         * 
+         * @deprecated
+        **/
         if (this.type !== ScriptType.NativeScript) {
             this.cbor = Cbor.encode(
                 new CborBytes(
                     Cbor.encode(
                         new CborBytes(
-                            Uint8Array.prototype.slice.call(bytes)
+                            Uint8Array.prototype.slice.call(this.bytes)
                         )
                     ).toBuffer()
                 )
@@ -225,7 +235,6 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         else {
             this.cbor = new CborString( this.bytes );
         }
-
         this.cborRef = cborRef;
     }
 
@@ -389,5 +398,18 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
             cObj.array[1].bytes,
             getSubCborRef( cObj )
         );
+    }
+
+    static encodePlutusScriptForWitnessSet( script: Script ): CborBytes
+    {
+        return new CborBytes(
+            Cbor.encode(
+                new CborBytes(
+                    Uint8Array.prototype.slice.call(script.bytes)
+                )
+            ).toBuffer()
+        )
+        // return Cbor.parse( script.cbor ) as CborBytes
+        // return new CborBytes( script.bytes );
     }
 }

@@ -216,7 +216,7 @@ export class ShelleyTxWitnessSet
                     v: new CborArray(
                         this.nativeScripts.map( 
                             nativeScript => nativeScript instanceof Script ?
-                            Cbor.parse( nativeScript.cbor ) :
+                            Cbor.parse( nativeScript.toCbor() ) :
                             nativeScriptToCborObj( nativeScript ) )
                     )
                 },
