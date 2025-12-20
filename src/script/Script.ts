@@ -71,6 +71,13 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
     implements ToCbor
 {
     readonly type!: T;
+    /**
+     * format expected by `cardano-cli`
+     * 
+     * for standard ledger format (as defined in CDDL) use `toCbor` method
+     * 
+     * this one is used in the witness set
+    **/
     readonly bytes!: Uint8Array;
 
     /**

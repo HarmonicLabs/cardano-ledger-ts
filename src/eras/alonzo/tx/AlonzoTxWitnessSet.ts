@@ -245,8 +245,9 @@ export class AlonzoTxWitnessSet
                     v: new CborArray(
                         this.nativeScripts.map( 
                             nativeScript => nativeScript instanceof Script ?
-                            Cbor.parse( nativeScript.bytes ) :
-                            nativeScriptToCborObj( nativeScript ) )
+                            Cbor.parse( nativeScript.bytes ) : // nativeScript.toCborObj() wraps in an array
+                            nativeScriptToCborObj( nativeScript )
+                        )
                     )
                 },
 
@@ -263,7 +264,7 @@ export class AlonzoTxWitnessSet
                     k: new CborUInt( 3 ),
                     v: new CborArray(
                         this.plutusV1Scripts
-                        .map( script =>  Cbor.parse( script.cbor ) )
+                        .map( script =>  Cbor.parse( script.bytes ) )
                     )
                 },
 

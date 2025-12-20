@@ -265,8 +265,9 @@ export class ConwayTxWitnessSet
                     v: new CborArray(
                         this.nativeScripts.map( 
                             nativeScript => nativeScript instanceof Script ?
-                            Cbor.parse( nativeScript.cbor ) :
-                            nativeScriptToCborObj( nativeScript ) )
+                            Cbor.parse( nativeScript.bytes ) : // nativeScript.toCborObj() wraps in an array
+                            nativeScriptToCborObj( nativeScript )
+                        )
                     )
                 },
 
@@ -283,7 +284,7 @@ export class ConwayTxWitnessSet
                     k: new CborUInt( 3 ),
                     v: new CborArray(
                         this.plutusV1Scripts
-                        .map( script =>  Cbor.parse( script.cbor ) )
+                        .map( script =>  Cbor.parse( script.bytes ) )
                     )
                 },
 
@@ -308,7 +309,7 @@ export class ConwayTxWitnessSet
                     k: new CborUInt( 6 ),
                     v: new CborArray(
                         this.plutusV2Scripts
-                        .map( script => Cbor.parse( script.cbor ) )
+                        .map( script => Cbor.parse( script.bytes ) )
                     )
                 },
 
@@ -317,7 +318,7 @@ export class ConwayTxWitnessSet
                     k: new CborUInt( 7 ),
                     v: new CborArray(
                         this.plutusV3Scripts
-                        .map( script => Cbor.parse( script.cbor ) )
+                        .map( script => Cbor.parse( script.bytes ) )
                     )
                 },
             ]
