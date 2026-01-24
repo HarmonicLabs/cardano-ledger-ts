@@ -247,15 +247,32 @@ export class ConwayAuxiliaryData
                 metadata: TxMetadata.fromCborObj( cObj.array[0] ),
                 nativeScripts: cObj.array[1].array.map( nativeScriptFromCborObj )
             });
-        }
-        console.log("ConwayAuxiliaryData.fromCborObj", cObj);
+        };
+        /* 
+            some blocks have auxiliary data as plain CborMap (metadata only old format) instead of CborTag(259, CborMap) for post Alonzo
+            some blocks use legacy auxiliary data encoding.(face palm)
+        */
+        if( cObj instanceof CborMap )
+        {
+
+            return new ConwayAuxiliaryData({
+                metadata: TxMetadata.fromCborObj( cObj )
+            }, getSubCborRef( cObj ));
+        };
+        // console.log("ConwayAuxiliaryData.fromCborObj", cObj);
+        /*
+        ;               metadata: shelley
+        ;   transaction_metadata: shelley-ma
+        ; #6.259(0 ==> metadata): alonzo onwards
+        ; NEW:
+        ;   3: [* plutus_v3_script]
+        ;
+        */
         if(!(
             cObj instanceof CborTag 
             && cObj.data instanceof CborMap 
             // && cObj.data.map.length >= 5
         ))throw new InvalidCborFormatError("ConwayAuxiliaryData");
-
-        
 
         let fields: (CborObj | undefined)[] = new Array( 5 ).fill( undefined );
 

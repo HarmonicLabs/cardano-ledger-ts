@@ -20,8 +20,7 @@ export interface IAllegraBlock {
     transactionBodies: IAllegraTxBody[];
     transactionWitnessSets: IAllegraTxWitnessSet[];
     auxiliaryDataSet: { [transactionIndex: number]: IAllegraAuxiliaryData };
-
-  }
+}
 export class AllegraBlock implements 
     IAllegraBlock, ToCbor, ToJson 
 {
@@ -158,15 +157,13 @@ export class AllegraBlock implements
             auxiliaryDataSet[txIndex] = AllegraAuxiliaryData.fromCborObj(v);
         }
 
-        const conwayBlock = new AllegraBlock({
+        return new AllegraBlock({
             header,
             transactionBodies,
             transactionWitnessSets,
             auxiliaryDataSet
         }, getSubCborRef(cObj));
-
-        return conwayBlock
-    }
+    };
 
     toJSON() 
     { 

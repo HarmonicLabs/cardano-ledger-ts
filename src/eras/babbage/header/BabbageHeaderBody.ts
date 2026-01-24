@@ -78,13 +78,14 @@ export class BabbageHeaderBody
     }
 
     // just keep the leaderVrfOutput and nonceVrfOutput ones
-    leaderVrfOutput(): U8Arr<32>
+    getLeaderVrfOutput(): U8Arr<32>
     {
         return sha2_256_sync(
             this.vrfResult.proofHash
         ) as U8Arr<32>;
     }
-    nonceVrfOutput: () => U8Arr32;   
+    // Not used after Babbage
+    getNonceVrfOutput: () => U8Arr32;   
 
     clone(): BabbageHeaderBody
     {
@@ -200,7 +201,7 @@ export class BabbageHeaderBody
             opCert: PoolOperationalCert.fromCborObj(_cOpCert),
             protocolVersion: ProtocolVersion.fromCborObj(_cProtVer)
         }, getSubCborRef( cHdrBody, _originalBytes ))
-
+        
         return babbageHeaderBody;
     }
 }

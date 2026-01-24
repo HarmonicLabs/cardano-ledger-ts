@@ -204,29 +204,44 @@ export class BabbageAuxiliaryData
             return new BabbageAuxiliaryData({
                 metadata: TxMetadata.fromCborObj( cObj.data  )
             });
-        }
-
+        };
         // shelley multi assets; metadata + native scripts
         if( cObj instanceof CborArray )
         {
-            if(!(
-                cObj.array[1] instanceof CborArray 
+            if (!(
+                cObj.array[1] instanceof CborArray
                 // && cObj.array[1].length >= 5               
-            ))throw new InvalidCborFormatError("BabbageAuxiliaryData")
+            )) throw new InvalidCborFormatError("BabbageAuxiliaryData CBorArray");
 
             return new BabbageAuxiliaryData({
                 metadata: TxMetadata.fromCborObj( cObj.array[0] ),
                 nativeScripts: cObj.array[1].array.map( nativeScriptFromCborObj )
             });
-        }
-        
-        if(!(
-            cObj instanceof CborTag 
-            && cObj.data instanceof CborMap 
-            // && cObj.data.map.length >= 4
-        ))throw new InvalidCborFormatError("BabbageAuxiliaryData");
+        };
+        /* 
+            some blocks have auxiliary data as plain CborMap (metadata only old format) instead of CborTag(259, CborMap) for post Alonzo
+            some blocks use legacy auxiliary data encoding.(face palm)
+        */
+        if( cObj instanceof CborMap )
+        {
 
-        
+            return new BabbageAuxiliaryData({
+                metadata: TxMetadata.fromCborObj( cObj )
+            }, getSubCborRef( cObj ));
+        };
+        /*
+        ;               metadata: shelley
+        ;   transaction_metadata: shelley-ma
+        ; #6.259(0 ==> metadata): alonzo onwards
+        ; NEW:
+        ;   3: [* plutus_v2_script]
+        ;
+        */
+        if(!(
+            cObj instanceof CborTag &&
+            cObj.data instanceof CborMap 
+            // && cObj.data.map.length >= 4
+        ))throw new InvalidCborFormatError("BabbageAuxiliaryData CborTag && CborMap");
 
         let fields: (CborObj | undefined)[] = new Array( 4 ).fill( undefined );
 
@@ -239,8 +254,7 @@ export class BabbageAuxiliaryData
             if( v === undefined ) continue;
 
             fields[i] = v;
-        }
-        // console.log("fields", fields);
+        };
 
         const [
             _metadata,

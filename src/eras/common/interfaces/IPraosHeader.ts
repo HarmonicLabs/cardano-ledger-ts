@@ -59,7 +59,7 @@ export interface IPraosHeaderBody {
      * https://github.com/txpipe/pallas/blob/2ddb5b066bbde9d2ed55014b286f47ad370b828e/pallas-primitives/src/babbage/model.rs#L296-L317
      * babbage and later: `sha2_256( [0x4c].concat( this.vrfResult.vrfOutput ) )` (0x4c is "L" indicating leader)
     **/
-    leaderVrfOutput: () => U8Arr32;
+    getLeaderVrfOutput: () => U8Arr32;
     /**
      * 
      * from shelley to alonzo: `this.nonceVrfResult.vrfOutput`
@@ -67,7 +67,7 @@ export interface IPraosHeaderBody {
      * https://github.com/txpipe/pallas/blob/2ddb5b066bbde9d2ed55014b286f47ad370b828e/pallas-primitives/src/babbage/model.rs#L296-L317
      * babbage and later: `sha2_256( [0x4e].concat( this.vrfResult.vrfOutput ) )` (0x4e is "N" indicating nonce)
     **/
-    nonceVrfOutput: () => U8Arr32;
+    getNonceVrfOutput: () => U8Arr32;
 
     // getLeaderVrfCert: () => VrfCert;
     // getNonceVrfCert: () => VrfCert;

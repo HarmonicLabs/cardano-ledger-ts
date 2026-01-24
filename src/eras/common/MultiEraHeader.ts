@@ -17,7 +17,7 @@ export interface IMultiEraHeader {
 }
 
 export class MultiEraHeader implements 
-IMultiEraHeader, ToCbor, ToJson 
+    IMultiEraHeader, ToCbor, ToJson 
 {
     readonly era: CardanoEra;
     readonly header: ConwayHeader | BabbageHeader | AlonzoHeader | MaryHeader | AllegraHeader | ShelleyHeader;

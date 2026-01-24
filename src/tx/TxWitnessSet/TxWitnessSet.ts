@@ -267,7 +267,7 @@ export class TxWitnessSet
                     v: new CborArray(
                         this.nativeScripts.map( 
                             nativeScript => nativeScript instanceof Script ?
-                            Cbor.parse( nativeScript.bytes ) : // nativeScript.toCborObj() wraps in an array
+                            Cbor.parse( nativeScript.bytes ) :
                             nativeScriptToCborObj( nativeScript )
                         )
                     )
@@ -286,7 +286,7 @@ export class TxWitnessSet
                     k: new CborUInt( 3 ),
                     v: new CborArray(
                         this.plutusV1Scripts
-                        .map( encodePlutusScriptForWitnessSet )
+                        .map( Script.encodePlutusScriptForWitnessSet )
                     )
                 },
 
@@ -311,7 +311,7 @@ export class TxWitnessSet
                     k: new CborUInt( 6 ),
                     v: new CborArray(
                         this.plutusV2Scripts
-                        .map( encodePlutusScriptForWitnessSet )
+                        .map( Script.encodePlutusScriptForWitnessSet )
                     )
                 },
 
@@ -320,13 +320,13 @@ export class TxWitnessSet
                     k: new CborUInt( 7 ),
                     v: new CborArray(
                         this.plutusV3Scripts
-                        .map( encodePlutusScriptForWitnessSet )
+                        .map( Script.encodePlutusScriptForWitnessSet )
                     )
                 },
             ]
             .filter( elem => elem !== undefined ) as CborMapEntry[])
         )
-    }
+    };
 
     static fromCbor( cStr: CanBeCborString ): TxWitnessSet
     {
@@ -345,7 +345,7 @@ export class TxWitnessSet
                 ({ k }) => k instanceof CborUInt && Number( k.num ) === i
             ) ?? { v: undefined };
 
-            if( v === undefined || !isCborObj( v ) ) continue;encodePlutusScriptForWitnessSet
+            if( v === undefined || !isCborObj( v ) ) continue;
 
             fields[i] = v;
         }
@@ -402,7 +402,6 @@ export class TxWitnessSet
     }
 
 }
-
 function witnessRedeemersFromCborObj( cbor: CborObj ): TxRedeemer[]
 {
     if( cbor instanceof CborArray )
@@ -416,17 +415,3 @@ function witnessRedeemersFromCborObj( cbor: CborObj ): TxRedeemer[]
     else throw new Error("invalid format for witness set redeemers field");
 }
 
-function encodePlutusScriptForWitnessSet(
-    script: Script
-): CborBytes
-{
-    return new CborBytes(
-        Cbor.encode(
-            new CborBytes(
-                Uint8Array.prototype.slice.call(script.bytes)
-            )
-        ).toBuffer()
-    )
-    // return Cbor.parse( script.bytes ) as CborBytes
-    // return new CborBytes( script.bytes );
-}

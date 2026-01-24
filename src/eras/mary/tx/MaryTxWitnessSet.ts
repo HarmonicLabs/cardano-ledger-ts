@@ -215,7 +215,7 @@ export class MaryTxWitnessSet
                     v: new CborArray(
                         this.nativeScripts.map( 
                             nativeScript => nativeScript instanceof Script ?
-                            Cbor.parse( nativeScript.bytes ) : // nativeScript.toCborObj() wraps in an array
+                            Cbor.parse( nativeScript.bytes ) :
                             nativeScriptToCborObj( nativeScript )
                         )
                     )

@@ -245,7 +245,7 @@ export class AlonzoTxWitnessSet
                     v: new CborArray(
                         this.nativeScripts.map( 
                             nativeScript => nativeScript instanceof Script ?
-                            Cbor.parse( nativeScript.bytes ) : // nativeScript.toCborObj() wraps in an array
+                            Cbor.parse( nativeScript.bytes ) :
                             nativeScriptToCborObj( nativeScript )
                         )
                     )
@@ -263,8 +263,8 @@ export class AlonzoTxWitnessSet
                 {
                     k: new CborUInt( 3 ),
                     v: new CborArray(
-                        this.plutusV1Scripts
-                        .map( script =>  Cbor.parse( script.bytes ) )
+                        this.plutusV1Scripts 
+                        .map ( Script.encodePlutusScriptForWitnessSet )
                     )
                 },
 
@@ -365,4 +365,4 @@ function witnessRedeemersFromCborObj( cbor: CborObj ): AlonzoTxRedeemer[]
         return cbor.map.map( AlonzoTxRedeemer.fromCborMapEntry );
     }
     else throw new Error("invalid format for witness set redeemers field");
-}
+};
