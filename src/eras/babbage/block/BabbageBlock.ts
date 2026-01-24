@@ -179,7 +179,7 @@ export class BabbageBlock implements
             auxiliaryDataSet,
             invalidTransactions
         }, getSubCborRef(cObj));
-        console.log("babbageBlock", babbageBlock);
+        // console.log("babbageBlock", babbageBlock);
         return babbageBlock
     }
 
