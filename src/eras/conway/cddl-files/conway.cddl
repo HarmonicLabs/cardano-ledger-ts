@@ -180,7 +180,7 @@ cost_models = {
                 ? 0 : [* int64]
               , ? 1 : [* int64]
               , ? 2 : [* int64]
-              , * 3 .. 255 => [* int64]
+              , ?3 => [* int64]
               }
 
 credential = [0, addr_keyhash // 1, script_hash]

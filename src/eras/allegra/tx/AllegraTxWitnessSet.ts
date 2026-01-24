@@ -214,8 +214,9 @@ export class AllegraTxWitnessSet
                     v: new CborArray(
                         this.nativeScripts.map( 
                             nativeScript => nativeScript instanceof Script ?
-                            Cbor.parse( nativeScript.toCbor() ) :
-                            nativeScriptToCborObj( nativeScript ) )
+                            Cbor.parse( nativeScript.bytes ) : // nativeScript.toCborObj() wraps in an array
+                            nativeScriptToCborObj( nativeScript )
+                        )
                     )
                 },
 
