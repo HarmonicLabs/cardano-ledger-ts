@@ -30,7 +30,7 @@ export type AddressType
     = "base"
     | "pointer"
     | "enterprise"
-    | "bootstrap"
+    | "byron"
     | "unknown"
 
 export interface IAddress {
@@ -98,7 +98,7 @@ export class Address
             if(!(
                 type === "base"         ||
                 type === "enterprise"   ||
-                type === "bootstrap"    ||
+                type === "byron"    ||
                 type === "pointer"
             ))throw new Error("invalid address type");
 
@@ -185,7 +185,7 @@ export class Address
                 this.type === "base" ?       0b0000_0000 :
                 this.type === "pointer" ?    0b0100_0000 :
                 this.type === "enterprise" ? 0b0110_0000 :
-                0b1000 // bootstrap
+                0b1000 // byron
             ) |
             ( this.stakeCreds?.type === "script"  ? 0b10_0000 : 0b00_0000 ) |
             ( this.paymentCreds.type === CredentialType.Script ? 0b01_0000 : 0b00_0000 )
@@ -227,19 +227,23 @@ export class Address
         const addrType = (header & 0b1111_0000) >> 4;
         const network: NetworkT = ( (header & 0b0000_1111) ) === 1 ? "mainnet" : "testnet" ;
 
+        if( addrType === 0b1000 ) { // byron
+
+        }
+
         const type: AddressType =
             addrType <= 0b0011  ? "base" :
             addrType <= 0b0101  ? "pointer" :
             addrType <= 0b0111  ? "enterprise" :
-            addrType === 0b1000 ? "bootstrap" :
+            addrType === 0b1000 ? "byron" :
             // addrType === 0b1110 || addrType === 0b1111 ? "stake" :
             "unknown";
 
         let payment: byte[];
         let stake: byte[];
 
-        const paymentType: CredentialType = (addrType & 0b0001) === 1 ? CredentialType.Script: CredentialType.KeyHash; 
-        const   stakeType: StakeCredentialsType   = (addrType & 0b0010) === 1 ? StakeCredentialsType.Script: StakeCredentialsType.KeyHash;
+        const paymentType: CredentialType       = addrType & 0b0001 ? CredentialType.Script: CredentialType.KeyHash; 
+        const stakeType: StakeCredentialsType   = addrType & 0b0010 ? StakeCredentialsType.Script: StakeCredentialsType.KeyHash;
 
         switch( type )
         {
@@ -252,7 +256,7 @@ export class Address
                 payment = payload.slice( 0, 28 ),
                 stake = payload.slice( 28 );
             break;
-            case "bootstrap":
+            case "byron":
             case "enterprise":
             case "pointer":
                 if( payload.length < 28 )
