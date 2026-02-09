@@ -2,7 +2,7 @@ import { ToCbor, CborString, Cbor, CborMap, CborUInt, CborArray, CborTag, CborBy
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { isObject, hasOwn } from "@harmoniclabs/obj-utils";
 import { Data, isData, ToData, DataConstr, dataToCbor, dataFromCborObj, DataB } from "@harmoniclabs/plutus-data";
-import { Hash32 } from "../../../hashes";
+import { Hash28, Hash32 } from "../../../hashes";
 import { Script } from "../../../script";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
@@ -155,7 +155,7 @@ export class TxOut
         )
     }
 
-    static fromData( data: DataConstr, version: ToDataVersion = "v3" ): TxOut
+    static fromData( data: Data, version: ToDataVersion = "v3" ): TxOut
     {
         if( version === "v1" )
         {
@@ -256,7 +256,7 @@ export class TxOut
         throw new BasePlutsError("invalid TxOut data: invalid refScriptHash field");
 
         const maybeRefScriptHashIdx = Number( data_refScriptHash.constr );
-        let refScriptHash: Hash32 | undefined = undefined;
+        let refScriptHash: Hash28 | undefined = undefined;
 
         if( maybeRefScriptHashIdx === 1 ) refScriptHash = undefined;
         else if( maybeRefScriptHashIdx === 0 )
@@ -265,7 +265,7 @@ export class TxOut
                 data_refScriptHash.fields.length === 1
                 && data_refScriptHash.fields[0] instanceof DataB
             )) throw new BasePlutsError("invalid TxOut data: invalid refScriptHash field");
-            refScriptHash = new Hash32( data_refScriptHash.fields[0].bytes.toBuffer() );
+            refScriptHash = new Hash28( data_refScriptHash.fields[0].bytes.toBuffer() );
         }
         
         return new TxOut({

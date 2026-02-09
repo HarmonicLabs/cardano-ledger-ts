@@ -2,7 +2,7 @@ import { ToCbor, CborString, Cbor, CborObj, CborArray, CborUInt, CanBeCborString
 import { lexCompare } from "@harmoniclabs/uint8array-utils";
 import { forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
 import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
-import { ToData, DataConstr, DataB, DataI } from "@harmoniclabs/plutus-data";
+import { ToData, DataConstr, DataB, DataI, Data } from "@harmoniclabs/plutus-data";
 import { Hash32 } from "../../../hashes";
 import { BasePlutsError } from "../../../utils/BasePlutsError";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
@@ -134,7 +134,7 @@ export class TxOutRef
         );
     }
 
-    static fromData( data: DataConstr, version: ToDataVersion = "v3" ): TxOutRef
+    static fromData( data: Data, version: ToDataVersion = "v3" ): TxOutRef
     {
         if( version === "v1" || version === "v2" )
         {
