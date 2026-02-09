@@ -74,7 +74,6 @@ export class Credential<T extends CredentialType = CredentialType>
             [ new DataB( this.hash.toBuffer() )  ]
         )
     }
-
     static fromData( data: Data ): Credential
     {
         if(!(data instanceof DataConstr))

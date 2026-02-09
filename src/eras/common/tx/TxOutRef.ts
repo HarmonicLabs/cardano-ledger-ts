@@ -134,6 +134,61 @@ export class TxOutRef
         );
     }
 
+    static fromData( data: DataConstr, version: ToDataVersion = "v3" ): TxOutRef
+    {
+        if( version === "v1" || version === "v2" )
+        {
+            if(!(
+                data instanceof DataConstr
+                && Number( data.constr ) === 0
+                && data.fields.length === 2
+            )) throw new BasePlutsError("invalid TxOutRef data");
+
+            const [
+                data_id,
+                data_index
+            ] = data.fields;
+
+            if(!(
+                data_id instanceof DataConstr
+                && Number( data_id.constr ) === 0
+                && data_id.fields.length === 1
+                && data_id.fields[0] instanceof DataB
+            )) throw new BasePlutsError("invalid TxOutRef data: invalid id field");
+            
+            if(!( data_index instanceof DataI ))
+            throw new BasePlutsError("invalid TxOutRef data: invalid index field");
+
+            return new TxOutRef({
+                id: new Hash32( data_id.fields[0].bytes.toBuffer() ),
+                index: Number( data_index.int )
+            });
+        }
+
+        // v3 and later
+        if(!(
+            data instanceof DataConstr
+            && Number( data.constr ) === 0
+            && data.fields.length === 2
+        )) throw new BasePlutsError("invalid TxOutRef data");
+
+        const [
+            data_id,
+            data_index
+        ] = data.fields;
+
+        if(!( data_id instanceof DataB ))
+        throw new BasePlutsError("invalid TxOutRef data: invalid id field");
+        
+        if(!( data_index instanceof DataI ))
+        throw new BasePlutsError("invalid TxOutRef data: invalid index field");
+
+        return new TxOutRef({
+            id: new Hash32( data_id.bytes.toBuffer() ),
+            index: Number( data_index.int )
+        });
+    }
+
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();

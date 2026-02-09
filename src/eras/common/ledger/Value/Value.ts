@@ -1,5 +1,5 @@
 import { ToCbor, CborString, Cbor, CborObj, CborUInt, CborMap, CborBytes, CborNegInt, CborArray, CanBeCborString, forceCborString, CborMapEntry, SubCborRef } from "@harmoniclabs/cbor";
-import { ToData, DataMap, DataB, DataI, DataPair } from "@harmoniclabs/plutus-data";
+import { ToData, DataMap, DataB, DataI, DataPair, Data } from "@harmoniclabs/plutus-data";
 import { lexCompare, toHex, fromHex } from "@harmoniclabs/uint8array-utils";
 import { Hash28 } from "../../../../hashes";
 import { forceBigUInt, CanBeUInteger } from "../../../../utils/ints";
@@ -227,19 +227,19 @@ export class Value
     }
 
     static singleAssetEntry(
-        policy: Hash28,
+        policy: Hash28 | Uint8Array | string,
         name: Uint8Array,
         qty: number | bigint
     ): NormalizedIValuePolicyEntry
     {
         return {
-            policy,
+            policy: new Hash28( policy ),
             assets: [ Value.assetEntry( name, qty ) ]
         };
     }
 
     static singleAsset(
-        policy: Hash28,
+        policy: Hash28 | Uint8Array | string,
         name: Uint8Array,
         qty: number | bigint
     ): Value
@@ -254,11 +254,14 @@ export class Value
     }
 
     static entry(
-        policy: Hash28,
+        policy: Hash28 | Uint8Array | string,
         assets: IValueAsset[]
     ): NormalizedIValuePolicyEntry
     {
-        return { policy, assets: assets.map( normalizeIValueAsset ) };
+        return {
+            policy: new Hash28( policy ),
+            assets: assets.map( normalizeIValueAsset )
+        };
     }
 
     static add( a: Value, b: Value, ...rest: Value[] ): Value
@@ -298,6 +301,54 @@ export class Value
                 )
             )
         )
+    }
+
+    static fromData( data: Data, version: ToDataVersion = "v3" ): Value
+    {
+        if(!(
+            data instanceof DataMap
+        )) throw new Error("invalid Value data");
+
+        const dataEntries = data.map;
+        const valueMap: IValue = new Array( dataEntries.length );
+        for( let i = 0; i < dataEntries.length; i++ )
+        {
+            const data_policy = dataEntries[i].fst;
+            const data_assets = dataEntries[i].snd;
+
+            if(!( data_policy instanceof DataB ))
+            throw new Error("invalid Value data: policy keys must be bytes");
+
+            if(!( data_assets instanceof DataMap ))
+            throw new Error("invalid Value data: assets must be maps");
+
+            const policy = data_policy.bytes.toBuffer().length === 0 ? "" : new Hash28( data_policy.bytes.toBuffer() );
+            const assetEntries = data_assets.map;
+            const assets: IValueAssetBI[] = new Array( assetEntries.length );
+            for( let j = 0; j < assetEntries.length; j++ )
+            {
+                const data_assetName = assetEntries[j].fst;
+                const data_quantity = assetEntries[j].snd;
+
+                if(!( data_assetName instanceof DataB ))
+                throw new Error("invalid Value data: asset name keys must be bytes");
+
+                if(!( data_quantity instanceof DataI ))
+                throw new Error("invalid Value data: asset quantity values must be integers");
+
+                assets[j] = {
+                    name: data_assetName.bytes.toBuffer(),
+                    quantity: BigInt( data_quantity.int )
+                };
+            }
+
+            valueMap[i] = {
+                policy,
+                assets
+            };
+        }
+
+        return new Value( valueMap );
     }
     
     toCborBytes(): Uint8Array

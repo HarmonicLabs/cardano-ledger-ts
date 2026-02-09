@@ -1,7 +1,7 @@
 import { ToCbor, CborString, Cbor, CborMap, CborUInt, CborArray, CborTag, CborBytes, CborMapEntry, CanBeCborString, forceCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { isObject, hasOwn } from "@harmoniclabs/obj-utils";
-import { Data, isData, ToData, DataConstr, dataToCbor, dataFromCborObj } from "@harmoniclabs/plutus-data";
+import { Data, isData, ToData, DataConstr, dataToCbor, dataFromCborObj, DataB } from "@harmoniclabs/plutus-data";
 import { Hash32 } from "../../../hashes";
 import { Script } from "../../../script";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
@@ -153,6 +153,127 @@ export class TxOut
                 maybeData( this.refScript?.hash.toData( version ) )
             ]
         )
+    }
+
+    static fromData( data: DataConstr, version: ToDataVersion = "v3" ): TxOut
+    {
+        if( version === "v1" )
+        {
+            if(!(
+                data instanceof DataConstr
+                && Number( data.constr ) === 0
+                && data.fields.length === 3
+            )) throw new BasePlutsError("invalid TxOut data");
+
+            const [
+                data_address,
+                data_value,
+                data_datum
+            ] = data.fields;
+
+            if(!(
+                data_address instanceof DataConstr
+            )) throw new BasePlutsError("invalid TxOut data: invalid address field");
+
+            if(!(
+                data_datum instanceof DataConstr
+            )) throw new BasePlutsError("invalid TxOut data: invalid datum field");
+
+            const maybeIdx = Number( data_datum.constr );
+            let datum: Hash32 | Data | undefined = undefined;
+
+            if( maybeIdx === 0 ) datum = undefined;
+            else if( maybeIdx === 1 )
+            {
+                if(!(
+                    data_datum.fields.length === 1
+                    && data_datum.fields[0] instanceof DataB
+                )) throw new BasePlutsError("invalid TxOut data: invalid datum field");
+
+                datum = new Hash32( data_datum.fields[0].bytes.toBuffer() );
+            }
+            // else if( maybeIdx === 2 ) // not supported for tx out v1
+            // {
+            //     if(!(
+            //         data_datum.fields.length === 1
+            //     )) throw new BasePlutsError("invalid TxOut data: invalid datum field");
+            //     datum = data_datum.fields[0];
+            // }
+            else throw new BasePlutsError("invalid TxOut data: invalid datum field");
+
+            return new TxOut({
+                address: Address.fromData( data_address ),
+                value: Value.fromData( data_value, version ),
+                datum
+            });
+        }
+
+        // v2 and later
+        if(!(
+            data instanceof DataConstr
+            && Number( data.constr ) === 0
+            && data.fields.length >= 3
+        )) throw new BasePlutsError("invalid TxOut data");
+
+        const [
+            data_address,
+            data_value,
+            data_datum,
+            data_refScriptHash
+        ] = data.fields;
+
+        if(!(
+            data_address instanceof DataConstr
+        )) throw new BasePlutsError("invalid TxOut data: invalid address field");
+
+        if(!(
+            data_datum instanceof DataConstr
+        )) throw new BasePlutsError("invalid TxOut data: invalid datum field");
+
+        const maybeIdx = Number( data_datum.constr );
+        let datum: Hash32 | Data | undefined = undefined;
+
+        if( maybeIdx === 0 ) datum = undefined;
+        else if( maybeIdx === 1 )
+        {
+            if(!(
+                data_datum.fields.length === 1
+                && data_datum.fields[0] instanceof DataB
+            )) throw new BasePlutsError("invalid TxOut data: invalid datum field");
+
+            datum = new Hash32( data_datum.fields[0].bytes.toBuffer() );
+        }
+        else if( maybeIdx === 2 )
+        {
+            if(!(
+                data_datum.fields.length === 1
+            )) throw new BasePlutsError("invalid TxOut data: invalid datum field");
+            datum = data_datum.fields[0];
+        }
+        else throw new BasePlutsError("invalid TxOut data: invalid datum field");
+
+        if(!( data_refScriptHash instanceof DataConstr ))
+        throw new BasePlutsError("invalid TxOut data: invalid refScriptHash field");
+
+        const maybeRefScriptHashIdx = Number( data_refScriptHash.constr );
+        let refScriptHash: Hash32 | undefined = undefined;
+
+        if( maybeRefScriptHashIdx === 1 ) refScriptHash = undefined;
+        else if( maybeRefScriptHashIdx === 0 )
+        {
+            if(!(
+                data_refScriptHash.fields.length === 1
+                && data_refScriptHash.fields[0] instanceof DataB
+            )) throw new BasePlutsError("invalid TxOut data: invalid refScriptHash field");
+            refScriptHash = new Hash32( data_refScriptHash.fields[0].bytes.toBuffer() );
+        }
+        
+        return new TxOut({
+            address: Address.fromData( data_address ),
+            value: Value.fromData( data_value, version ),
+            datum,
+            refScript: undefined // we can't get the script from the hash, so we set it to undefined
+        });
     }
 
     toCborBytes(): Uint8Array
