@@ -337,9 +337,10 @@ export class TxWitnessSet
         if(!( cObj instanceof CborMap ))
         throw new InvalidCborFormatError("TxWitnessSet");
 
-        let fields: (CborObj | undefined)[] = new Array( 8 ).fill( undefined );
+        const nFields = 8;
+        let fields: (CborObj | undefined)[] = new Array( nFields ).fill( undefined );
 
-        for( let i = 0; i < 7; i++)
+        for( let i = 0; i < nFields; i++)
         {
             const { v } = cObj.map.find(
                 ({ k }) => k instanceof CborUInt && Number( k.num ) === i
