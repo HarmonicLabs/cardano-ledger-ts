@@ -2,17 +2,15 @@
 node_modules/
 # can be retreived by running tests
 coverage/
-
 .vscode*
-
 .npmrc*
+.prettierrc
 
 # npm pack
 *.tgz
 
 # output of build
 dist
-
 src/offchain/tx/builder/__tests__/TxBuilder.contracts.test.ts
 
 # workers compilation
