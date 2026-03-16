@@ -38,7 +38,7 @@ export class MaryAuxiliaryData
 
         this._hash = new AuxiliaryDataHash(
             new Uint8Array(
-                blake2b_256( this.toCbor().toBuffer() )
+                blake2b_256( this.toCbor() )
             )
         );
 
@@ -98,7 +98,7 @@ export class MaryAuxiliaryData
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
-        return this.toCbor().toBuffer();
+        return this.toCbor();
     }
     toCbor(): CborString
     {
@@ -106,7 +106,7 @@ export class MaryAuxiliaryData
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.cborRef.toBuffer() );
+            return this.cborRef.toBuffer();
         }
         
         return Cbor.encode( this.toCborObj() );
@@ -189,7 +189,7 @@ export class MaryAuxiliaryData
             metadata: _metadata === undefined ? undefined : TxMetadata.fromCborObj( _metadata ),
             nativeScripts:_native === undefined ? undefined : 
                 _native.array.map( nativeCborObj => 
-                    new Script( ScriptType.NativeScript, Cbor.encode( nativeCborObj ).toBuffer() )
+                    new Script( ScriptType.NativeScript, Cbor.encode( nativeCborObj ) )
                 )           
         }, getSubCborRef( cObj ));
     }

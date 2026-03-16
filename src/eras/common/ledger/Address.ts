@@ -385,7 +385,7 @@ export class Address
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
-        return this.toCbor().toBuffer();
+        return this.toCbor();
     }
     toCbor(): CborString
     {
@@ -393,7 +393,7 @@ export class Address
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.cborRef.toBuffer() );
+            return this.cborRef.toBuffer();
         }
         
         return Cbor.encode( this.toCborObj() );

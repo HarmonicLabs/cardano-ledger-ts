@@ -322,7 +322,7 @@ export class Value
             if(!( data_assets instanceof DataMap ))
             throw new Error("invalid Value data: assets must be maps");
 
-            const policy = data_policy.bytes.toBuffer().length === 0 ? "" : new Hash28( data_policy.bytes.toBuffer() );
+            const policy = data_policy.bytes.length === 0 ? "" : new Hash28( data_policy.bytes );
             const assetEntries = data_assets.map;
             const assets: IValueAssetBI[] = new Array( assetEntries.length );
             for( let j = 0; j < assetEntries.length; j++ )
@@ -337,7 +337,7 @@ export class Value
                 throw new Error("invalid Value data: asset quantity values must be integers");
 
                 assets[j] = {
-                    name: data_assetName.bytes.toBuffer(),
+                    name: data_assetName.bytes,
                     quantity: BigInt( data_quantity.int )
                 };
             }
@@ -354,7 +354,7 @@ export class Value
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
-        return this.toCbor().toBuffer();
+        return this.toCbor();
     }
     toCbor(): CborString
     {
@@ -362,7 +362,7 @@ export class Value
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.cborRef.toBuffer() );
+            return this.cborRef.toBuffer();
         }
         
         return Cbor.encode( this.toCborObj() );

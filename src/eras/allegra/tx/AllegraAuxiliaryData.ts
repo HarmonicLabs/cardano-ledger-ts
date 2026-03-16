@@ -38,7 +38,7 @@ export class AllegraAuxiliaryData
 
         this._hash = new AuxiliaryDataHash(
             new Uint8Array(
-                blake2b_256( this.toCbor().toBuffer() )
+                blake2b_256( this.toCbor() )
             )
         );
 
@@ -95,7 +95,7 @@ export class AllegraAuxiliaryData
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
-        return this.toCbor().toBuffer();
+        return this.toCbor();
     }
     toCbor(): CborString
     {
@@ -103,7 +103,7 @@ export class AllegraAuxiliaryData
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.cborRef.toBuffer() );
+            return this.cborRef.toBuffer();
         }
         
         return Cbor.encode( this.toCborObj() );
@@ -190,7 +190,7 @@ export class AllegraAuxiliaryData
                 _native.array.map( nativeCborObj => 
                     new Script(
                         ScriptType.NativeScript, 
-                        Cbor.encode( nativeCborObj ).toBuffer()
+                        Cbor.encode( nativeCborObj )
                     )
                 )           
         }, getSubCborRef( cObj ));

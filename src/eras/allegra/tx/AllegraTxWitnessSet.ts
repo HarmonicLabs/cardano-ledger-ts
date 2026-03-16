@@ -177,7 +177,7 @@ export class AllegraTxWitnessSet
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
-        return this.toCbor().toBuffer();
+        return this.toCbor();
     }
     toCbor(): CborString
     {
@@ -185,7 +185,7 @@ export class AllegraTxWitnessSet
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.cborRef.toBuffer() );
+            return this.cborRef.toBuffer();
         }
         
         return Cbor.encode( this.toCborObj() );
@@ -275,7 +275,7 @@ export class AllegraTxWitnessSet
                 getCborSet( _native ).map( nativeCborObj => 
                     new Script(
                         ScriptType.NativeScript, 
-                        Cbor.encode( nativeCborObj ).toBuffer()
+                        Cbor.encode( nativeCborObj )
                     )
                 ),
             bootstrapWitnesses: _bootstrap === undefined ? undefined : getCborSet( _bootstrap ).map( BootstrapWitness.fromCborObj )

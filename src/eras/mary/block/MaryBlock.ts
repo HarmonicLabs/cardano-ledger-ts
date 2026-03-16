@@ -50,12 +50,12 @@ export class MaryBlock implements
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
-        return this.toCbor().toBuffer();
+        return this.toCbor();
     }
   
     toCbor(): CborString
     {
-        if( this.cborRef instanceof SubCborRef ) return new CborString( this.cborRef.toBuffer() );
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
         return Cbor.encode( this.toCborObj() );
     }
 
@@ -79,7 +79,7 @@ export class MaryBlock implements
     static fromCbor( cbor: CanBeCborString ): MaryBlock
     {   
         // console.log("MaryBlock.fromCbor", cbor);
-        const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor ).toBuffer();
+        const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor );
         return MaryBlock.fromCborObj(
             Cbor.parse( bytes, { keepRef: true } ),
             bytes

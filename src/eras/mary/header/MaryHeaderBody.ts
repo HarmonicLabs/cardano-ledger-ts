@@ -139,12 +139,12 @@ export class MaryHeaderBody
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
-        return this.toCbor().toBuffer();
+        return this.toCbor();
     }
 
     toCbor(): CborString
     {
-        if( this.cborRef instanceof SubCborRef ) return new CborString( this.cborRef.toBuffer() );
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
         return Cbor.encode( this.toCborObj() );
     }
 
@@ -171,7 +171,7 @@ export class MaryHeaderBody
 
     static fromCbor( cbor: CanBeCborString ): MaryHeaderBody
     {
-        const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor ).toBuffer();
+        const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor );
         return MaryHeaderBody.fromCborObj(
             Cbor.parse( bytes, { keepRef: true } ),
             bytes

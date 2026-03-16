@@ -230,7 +230,7 @@ export class TxWitnessSet
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
-        return this.toCbor().toBuffer();
+        return this.toCbor();
     }
     toCbor(): CborString
     {
@@ -238,7 +238,7 @@ export class TxWitnessSet
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.cborRef.toBuffer() );
+            return this.cborRef.toBuffer();
         }
         
         return Cbor.encode( this.toCborObj() );
@@ -379,25 +379,25 @@ export class TxWitnessSet
                 getCborSet( _native ).map( nativeCborObj => 
                     new Script(
                         ScriptType.NativeScript, 
-                        Cbor.encode( nativeCborObj ).toBuffer()
+                        Cbor.encode( nativeCborObj )
                     )
                 ),
             bootstrapWitnesses: _bootstrap === undefined ? undefined :
                 getCborSet( _bootstrap ).map( BootstrapWitness.fromCborObj ),
             plutusV1Scripts: _plutusV1 === undefined ? undefined :
                 getCborSet( _plutusV1 ).map( cbor =>
-                    Script.plutusV1( Cbor.encode( cbor ).toBuffer() )
+                    Script.plutusV1( Cbor.encode( cbor ) )
                 ),
             datums: _dats === undefined ? undefined :
                 getCborSet( _dats ).map( dataFromCborObj ),
             redeemers: _reds === undefined ? undefined : witnessRedeemersFromCborObj( _reds ),
             plutusV2Scripts: _plutusV2 === undefined ? undefined :
                 getCborSet( _plutusV2 ).map( cbor =>
-                    Script.plutusV2( Cbor.encode( cbor ).toBuffer() )
+                    Script.plutusV2( Cbor.encode( cbor ) )
                 ),
             plutusV3Scripts: _plutusV3 === undefined ? undefined :
                 getCborSet( _plutusV3 ).map( cbor =>
-                    Script.plutusV3( Cbor.encode( cbor ).toBuffer() )
+                    Script.plutusV3( Cbor.encode( cbor ) )
                 ),
         }, getSubCborRef( cObj ));
     }

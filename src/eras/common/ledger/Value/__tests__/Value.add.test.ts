@@ -50,9 +50,5 @@ describe("Value.add", () => {
             )
         );
 
-        console.log(
-            JSON.stringify(nextSwappableValue, null, 2)
-        );
-
     });
 });

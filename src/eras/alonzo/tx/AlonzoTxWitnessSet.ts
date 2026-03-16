@@ -208,7 +208,7 @@ export class AlonzoTxWitnessSet
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
-        return this.toCbor().toBuffer();
+        return this.toCbor();
     }
     toCbor(): CborString
     {
@@ -216,7 +216,7 @@ export class AlonzoTxWitnessSet
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.cborRef.toBuffer() );
+            return this.cborRef.toBuffer();
         }
         
         return Cbor.encode( this.toCborObj() );
@@ -337,14 +337,14 @@ export class AlonzoTxWitnessSet
                 getCborSet( _native ).map( nativeCborObj => 
                     new Script(
                         ScriptType.NativeScript, 
-                        Cbor.encode( nativeCborObj ).toBuffer()
+                        Cbor.encode( nativeCborObj )
                     )
                 ),
             bootstrapWitnesses: _bootstrap === undefined ? undefined :
                 getCborSet( _bootstrap ).map( BootstrapWitness.fromCborObj ),
             plutusV1Scripts: _plutusV1 === undefined ? undefined :
                 getCborSet( _plutusV1 ).map( cbor =>
-                    Script.plutusV1( Cbor.encode( cbor ).toBuffer() )
+                    Script.plutusV1( Cbor.encode( cbor ) )
                 ),
             datums: _dats === undefined ? undefined :
                 getCborSet( _dats ).map( dataFromCborObj ),

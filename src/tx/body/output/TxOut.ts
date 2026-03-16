@@ -190,7 +190,7 @@ export class TxOut
                     && data_datum.fields[0] instanceof DataB
                 )) throw new BasePlutsError("invalid TxOut data: invalid datum field");
 
-                datum = new Hash32( data_datum.fields[0].bytes.toBuffer() );
+                datum = new Hash32( data_datum.fields[0].bytes );
             }
             // else if( maybeIdx === 2 ) // not supported for tx out v1
             // {
@@ -241,7 +241,7 @@ export class TxOut
                 && data_datum.fields[0] instanceof DataB
             )) throw new BasePlutsError("invalid TxOut data: invalid datum field");
 
-            datum = new Hash32( data_datum.fields[0].bytes.toBuffer() );
+            datum = new Hash32( data_datum.fields[0].bytes );
         }
         else if( maybeIdx === 2 )
         {
@@ -265,7 +265,7 @@ export class TxOut
                 data_refScriptHash.fields.length === 1
                 && data_refScriptHash.fields[0] instanceof DataB
             )) throw new BasePlutsError("invalid TxOut data: invalid refScriptHash field");
-            refScriptHash = new Hash28( data_refScriptHash.fields[0].bytes.toBuffer() );
+            refScriptHash = new Hash28( data_refScriptHash.fields[0].bytes );
         }
         
         return new TxOut({
@@ -279,7 +279,7 @@ export class TxOut
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
-        return this.toCbor().toBuffer();
+        return this.toCbor();
     }
     toCbor(): CborString
     {
@@ -287,7 +287,7 @@ export class TxOut
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.cborRef.toBuffer() );
+            return this.cborRef.toBuffer();
         }
         
         return Cbor.encode( this.toCborObj() );
@@ -330,7 +330,7 @@ export class TxOut
                         new CborTag(
                             24,
                             new CborBytes(
-                                dataToCbor( datum ).toBuffer()
+                                dataToCbor( datum )
                             )
                         )
                     ])
@@ -338,7 +338,7 @@ export class TxOut
             this.refScript === undefined ? undefined :
             {
                 k: new CborUInt( 3 ),
-                v: new CborTag( 24, new CborBytes( this.refScript.toCbor().toBuffer() ) )
+                v: new CborTag( 24, new CborBytes( this.refScript.toCbor() ) )
             }
         ].filter( elem => elem !== undefined ) as CborMapEntry[])
     }

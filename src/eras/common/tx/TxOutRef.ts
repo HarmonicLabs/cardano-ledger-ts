@@ -160,7 +160,7 @@ export class TxOutRef
             throw new BasePlutsError("invalid TxOutRef data: invalid index field");
 
             return new TxOutRef({
-                id: new Hash32( data_id.fields[0].bytes.toBuffer() ),
+                id: new Hash32( data_id.fields[0].bytes ),
                 index: Number( data_index.int )
             });
         }
@@ -184,7 +184,7 @@ export class TxOutRef
         throw new BasePlutsError("invalid TxOutRef data: invalid index field");
 
         return new TxOutRef({
-            id: new Hash32( data_id.bytes.toBuffer() ),
+            id: new Hash32( data_id.bytes ),
             index: Number( data_index.int )
         });
     }
@@ -192,7 +192,7 @@ export class TxOutRef
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
-        return this.toCbor().toBuffer();
+        return this.toCbor();
     }
     toCbor(): CborString
     {
@@ -200,7 +200,7 @@ export class TxOutRef
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.cborRef.toBuffer() );
+            return this.cborRef.toBuffer();
         }
         
         return Cbor.encode( this.toCborObj() );

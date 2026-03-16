@@ -87,7 +87,7 @@ export class Credential<T extends CredentialType = CredentialType>
         
         return new Credential({
             type: tag <= 0 ? CredentialType.KeyHash : CredentialType.Script, 
-            hash: new Hash28( hash.bytes.toBuffer() )
+            hash: new Hash28( hash.bytes )
         });
     }
 
@@ -120,7 +120,7 @@ export class Credential<T extends CredentialType = CredentialType>
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
-        return this.toCbor().toBuffer();
+        return this.toCbor();
     }
     toCbor(): CborString
     {
@@ -128,7 +128,7 @@ export class Credential<T extends CredentialType = CredentialType>
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.cborRef.toBuffer() );
+            return this.cborRef.toBuffer();
         }
         
         return Cbor.encode( this.toCborObj() );

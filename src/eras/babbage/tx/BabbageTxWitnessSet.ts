@@ -218,7 +218,7 @@ export class BabbageTxWitnessSet
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
-        return this.toCbor().toBuffer();
+        return this.toCbor();
     }
     toCbor(): CborString
     {
@@ -226,7 +226,7 @@ export class BabbageTxWitnessSet
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.cborRef.toBuffer() );
+            return this.cborRef.toBuffer();
         }
         
         return Cbor.encode( this.toCborObj() );
@@ -358,7 +358,7 @@ export class BabbageTxWitnessSet
                 getCborSet( _native ).map( nativeCborObj => 
                     new Script(
                         ScriptType.NativeScript, 
-                        Cbor.encode( nativeCborObj ).toBuffer()
+                        Cbor.encode( nativeCborObj )
                     )
                 ),
             bootstrapWitnesses: _bootstrap === undefined ? undefined :
@@ -367,7 +367,7 @@ export class BabbageTxWitnessSet
                 getCborSet( _plutusV1 ).map( cbor =>
                     new Script(
                         ScriptType.PlutusV1,
-                        Cbor.encode( cbor ).toBuffer()
+                        Cbor.encode( cbor )
                     )
                 ),
             datums: _dats === undefined ? undefined :
@@ -375,7 +375,7 @@ export class BabbageTxWitnessSet
             redeemers: _reds === undefined ? undefined : witnessRedeemersFromCborObj( _reds ),
             plutusV2Scripts: _plutusV2 === undefined ? undefined :
                 getCborSet( _plutusV2 ).map( cbor =>
-                    Script.plutusV2( Cbor.encode( cbor ).toBuffer() )
+                    Script.plutusV2( Cbor.encode( cbor ) )
                 )
         }, getSubCborRef( cObj ));
     }

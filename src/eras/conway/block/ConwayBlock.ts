@@ -53,12 +53,12 @@ export class ConwayBlock implements
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
-        return this.toCbor().toBuffer();
+        return this.toCbor();
     }
   
     toCbor(): CborString
     {
-        if( this.cborRef instanceof SubCborRef ) return new CborString( this.cborRef.toBuffer() );
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
         return Cbor.encode( this.toCborObj() );
     }
 
@@ -84,7 +84,7 @@ export class ConwayBlock implements
 
     static fromCbor( cbor: CanBeCborString ): ConwayBlock
     {   
-        const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor ).toBuffer();
+        const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor );
         return ConwayBlock.fromCborObj(
             Cbor.parse( bytes, { keepRef: true } ),
             bytes

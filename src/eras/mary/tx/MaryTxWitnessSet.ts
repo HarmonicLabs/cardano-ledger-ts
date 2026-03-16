@@ -178,7 +178,7 @@ export class MaryTxWitnessSet
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
-        return this.toCbor().toBuffer();
+        return this.toCbor();
     }
     toCbor(): CborString
     {
@@ -186,7 +186,7 @@ export class MaryTxWitnessSet
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.cborRef.toBuffer() );
+            return this.cborRef.toBuffer();
         }
         
         return Cbor.encode( this.toCborObj() );
@@ -274,7 +274,7 @@ export class MaryTxWitnessSet
             vkeyWitnesses: _vkey === undefined ? undefined : getCborSet( _vkey ).map( VKeyWitness.fromCborObj ),
             nativeScripts: _native === undefined ? undefined : 
                 getCborSet( _native ).map( nativeCborObj => 
-                    new Script( ScriptType.NativeScript, Cbor.encode( nativeCborObj ).toBuffer() )
+                    new Script( ScriptType.NativeScript, Cbor.encode( nativeCborObj ) )
                 ),
             bootstrapWitnesses: _bootstrap === undefined ? undefined : getCborSet( _bootstrap ).map( BootstrapWitness.fromCborObj )
         }, getSubCborRef( cObj ));

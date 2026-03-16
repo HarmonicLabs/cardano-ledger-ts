@@ -112,7 +112,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
                     new CborBytes(
                         this.bytes
                     )
-                ).toBuffer()
+                )
             );
 
             scriptDataToBeHashed = [
@@ -188,7 +188,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
             }
             else
             {
-                bytes = nativeScriptToCbor( bytes as NativeScript ).toBuffer()
+                bytes = nativeScriptToCbor( bytes as NativeScript )
             }
         }
         else bytes = Uint8Array.prototype.slice.call( bytes );
@@ -235,12 +235,12 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
                         new CborBytes(
                             Uint8Array.prototype.slice.call(this.bytes)
                         )
-                    ).toBuffer()
+                    )
                 )
             );
         }
         else {
-            this.cbor = new CborString( this.bytes );
+            this.cbor = Uint8Array.prototype.slice.call( this.bytes );
         }
         this.cborRef = cborRef;
     }
@@ -257,7 +257,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
     {
         if( this.type === ScriptType.NativeScript )
         {
-            return nativeScriptFromCbor( new CborString( this.bytes ) );
+            return nativeScriptFromCbor( this.bytes );
         }
         return undefined;
     }
@@ -276,7 +276,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
     {
         if( this.type === ScriptType.NativeScript )
         {
-            return nativeScriptFromCbor( new CborString( this.bytes ) )
+            return nativeScriptFromCbor( this.bytes )
         }
         else
         {
@@ -289,7 +289,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
                             new CborBytes(
                                 this.bytes
                             )
-                        ).toBuffer()
+                        )
                     )
                 ).toString()
             }
@@ -320,7 +320,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
-        return this.toCbor().toBuffer();
+        return this.toCbor();
     }
     toCbor(): CborString
     {
@@ -328,7 +328,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.cborRef.toBuffer() );
+            return this.cborRef.toBuffer();
         }
         
         return Cbor.encode( this.toCborObj() );
@@ -357,7 +357,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
             new CborBytes(
                 Cbor.encode(
                     new CborBytes( Uint8Array.prototype.slice.call( this.bytes ) )
-                ).toBuffer()
+                )
             )
         ]);
     }
@@ -393,7 +393,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         if( t === ScriptType.NativeScript )
         return new Script(
             t,
-            Cbor.encode( cObj.array[1] ).toBuffer(),
+            Cbor.encode( cObj.array[1] ),
             getSubCborRef( cObj )
         );
 
@@ -414,7 +414,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
                 new CborBytes(
                     Uint8Array.prototype.slice.call(script.bytes)
                 )
-            ).toBuffer()
+            )
         )
         // return Cbor.parse( script.cbor ) as CborBytes
         // return new CborBytes( script.bytes );

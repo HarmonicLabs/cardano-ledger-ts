@@ -156,7 +156,7 @@ export class BabbageTxOut
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
-        return this.toCbor().toBuffer();
+        return this.toCbor();
     }
     toCbor(): CborString
     {
@@ -164,7 +164,7 @@ export class BabbageTxOut
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.cborRef.toBuffer() );
+            return this.cborRef.toBuffer();
         }
         
         return Cbor.encode( this.toCborObj() );
@@ -213,7 +213,7 @@ export class BabbageTxOut
                         new CborTag(
                             24,
                             new CborBytes(
-                                dataToCbor( datum ).toBuffer()
+                                dataToCbor( datum )
                             )
                         )
                     ])
@@ -221,7 +221,7 @@ export class BabbageTxOut
             this.refScript === undefined ? undefined :
             {
                 k: new CborUInt( 3 ),
-                v: new CborTag( 24, new CborBytes( this.refScript.toCbor().toBuffer() ) )
+                v: new CborTag( 24, new CborBytes( this.refScript.toCbor() ) )
             }
         ].filter( elem => elem !== undefined ) as CborMapEntry[])
     }

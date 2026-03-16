@@ -48,11 +48,11 @@ export class ShelleyHeader
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
-        return this.toCbor().toBuffer();
+        return this.toCbor();
     }
     toCbor(): CborString
     {
-        if( this.cborRef instanceof SubCborRef ) return new CborString( this.cborRef.toBuffer() );
+        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
         return Cbor.encode( this.toCborObj() );
     }
     /* header = [header_body, body_signature : $kes_signature] */
@@ -67,7 +67,7 @@ export class ShelleyHeader
 
     static fromCbor( cbor: CanBeCborString ): ShelleyHeader
     {
-        const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor ).toBuffer();
+        const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor );
         return ShelleyHeader.fromCborObj(
             Cbor.parse( bytes, { keepRef: true } ),
             bytes

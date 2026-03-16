@@ -40,7 +40,7 @@ export class AlonzoAuxiliaryData
 
         this._hash = new AuxiliaryDataHash(
             new Uint8Array(
-                blake2b_256( this.toCbor().toBuffer() )
+                blake2b_256( this.toCbor() )
             )
         );
 
@@ -121,7 +121,7 @@ export class AlonzoAuxiliaryData
     toCborBytes(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
-        return this.toCbor().toBuffer();
+        return this.toCbor();
     }
     toCbor(): CborString
     {
@@ -129,7 +129,7 @@ export class AlonzoAuxiliaryData
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.cborRef.toBuffer() );
+            return this.cborRef.toBuffer();
         }
         
         return Cbor.encode( this.toCborObj() );
@@ -238,12 +238,12 @@ export class AlonzoAuxiliaryData
                 _native.array.map( nativeCborObj => 
                     new Script(
                         ScriptType.NativeScript, 
-                        Cbor.encode( nativeCborObj ).toBuffer()
+                        Cbor.encode( nativeCborObj )
                     )
                 ),
             plutusV1Scripts: _pV1 === undefined ? undefined :
                 _pV1.array.map( cbor =>
-                    Script.plutusV1( Cbor.encode( cbor ).toBuffer() )
+                    Script.plutusV1( Cbor.encode( cbor ) )
                 )            
         }, getSubCborRef( cObj ));
     }

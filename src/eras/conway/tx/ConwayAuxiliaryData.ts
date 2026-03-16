@@ -46,7 +46,7 @@ export class ConwayAuxiliaryData
 
         this._hash = new AuxiliaryDataHash(
             new Uint8Array(
-                blake2b_256( this.toCbor().toBuffer() )
+                blake2b_256( this.toCbor() )
             )
         );
 
@@ -172,7 +172,7 @@ export class ConwayAuxiliaryData
             this.cborRef instanceof SubCborRef  
         ) return this.cborRef.toBuffer();
 
-        return this.toCbor().toBuffer();
+        return this.toCbor();
     }
     toCbor(): CborString
     {
@@ -180,7 +180,7 @@ export class ConwayAuxiliaryData
         {
             // TODO: validate cbor structure
             // we assume correctness here
-            return new CborString( this.cborRef.toBuffer() );
+            return this.cborRef.toBuffer();
         }
         return Cbor.encode( this.toCborObj() );
     }
@@ -308,20 +308,20 @@ export class ConwayAuxiliaryData
                 _native.array.map( nativeCborObj => 
                     new Script(
                         ScriptType.NativeScript, 
-                        Cbor.encode( nativeCborObj ).toBuffer()
+                        Cbor.encode( nativeCborObj )
                     )
                 ),
             plutusV1Scripts: _pV1 === undefined ? undefined :
                 _pV1.array.map( cbor =>
-                    Script.plutusV1( Cbor.encode( cbor ).toBuffer() )
+                    Script.plutusV1( Cbor.encode( cbor ) )
                 ),
             plutusV2Scripts: _pV2 === undefined ? undefined :
                 _pV2.array.map( cbor =>
-                    Script.plutusV2( Cbor.encode( cbor ).toBuffer() )
+                    Script.plutusV2( Cbor.encode( cbor ) )
                 ),
             plutusV3Scripts: _pV3 === undefined ? undefined :
                 _pV3.array.map( cbor =>
-                    Script.plutusV3( Cbor.encode( cbor ).toBuffer() )
+                    Script.plutusV3( Cbor.encode( cbor ) )
                 )                
         }, getSubCborRef( cObj ));
     }
