@@ -9,9 +9,9 @@ import { ToDataVersion } from "../../../toData/defaultToDataVersion";
 export enum VoterKind {
     ConstitutionalCommitteKeyHash = 0,
     ConstitutionalCommitteScript = 1,
-    DRepKeyHash = 3,
-    DRepScript = 4,
-    StakingPoolKeyHash = 5
+    DRepKeyHash = 2,
+    DRepScript = 3,
+    StakingPoolKeyHash = 4
 }
 
 Object.freeze( VoterKind );
@@ -108,12 +108,12 @@ export class Voter
     }
     toCbor(): CborString
     {
-        if( this.cborRef instanceof SubCborRef )
-        {
-            // TODO: validate cbor structure
-            // we assume correctness here
-            return this.cborRef.toBuffer();
-        }
+        // if( this.cborRef instanceof SubCborRef )
+        // {
+        //     // TODO: validate cbor structure
+        //     // we assume correctness here
+        //     return this.cborRef.toBuffer();
+        // }
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborArray

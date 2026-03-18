@@ -4,6 +4,7 @@ import { ConwayUTxO } from "../ConwayUTxO";
 import { ConwayTxBody, ConwayTxOut } from "..";
 import { Address, Value } from "../../../common/ledger";
 import { ConwayTx } from "../ConwayTx"
+import { toHex } from "@harmoniclabs/uint8array-utils"
 
 describe("ConwayTx.fromCbor", () => {
 
@@ -49,8 +50,8 @@ describe("ConwayTx.fromCbor", () => {
         .toEqual(JSON.stringify(sameTx.toJSON()));
         
         // expect different cbor
-        expect( tx.toCbor().toString() ).toEqual(str)
-        expect( sameTx.toCbor().toString() ).not.toEqual(str)
+        expect( toHex(tx.toCbor()) ).toEqual(str)
+        expect( toHex(sameTx.toCbor()) ).not.toEqual(str)
 
         // console.log( tx.hash.toString() );
         // console.log( sameTx.hash.toString() );

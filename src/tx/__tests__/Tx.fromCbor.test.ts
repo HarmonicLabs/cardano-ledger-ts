@@ -1,6 +1,7 @@
 import { TxBody, TxOut, UTxO } from "..";
 import { Address, Value } from "../../ledger";
 import { Tx } from "../Tx"
+import { toHex } from "@harmoniclabs/uint8array-utils"
 
 describe("Tx.fromCbor", () => {
 
@@ -46,8 +47,8 @@ describe("Tx.fromCbor", () => {
         .toEqual(JSON.stringify(sameTx.toJSON()));
         
         // expect different cbor
-        expect( tx.toCbor().toString() ).toEqual(str)
-        expect( sameTx.toCbor().toString() ).not.toEqual(str)
+        expect( toHex(tx.toCbor()) ).toEqual(str)
+        expect( toHex(sameTx.toCbor()) ).not.toEqual(str)
 
         // console.log( tx.hash.toString() );
         // console.log( sameTx.hash.toString() );

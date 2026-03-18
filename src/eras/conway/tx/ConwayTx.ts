@@ -1,6 +1,7 @@
 import { XPrv } from "@harmoniclabs/bip32_ed25519"
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborString, forceCborString } from "@harmoniclabs/cbor"
 import { signEd25519_sync } from "@harmoniclabs/crypto"
+import { toHex } from "@harmoniclabs/uint8array-utils"
 import { PrivateKey, CredentialType, PubKeyHash } from "../../../credentials"
 import { Signature, Hash32, Hash28 } from "../../../hashes"
 import { IConwayTxBody, IConwayTxWitnessSet, ConwayAuxiliaryData, ConwayTxBody, ConwayTxWitnessSet, isIConwayTxBody, isIConwayTxWitnessSet } from "./"
@@ -146,7 +147,7 @@ export class ConwayTx
         const wits = ConwayTxWitnessSet.fromCbor(
             await cip30.signTx(
                 // signConwayTx expects the entire transaction by standard (not only the body ¯\_(ツ)_/¯)
-                this.toCbor().toString(),
+                toHex(this.toCbor()),
                 true
             )
         );

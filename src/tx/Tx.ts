@@ -5,6 +5,7 @@ import { VKeyWitness } from "./TxWitnessSet/VKeyWitness/VKeyWitness";
 import { VKey } from "./TxWitnessSet/VKey";
 import { ToCbor, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { signEd25519, signEd25519_sync } from "@harmoniclabs/crypto";
+import { toHex } from "@harmoniclabs/uint8array-utils";
 import { InvalidCborFormatError } from "../utils/InvalidCborFormatError";
 import { ToJson } from "../utils/ToJson";
 import { AuxiliaryData } from "./AuxiliaryData";
@@ -155,7 +156,7 @@ export class Tx
         const wits = TxWitnessSet.fromCbor(
             await cip30.signTx(
                 // signTx expects the entire transaction by standard (not only the body ¯\_(ツ)_/¯)
-                this.toCbor().toString(),
+                toHex(this.toCbor()),
                 true
             )
         );
@@ -186,7 +187,7 @@ export class Tx
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
         return this.toCbor();
     }
-    toCbor(): CborString
+    toCbor(): Uint8Array
     {
         if( this.cborRef instanceof SubCborRef )
         {

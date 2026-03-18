@@ -1,6 +1,6 @@
 import { ToCbor, CborString, Cbor, CborBytes, CborObj, CborArray, CborUInt, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { blake2b_224, byte } from "@harmoniclabs/crypto";
-import { fromHex, isUint8Array } from "@harmoniclabs/uint8array-utils";
+import { fromHex, isUint8Array, toHex } from "@harmoniclabs/uint8array-utils";
 import { Hash28 } from "../hashes";
 import { NativeScript, nativeScriptToCbor, nativeScriptFromCbor } from "./NativeScript";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
@@ -283,7 +283,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
             return {
                 type: this.type,
                 description: "",
-                cborHex: Cbor.encode(
+                cborHex: toHex(Cbor.encode(
                     new CborBytes(
                         Cbor.encode(
                             new CborBytes(
@@ -291,7 +291,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
                             )
                         )
                     )
-                ).toString()
+                ))
             }
         }
     }
