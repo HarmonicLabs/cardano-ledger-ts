@@ -3,12 +3,12 @@ import { blake2b_256 } from "@harmoniclabs/crypto";
 import { isObject, hasOwn } from "@harmoniclabs/obj-utils";
 import { PubKeyHash } from "../../credentials";
 import { AuxiliaryDataHash, ScriptDataHash, Hash32, CanBeHash28, canBeHash28 } from "../../hashes";
-import { canBeTxWithdrawals, forceTxWithdrawals } from "../../ledger/TxWithdrawals";
+import { canBeTxWithdrawals, forceTxWithdrawals } from "../../eras/common/ledger/TxWithdrawals";
 import { NetworkT } from "../../ledger/Network";
 import { LegacyPPUpdateProposal, LegacyPPUpdateProposalFromCborObj, LegacyPPUpdateProposalToCborObj, protocolUpdateToJson, isLegacyPPUpdateProposal } from "../../ledger/protocol/LegacyPPUpdateProposal";
-import { Certificate, isCertificate,  certificateFromCborObj } from "../../ledger/certs/Certificate";
+import { Certificate, isCertificate, certificateFromCborObj } from "../../eras/common/ledger/certs/Certificate";
 import { certificatesToDepositLovelaces } from "../../ledger/certs/ICert";
-import { TxWithdrawals, ITxWithdrawals } from "../../ledger/TxWithdrawals";
+import { TxWithdrawals, ITxWithdrawals } from "../../eras/common/ledger/TxWithdrawals";
 import { Coin } from "../../ledger/Coin"
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
