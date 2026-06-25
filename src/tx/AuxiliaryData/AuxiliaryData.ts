@@ -5,7 +5,7 @@ import { AuxiliaryDataHash } from "../../hashes";
 import { NativeScript, nativeScriptFromCborObj } from "../../script/NativeScript";
 import { PlutusScriptJsonFormat, Script, ScriptType } from "../../script/Script";
 import { ToJson } from "../../utils/ToJson";
-import { TxMetadata } from "../metadata/TxMetadata";
+import { TxMetadata } from "../../eras/common/tx/metadata/TxMetadata";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
