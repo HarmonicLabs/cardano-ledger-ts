@@ -184,7 +184,8 @@ export class MaryBlock implements
                 ( acc, [ k, v ] ) => ({
                     ...acc,
                     [ k ]: v.toJson()
-                })
+                }),
+                {}
             )
         };
     };

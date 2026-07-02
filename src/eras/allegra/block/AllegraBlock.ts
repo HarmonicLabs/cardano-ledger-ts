@@ -180,7 +180,8 @@ export class AllegraBlock implements
                 ( acc, [ k, v ] ) => ({
                     ...acc,
                     [ k ]: v.toJson()
-                })
+                }),
+                {}
             )
         };
     };
