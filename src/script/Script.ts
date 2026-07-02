@@ -10,7 +10,8 @@ export enum ScriptType {
     NativeScript = "NativeScript",
     PlutusV1 = "PlutusScriptV1",
     PlutusV2 = "PlutusScriptV2",
-    PlutusV3 = "PlutusScriptV3"
+    PlutusV3 = "PlutusScriptV3",
+    PlutusV4 = "PlutusScriptV4" // Dijkstra
 }
 Object.freeze( ScriptType );
 
@@ -22,6 +23,7 @@ export function scriptTypeToNumber( scriptType: LitteralScriptType ): number
         case ScriptType.PlutusV1:     return 1;
         case ScriptType.PlutusV2:     return 2;
         case ScriptType.PlutusV3:     return 3;
+        case ScriptType.PlutusV4:     return 4;
     }
     if( typeof scriptType === "string" )
     {
@@ -31,6 +33,7 @@ export function scriptTypeToNumber( scriptType: LitteralScriptType ): number
             case "PlutusScriptV1": return 1;
             case "PlutusScriptV2": return 2;
             case "PlutusScriptV3": return 3;
+            case "PlutusScriptV4": return 4;
         }
     }
 
@@ -45,6 +48,7 @@ export function scriptTypeFromNumber( n: number ): ScriptType
         case 1: return ScriptType.PlutusV1;
         case 2: return ScriptType.PlutusV2;
         case 3: return ScriptType.PlutusV3;
+        case 4: return ScriptType.PlutusV4;
     }
 
     throw new Error(`Invalid ScriptType number: ${n}`);
@@ -52,9 +56,9 @@ export function scriptTypeFromNumber( n: number ): ScriptType
 
 export const defaultScriptType = ScriptType.PlutusV3;
 
-export type PlutusScriptType = ScriptType.PlutusV1 | ScriptType.PlutusV2 | ScriptType.PlutusV3 | "PlutusScriptV1" | "PlutusScriptV2" | "PlutusScriptV3"
+export type PlutusScriptType = ScriptType.PlutusV1 | ScriptType.PlutusV2 | ScriptType.PlutusV3 | ScriptType.PlutusV4 | "PlutusScriptV1" | "PlutusScriptV2" | "PlutusScriptV3" | "PlutusScriptV4"
 
-export type LitteralScriptType = ScriptType | "NativeScript" | "PlutusScriptV1" | "PlutusScriptV2" | "PlutusScriptV3"
+export type LitteralScriptType = ScriptType | "NativeScript" | "PlutusScriptV1" | "PlutusScriptV2" | "PlutusScriptV3" | "PlutusScriptV4"
 
 export interface PlutusScriptJsonFormat<T extends PlutusScriptType = PlutusScriptType> {
     type: T,
@@ -118,7 +122,8 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
             scriptDataToBeHashed = [
                 this.type === ScriptType.PlutusV1 ? 0x01 :
                 this.type === ScriptType.PlutusV2 ? 0x02 :
-                0x03
+                this.type === ScriptType.PlutusV3 ? 0x03 :
+                0x04 // Plutus V4 (Dijkstra)
             ].concat( singleCbor );
         }
 
@@ -159,6 +164,13 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
             script
         );
     }
+    static plutusV4( script: Uint8Array ): Script<ScriptType.PlutusV4>
+    {
+        return new Script(
+            ScriptType.PlutusV4,
+            script
+        );
+    }
 
     constructor(
         scriptType: T,
@@ -171,7 +183,8 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
             scriptType === ScriptType.NativeScript  ||
             scriptType === ScriptType.PlutusV1      ||
             scriptType === ScriptType.PlutusV2      ||
-            scriptType === ScriptType.PlutusV3
+            scriptType === ScriptType.PlutusV3      ||
+            scriptType === ScriptType.PlutusV4
         ))throw new Error("invalid 'scriptType'")
         
         this.type = scriptType;
@@ -181,7 +194,8 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
             if(
                 (bytes?.type as any) === ScriptType.PlutusV1 ||
                 (bytes?.type as any) === ScriptType.PlutusV2 ||
-                (bytes?.type as any) === ScriptType.PlutusV3
+                (bytes?.type as any) === ScriptType.PlutusV3 ||
+                (bytes?.type as any) === ScriptType.PlutusV4
             )
             {
                 bytes = fromHex( (bytes as PlutusScriptJsonFormat).cborHex );
@@ -196,10 +210,11 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         if(
             scriptType === ScriptType.PlutusV1 ||
             scriptType === ScriptType.PlutusV2 ||
-            scriptType === ScriptType.PlutusV3
+            scriptType === ScriptType.PlutusV3 ||
+            scriptType === ScriptType.PlutusV4
         )
         {
-            // unwrap up to 2 cbor bytes 
+            // unwrap up to 2 cbor bytes
             try {
                 let parsed = Cbor.parse( bytes );
                 

@@ -131,7 +131,7 @@ export class TxRedeemer
             ...this,
             data: this.data.clone(),
             execUnits: this.execUnits.clone()
-        });
+        }, this.cborRef?.clone());
     }
 
     toCborMapEntry(): CborMapEntry

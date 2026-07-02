@@ -15,7 +15,7 @@ export interface IConwayAuxiliaryData {
     nativeScripts?: (NativeScript | Script<ScriptType.NativeScript>)[];
     plutusV1Scripts?: (PlutusScriptJsonFormat<ScriptType.PlutusV1 | "PlutusScriptV1"> | Script<ScriptType.PlutusV1>)[];
     plutusV2Scripts?: (PlutusScriptJsonFormat<ScriptType.PlutusV2 | "PlutusScriptV2"> | Script<ScriptType.PlutusV2>)[];
-    plutusV3Scripts?: (PlutusScriptJsonFormat<ScriptType.PlutusV3 | "PlutusScriptV2"> | Script<ScriptType.PlutusV3>)[];
+    plutusV3Scripts?: (PlutusScriptJsonFormat<ScriptType.PlutusV3 | "PlutusScriptV3"> | Script<ScriptType.PlutusV3>)[];
 }
 
 function scriptArrToCbor( scripts: Script[] ): CborArray
@@ -227,8 +227,11 @@ export class ConwayAuxiliaryData
     static fromCborObj( cObj: CborObj ): ConwayAuxiliaryData
     {
         
-        // shelley; metadata only
-        if( "data" in cObj && cObj.data instanceof CborMap )
+        // shelley; metadata only.
+        // NOTE: must NOT match a CborTag — the alonzo+ `#6.259(map)` shape also exposes
+        // `.data` as a CborMap, and it must fall through to the tagged field parser below
+        // (otherwise every tag-259 aux_data is mis-read as metadata-only, dropping scripts).
+        if( !(cObj instanceof CborTag) && "data" in cObj && cObj.data instanceof CborMap )
         {
             return new ConwayAuxiliaryData({
                 metadata: TxMetadata.fromCborObj( cObj.data  )
@@ -334,7 +337,7 @@ export class ConwayAuxiliaryData
             nativeScripts: this.nativeScripts?.map( s => s.toJson() ),
             plutusV1Scripts: this.plutusV1Scripts?.map( s => s.toJson() ),
             plutusV2Scripts: this.plutusV2Scripts?.map( s => s.toJson() ),
-            plutusV3Scripts: this.plutusV2Scripts?.map( s => s.toJson() )
+            plutusV3Scripts: this.plutusV3Scripts?.map( s => s.toJson() )
         }
     }
 }

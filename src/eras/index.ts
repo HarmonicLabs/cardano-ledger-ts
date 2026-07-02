@@ -6,3 +6,4 @@ export * from "./allegra";
 export * from "./alonzo";
 export * from "./babbage";
 export * from "./conway";
+export * from "./dijkstra";

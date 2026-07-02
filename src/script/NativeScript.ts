@@ -2,6 +2,7 @@ import { CborArray, CborUInt, CborBytes, CborString, Cbor, CborObj } from "@harm
 import { Hash28 } from "../hashes/Hash28/Hash28";
 import { toHex } from "@harmoniclabs/uint8array-utils";
 import { CanBeUInteger, forceBigUInt } from "../utils/ints";
+import { Credential } from "../credentials/Credential";
 
 export type NativeScript
     = ScriptSignature
@@ -10,6 +11,7 @@ export type NativeScript
     | ScriptAtLeast
     | ScriptAfter
     | ScriptBefore
+    | ScriptRequireGuard
 
 export interface ScriptSignature {
     type: "sig",
@@ -40,6 +42,15 @@ export interface ScriptAfter {
 export interface ScriptBefore {
     type: "before",
     slot: CanBeUInteger
+}
+
+/**
+ * Dijkstra (CIP guard scripts): `script_require_guard = (6, credential)`.
+ * A guard script requires the given credential to authorize execution.
+ */
+export interface ScriptRequireGuard {
+    type: "requireGuard",
+    credential: Credential
 }
 
 export function nativeScriptToCborObj( nativeScript: NativeScript ): CborArray
@@ -80,6 +91,11 @@ export function nativeScriptToCborObj( nativeScript: NativeScript ): CborArray
         return new CborArray([
             new CborUInt( type === "after" ? 4 : 5 ),
             new CborUInt( forceBigUInt( nativeScript.slot ) ),
+        ]);
+    if( type === "requireGuard" )
+        return new CborArray([
+            new CborUInt( 6 ),
+            nativeScript.credential.toCborObj()
         ]);
 
     throw new Error(
@@ -159,7 +175,13 @@ export function nativeScriptFromCborObj( cbor: CborObj ): NativeScript
                 type: type === 4 ? "after" : "before",
                 slot: Number( f1.num )
             }
-        
+        case 6:
+            // script_require_guard = (6, credential)
+            return {
+                type: "requireGuard",
+                credential: Credential.fromCborObj( f1 )
+            }
+
         default:
             throw notNativeScriptError;
     }

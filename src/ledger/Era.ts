@@ -6,7 +6,8 @@ export enum Era {
     Mary,
     Alonzo,
     Babbage,
-    Conway
+    Conway,
+    Dijkstra
 }
 
 Object.freeze( Era );

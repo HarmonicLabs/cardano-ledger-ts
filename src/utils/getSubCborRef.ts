@@ -39,7 +39,10 @@ export function subCborRefOrUndef( thing: any ): SubCborRef | undefined
     {
         return thing;
     }
-    if( thing.cborRef instanceof SubCborRef )
+    if(
+        thing?.cborRef instanceof SubCborRef &&
+        Object.getPrototypeOf( thing ) !== Object.prototype
+    )
     {
         return thing.cborRef.clone();
     }

@@ -198,8 +198,11 @@ export class BabbageAuxiliaryData
     static fromCborObj( cObj: CborObj ): BabbageAuxiliaryData
     {
         // console.log("BabbageAuxiliaryData.fromCborObj", cObj);
-        // shelley; metadata only
-        if( "data" in cObj && cObj.data instanceof CborMap )
+        // shelley; metadata only.
+        // NOTE: must NOT match a CborTag — the alonzo+ `#6.259(map)` shape also exposes
+        // `.data` as a CborMap, and it must fall through to the tagged field parser below
+        // (otherwise every tag-259 aux_data is mis-read as metadata-only, dropping scripts).
+        if( !(cObj instanceof CborTag) && "data" in cObj && cObj.data instanceof CborMap )
         {
             return new BabbageAuxiliaryData({
                 metadata: TxMetadata.fromCborObj( cObj.data  )

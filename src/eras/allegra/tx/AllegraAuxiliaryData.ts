@@ -180,9 +180,8 @@ export class AllegraAuxiliaryData
             _native
         ] = fields;
 
-        if(!(
-            _native instanceof CborArray
-        ))throw new InvalidCborFormatError("AllegraAuxiliaryData")
+        if( _native !== undefined && !(_native instanceof CborArray) )
+        throw new InvalidCborFormatError("AllegraAuxiliaryData")
 
         return new AllegraAuxiliaryData({
             metadata: _metadata === undefined ? undefined : TxMetadata.fromCborObj( _metadata ),
