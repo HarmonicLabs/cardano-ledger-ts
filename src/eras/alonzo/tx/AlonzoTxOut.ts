@@ -58,7 +58,7 @@ export class AlonzoTxOut
         
         if (isAddressStr(address))
         {
-            address = Address.fromString(address);
+            address = Address.fromString(address) as Address; // Byron addresses are rejected by the `instanceof Address` guard below
         }
         if(!(
             address instanceof Address

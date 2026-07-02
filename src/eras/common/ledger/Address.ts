@@ -1,5 +1,6 @@
 import { ToCbor, CborObj, CborBytes, CborString, Cbor, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
-import { byte, encodeBech32, decodeBech32 } from "@harmoniclabs/crypto";
+import { byte, encodeBech32, decodeBech32, isBech32 } from "@harmoniclabs/crypto";
+import { ByronAddress } from "../../byron/ByronAddress";
 import { ToData, Data, DataConstr } from "@harmoniclabs/plutus-data";
 import { Credential, StakeCredentials, StakeCredentialsType, CredentialType, PublicKey } from "../../../credentials";
 import { Hash28 } from "../../../hashes";
@@ -228,7 +229,10 @@ export class Address
         const network: NetworkT = ( (header & 0b0000_1111) ) === 1 ? "mainnet" : "testnet" ;
 
         if( addrType === 0b1000 ) { // byron
-
+            // NOTE: Byron addresses embedded in the binary ledger format are handled by the
+            // dedicated `ByronAddress` decoder (via `ByronAddress.fromBytes`), not here.
+            // Decoding Byron addresses inside tx outputs is a separate follow-up (would widen
+            // every `TxOut.address` type); `Address.fromString` handles the base58 case today.
         }
 
         const type: AddressType =
@@ -372,8 +376,8 @@ export class Address
 
     static fromCborObj( buff: CborObj ): Address
     {
-        if(!( 
-            buff instanceof CborBytes 
+        if(!(
+            buff instanceof CborBytes
         ))throw new Error(`Invalid CBOR format for "Address"`);
 
         return Address.fromBuffer(
@@ -412,12 +416,21 @@ export class Address
         ) as AddressStr;
     }
 
-    static fromBech32( addr: AddressStr ): Address
+    static fromBech32( addr: AddressStr ): Address | ByronAddress
     {
         return Address.fromString( addr );
     }
-    static fromString( addr: string ): Address
+    static fromString( addr: string ): Address | ByronAddress
     {
+        // Byron (bootstrap) addresses are base58, not bech32; handle them first.
+        if( !isBech32( addr ) )
+        {
+            if( ByronAddress.isValid( addr ) ) return ByronAddress.fromBase58( addr );
+            throw new Error(
+                "string passed is not a Cardano address"
+            );
+        }
+
         const [ hrp, bytes ] = decodeBech32( addr );
 
         let hrpNetwork: NetworkT;
