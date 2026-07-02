@@ -51,8 +51,26 @@ describe("ByronBlock — real Pallas main blocks", () => {
     });
 });
 
+// the real preprod genesis epoch-boundary block (slot 0), from a cardano-node
+// immutable-DB chunk. `82 00 …` -> era tag 0 (EBB), protocolMagic 1 (preprod).
+const PREPROD_GENESIS_EBB =
+    "82008385015820d4b8de7a11d929a323373cbab6c1a9bdc931beffff11db111cf9d57356ee1937" +
+    "5820afc0da64183bf2664f3d4eec7238d524ba607faeeab24fc100eb861dba69971b8200810081a09fff81a0";
+
+describe("ByronBlock — real preprod genesis EBB", () => {
+    test("decodes + round-trips the real epoch-boundary block", () => {
+        const b = ByronBlock.fromCbor( PREPROD_GENESIS_EBB );
+        expect( b.isEbb ).toBe( true );
+        expect( toHex( b.toCborBytes() ) ).toBe( PREPROD_GENESIS_EBB );
+        const ebb = b.ebBlock!;
+        expect( ebb.header.protocolMagic ).toBe( 1 );          // preprod
+        expect( ebb.header.consensusData.epoch ).toBe( 0n );
+        expect( ebb.stakeholders.length ).toBe( 0 );
+    });
+});
+
 describe("ByronEbBlock — synthetic epoch-boundary block round-trip", () => {
-    // no on-chain EBB fixture exists (EBBs were never gossiped); validate via round-trip
+    // complements the real EBB above by exercising the construct/encode path
     test("construct -> encode -> decode is byte-exact", () => {
         const ebb = new ByronEbBlock({
             header: new ByronEbbHead({

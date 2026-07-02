@@ -4,22 +4,29 @@ import { AlonzoBlock } from '../alonzo/block/AlonzoBlock';
 import { MaryBlock } from '../mary/block/MaryBlock';
 import { AllegraBlock } from '../allegra/block/AllegraBlock';
 import { ShelleyBlock } from '../shelley/block/ShelleyBlock';
+import { ByronMainBlock } from '../byron/block/ByronMainBlock';
+import { ByronEbBlock } from '../byron/block/ByronEbBlock';
+import { isTag24, unwrapTag24 } from '../byron/common/byronCborUtils';
 import { CborArray, ToCbor, SubCborRef, CborString, Cbor, CborObj, CborUInt, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
 import { ToJson } from "../../utils/ToJson"
 import { getSubCborRef } from "../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError"
 import { CardanoEra } from "./types/CardanoEra";
 
+export type AnyEraBlock =
+    ConwayBlock | BabbageBlock | AlonzoBlock | MaryBlock | AllegraBlock | ShelleyBlock
+    | ByronMainBlock | ByronEbBlock;
+
 export interface IMultiEraBlock {
     era: CardanoEra;
-    block: ConwayBlock | BabbageBlock | AlonzoBlock | MaryBlock | AllegraBlock | ShelleyBlock;
+    block: AnyEraBlock;
 }
 
 export class MultiEraBlock implements 
 IMultiEraBlock, ToCbor, ToJson 
 {
     readonly era: CardanoEra;
-    readonly block: ConwayBlock | BabbageBlock | AlonzoBlock | MaryBlock | AllegraBlock | ShelleyBlock;
+    readonly block: AnyEraBlock;
 
     constructor(
         block: IMultiEraBlock,
@@ -67,8 +74,18 @@ IMultiEraBlock, ToCbor, ToJson
         ))throw new InvalidCborFormatError("Era must be a CborUInt");
         
 
-        let block: ConwayBlock | BabbageBlock | AlonzoBlock | MaryBlock | AllegraBlock | ShelleyBlock;
+        let block: AnyEraBlock;
         switch (Number(_era.num)) {
+            case 1: { // Byron main block
+                const body = isTag24(_blockData) ? unwrapTag24(_blockData) : _blockData;
+                block = ByronMainBlock.fromCborObj(body);
+                break;
+            }
+            case 0: { // Byron epoch-boundary block (EBB)
+                const body = isTag24(_blockData) ? unwrapTag24(_blockData) : _blockData;
+                block = ByronEbBlock.fromCborObj(body);
+                break;
+            }
             case 7: // Conway era
                 block = ConwayBlock.fromCborObj(_blockData);
                 break;

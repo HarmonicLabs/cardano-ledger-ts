@@ -4,6 +4,9 @@ import { AlonzoHeader } from '../alonzo/header/AlonzoHeader';
 import { MaryHeader } from '../mary/header/MaryHeader';
 import { AllegraHeader } from '../allegra/header/AllegraHeader';
 import { ShelleyHeader } from '../shelley/header/ShelleyHeader';
+import { ByronBlockHeaderBody } from '../byron/header/ByronBlockHeaderBody';
+import { ByronEbbHead } from '../byron/header/ByronEbbHead';
+import { isTag24, unwrapTag24 } from '../byron/common/byronCborUtils';
 import { CborArray, ToCbor, SubCborRef, CborString, Cbor, CborObj, CborUInt, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
 import { ToJson } from "../../utils/ToJson"
 import { getSubCborRef } from "../../utils/getSubCborRef";
@@ -11,16 +14,20 @@ import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError"
 import { toHex } from "@harmoniclabs/uint8array-utils";
 import { CardanoEra } from "./types/CardanoEra";
 
+export type AnyEraHeader =
+    ConwayHeader | BabbageHeader | AlonzoHeader | MaryHeader | AllegraHeader | ShelleyHeader
+    | ByronBlockHeaderBody | ByronEbbHead;
+
 export interface IMultiEraHeader {
     era: CardanoEra;
-    header: ConwayHeader | BabbageHeader | AlonzoHeader | MaryHeader | AllegraHeader | ShelleyHeader;
+    header: AnyEraHeader;
 }
 
 export class MultiEraHeader implements 
     IMultiEraHeader, ToCbor, ToJson 
 {
     readonly era: CardanoEra;
-    readonly header: ConwayHeader | BabbageHeader | AlonzoHeader | MaryHeader | AllegraHeader | ShelleyHeader;
+    readonly header: AnyEraHeader;
 
     constructor(
         header: IMultiEraHeader,
@@ -71,8 +78,18 @@ export class MultiEraHeader implements
         ))throw new InvalidCborFormatError("Era must be a CborUInt");
         
 
-        let header: ConwayHeader | BabbageHeader | AlonzoHeader | MaryHeader | AllegraHeader | ShelleyHeader;
+        let header: AnyEraHeader;
         switch (Number(_era.num)) {
+            case 1: { // Byron main block header (blockhead)
+                const body = isTag24(_headerData) ? unwrapTag24(_headerData) : _headerData;
+                header = ByronBlockHeaderBody.fromCborObj(body);
+                break;
+            }
+            case 0: { // Byron epoch-boundary block header (ebbhead)
+                const body = isTag24(_headerData) ? unwrapTag24(_headerData) : _headerData;
+                header = ByronEbbHead.fromCborObj(body);
+                break;
+            }
             case 7: // Conway era
                 header = ConwayHeader.fromCborObj(_headerData);
                 break;
