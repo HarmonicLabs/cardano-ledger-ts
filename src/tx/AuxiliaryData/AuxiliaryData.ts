@@ -5,7 +5,7 @@ import { AuxiliaryDataHash } from "../../hashes";
 import { NativeScript, nativeScriptFromCborObj } from "../../script/NativeScript";
 import { PlutusScriptJsonFormat, Script, ScriptType } from "../../script/Script";
 import { ToJson } from "../../utils/ToJson";
-import { TxMetadata } from "../metadata/TxMetadata";
+import { TxMetadata } from "../../eras/common/tx/metadata/TxMetadata";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
 
@@ -14,7 +14,7 @@ export interface IAuxiliaryData {
     nativeScripts?: (NativeScript | Script<ScriptType.NativeScript>)[];
     plutusV1Scripts?: (PlutusScriptJsonFormat<ScriptType.PlutusV1 | "PlutusScriptV1"> | Script<ScriptType.PlutusV1>)[];
     plutusV2Scripts?: (PlutusScriptJsonFormat<ScriptType.PlutusV2 | "PlutusScriptV2"> | Script<ScriptType.PlutusV2>)[];
-    plutusV3Scripts?: (PlutusScriptJsonFormat<ScriptType.PlutusV3 | "PlutusScriptV2"> | Script<ScriptType.PlutusV3>)[];
+    plutusV3Scripts?: (PlutusScriptJsonFormat<ScriptType.PlutusV3 | "PlutusScriptV3"> | Script<ScriptType.PlutusV3>)[];
 }
 
 function scriptArrToCbor( scripts: Script[] ): CborArray
@@ -247,9 +247,10 @@ export class AuxiliaryData
             cObj.data instanceof CborMap
         )) throw new InvalidCborFormatError("AuxiliaryData")
 
-        let fields: (CborObj | undefined)[] = new Array( 4 ).fill( undefined );
+        // 5 fields: 0 metadata, 1 native scripts, 2 plutus v1, 3 plutus v2, 4 plutus v3
+        let fields: (CborObj | undefined)[] = new Array( 5 ).fill( undefined );
 
-        for( let i = 0; i < 4; i++)
+        for( let i = 0; i < 5; i++)
         {
             const { v } = cObj.data.map.find(
                 ({ k }) => k instanceof CborUInt && Number( k.num ) === i
@@ -268,11 +269,13 @@ export class AuxiliaryData
             _pV3
         ] = fields;
 
+        // every field of conway aux data is optional;
+        // only validate the ones that are present (e.g. metadata-only is valid)
         if(!(
-            _native instanceof CborArray &&
-            _pV1 instanceof CborArray &&
-            _pV2 instanceof CborArray &&
-            _pV3 instanceof CborArray
+            ( _native === undefined || _native instanceof CborArray ) &&
+            ( _pV1    === undefined || _pV1    instanceof CborArray ) &&
+            ( _pV2    === undefined || _pV2    instanceof CborArray ) &&
+            ( _pV3    === undefined || _pV3    instanceof CborArray )
         ))
         throw new InvalidCborFormatError("AuxiliaryData")
 
@@ -308,7 +311,7 @@ export class AuxiliaryData
             nativeScripts: this.nativeScripts?.map( s => s.toJson() ),
             plutusV1Scripts: this.plutusV1Scripts?.map( s => s.toJson() ),
             plutusV2Scripts: this.plutusV2Scripts?.map( s => s.toJson() ),
-            plutusV3Scripts: this.plutusV2Scripts?.map( s => s.toJson() )
+            plutusV3Scripts: this.plutusV3Scripts?.map( s => s.toJson() )
         }
     }
 }
