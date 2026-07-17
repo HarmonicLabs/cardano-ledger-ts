@@ -329,8 +329,8 @@ export const defaultConwayProtocolParameters: ConwayProtocolParameters = freezeA
 	poolPledgeInfluence: new CborPositiveRational(3, 10), // 0.3, unchanged
 	monetaryExpansion: new CborPositiveRational(3, 1000), // 0.003, unchanged
 	treasuryCut: new CborPositiveRational(2, 10), // 0.2, unchanged
-	minPoolCost: 340_000_000, // 340 ADA, unchanged
-	utxoCostPerByte: 4310, // Consistent with Babbage (lovelacePerUTxOWord, historical approximation)
+	minPoolCost: 170_000_000, // 170 ADA, lowered on mainnet via governance
+	utxoCostPerByte: 4310, // coinsPerUTxOByte (CIP-55), unchanged since Babbage
 	costModels: {
 		PlutusScriptV1: defaultV1Costs, // Plutus V1 cost model (from Alonzo)
 		PlutusScriptV2: defaultV2Costs, // Plutus V2 cost model (from Babbage/Vasil)
@@ -340,11 +340,11 @@ export const defaultConwayProtocolParameters: ConwayProtocolParameters = freezeA
 		CborPositiveRational.fromNumber(0.0577), // Memory price (historical approximation)
 		CborPositiveRational.fromNumber(0.0000721), // CPU/Steps price (historical approximation)
 	],
-	maxTxExecutionUnits: new ExBudget({ mem: 14_000_000, cpu: 11_500_000_000 }), // Consistent with Babbage
+	maxTxExecutionUnits: new ExBudget({ mem: 16_500_000, cpu: 10_000_000_000 }), // mainnet, mem raised from 14M via governance
 	maxBlockExecutionUnits: new ExBudget({
-		mem: 62_000_000,
-		cpu: 50_000_000_000,
-	}), // Consistent with Babbage
+		mem: 72_000_000,
+		cpu: 20_000_000_000,
+	}), // mainnet, mem raised from 62M via governance
 	maxValueSize: 5000, // Unchanged, relevant for multi-asset and script data
 	collateralPercentage: 150, // Unchanged, percentage of fee as collateral
 	maxCollateralInputs: 3, // Unchanged, maximum number of collateral inputs
@@ -357,22 +357,22 @@ export const defaultConwayProtocolParameters: ConwayProtocolParameters = freezeA
 		securityRelevantVotingThresholds: CborPositiveRational.fromNumber(0.51),
 	} as ConwayPParamsPoolVotingThresholds,
 	drepVotingThresholds: {
-		motionNoConfidence: CborPositiveRational.fromNumber(0.51),
-		committeeNormal: CborPositiveRational.fromNumber(0.51),
-		committeeNoConfidence: CborPositiveRational.fromNumber(0.51),
-		updateConstitution: CborPositiveRational.fromNumber(0.51),
-		hardForkInitiation: CborPositiveRational.fromNumber(0.51),
-		ppNetworkGroup: CborPositiveRational.fromNumber(0.51),
-		ppEconomicGroup: CborPositiveRational.fromNumber(0.51),
-		ppTechnicalGroup: CborPositiveRational.fromNumber(0.51),
-		ppGovGroup: CborPositiveRational.fromNumber(0.51),
-		treasuryWithdrawal: CborPositiveRational.fromNumber(0.51),
+		motionNoConfidence: CborPositiveRational.fromNumber(0.67),
+		committeeNormal: CborPositiveRational.fromNumber(0.67),
+		committeeNoConfidence: CborPositiveRational.fromNumber(0.6),
+		updateConstitution: CborPositiveRational.fromNumber(0.75),
+		hardForkInitiation: CborPositiveRational.fromNumber(0.6),
+		ppNetworkGroup: CborPositiveRational.fromNumber(0.67),
+		ppEconomicGroup: CborPositiveRational.fromNumber(0.67),
+		ppTechnicalGroup: CborPositiveRational.fromNumber(0.67),
+		ppGovGroup: CborPositiveRational.fromNumber(0.75),
+		treasuryWithdrawal: CborPositiveRational.fromNumber(0.67),
 	} as ConwayPParamsDrepVotingThresholds,
-	minCommitteSize: 7, // Reasonable default for minimum constitutional committee size
-	committeeTermLimit: 200, // Epochs, reasonable term limit for committee members
-	governanceActionValidityPeriod: 10, // Epochs, validity period for governance actions
-	governanceActionDeposit: 1_000_000_000, // 1000 ADA, deposit for governance actions (approximation)
-	drepDeposit: 2_000_000, // 2 ADA, deposit for DRep registration (consistent with stake key deposit)
+	minCommitteSize: 5, // Minimum constitutional committee size on mainnet
+	committeeTermLimit: 146, // Epochs, term limit for committee members
+	governanceActionValidityPeriod: 6, // Epochs, validity period for governance actions
+	governanceActionDeposit: 100_000_000_000, // 100_000 ADA, deposit for governance actions
+	drepDeposit: 500_000_000, // 500 ADA, deposit for DRep registration
 	drepActivityPeriod: 20, // Epochs, activity period for DReps before becoming inactive
 	minfeeRefScriptCostPerByte: CborPositiveRational.fromNumber(15.0), // Cost per byte for reference scripts (approximation)
 } as ConwayProtocolParameters);
