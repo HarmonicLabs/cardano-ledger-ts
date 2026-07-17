@@ -29,9 +29,9 @@ export class ByronTxOut implements IByronTxOut
 
     toCborObj(): CborArray
     {
-        // re-inline the address as its CBOR array (address.toBytes() is the encoded array)
+        // re-inline the address as its CBOR array (address.toBuffer() is the encoded array)
         return new CborArray([
-            Cbor.parse( this.address.toBytes() ),
+            Cbor.parse( this.address.toBuffer() ),
             new CborUInt( this.amount )
         ]);
     }

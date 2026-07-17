@@ -1,6 +1,8 @@
-import { ToCbor, CborObj, CborString, Cbor, CborArray, CborBytes, CborUInt, CborTag, CborMap, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
+import { CborObj, CborString, Cbor, CborArray, CborBytes, CborUInt, CborTag, CborMap, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
 import { fromHex, toHex } from "@harmoniclabs/uint8array-utils";
-import { NetworkT } from "../common/ledger/Network";
+import { byte } from "@harmoniclabs/crypto";
+import { Address, AddressStr, _registerByronAddressParser } from "../common/ledger/Address";
+import { Credential } from "../../credentials";
 import { base58Decode, base58Encode } from "../../utils/base58";
 import { crc32 } from "../../utils/crc32";
 
@@ -59,23 +61,23 @@ function cloneAttrs( attrs: ByronAddressAttributes ): ByronAddressAttributes
  * BYRON_ADDRESS = ( #6.24(<<[ rootHash, attributes, addrType ]>>), crc32 )
  * ```
  *
- * Byron addresses are structurally unrelated to Shelley addresses (no header byte),
- * so they are represented by this dedicated class rather than by `Address`.
+ * Extends `Address` (with `type: "byron"`) so that a `ByronAddress` is accepted
+ * anywhere an `Address` is; the 28-byte address root doubles as the key-hash
+ * payment credential, mirroring how the ledger witnesses bootstrap inputs.
+ * Serialization is fully overridden: the Byron wire format has no Shelley
+ * header byte, so none of the base class encoding applies.
  *
  * This class covers decoding + round-trip re-serialization. Constructing a fresh
  * Byron address from a public key is intentionally out of scope (the era is closed).
  */
-export class ByronAddress
-    implements ToCbor
+export class ByronAddress extends Address
 {
     readonly rootHash: Uint8Array;
     readonly attributes: ByronAddressAttributes;
-    readonly type: ByronAddressType;
+    /** the on-wire Byron address type; `this.type` (from `Address`) is always `"byron"` */
+    readonly byronType: ByronAddressType;
 
-    /** present only to satisfy the `ToCbor` interface; Byron addresses do not cache a sub-ref */
-    readonly cborRef: SubCborRef | undefined = undefined;
-
-    /** original decoded bytes, kept so `toBytes`/`toBase58` round-trip byte-exactly */
+    /** original decoded bytes, kept so `toBuffer`/`toBase58` round-trip byte-exactly */
     private readonly _originalBytes?: Uint8Array;
 
     constructor( address: IByronAddress, originalBytes?: Uint8Array )
@@ -91,18 +93,18 @@ export class ByronAddress
             type === 0 || type === 1 || type === 2
         )) throw new Error("invalid Byron address type: " + String( type ));
 
-        this.rootHash = rootHash.slice();
-        this.attributes = cloneAttrs( attributes ?? {} );
-        this.type = type;
-        this._originalBytes = originalBytes?.slice();
-    }
+        const attrs = cloneAttrs( attributes ?? {} );
 
-    /**
-     * `"mainnet"` when no network-magic attribute is present, `"testnet"` otherwise.
-     */
-    get network(): NetworkT
-    {
-        return this.attributes.networkMagic === undefined ? "mainnet" : "testnet";
+        super({
+            network: attrs.networkMagic === undefined ? "mainnet" : "testnet",
+            paymentCreds: Credential.keyHash( rootHash ),
+            type: "byron"
+        });
+
+        this.rootHash = rootHash.slice();
+        this.attributes = attrs;
+        this.byronType = type;
+        this._originalBytes = originalBytes?.slice();
     }
 
     /**
@@ -118,7 +120,7 @@ export class ByronAddress
         return new ByronAddress({
             rootHash: this.rootHash,
             attributes: this.attributes,
-            type: this.type
+            type: this.byronType
         }, this._originalBytes );
     }
 
@@ -139,7 +141,7 @@ export class ByronAddress
 
     toBase58(): string
     {
-        return base58Encode( this.toBytes() );
+        return base58Encode( this.toBuffer() );
     }
 
     static fromBytes( bytes: Uint8Array | string ): ByronAddress
@@ -207,7 +209,8 @@ export class ByronAddress
         );
     }
 
-    toBytes(): Uint8Array
+    /** raw Byron address bytes: the base58-decoded `( #6.24(payload), crc32 )` CBOR array */
+    toBuffer(): Uint8Array
     {
         if( this._originalBytes instanceof Uint8Array ) return this._originalBytes.slice();
 
@@ -222,7 +225,7 @@ export class ByronAddress
             new CborArray([
                 new CborBytes( this.rootHash ),
                 new CborMap( attrEntries ),
-                new CborUInt( this.type )
+                new CborUInt( this.byronType )
             ])
         );
 
@@ -234,6 +237,11 @@ export class ByronAddress
         );
     }
 
+    toBytes(): byte[]
+    {
+        return Array.from( this.toBuffer() ) as byte[];
+    }
+
     /**
      * in the binary ledger format a Byron address is embedded verbatim as a CBOR byte string
      * (its first byte `0x82` has high nibble `0b1000`, matching the Shelley "bootstrap" header),
@@ -241,7 +249,7 @@ export class ByronAddress
      */
     toCborObj(): CborBytes
     {
-        return new CborBytes( this.toBytes() );
+        return new CborBytes( this.toBuffer() );
     }
     toCbor(): CborString
     {
@@ -249,7 +257,7 @@ export class ByronAddress
     }
     toCborBytes(): Uint8Array
     {
-        return this.toBytes();
+        return this.toBuffer();
     }
 
     static fromCborObj( cObj: CborObj ): ByronAddress
@@ -263,11 +271,20 @@ export class ByronAddress
         return ByronAddress.fromCborObj( Cbor.parse( forceCborString( cbor ) ) );
     }
 
+    /**
+     * Byron addresses have no bech32 form; their canonical string is base58.
+     * typed `AddressStr` only to satisfy the `Address` signature.
+     */
+    toString(): AddressStr
+    {
+        return this.toBase58() as any as AddressStr;
+    }
+
     toJSON() { return this.toJson(); }
     toJson()
     {
         return {
-            type: this.type,
+            type: this.byronType,
             network: this.network,
             protocolMagic: this.protocolMagic(),
             rootHash: toHex( this.rootHash ),
@@ -285,3 +302,10 @@ export function isByronAddress( thing: any ): thing is ByronAddress
 {
     return thing instanceof ByronAddress;
 }
+
+// registered here rather than imported by `Address`, so that the only runtime
+// dependency between the two modules is `ByronAddress -> Address` (required by
+// `extends`); the reverse import would make the cycle unresolvable at load time.
+_registerByronAddressParser(
+    str => ByronAddress.isValid( str ) ? ByronAddress.fromBase58( str ) : undefined
+);

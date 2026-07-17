@@ -17,7 +17,8 @@ describe("ByronAddress", () => {
         const b = ByronAddress.fromBase58( MAINNET );
         expect( isByronAddress( b ) ).toBe( true );
         expect( toHex( b.rootHash ) ).toBe( MAINNET_ROOT );
-        expect( b.type ).toBe( 0 );
+        expect( b.byronType ).toBe( 0 );
+        expect( b.type ).toBe( "byron" );
         expect( b.attributes.derivationPath ).toBeUndefined();
         expect( b.attributes.networkMagic ).toBeUndefined();
         expect( b.network ).toBe( "mainnet" );
@@ -38,7 +39,7 @@ describe("ByronAddress", () => {
             const rebuilt = new ByronAddress({
                 rootHash: decoded.rootHash,
                 attributes: decoded.attributes,
-                type: decoded.type
+                type: decoded.byronType
             }); // note: NO originalBytes -> forces the encode path
             expect( rebuilt.toBase58() ).toBe( s );
         }

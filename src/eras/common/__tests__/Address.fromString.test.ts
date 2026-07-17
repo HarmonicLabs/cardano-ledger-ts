@@ -15,7 +15,9 @@ describe("Address.fromString", () => {
         const addr = Address.fromString(str);
         expect( addr ).toBeInstanceOf( ByronAddress );
         expect( (addr as ByronAddress).toBase58() ).toBe( str );
-        expect( addr ).not.toBeInstanceOf( Address );
+        // ByronAddress extends Address, so it is usable anywhere an Address is
+        expect( addr ).toBeInstanceOf( Address );
+        expect( addr.toString() ).toBe( str );
     });
 
     test("still throws on non-addresses", () => {
