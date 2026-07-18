@@ -350,7 +350,7 @@ export class ConwayTxBody
         if(!(
             totCollateral === undefined ||
             canBeUInteger( totCollateral )
-        ))
+        )) throw new Error("invalid 'totCollateral' field");
 
         this.totCollateral = maybeBigUint( totCollateral );
 

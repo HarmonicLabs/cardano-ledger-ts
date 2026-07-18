@@ -358,7 +358,7 @@ export class DijkstraTxBody
         if(!(
             totCollateral === undefined ||
             canBeUInteger( totCollateral )
-        ))
+        )) throw new Error("invalid 'totCollateral' field");
 
         this.totCollateral = maybeBigUint( totCollateral );
 
