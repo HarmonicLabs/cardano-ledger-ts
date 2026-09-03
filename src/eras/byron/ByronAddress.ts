@@ -1,5 +1,6 @@
 import { ToCbor, CborObj, CborString, Cbor, CborArray, CborBytes, CborUInt, CborTag, CborMap, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { fromHex, toHex } from "@harmoniclabs/uint8array-utils";
+import { blake2b_224, sha3 } from "@harmoniclabs/crypto";
 import { NetworkT } from "../common/ledger/Network";
 import { base58Decode, base58Encode } from "../../utils/base58";
 import { crc32 } from "../../utils/crc32";
@@ -43,6 +44,17 @@ export interface IByronAddress {
     type: ByronAddressType;
 }
 
+/** attribute map as it appears both in the address payload and in the root-hash preimage. */
+function encodeByronAttributes( attrs: ByronAddressAttributes ): CborMap
+{
+    const attrEntries = [];
+    if( attrs.derivationPath !== undefined )
+        attrEntries.push({ k: new CborUInt( 1 ), v: new CborBytes( attrs.derivationPath ) });
+    if( attrs.networkMagic !== undefined )
+        attrEntries.push({ k: new CborUInt( 2 ), v: new CborBytes( Cbor.encode( new CborUInt( attrs.networkMagic ) ) ) });
+    return new CborMap( attrEntries );
+}
+
 function cloneAttrs( attrs: ByronAddressAttributes ): ByronAddressAttributes
 {
     const out: ByronAddressAttributes = {};
@@ -62,8 +74,9 @@ function cloneAttrs( attrs: ByronAddressAttributes ): ByronAddressAttributes
  * Byron addresses are structurally unrelated to Shelley addresses (no header byte),
  * so they are represented by this dedicated class rather than by `Address`.
  *
- * This class covers decoding + round-trip re-serialization. Constructing a fresh
- * Byron address from a public key is intentionally out of scope (the era is closed).
+ * This class covers decoding + round-trip re-serialization, plus construction from
+ * spending data (`fromPublicKey`, `fromRedeemPublicKey`) — needed to rebuild the
+ * Byron genesis UTxO set, whose AVVM entries are redeem public keys, not addresses.
  */
 export class ByronAddress
     implements ToCbor
@@ -207,21 +220,78 @@ export class ByronAddress
         );
     }
 
+    /**
+     * Address root: `blake2b_224( sha3_256( cbor([ addrType, spendingData, attributes ]) ) )`
+     * (cardano-ledger-byron `addrRoot`). `spendingData` is the CBOR
+     * `[ 0, xpub(64) ]` for a public-key address or `[ 2, pk(32) ]` for a redeem address.
+     */
+    static computeRootHash(
+        type: ByronAddressType,
+        spendingData: CborObj,
+        attributes: ByronAddressAttributes
+    ): Uint8Array
+    {
+        const preimage = Cbor.encode(
+            new CborArray([
+                new CborUInt( type ),
+                spendingData,
+                encodeByronAttributes( attributes )
+            ])
+        );
+        return new Uint8Array( blake2b_224( new Uint8Array( sha3( new Uint8Array( preimage ) ) ) ) );
+    }
+
+    /**
+     * Public-key (type 0) address from a 64-byte extended public key (pk ‖ chain code).
+     * `networkMagic` undefined = mainnet (attribute omitted).
+     */
+    static fromPublicKey(
+        xpub: Uint8Array,
+        networkMagic?: number,
+        derivationPath?: Uint8Array
+    ): ByronAddress
+    {
+        if(!( xpub instanceof Uint8Array && xpub.length === 64 ))
+        throw new Error("Byron public-key address needs a 64-byte extended public key");
+        const attributes: ByronAddressAttributes = {};
+        if( derivationPath !== undefined ) attributes.derivationPath = derivationPath.slice();
+        if( networkMagic !== undefined && networkMagic !== BYRON_MAINNET_PROTOCOL_MAGIC ) attributes.networkMagic = networkMagic;
+        const spendingData = new CborArray([ new CborUInt( 0 ), new CborBytes( xpub ) ]);
+        return new ByronAddress({
+            rootHash: ByronAddress.computeRootHash( 0, spendingData, attributes ),
+            attributes,
+            type: 0
+        });
+    }
+
+    /**
+     * Redeem (AVVM, type 2) address from a 32-byte redeem public key — the form the
+     * Byron genesis `avvmDistr` keys take (base64url of the key). Mainnet addresses
+     * carry no attributes; testnets carry the network magic.
+     */
+    static fromRedeemPublicKey( redeemPk: Uint8Array, networkMagic?: number ): ByronAddress
+    {
+        if(!( redeemPk instanceof Uint8Array && redeemPk.length === 32 ))
+        throw new Error("Byron redeem address needs a 32-byte public key");
+        const attributes: ByronAddressAttributes = {};
+        if( networkMagic !== undefined && networkMagic !== BYRON_MAINNET_PROTOCOL_MAGIC ) attributes.networkMagic = networkMagic;
+        const spendingData = new CborArray([ new CborUInt( 2 ), new CborBytes( redeemPk ) ]);
+        return new ByronAddress({
+            rootHash: ByronAddress.computeRootHash( 2, spendingData, attributes ),
+            attributes,
+            type: 2
+        });
+    }
+
     toBytes(): Uint8Array
     {
         if( this._originalBytes instanceof Uint8Array ) return this._originalBytes.slice();
 
         // re-encode from fields
-        const attrEntries = [];
-        if( this.attributes.derivationPath !== undefined )
-            attrEntries.push({ k: new CborUInt( 1 ), v: new CborBytes( this.attributes.derivationPath ) });
-        if( this.attributes.networkMagic !== undefined )
-            attrEntries.push({ k: new CborUInt( 2 ), v: new CborBytes( Cbor.encode( new CborUInt( this.attributes.networkMagic ) ) ) });
-
         const payloadBytes = Cbor.encode(
             new CborArray([
                 new CborBytes( this.rootHash ),
-                new CborMap( attrEntries ),
+                encodeByronAttributes( this.attributes ),
                 new CborUInt( this.type )
             ])
         );

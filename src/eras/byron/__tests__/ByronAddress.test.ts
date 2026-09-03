@@ -1,4 +1,5 @@
 import { fromHex, toHex } from "@harmoniclabs/uint8array-utils";
+import { blake2b_256 } from "@harmoniclabs/crypto";
 import { ByronAddress, isByronAddress, BYRON_MAINNET_PROTOCOL_MAGIC } from "../ByronAddress";
 
 // real mainnet Icarus address (from Michele's report); empty attributes, type 0
@@ -76,5 +77,57 @@ describe("ByronAddress", () => {
         const b = ByronAddress.fromBase58( MAINNET );
         const back = ByronAddress.fromCbor( b.toCbor() );
         expect( back.toBase58() ).toBe( MAINNET );
+    });
+});
+
+// Mainnet Byron genesis `avvmDistr` entries (base64url redeem public keys) and the
+// redeem addresses they must derive to. Verified 2026-09-03 against mainnet via
+// Blockfrost: each address received exactly its genesis lovelace in the redeem tx.
+const AVVM_VECTORS: Array<{ pk: string; addr: string; utxoId: string }> = [
+    { pk: "-0BJDi-gauylk4LptQTgjMeo7kY9lTCbZv12vwOSTZk=", addr: "Ae2tdPwUPEZHFQnrr2dYB4GEQ8WVKspEyrg29pJ3f7qdjzaxjeShEEokF5f", utxoId: "8ee33c9906974706223d7d500d63bbee2369d7150f972757a9fdded2f706b938" },
+    { pk: "-0Np4pyTOWF26iXWVIvu6fhz9QupwWRS2hcCaOEYlw0=", addr: "Ae2tdPwUPEZFF5MA48FeLbPhKPbC9pG5DpzReXzzoFhofPR7nZQ8DSR3A4G", utxoId: "2d8208189f58f59c674fbe8f8c421f84c9060aa4b790d498c5f6083819f3e131" },
+    { pk: "-0_pjw54ACGTrCsH3SXreedq-Cj9pFBcZDbxT9sXaqQ=", addr: "Ae2tdPwUPEZEESRbZwe58ZcwLRD7P9kxCLad3gxBVNdFRCP4En5z8eh5QCF", utxoId: "cec733c7d6c052103194446440669995adb76f13a70eed526e2d1241b16feda3" },
+];
+
+function base64urlToBytes( s: string ): Uint8Array
+{
+    return new Uint8Array( Buffer.from( s.replace(/-/g, "+").replace(/_/g, "/"), "base64" ) );
+}
+
+describe("ByronAddress construction from spending data", () => {
+
+    test("fromRedeemPublicKey reproduces mainnet AVVM genesis addresses", () => {
+        for( const v of AVVM_VECTORS )
+        {
+            const a = ByronAddress.fromRedeemPublicKey( base64urlToBytes( v.pk ) );
+            expect( a.type ).toBe( 2 );
+            expect( a.attributes.networkMagic ).toBeUndefined();
+            expect( a.toBase58() ).toBe( v.addr );
+            // genesis UTxO id = blake2b-256 of the address bytes (cardano-ledger-byron genesisUtxo)
+            expect( toHex( blake2b_256( a.toBytes() ) ) ).toBe( v.utxoId );
+            // decode → re-encode is byte-exact
+            expect( ByronAddress.fromBase58( v.addr ).toBase58() ).toBe( v.addr );
+        }
+    });
+
+    test("testnet redeem addresses carry the network-magic attribute", () => {
+        const a = ByronAddress.fromRedeemPublicKey( base64urlToBytes( AVVM_VECTORS[0].pk ), 1 );
+        expect( a.attributes.networkMagic ).toBe( 1 );
+        expect( a.network ).toBe( "testnet" );
+        const back = ByronAddress.fromBase58( a.toBase58() );
+        expect( back.attributes.networkMagic ).toBe( 1 );
+        expect( toHex( back.rootHash ) ).toBe( toHex( a.rootHash ) );
+        // mainnet magic is normalised to "no attribute"
+        expect( ByronAddress.fromRedeemPublicKey( base64urlToBytes( AVVM_VECTORS[0].pk ), BYRON_MAINNET_PROTOCOL_MAGIC ).toBase58() ).toBe( AVVM_VECTORS[0].addr );
+    });
+
+    test("fromPublicKey builds a decodable type-0 address and rejects bad key sizes", () => {
+        const xpub = new Uint8Array( 64 ).map( (_, i) => (i * 13 + 1) & 0xff );
+        const a = ByronAddress.fromPublicKey( xpub );
+        expect( a.type ).toBe( 0 );
+        expect( a.rootHash.length ).toBe( 28 );
+        expect( ByronAddress.fromBase58( a.toBase58() ).toBase58() ).toBe( a.toBase58() );
+        expect( () => ByronAddress.fromPublicKey( new Uint8Array( 32 ) ) ).toThrow();
+        expect( () => ByronAddress.fromRedeemPublicKey( new Uint8Array( 31 ) ) ).toThrow();
     });
 });
