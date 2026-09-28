@@ -53,6 +53,11 @@ export class Hash32 extends Hash
         this.cborRef = cborRef ?? subCborRefOrUndef( bs );
     }
 
+    clone(): Hash32
+    {
+        return new Hash32( Uint8Array.prototype.slice.call( this.toBuffer() ) );
+    }
+
     static fromCbor( cStr: CanBeCborString ): Hash32
     {
         return Hash32.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
