@@ -1,4 +1,5 @@
 import { ToCbor, CborString, Cbor, CborObj, CborArray, CborUInt, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
+import { cborArray, cborUInt16 } from "../../../utils/strictCbor";
 import { lexCompare } from "@harmoniclabs/uint8array-utils";
 import { forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
 import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
@@ -223,22 +224,31 @@ export class TxOutRef
     {
         return TxOutRef.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
+    /**
+     * cardano-ledger `DecCBOR TxIn`: `decodeRecordNamed "TxIn" (const 2)` (definite or
+     * indefinite array of exactly two), a 32-byte tx id and a `TxIx` (Word16).
+     */
     static fromCborObj( cObj: CborObj ): TxOutRef
     {
-        if(!(
-            cObj instanceof CborArray 
-        ))throw new InvalidCborFormatError("TxOutRef");
-
-        const [ _id, _index ] = cObj.array;
-
-        const idRes = Hash32.fromCborObj( _id );
-
-        if(!(_index instanceof CborUInt))
-        throw new InvalidCborFormatError("TxOutRef");
+        const [ _id, _index ] = cborArray( cObj, "TxOutRef", { len: 2 } );
 
         return new TxOutRef({
-            id: idRes,
-            index: Number( _index.num )
+            id: Hash32.fromCborObj( _id ),
+            index: Number( cborUInt16( _index, "TxOutRef index" ) )
+        }, getSubCborRef( cObj ));
+    }
+
+    /**
+     * cardano-ledger `DecCBOR GovActionId`: below protocol version 12 a `RecD`
+     * record, i.e. a definite-length array of two (tx id, `GovActionIx` Word16).
+     */
+    static govActionIdFromCborObj( cObj: CborObj ): TxOutRef
+    {
+        const [ _id, _index ] = cborArray( cObj, "GovActionId", { len: 2, definite: true } );
+
+        return new TxOutRef({
+            id: Hash32.fromCborObj( _id ),
+            index: Number( cborUInt16( _index, "GovActionId index" ) )
         }, getSubCborRef( cObj ));
     }
 
