@@ -669,7 +669,7 @@ export class TxBody
             protocolUpdate:             _pUp === undefined ? undefined : LegacyPPUpdateProposalFromCborObj( _pUp ),
             auxDataHash:                _auxDataHash === undefined ? undefined : AuxiliaryDataHash.fromCborObj( _auxDataHash ),
             validityIntervalStart:      _validityStart instanceof CborUInt ? _validityStart.num : undefined,
-            mint:                       _mint === undefined ? undefined : Value.fromCborObj( _mint ),
+            mint:                       _mint === undefined ? undefined : Value.fromCborObj( _mint, { mint: true } ),
             scriptDataHash:             _scriptDataHash === undefined ? undefined : ScriptDataHash.fromCborObj( _scriptDataHash ),
             collateralInputs:           _collIns !== undefined ? getCborSet( _collIns ).map( txOutRefAsUTxOFromCborObj ) : undefined ,
             requiredSigners:            _reqSigs !== undefined  ? getCborSet( _reqSigs ).map( PubKeyHash.fromCborObj ) : undefined,

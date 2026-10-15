@@ -1,5 +1,5 @@
 import { ToCbor, CborString, Cbor, CborObj, CborUInt, CborMap, CborBytes, CborNegInt, CborArray, CanBeCborString, forceCborString, CborMapEntry, SubCborRef } from "@harmoniclabs/cbor";
-import { definiteBytes } from "../../../../utils/strictCbor";
+import { cborArray, cborInt, cborMapEntries, cborUInt, decodeVersionAtLeast, definiteBytes } from "../../../../utils/strictCbor";
 import { ToData, DataMap, DataB, DataI, DataPair, Data } from "@harmoniclabs/plutus-data";
 import { lexCompare, toHex, fromHex } from "@harmoniclabs/uint8array-utils";
 import { Hash28 } from "../../../../hashes";
@@ -352,30 +352,20 @@ export class Value
         return new Value( valueMap );
     }
     
+    // A value is not a hash preimage and cardano-ledger does not keep its bytes: it is
+    // always re-encoded from its contents (`[coin, {}]` becomes the plain coin), so the
+    // decoded `cborRef` is not re-emitted (586). Memoized containers (outputs in a
+    // decoded transaction body) still re-emit their own bytes.
     toCborBytes(): Uint8Array
     {
-        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
         return this.toCbor();
     }
     toCbor(): CborString
     {
-        if( this.cborRef instanceof SubCborRef )
-        {
-            // TODO: validate cbor structure
-            // we assume correctness here
-            return this.cborRef.toBuffer();
-        }
-        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborObj
     {
-        if( this.cborRef instanceof SubCborRef )
-        {
-            // TODO: validate cbor structure
-            // we assume correctness here
-            return Cbor.parse( this.cborRef.toBuffer() );
-        }
         if( Value.isAdaOnly( this ) ) return new CborUInt( this.lovelaces );
 
         const multiasset = new CborMap(
@@ -415,110 +405,100 @@ export class Value
     {
         return Value.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) )
     }
-    static fromCborObj( cObj: CborObj ): Value
+    /**
+     * cardano-ledger `decodeMaryValue` (outputs) and `decodeMultiAsset` (mint):
+     *
+     * - a value is a Word64 coin or `[coin, multiasset]`, the latter a `RecD` record
+     *   (below protocol version 12: definite array of exactly two); a bare map is not
+     *   a value;
+     * - `opts.mint`: the mint field, a multiasset map whose amounts are Int64s
+     *   (`decodeIntegerBounded64`: no bignum);
+     * - a multiasset maps 28-byte policy ids to maps from asset names (at most 32
+     *   bytes) to amounts (Word64 in outputs); all byte strings definite;
+     * - from protocol version 9 a repeated policy or asset name fails (`decodeMap`),
+     *   an asset map may not be empty and an amount may not be zero; before 9 a
+     *   repeated key replaces the earlier one (`Map.fromList`).
+     */
+    static fromCborObj( cObj: CborObj, opts: { mint?: boolean } = {} ): Value
     {
-        if(!(
-            cObj instanceof CborArray   ||  // ada and assets
-            cObj instanceof CborMap     ||  // only assets
-            cObj instanceof CborUInt        // only ada
-        ))throw new Error(`Invalid CBOR format for "Value"`);
-
-        if( cObj instanceof CborUInt )
-        return Value.lovelaces( cObj.num );
+        const what = opts.mint ? "Mint" : "Value";
+        const v9 = decodeVersionAtLeast( 9 );
 
         let cborMap: CborMapEntry[];
         let valueMap: IValue;
 
-        if( cObj instanceof CborArray )
+        if( opts.mint )
         {
-            if(!(
-                cObj.array[0] instanceof CborUInt &&
-                cObj.array[1] instanceof CborMap
-            ))
-            throw new Error(`Invalid CBOR format for "Value"`);
-
-            cborMap = cObj.array[1].map;
+            cborMap = cborMapEntries( cObj, what );
             valueMap = new Array( cborMap.length + 1 );
-
-            valueMap[0] = {
-                policy: "",
-                assets: [
-                    {
-                        name: new Uint8Array([]),
-                        quantity: cObj.array[0].num
-                    }
-                ]
-            };
+            valueMap[0] = { policy: "", assets: [ { name: new Uint8Array([]), quantity: BigInt( 0 ) } ] };
+        }
+        else if( cObj instanceof CborUInt )
+        {
+            return Value.lovelaces( cborUInt( cObj, "Value coin" ) );
         }
         else
         {
-            cborMap = cObj.map;
+            const [ coin, ma ] = cborArray( cObj, what, { len: 2, definite: true } );
+            cborMap = cborMapEntries( ma, "MultiAsset" );
             valueMap = new Array( cborMap.length + 1 );
-
-            valueMap[0] = {
-                policy: "",
-                assets: [
-                    {
-                        name: new Uint8Array([]),
-                        quantity: BigInt( 0 )
-                    }
-                ]
-            };
+            valueMap[0] = { policy: "", assets: [ { name: new Uint8Array([]), quantity: cborUInt( coin, "Value coin" ) } ] };
         }
-        
+
         const n = cborMap.length;
 
-        // Duplicate keys: the Haskell decoder builds `Map`s (protocol versions
-        // before 9), so a repeated policy replaces the earlier entry wholesale and
-        // a repeated asset name within a policy replaces the earlier quantity.
+        // Duplicate keys below protocol version 9: the Haskell decoder builds `Map`s, so
+        // a repeated policy replaces the earlier entry wholesale and a repeated asset
+        // name within a policy replaces the earlier quantity.
         // Preview slot 51361220 (Babbage) carries a mint with every policy twice.
-        // Without this the constructor's duplicate check rejected on-chain blocks.
         const seenPolicies = new Map<string, number>(); // policy hex → index in valueMap
         let next = 1;
         for( let i = 0; i < n; i++ )
         {
-            const { k , v } = cborMap[i];
+            const { k, v } = cborMap[i];
 
-            const policyBytes = definiteBytes( k, "Value policy id" );
-            const policy = policyBytes.length === 0 ? "" : new Hash28( policyBytes )
+            const policy = Hash28.fromCborObj( k );
+            const policyHex = policy.toString();
 
-            if(!( v instanceof CborMap ))
-            throw new Error(`Invalid CBOR format for "Value"`);
-
-            const assetsMap = v.map;
-            const assetsMapLen = v.map.length;
+            const assetsMap = cborMapEntries( v, "MultiAsset assets" );
+            if( v9 && assetsMap.length === 0 ) throw new Error(`Invalid CBOR format for "${what}"; empty assets are not allowed`);
 
             const assets: IValueAssetBI[] = [];
             const seenNames = new Map<string, number>(); // asset name hex → index in assets
 
-            for( let j = 0 ; j < assetsMapLen; j++ )
+            for( let j = 0 ; j < assetsMap.length; j++ )
             {
                 const { k, v } = assetsMap[j];
                 const name = definiteBytes( k, "Value asset name" );
+                if( name.length > 32 ) throw new Error(`Invalid CBOR format for "${what}"; asset name exceeds 32 bytes`);
 
-                if(!( v instanceof CborNegInt || v instanceof CborUInt ))
-                throw new Error(`Invalid CBOR format for "Value"`);
+                const quantity = opts.mint ? cborInt( v, "Mint amount" ) : cborUInt( v, "Value amount" );
+                if( v9 && quantity === BigInt( 0 ) ) throw new Error(`Invalid CBOR format for "${what}"; zero amounts are not allowed`);
 
                 const nameHex = toHex( name );
                 const at = seenNames.get( nameHex );
-                if( at !== undefined ) assets[at] = { name, quantity: v.num };
+                if( at !== undefined )
+                {
+                    if( v9 ) throw new Error(`Invalid CBOR format for "${what}"; repeated asset name`);
+                    assets[at] = { name, quantity };
+                }
                 else
                 {
                     seenNames.set( nameHex, assets.length );
-                    assets.push({
-                        name,
-                        quantity: v.num
-                    });
+                    assets.push({ name, quantity });
                 }
             }
 
-            const policyHex = policy === "" ? "" : toHex( policyBytes );
             const entry = {
                 policy: policy,
                 assets
             } as NormalizedIValuePolicyEntry | NormalizedIValueAdaEntry;
             const dup = seenPolicies.get( policyHex );
-            if( dup !== undefined ) valueMap[dup] = entry;
+            if( dup !== undefined )
+            {
+                if( v9 ) throw new Error(`Invalid CBOR format for "${what}"; repeated policy`);
+                valueMap[dup] = entry;
+            }
             else
             {
                 seenPolicies.set( policyHex, next );

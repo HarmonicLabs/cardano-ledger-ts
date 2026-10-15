@@ -168,7 +168,7 @@ export function decodeDijkstraBodyFields( cObj: CborObj, level: DijkstraTxLevel 
     if( ( c = get( 5 ) ) !== undefined ) out.withdrawals = TxWithdrawals.fromCborObj( nonEmptyMap( c, "Withdrawals" ) );
     if( ( c = get( 7 ) ) !== undefined ) out.auxDataHash = AuxiliaryDataHash.fromCborObj( c );
     if( ( c = get( 8 ) ) !== undefined ) out.validityIntervalStart = uintField( c, "validity interval start" );
-    if( ( c = get( 9 ) ) !== undefined ) { nonEmptyMap( c, "Mint" ); out.mint = Value.fromCborObj( c ); }
+    if( ( c = get( 9 ) ) !== undefined ) { nonEmptyMap( c, "Mint" ); out.mint = Value.fromCborObj( c, { mint: true } ); }
     if( ( c = get( 11 ) ) !== undefined ) out.scriptDataHash = ScriptDataHash.fromCborObj( c );
     if( ( c = get( 13 ) ) !== undefined ) out.collateralInputs = nonEmpty( getCborSet( c ), "Collateral Inputs" ).map( txOutRefAsUTxOFromCborObj );
     if( ( c = get( 14 ) ) !== undefined ) out.guards = guardsFromCborObj( c );

@@ -361,7 +361,7 @@ export class MaryTxBody
             protocolUpdate:             _pUp === undefined ? undefined : LegacyPPUpdateProposalFromCborObj( _pUp, (cObj) => LegacyPPUpdateMapFromCborObj( cObj, partialMaryProtocolParametersFromCborObj as any ) ),
             auxDataHash:                _auxDataHash === undefined ? undefined : AuxiliaryDataHash.fromCborObj( _auxDataHash ),
             validityIntervalStart:      _validityStart instanceof CborUInt ? _validityStart.num : undefined,
-            mint:                       _mint === undefined ? undefined : Value.fromCborObj( _mint ),
+            mint:                       _mint === undefined ? undefined : Value.fromCborObj( _mint, { mint: true } ),
         }, getSubCborRef( cObj ));
     }
 
