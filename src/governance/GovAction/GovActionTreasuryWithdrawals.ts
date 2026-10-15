@@ -1,4 +1,4 @@
-import { Cbor, CborArray, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
+import { Cbor, CborArray, CborBytes, CborMap, CborSimple, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { DataConstr, DataI, ToData } from "@harmoniclabs/plutus-data";
 import { CanBeHash28, Hash28, canBeHash28 } from "../../hashes";
@@ -48,27 +48,21 @@ export class GovActionTreasuryWithdrawals
         );
     }
 
+    // cardano-ledger keeps `Map AccountAddress Coin` and writes it in key order; the
+    // action is not a hash preimage, so it is always re-encoded that way (586)
     toCborBytes(): Uint8Array
     {
-        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
         return this.toCbor();
     }
     toCbor(): CborString
     {
-        if( this.cborRef instanceof SubCborRef )
-        {
-            // TODO: validate cbor structure
-            // we assume correctness here
-            return this.cborRef.toBuffer();
-        }
-        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborArray
     {
         return new CborArray([
             new CborUInt( this.govActionType ),
-            this.withdrawals.toCborObj(),
+            canonicalWithdrawalsCborObj( this.withdrawals ),
             this.policyHash?.toCborObj() ?? new CborSimple( null )
         ]);
     }
@@ -83,4 +77,25 @@ export class GovActionTreasuryWithdrawals
             ]
         );
     }
+}
+/**
+ * `Map AccountAddress Coin` in cardano-ledger's `Ord` order: network (testnet before
+ * mainnet), then the credential (script hashes before key hashes), then the hash
+ */
+function canonicalWithdrawalsCborObj( withdrawals: TxWithdrawals ): CborMap
+{
+    const entries = withdrawals.map.map( ({ rewardAccount, amount }) => {
+        const k = rewardAccount.toCborObj();
+        const bytes = ( k as CborBytes ).bytes;
+        const header = bytes[0] ?? 0;
+        const sortKey = [ header & 1, ( header >> 4 ) & 1 ? 0 : 1 ];
+        return { k, v: new CborUInt( amount ), sortKey, hash: bytes.subarray( 1 ) };
+    });
+    entries.sort( ( a, b ) => {
+        for( let i = 0; i < 2; i++ ) if( a.sortKey[i] !== b.sortKey[i] ) return a.sortKey[i] - b.sortKey[i];
+        const n = Math.min( a.hash.length, b.hash.length );
+        for( let i = 0; i < n; i++ ) if( a.hash[i] !== b.hash[i] ) return a.hash[i] - b.hash[i];
+        return a.hash.length - b.hash.length;
+    });
+    return new CborMap( entries.map( ({ k, v }) => ({ k, v }) ) );
 }

@@ -314,7 +314,7 @@ export function partialDijkstraProtocolParametersFromCborObj(cObj: CborObj): Par
 		governanceActionDeposit: fromUIntOrUndef(_govActionDeposit),
 		drepDeposit: fromUIntOrUndef(_drepDeposit),
 		drepActivityPeriod: fromUIntOrUndef(_drepActivityPeriod),
-		minfeeRefScriptCostPerByte: tryCborFromRational(_minfeeRefScriptCostPerByte),
+		minfeeRefScriptCostPerByte: CborPositiveRational.fromCborObjOrUndef(_minfeeRefScriptCostPerByte),
 	};
 }
 

@@ -340,7 +340,7 @@ export function partialProtocolParametersFromCborObj(cObj: CborObj): Partial<Pro
 		governanceActionDeposit: fromUIntOrUndef(_governanceActionDeposit),
 		drepDeposit: fromUIntOrUndef(_drepDeposit),
 		drepActivityPeriod: fromUIntOrUndef(_drepActivityPeriod),
-		minfeeRefScriptCostPerByte: tryCborFromRational(_minfeeRefScriptCostPerByte),
+		minfeeRefScriptCostPerByte: CborPositiveRational.fromCborObjOrUndef(_minfeeRefScriptCostPerByte),
 	};
 }
 

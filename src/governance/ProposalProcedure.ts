@@ -55,20 +55,13 @@ export class ProposalProcedure
         );
     }
 
+    // not memoized in cardano-ledger: always re-encoded from its contents (586)
     toCborBytes(): Uint8Array
     {
-        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
         return this.toCbor();
     }
     toCbor(): CborString
     {
-        if( this.cborRef instanceof SubCborRef )
-        {
-            // TODO: validate cbor structure
-            // we assume correctness here
-            return this.cborRef.toBuffer();
-        }
-        
         return Cbor.encode( this.toCborObj() );
     }
     toCborObj(): CborArray
