@@ -1,4 +1,5 @@
 import { Script, ScriptType, scriptTypeToNumber, scriptTypeFromNumber } from "../Script";
+import { withDecodeVersion } from "../../utils/strictCbor";
 
 const FLAT = new Uint8Array([ 0x01, 0x02, 0x03, 0x04 ]);
 
@@ -20,7 +21,9 @@ describe("Plutus V4 script support (Dijkstra)", () => {
         const obj = s.toCborObj();
         expect( (obj as any).array[0].num ).toBe( 4n );
 
-        const decoded = Script.fromCbor( s.toCbor(), ScriptType.PlutusV4 );
+        // script tag 4 exists from protocol 12 (Dijkstra); Conway (the default version) rejects it
+        expect( () => Script.fromCbor( s.toCbor(), ScriptType.PlutusV4 ) ).toThrow();
+        const decoded = withDecodeVersion( 12, () => Script.fromCbor( s.toCbor(), ScriptType.PlutusV4 ) );
         expect( decoded.type ).toBe( ScriptType.PlutusV4 );
         expect( decoded.toCbor().toString() ).toBe( s.toCbor().toString() );
     });
