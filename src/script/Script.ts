@@ -1,9 +1,9 @@
 import { ToCbor, CborString, Cbor, CborBytes, CborObj, CborArray, CborUInt, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
-import { definiteBytes } from "../utils/strictCbor";
+import { decodeVersionAtLeast, definiteBytes, expectSize, parseCborFull, recordSum } from "../utils/strictCbor";
 import { blake2b_224, byte } from "@harmoniclabs/crypto";
 import { fromHex, isUint8Array, toHex } from "@harmoniclabs/uint8array-utils";
 import { Hash28 } from "../hashes";
-import { NativeScript, nativeScriptToCbor, nativeScriptFromCbor } from "./NativeScript";
+import { NativeScript, nativeScriptToCbor, nativeScriptFromCbor, nativeScriptFromCborObj } from "./NativeScript";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { getSubCborRef, subCborRefOrUndef } from "../utils/getSubCborRef";
 
@@ -380,7 +380,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
 
     static fromCbor( cbor: CanBeCborString, defType: ScriptType = defaultScriptType ): Script
     {
-        return Script.fromCborObj( Cbor.parse( forceCborString( cbor ) ), defType );
+        return Script.fromCborObj( parseCborFull( cbor, "Script" ), defType );
     }
 
     static fromCborObj( cObj: CborObj, defType: ScriptType = defaultScriptType ): Script
@@ -395,27 +395,29 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
             );
         }
 
-        if(!(
-            cObj instanceof CborArray   &&
-            cObj.array.length >= 2      &&
-            cObj.array[0] instanceof CborUInt
-        ))
-        throw new Error(`Invalid CBOR format for "Script"`);
-
-        const n = Number(cObj.array[0].num);
+        // cardano-ledger `DecCBOR (Annotator (AlonzoScript era))` (`Summands`): `[0, native]`,
+        // `[1 | 2 | 3, plutus bytes]`, plus `[4, bytes]` from protocol version 12;
+        // definite arrays have exactly two elements
+        const { tag: n, fields, size } = recordSum( cObj, "Script" );
+        if( n > ( decodeVersionAtLeast( 12 ) ? 4 : 3 ) )
+        throw new Error(`Invalid CBOR format for "Script"; unsupported script tag ${n}`);
+        expectSize( size, 2, "Script" );
         const t = scriptTypeFromNumber( n ); 
         
 
         if( t === ScriptType.NativeScript )
-        return new Script(
+        {
+            nativeScriptFromCborObj( fields[0] ); // must decode as a native script
+            return new Script(
             t,
-            Cbor.encode( cObj.array[1] ),
+            Cbor.encode( fields[0] ),
             getSubCborRef( cObj )
-        );
+            );
+        }
 
         return new Script(
             t,
-            definiteBytes( cObj.array[1], "Script" ),
+            definiteBytes( fields[0], "Script" ),
             getSubCborRef( cObj )
         );
     }

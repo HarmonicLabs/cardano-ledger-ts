@@ -1,5 +1,5 @@
-import { CborArray, CborUInt, CborBytes, CborString, Cbor, CborObj } from "@harmoniclabs/cbor";
-import { definiteBytes } from "../utils/strictCbor";
+import { CborArray, CborUInt, CborNegInt, CborBytes, CborString, Cbor, CborObj } from "@harmoniclabs/cbor";
+import { cborArray, cborInt, cborUInt, decodeVersionAtLeast, expectSize, parseCborFull, recordSum } from "../utils/strictCbor";
 import { Hash28 } from "../hashes/Hash28/Hash28";
 import { toHex } from "@harmoniclabs/uint8array-utils";
 import { CanBeUInteger, forceBigUInt } from "../utils/ints";
@@ -31,7 +31,8 @@ export interface ScriptAny {
 
 export interface ScriptAtLeast {
     type: "atLeast",
-    required: CanBeUInteger,
+    /** an Int64; values <= 0 are always satisfied */
+    required: number | bigint,
     scripts: NativeScript[]
 }
 
@@ -83,7 +84,9 @@ export function nativeScriptToCborObj( nativeScript: NativeScript ): CborArray
     if( type === "atLeast" )
         return new CborArray([
             new CborUInt( 3 ),
-            new CborUInt( forceBigUInt( nativeScript.required ) ),
+            BigInt( nativeScript.required ) < BigInt( 0 ) ?
+                new CborNegInt( BigInt( nativeScript.required ) ) :
+                new CborUInt( BigInt( nativeScript.required ) ),
             new CborArray(
                 nativeScript.scripts.map( nativeScriptToCborObj )
             )
@@ -112,69 +115,57 @@ const notNativeScriptError = new Error(
     "ill formed native script to deserialize"
 );
 
+/**
+ * cardano-ledger `DecCBOR (Annotator (TimelockRaw era))` (`Summands "TimelockRaw"`):
+ * an array (definite with the exact size, or indefinite) tagged with a `decodeWord`:
+ *
+ * - `[0, keyhash]` (28 bytes)
+ * - `[1, [* script]]`, `[2, [* script]]` (lists, definite or indefinite)
+ * - `[3, n, [* script]]`, `n` an `Int` (Int64: negative values are valid and always satisfied)
+ * - `[4, slot]`, `[5, slot]`, slots Word64 (kept as bigint)
+ * - `[6, credential]` only from protocol version 12 (Dijkstra guard scripts)
+ */
 export function nativeScriptFromCborObj( cbor: CborObj ): NativeScript
 {
-    if(!(cbor instanceof CborArray))
+    let parts: { tag: number, fields: CborObj[], size: number };
+    try {
+        parts = recordSum( cbor, "NativeScript" );
+    }
+    catch {
+        throw notNativeScriptError;
+    }
+    const { tag: type, fields, size } = parts;
+    const [ f1, f2 ] = fields;
+    const sizes: { [t: number]: number } = { 0: 2, 1: 2, 2: 2, 3: 3, 4: 2, 5: 2, 6: 2 };
+
+    if( sizes[type] === undefined || ( type === 6 && !decodeVersionAtLeast( 12 ) ) )
     throw notNativeScriptError;
-
-    const [ _type, f1, f2 ] = cbor.array;
-
-    if( !( _type instanceof CborUInt ) )
-    throw notNativeScriptError
-
-    const type = Number( _type.num );
-
-    let scripts: NativeScript[];
+    expectSize( size, sizes[type], "NativeScript" );
 
     switch( type )
     {
         case 0:
-            if( !(f1 instanceof CborBytes) )
-            throw notNativeScriptError;
-
-            const pkh = toHex( definiteBytes( f1, "NativeScript key hash" ) );
-
             return {
                 type: "sig",
-                keyHash: pkh
+                keyHash: toHex( Hash28.fromCborObj( f1 ).toBuffer() )
             }
         case 1:
         case 2:
-            if( !(f1 instanceof CborArray) )
-            throw notNativeScriptError;
-
-            scripts = f1.array.map( nativeScriptFromCborObj as any );
-
             return {
                 type: type === 1 ? "all" : "any",
-                scripts: scripts
+                scripts: cborArray( f1, "NativeScript" ).map( nativeScriptFromCborObj as any ) as NativeScript[]
             }
         case 3:
-
-            if( !(f1 instanceof CborUInt) )
-            throw notNativeScriptError;
-
-            if( !(f2 instanceof CborArray) )
-            throw notNativeScriptError;
-
-            const n = Number( f1.num )
-
-            scripts = f2.array.map( nativeScriptFromCborObj as any );
-
             return {
                 type: "atLeast",
-                required: n,
-                scripts: scripts
+                required: cborInt( f1, "NativeScript atLeast" ),
+                scripts: cborArray( f2, "NativeScript" ).map( nativeScriptFromCborObj as any ) as NativeScript[]
             }
         case 4:
         case 5:
-
-            if( !(f1 instanceof CborUInt) )
-            throw notNativeScriptError;
-
             return {
                 type: type === 4 ? "after" : "before",
-                slot: Number( f1.num )
+                slot: cborUInt( f1, "NativeScript slot" )
             }
         case 6:
             // script_require_guard = (6, credential)
@@ -187,7 +178,8 @@ export function nativeScriptFromCborObj( cbor: CborObj ): NativeScript
             throw notNativeScriptError;
     }
 }
+
 export function nativeScriptFromCbor( cbor: CborString ): NativeScript
 {
-    return nativeScriptFromCborObj( Cbor.parse( cbor ) as any );
+    return nativeScriptFromCborObj( parseCborFull( cbor, "NativeScript" ) );
 };
