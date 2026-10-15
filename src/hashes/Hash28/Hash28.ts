@@ -33,8 +33,9 @@ export class Hash28 extends Hash
         super( bs instanceof Hash28 ? bs.toBuffer() : bs );
 
         if(!(
-            this._bytes instanceof Uint8Array
-        ))throw new Error("'Hash28' must be an hash of length 28");
+            this._bytes instanceof Uint8Array &&
+            this._bytes.length === 28
+        ))throw new Error("'Hash28' must be an hash of length 28; length was: " + this._bytes?.length);
 
          /* Done: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef( bs );
