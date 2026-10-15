@@ -1,4 +1,5 @@
 import { Cbor, CborArray, CborBytes, CborObj, CborString, CborText, SubCborRef } from "@harmoniclabs/cbor";
+import { boundedText, cborArray, urlMaxBytes } from "../../../utils/strictCbor";
 import { CanBeHash32, Hash32, canBeHash32 } from "../../../hashes";
 import { roDescr } from "../../../utils/roDescr";
 import { isObject } from "@harmoniclabs/obj-utils";
@@ -64,17 +65,18 @@ export class Anchor
             this.anchorDataHash.toCborObj()
         ]);
     }
+    /**
+     * cardano-ledger `DecCBOR Anchor`: below protocol version 12 `RecD Anchor`, a
+     * definite-length array of exactly two (indefinite from 12): a `Url` (definite
+     * text of at most 128 bytes, 64 below version 9) and a 32-byte hash.
+     */
     static fromCborObj( cbor: CborObj ): Anchor
     {
-        if(!(
-            cbor instanceof CborArray &&
-            cbor.array.length >= 2 &&
-            cbor.array[0] instanceof CborText
-        )) throw new Error("invalid cbor for Anchor");
+        const [ url, hash ] = cborArray( cbor, "Anchor", { len: 2, definite: true } );
 
         return new Anchor({
-            url: cbor.array[0].text,
-            anchorDataHash: Hash32.fromCborObj( cbor.array[1] )
+            url: boundedText( url, urlMaxBytes(), "Anchor url" ),
+            anchorDataHash: Hash32.fromCborObj( hash )
         }, getSubCborRef( cbor ));
     }
 

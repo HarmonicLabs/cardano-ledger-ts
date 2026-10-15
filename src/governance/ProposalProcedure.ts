@@ -1,5 +1,5 @@
 import { Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
-import { definiteBytes } from "../utils/strictCbor";
+import { cborArray, cborUInt } from "../utils/strictCbor";
 import { govActionFromCborObj } from "./govActionFromCborObj";
 import { Credential } from "../credentials";
 import { getSubCborRef } from "../utils/getSubCborRef";
@@ -75,30 +75,25 @@ export class ProposalProcedure
     {
         return new CborArray([
             new CborUInt( this.deposit ),
-            this.rewardAccount.toCredential().toCborObj(),
+            this.rewardAccount.toCborObj(),
             this.govAction.toCborObj(),
             this.anchor.toCborObj()
         ]);
     }
 
-    /** `[deposit, reward_account (29 bytes), gov_action, anchor]`; the reward account is also accepted in credential form (this class's own encoding). */
+    /**
+     * cardano-ledger `DecCBOR ProposalProcedure`: below protocol version 12 a `RecD`
+     * record, a definite array of exactly four: deposit (Word64), reward account
+     * (29 bytes), gov action, anchor.
+     */
     static fromCborObj( cObj: CborObj ): ProposalProcedure
     {
-        if(!( cObj instanceof CborArray && cObj.array.length >= 4 && cObj.array[0] instanceof CborUInt ))
-        throw new Error("invalid CBOR for proposal_procedure");
-        const [ deposit, acct, action, anchor ] = cObj.array;
-        let rewardAccount: StakeAddress;
-        if( acct instanceof CborBytes ) rewardAccount = StakeAddress.fromBytes( definiteBytes( acct, "ProposalProcedure reward account" ) );
-        else
-        {
-            const cred = Credential.fromCborObj( acct! );
-            rewardAccount = new StakeAddress({ network: "mainnet", credentials: cred.hash, type: cred.type === 1 ? "script" : "stakeKey" } as any);
-        }
+        const [ deposit, acct, action, anchor ] = cborArray( cObj, "ProposalProcedure", { len: 4, definite: true } );
         return new ProposalProcedure({
-            deposit: (deposit as CborUInt).num,
-            rewardAccount,
-            govAction: govActionFromCborObj( action! ) as any,
-            anchor: Anchor.fromCborObj( anchor! )
+            deposit: cborUInt( deposit, "ProposalProcedure deposit" ),
+            rewardAccount: StakeAddress.fromCborObj( acct ),
+            govAction: govActionFromCborObj( action ) as any,
+            anchor: Anchor.fromCborObj( anchor )
         }, getSubCborRef( cObj ));
     }
 

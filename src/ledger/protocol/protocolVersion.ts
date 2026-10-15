@@ -1,4 +1,5 @@
 import { CanBeCborString, Cbor, CborArray, CborObj, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
+import { cborArray, cborUInt, MAX_PROTOCOL_VERSION, MAX_WORD32 } from "../../utils/strictCbor";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { subCborRefOrUndef, getSubCborRef } from "../../utils/getSubCborRef";
 import { CanBeUInteger, canBeUInteger, u32 } from "../../utils/ints";
@@ -73,17 +74,20 @@ export class ProtocolVersion
             bytes
         );
     }
+    /**
+     * cardano-ledger `DecCBOR ProtVer` (`CBORGroup`, `decodeRecordNamed`): an array
+     * (definite or indefinite) of exactly two Word32s, the major being a supported
+     * `Version` (`mkVersion32`: at most `MaxVersion`, 13).
+     */
     static fromCborObj( cbor: CborObj, _originalBytes?: Uint8Array ): ProtocolVersion
     {
-        if(!(
-            cbor instanceof CborArray &&
-            cbor.array[0] instanceof CborUInt &&
-            cbor.array[1] instanceof CborUInt
-        )) throw new Error("Invalid ProtocolVersion");
+        const [ major, minor ] = cborArray( cbor, "ProtocolVersion", { len: 2 } );
+        const maj = cborUInt( major, "ProtocolVersion major", MAX_WORD32 );
+        if( maj > BigInt( MAX_PROTOCOL_VERSION ) ) throw new Error("Invalid ProtocolVersion: unsupported major version " + maj );
 
         return new ProtocolVersion({
-            major: cbor.array[0].num,
-            minor: cbor.array[1].num
+            major: maj,
+            minor: cborUInt( minor, "ProtocolVersion minor", MAX_WORD32 )
         }, getSubCborRef( cbor, _originalBytes ));
     }
 }

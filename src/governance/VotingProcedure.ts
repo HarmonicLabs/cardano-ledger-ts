@@ -1,4 +1,5 @@
 import { getSubCborRef } from "../utils/getSubCborRef";
+import { cborArray, cborInt, nullOr } from "../utils/strictCbor";
 import { Cbor, CborArray, CborBytes, CborObj, CborSimple, CborString, CborText, CborUInt, SubCborRef } from "@harmoniclabs/cbor";
 import { roDescr } from "../utils/roDescr";
 import { Anchor, IAnchor, isIAnchor } from "./Anchor";
@@ -70,12 +71,16 @@ export class VotingProcedure
     }
 
     /** `[vote, anchor / null]`. */
+    /**
+     * cardano-ledger `DecCBOR VotingProcedure`: below protocol version 12 a `RecD`
+     * record (definite array of exactly two): the vote (`decodeEnumBounded`, an `Int`
+     * in 0..2) and an anchor or null.
+     */
     static fromCborObj( cObj: CborObj ): VotingProcedure
     {
-        if(!( cObj instanceof CborArray && cObj.array.length >= 1 && cObj.array[0] instanceof CborUInt ))
-        throw new Error("invalid CBOR for voting_procedure");
-        const anchorObj = cObj.array[1];
-        const anchor = anchorObj === undefined || ( anchorObj instanceof CborSimple && anchorObj.simple === null ) ? undefined : Anchor.fromCborObj( anchorObj );
-        return new VotingProcedure({ vote: Number( cObj.array[0].num ) as Vote, anchor }, getSubCborRef( cObj ));
+        const [ vote, anchorObj ] = cborArray( cObj, "VotingProcedure", { len: 2, definite: true } );
+        const v = cborInt( vote, "VotingProcedure vote", BigInt( 0 ), BigInt( 2 ) );
+        const anchor = nullOr( anchorObj, Anchor.fromCborObj );
+        return new VotingProcedure({ vote: Number( v ) as Vote, anchor }, getSubCborRef( cObj ));
     }
 }

@@ -1,4 +1,5 @@
 import { getSubCborRef } from "../utils/getSubCborRef";
+import { cborMapEntries } from "../utils/strictCbor";
 import { CborString, Cbor, CborObj, CborMap, SubCborRef } from "@harmoniclabs/cbor";
 import { roDescr } from "../utils/roDescr";
 import { IVoter, Voter, isIVoter } from "./Voter";
@@ -84,15 +85,31 @@ export class VotingProcedures
         return Cbor.encode( this.toCborObj() )
     }
     /** `{ voter => { gov_action_id => voting_procedure } }`. */
+    /**
+     * cardano-ledger `DecCBOR VotingProcedures`: `Map Voter (Map GovActionId VotingProcedure)`
+     * (protocol version 9+: no duplicate keys), every voter with at least one vote.
+     */
     static fromCborObj( cObj: CborObj ): VotingProcedures
     {
-        if(!( cObj instanceof CborMap )) throw new Error("invalid CBOR for voting_procedures");
+        const seenVoters = new Set<string>();
         return new VotingProcedures(
-            cObj.map.map(({ k, v }) => {
-                if(!( v instanceof CborMap )) throw new Error("invalid CBOR for voting_procedures entry");
+            cborMapEntries( cObj, "VotingProcedures" ).map(({ k, v }) => {
+                const voter = Voter.fromCborObj( k );
+                const vKey = voter.kind + ":" + voter.hash.toString();
+                if( seenVoters.has( vKey ) ) throw new Error("invalid CBOR for voting_procedures: duplicate voter");
+                seenVoters.add( vKey );
+                const entries = cborMapEntries( v, "VotingProcedures votes" );
+                if( entries.length === 0 ) throw new Error("invalid CBOR for voting_procedures: voter without votes");
+                const seenIds = new Set<string>();
                 return {
-                    voter: Voter.fromCborObj( k ),
-                    votes: v.map.map(({ k: id, v: proc }) => ({ govActionId: TxOutRef.fromCborObj( id ), vote: VotingProcedure.fromCborObj( proc ) }))
+                    voter,
+                    votes: entries.map(({ k: id, v: proc }) => {
+                        const govActionId = TxOutRef.govActionIdFromCborObj( id );
+                        const idKey = govActionId.toString();
+                        if( seenIds.has( idKey ) ) throw new Error("invalid CBOR for voting_procedures: duplicate gov action id");
+                        seenIds.add( idKey );
+                        return { govActionId, vote: VotingProcedure.fromCborObj( proc ) };
+                    })
                 };
             }),
             getSubCborRef( cObj )

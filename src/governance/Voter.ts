@@ -1,5 +1,5 @@
 import { CborArray, CborBytes, CborObj, CborUInt } from "@harmoniclabs/cbor";
-import { definiteBytes } from "../utils/strictCbor";
+import { expectSize, recordSum } from "../utils/strictCbor";
 import { CanBeHash28, Hash28, canBeHash28 } from "../hashes";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { uint8ArrayEq } from "@harmoniclabs/uint8array-utils";
@@ -110,9 +110,11 @@ export class Voter
     /** `[voter_kind, hash28]` (0–4: CC key/script, DRep key/script, pool key). */
     static fromCborObj( cObj: CborObj ): Voter
     {
-        if(!( cObj instanceof CborArray && cObj.array.length >= 2 && cObj.array[0] instanceof CborUInt && cObj.array[1] instanceof CborBytes ))
-        throw new Error("invalid CBOR for voter");
-        return new Voter({ kind: Number( cObj.array[0].num ) as VoterKind, hash: definiteBytes( cObj.array[1], "Voter hash" ) });
+        // cardano-ledger `DecCBOR Voter`: `decodeRecordSum`, kinds 0-4, each with a 28-byte hash
+        const { tag, fields, size } = recordSum( cObj, "Voter" );
+        if( tag > 4 ) throw new Error("invalid CBOR for voter: kind " + tag );
+        expectSize( size, 2, "Voter" );
+        return new Voter({ kind: tag as VoterKind, hash: Hash28.fromCborObj( fields[0] ) });
     }
 
     toData( version?: ToDataVersion ): DataConstr

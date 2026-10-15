@@ -1,4 +1,6 @@
 import { StakeAddress, StakeAddressBech32 } from "./StakeAddress";
+import { cborMapEntries, cborUInt, noDuplicates, rewardAccountBytes } from "../utils/strictCbor";
+import { toHex } from "@harmoniclabs/uint8array-utils";
 import { NetworkT } from "./Network";
 import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { ToData, DataMap, DataConstr, DataI, DataPair } from "@harmoniclabs/plutus-data";
@@ -186,24 +188,24 @@ export class TxWithdrawals
     {
         return TxWithdrawals.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
+    /**
+     * cardano-ledger `decodeMap decCBOR decCBOR` for `Map AccountAddress Coin`: reward
+     * accounts (29 bytes) to Word64 amounts; from protocol version 9 a repeated
+     * account fails.
+     */
     static fromCborObj( cObj: CborObj ): TxWithdrawals
     {
-        if(!( 
-            cObj instanceof CborMap 
-        ))throw new Error(`Invalid CBOR fromat for "TxWithdrawals"`);
+        const entries = noDuplicates(
+            cborMapEntries( cObj, "TxWithdrawals" ),
+            ({ k }) => toHex( rewardAccountBytes( k, "TxWithdrawals reward account" ) ),
+            "TxWithdrawals"
+        );
 
         return new TxWithdrawals(
-            cObj.map.map( ({ k, v }) => {
-
-                if(!( 
-                    v instanceof CborUInt 
-                ))throw new Error(`Invalid CBOR fromat for "TxWithdrawals"`);
-
-                return {
-                    rewardAccount: StakeAddress.fromCborObj( k ),
-                    amount: v.num
-                }
-            }),
+            entries.map( ({ k, v }) => ({
+                rewardAccount: StakeAddress.fromCborObj( k ),
+                amount: cborUInt( v, "TxWithdrawals amount" )
+            })),
             getSubCborRef( cObj )
         );
     }
