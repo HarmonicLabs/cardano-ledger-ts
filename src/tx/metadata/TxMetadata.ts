@@ -1,4 +1,5 @@
 import { ToCbor, CborString, Cbor, CborObj, CborMap, CborUInt, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
+import { cborMapEntries, cborUInt, noDuplicates } from "../../utils/strictCbor";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
 import { ToJson } from "../../utils/ToJson";
@@ -86,19 +87,24 @@ export class TxMetadata
         return TxMetadata.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
 
+    /**
+     * cardano-ledger `Metadata`: `Map Word64 Metadatum` (`decodeMap`: from protocol
+     * version 9 a repeated label fails; before, the last one wins)
+     */
     static fromCborObj( cObj: CborObj ): TxMetadata
     {
-        if(!( 
-            cObj instanceof CborMap 
-            // && cObj.map.length >= 1
-        ))throw new InvalidCborFormatError("TxMetadata")
+        const entries = noDuplicates(
+            cborMapEntries( cObj, "TxMetadata" ),
+            ({ k }) => cborUInt( k, "TxMetadata label" ).toString(),
+            "TxMetadata"
+        );
 
         const meta = {};
-        const len = cObj.map.length;
+        const len = entries.length;
 
         for( let i = 0; i < len; i++ )
         {
-            const { k, v } = cObj.map[i];
+            const { k, v } = entries[i];
             if(!( k instanceof CborUInt ))
             throw new InvalidCborFormatError("TxMetadata: " + k)
 

@@ -1,4 +1,5 @@
 import { CborObj, CborMap, CborArray, CborUInt, CborNegInt, CborBytes, CborText, ToCbor, CborString, Cbor, SubCborRef } from "@harmoniclabs/cbor";
+import { getDecodeVersion, isBigNum } from "../../utils/strictCbor";
 import { has_n_determined_keys, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { fromHex, isUint8Array, toHex } from "@harmoniclabs/uint8array-utils";
 import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError";
@@ -12,8 +13,14 @@ export type TxMetadatum
     | TxMetadatumBytes
     | TxMetadatumText;
 
+/**
+ * cardano-ledger `decodeMetadatum`: maps and lists (definite or indefinite), integers
+ * from CBOR heads only (no bignum), byte strings and text strings, definite or chunked,
+ * of at most 64 bytes (enforced from Allegra, decoder version > 2); nothing else.
+ */
 export function txMetadatumFromCborObj( cObj: CborObj ): TxMetadatum
 {
+    const checkSizes = getDecodeVersion() > 2;
     if( cObj instanceof CborMap )
     {
         return new TxMetadatumMap( 
@@ -31,15 +38,20 @@ export function txMetadatumFromCborObj( cObj: CborObj ): TxMetadatum
     }
     if( cObj instanceof CborUInt || cObj instanceof CborNegInt )
     {
+        if( isBigNum( cObj ) ) throw new InvalidCborFormatError("TxMetadatum", "big integers are not allowed in metadata");
         return new TxMetadatumInt( cObj.num );
     }
     if( cObj instanceof CborBytes )
     {
-        return new TxMetadatumBytes( cObj.buffer );
+        const bytes = cObj.bytes;
+        if( checkSizes && bytes.length > 64 ) throw new InvalidCborFormatError("TxMetadatum", "bytes .size (0..64): bytestring exceeds 64 bytes");
+        return new TxMetadatumBytes( bytes );
     }
     if( cObj instanceof CborText )
     {
-        return new TxMetadatumText( cObj.text );
+        const text = cObj.text;
+        if( checkSizes && new TextEncoder().encode( text ).length > 64 ) throw new InvalidCborFormatError("TxMetadatum", "text .size (0..64): text exceeds 64 bytes");
+        return new TxMetadatumText( text );
     }
 
     throw new InvalidCborFormatError("TxMetadatum")

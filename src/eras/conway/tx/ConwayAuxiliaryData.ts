@@ -1,5 +1,5 @@
 import { CborArray, CborBytes, ToCbor, SubCborRef, CborString, Cbor, CborTag, CborMap, CborUInt, CborMapEntry, CanBeCborString, forceCborString, CborObj } from "@harmoniclabs/cbor";
-import { definiteBytes } from "../../../utils/strictCbor";
+import { cborArray, cborMapEntries, decodeVersionAtLeast, definiteBytes, expectTag, sparseMapKeys } from "../../../utils/strictCbor";
 import { blake2b_256 } from "@harmoniclabs/crypto";
 import { hasOwn } from "@harmoniclabs/obj-utils";
 import { AuxiliaryDataHash } from "../../../hashes";
@@ -225,72 +225,57 @@ export class ConwayAuxiliaryData
         return ConwayAuxiliaryData.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
     
+    /**
+     * cardano-ledger `DecCBOR (Annotator (AlonzoTxAuxDataRaw era))`, by token type
+     * (below protocol version 12):
+     *
+     * - a map: Shelley form, metadata only;
+     * - an array: Allegra form `[metadata, [* native_script]]`, a `RecD` record
+     *   (definite array of exactly two; an indefinite one is accepted too, as the
+     *   ledger's testlib decoder does);
+     * - a tag: it must be 259, over a sparse map with keys 0 (metadata), 1 (native
+     *   scripts), 2 / 3 / 4 (plutus V1 / V2 / V3 scripts as byte strings); a repeated
+     *   or unknown key fails, and so does key 5 (PlutusV4) before Dijkstra.
+     *
+     * The decoded value keeps its bytes in every form (588): auxiliary data is
+     * memoized in cardano-ledger and its hash is over these bytes.
+     */
     static fromCborObj( cObj: CborObj ): ConwayAuxiliaryData
     {
-        
-        // shelley; metadata only.
-        // NOTE: must NOT match a CborTag — the alonzo+ `#6.259(map)` shape also exposes
-        // `.data` as a CborMap, and it must fall through to the tagged field parser below
-        // (otherwise every tag-259 aux_data is mis-read as metadata-only, dropping scripts).
-        if( !(cObj instanceof CborTag) && "data" in cObj && cObj.data instanceof CborMap )
-        {
-            return new ConwayAuxiliaryData({
-                metadata: TxMetadata.fromCborObj( cObj.data  )
-            });
-        }
+        const ref = getSubCborRef( cObj );
 
-        // shelley multi assets; metadata + native scripts
-        if( cObj instanceof CborArray )
-        {
-            if(!(
-                cObj.array[1] instanceof CborArray 
-                // && cObj.array[1].length >= 5               
-            ))throw new InvalidCborFormatError("ConwayAuxiliaryData")
-
-            return new ConwayAuxiliaryData({
-                metadata: TxMetadata.fromCborObj( cObj.array[0] ),
-                nativeScripts: cObj.array[1].array.map( nativeScriptFromCborObj )
-            });
-        };
-        /* 
-            some blocks have auxiliary data as plain CborMap (metadata only old format) instead of CborTag(259, CborMap) for post Alonzo
-            some blocks use legacy auxiliary data encoding.(face palm)
-        */
         if( cObj instanceof CborMap )
         {
-
             return new ConwayAuxiliaryData({
                 metadata: TxMetadata.fromCborObj( cObj )
-            }, getSubCborRef( cObj ));
-        };
-        // console.log("ConwayAuxiliaryData.fromCborObj", cObj);
-        /*
-        ;               metadata: shelley
-        ;   transaction_metadata: shelley-ma
-        ; #6.259(0 ==> metadata): alonzo onwards
-        ; NEW:
-        ;   3: [* plutus_v3_script]
-        ;
-        */
-        if(!(
-            cObj instanceof CborTag 
-            && cObj.data instanceof CborMap 
-            // && cObj.data.map.length >= 5
-        ))throw new InvalidCborFormatError("ConwayAuxiliaryData");
-
-        let fields: (CborObj | undefined)[] = new Array( 5 ).fill( undefined );
-
-        for( let i = 0; i < 5 ; i++)
-        {
-            const { v } = cObj.data.map.find(
-                ({ k }) => k instanceof CborUInt && Number( k.num ) === i
-            ) ?? { v: undefined };
-
-            if( v === undefined ) continue;
-
-            fields[i] = v;
+            }, ref );
         }
-        // console.log("fields", fields);
+
+        if( cObj instanceof CborArray )
+        {
+            // production (Annotator) decoder: `RecD`, i.e. definite only; the reference decoder of
+            // the conformance corpus (testlib `decodeRecordNamed`) also takes an indefinite array.
+            // Accepting both can never reject what a node accepts.
+            const [ _metadata, _native ] = cborArray( cObj, "ConwayAuxiliaryData", { len: 2 } );
+            return new ConwayAuxiliaryData({
+                metadata: TxMetadata.fromCborObj( _metadata ),
+                nativeScripts: cborArray( _native, "ConwayAuxiliaryData native scripts" ).map( nativeScriptOf )
+            }, ref );
+        }
+
+        const data = expectTag( cObj, 259, "ConwayAuxiliaryData" );
+        const fields: ( CborObj | undefined )[] = new Array( 5 ).fill( undefined );
+        const maxKey = decodeVersionAtLeast( 12 ) ? 5 : 4;
+        for( const k of sparseMapKeys( data, "ConwayAuxiliaryData" ) )
+        {
+            if( k > maxKey ) throw new InvalidCborFormatError( "ConwayAuxiliaryData", "unknown or unsupported key " + k );
+        }
+        for( const { k, v } of cborMapEntries( data, "ConwayAuxiliaryData" ) )
+        {
+            const key = Number( ( k as CborUInt ).num );
+            if( key < 5 ) fields[ key ] = v;
+            else cborArray( v, "AlonzoAuxiliaryData plutus V4" ).forEach( c => definiteBytes( c, "plutus V4 script" ) );
+        }
 
         const [
             _metadata,
@@ -299,35 +284,21 @@ export class ConwayAuxiliaryData
             _pV2,
             _pV3
         ] = fields;
-        // console.log("_native", _native);
-        
-        if (_native !== undefined && !(_native instanceof CborArray)) throw new InvalidCborFormatError("AlonzoAuxiliaryData native")
-        if (_pV1 !== undefined && !(_pV1 instanceof CborArray)) throw new InvalidCborFormatError("AlonzoAuxiliaryData pV1")
-        if (_pV2 !== undefined && !(_pV2 instanceof CborArray)) throw new InvalidCborFormatError("AlonzoAuxiliaryData pV2")
-        if (_pV3 !== undefined && !(_pV3 instanceof CborArray)) throw new InvalidCborFormatError("AlonzoAuxiliaryData pV3")
+
+        const plutus = ( c: CborObj | undefined, v: 1 | 2 | 3 ) => c === undefined ? undefined :
+            cborArray( c, "AlonzoAuxiliaryData plutus V" + v ).map( cbor => {
+                const bytes = Cbor.encode( new CborBytes( definiteBytes( cbor, "plutus V" + v + " script" ) ) );
+                return v === 1 ? Script.plutusV1( bytes ) : v === 2 ? Script.plutusV2( bytes ) : Script.plutusV3( bytes );
+            });
 
         return new ConwayAuxiliaryData({
             metadata: _metadata === undefined ? undefined : TxMetadata.fromCborObj( _metadata ),
-            nativeScripts:_native === undefined ? undefined : 
-                _native.array.map( nativeCborObj => 
-                    new Script(
-                        ScriptType.NativeScript, 
-                        Cbor.encode( nativeCborObj )
-                    )
-                ),
-            plutusV1Scripts: _pV1 === undefined ? undefined :
-                _pV1.array.map( cbor =>
-                    Script.plutusV1( Cbor.encode( new CborBytes( definiteBytes( cbor, "plutus V1 script" ) ) ) )
-                ),
-            plutusV2Scripts: _pV2 === undefined ? undefined :
-                _pV2.array.map( cbor =>
-                    Script.plutusV2( Cbor.encode( new CborBytes( definiteBytes( cbor, "plutus V2 script" ) ) ) )
-                ),
-            plutusV3Scripts: _pV3 === undefined ? undefined :
-                _pV3.array.map( cbor =>
-                    Script.plutusV3( Cbor.encode( new CborBytes( definiteBytes( cbor, "plutus V3 script" ) ) ) )
-                )                
-        }, getSubCborRef( cObj ));
+            nativeScripts: _native === undefined ? undefined :
+                cborArray( _native, "AlonzoAuxiliaryData native" ).map( nativeScriptOf ),
+            plutusV1Scripts: plutus( _pV1, 1 ) as any,
+            plutusV2Scripts: plutus( _pV2, 2 ) as any,
+            plutusV3Scripts: plutus( _pV3, 3 ) as any,
+        }, ref );
     }
 
     toJSON() { return this.toJson(); }
@@ -341,4 +312,10 @@ export class ConwayAuxiliaryData
             plutusV3Scripts: this.plutusV3Scripts?.map( s => s.toJson() )
         }
     }
+}
+/** a native script of auxiliary data: decoded strictly, kept with its own bytes */
+function nativeScriptOf( c: CborObj ): Script<ScriptType.NativeScript>
+{
+    nativeScriptFromCborObj( c );
+    return new Script( ScriptType.NativeScript, Cbor.encode( c ) ) as Script<ScriptType.NativeScript>;
 }
