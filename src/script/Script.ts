@@ -3,7 +3,7 @@ import { decodeVersionAtLeast, definiteBytes, expectSize, parseCborFull, recordS
 import { blake2b_224, byte } from "@harmoniclabs/crypto";
 import { fromHex, isUint8Array, toHex } from "@harmoniclabs/uint8array-utils";
 import { Hash28 } from "../hashes";
-import { NativeScript, nativeScriptToCbor, nativeScriptFromCbor, nativeScriptFromCborObj } from "./NativeScript";
+import { NativeScript, nativeScriptToCbor, nativeScriptFromCbor, nativeScriptFromCborObj, nativeScriptToJson } from "./NativeScript";
 import { defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { getSubCborRef, subCborRefOrUndef } from "../utils/getSubCborRef";
 
@@ -292,7 +292,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
     {
         if( this.type === ScriptType.NativeScript )
         {
-            return nativeScriptFromCbor( this.bytes )
+            return nativeScriptToJson( nativeScriptFromCbor( this.bytes ) )
         }
         else
         {

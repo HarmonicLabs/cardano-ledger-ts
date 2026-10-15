@@ -183,3 +183,26 @@ export function nativeScriptFromCbor( cbor: CborString ): NativeScript
 {
     return nativeScriptFromCborObj( parseCborFull( cbor, "NativeScript" ) );
 };
+/**
+ * JSON view of a native script: `required` and `slot` are bigints in the decoded
+ * script (587); in JSON they are numbers when exactly representable (every value
+ * seen in practice, and what this library always produced) and decimal strings
+ * otherwise, so `JSON.stringify` never meets a bigint.
+ */
+export function nativeScriptToJson( ns: NativeScript ): any
+{
+    const num = ( n: number | bigint ) => {
+        const b = BigInt( n );
+        return b >= BigInt( Number.MIN_SAFE_INTEGER ) && b <= BigInt( Number.MAX_SAFE_INTEGER ) ? Number( b ) : b.toString();
+    };
+    switch( ns.type )
+    {
+        case "all":
+        case "any": return { type: ns.type, scripts: ns.scripts.map( nativeScriptToJson ) };
+        case "atLeast": return { type: ns.type, required: num( ns.required ), scripts: ns.scripts.map( nativeScriptToJson ) };
+        case "after":
+        case "before": return { type: ns.type, slot: num( ns.slot ) };
+        case "requireGuard": return { type: ns.type, credential: ns.credential.toJson() };
+        default: return ns;
+    }
+}
