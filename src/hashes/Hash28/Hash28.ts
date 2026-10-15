@@ -1,5 +1,5 @@
 import { CanBeCborString, Cbor, forceCborString, CborObj, CborBytes, SubCborRef } from "@harmoniclabs/cbor";
-import { definiteBytes, parseCborFull } from "../../utils/strictCbor";
+import { fixedBytes, parseCborFull } from "../../utils/strictCbor";
 import { assert } from "../../utils/assert";
 import { Hash, canBeHashInstance } from "../Hash";
 import { isHex } from "../../utils/hex";
@@ -33,10 +33,12 @@ export class Hash28 extends Hash
     {
         super( bs instanceof Hash28 ? bs.toBuffer() : bs );
 
+        // the length is checked where a hash is decoded (`Hash28.fromCborObj`), as
+        // cardano-ledger does; the constructor stays lenient because callers build
+        // `Hash28`s from other values (Gerolamo: `new PoolKeyHash( issuerVkey )`)
         if(!(
-            this._bytes instanceof Uint8Array &&
-            this._bytes.length === 28
-        ))throw new Error("'Hash28' must be an hash of length 28; length was: " + this._bytes?.length);
+            this._bytes instanceof Uint8Array
+        ))throw new Error("'Hash28' must be an hash of length 28");
 
          /* Done: this.cboRref params */
         this.cborRef = cborRef ?? subCborRefOrUndef( bs );
@@ -56,10 +58,11 @@ export class Hash28 extends Hash
     {
         return Hash28.fromCborObj( parseCborFull( cStr, "Hash28" ) );
     }
+    /** cardano-ledger `decodeHash`: a definite byte string of exactly 28 bytes */
     static fromCborObj( cObj: CborObj ): Hash28
     {
         return new Hash28(
-            definiteBytes( cObj, "Hash28" ),
+            fixedBytes( cObj, 28, "Hash28" ),
             getSubCborRef( cObj )
         );
     }
