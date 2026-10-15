@@ -467,6 +467,13 @@ export class Value
         
         const n = cborMap.length;
 
+        // Duplicate keys: the Haskell decoder builds `Map`s (protocol versions
+        // before 9), so a repeated policy replaces the earlier entry wholesale and
+        // a repeated asset name within a policy replaces the earlier quantity.
+        // Preview slot 51361220 (Babbage) carries a mint with every policy twice.
+        // Without this the constructor's duplicate check rejected on-chain blocks.
+        const seenPolicies = new Map<string, number>(); // policy hex → index in valueMap
+        let next = 1;
         for( let i = 0; i < n; i++ )
         {
             const { k , v } = cborMap[i];
@@ -483,6 +490,7 @@ export class Value
             const assetsMapLen = v.map.length;
 
             const assets: IValueAssetBI[] = [];
+            const seenNames = new Map<string, number>(); // asset name hex → index in assets
 
             for( let j = 0 ; j < assetsMapLen; j++ )
             {
@@ -493,17 +501,33 @@ export class Value
                 if(!( v instanceof CborNegInt || v instanceof CborUInt ))
                 throw new Error(`Invalid CBOR format for "Value"`);
 
-                assets.push({
-                    name: k.bytes,
-                    quantity: v.num
-                });
+                const nameHex = toHex( k.bytes );
+                const at = seenNames.get( nameHex );
+                if( at !== undefined ) assets[at] = { name: k.bytes, quantity: v.num };
+                else
+                {
+                    seenNames.set( nameHex, assets.length );
+                    assets.push({
+                        name: k.bytes,
+                        quantity: v.num
+                    });
+                }
             }
 
-            valueMap[i + 1] = {
+            const policyHex = policy === "" ? "" : toHex( k.bytes );
+            const entry = {
                 policy: policy,
                 assets
             } as NormalizedIValuePolicyEntry | NormalizedIValueAdaEntry;
+            const dup = seenPolicies.get( policyHex );
+            if( dup !== undefined ) valueMap[dup] = entry;
+            else
+            {
+                seenPolicies.set( policyHex, next );
+                valueMap[next++] = entry;
+            }
         }
+        valueMap.length = next;
 
         return new Value(valueMap, getSubCborRef( cObj ));
     }

@@ -1,4 +1,7 @@
-import { Cbor, CborArray, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
+import { Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
+import { govActionFromCborObj } from "./govActionFromCborObj";
+import { Credential } from "../credentials";
+import { getSubCborRef } from "../utils/getSubCborRef";
 import { Coin } from "../ledger/Coin";
 import { StakeAddress } from "../ledger/StakeAddress";
 import { Anchor, IAnchor, isIAnchor } from "./Anchor";
@@ -75,6 +78,27 @@ export class ProposalProcedure
             this.govAction.toCborObj(),
             this.anchor.toCborObj()
         ]);
+    }
+
+    /** `[deposit, reward_account (29 bytes), gov_action, anchor]`; the reward account is also accepted in credential form (this class's own encoding). */
+    static fromCborObj( cObj: CborObj ): ProposalProcedure
+    {
+        if(!( cObj instanceof CborArray && cObj.array.length >= 4 && cObj.array[0] instanceof CborUInt ))
+        throw new Error("invalid CBOR for proposal_procedure");
+        const [ deposit, acct, action, anchor ] = cObj.array;
+        let rewardAccount: StakeAddress;
+        if( acct instanceof CborBytes ) rewardAccount = StakeAddress.fromBytes( acct.bytes );
+        else
+        {
+            const cred = Credential.fromCborObj( acct! );
+            rewardAccount = new StakeAddress({ network: "mainnet", credentials: cred.hash, type: cred.type === 1 ? "script" : "stakeKey" } as any);
+        }
+        return new ProposalProcedure({
+            deposit: (deposit as CborUInt).num,
+            rewardAccount,
+            govAction: govActionFromCborObj( action! ) as any,
+            anchor: Anchor.fromCborObj( anchor! )
+        }, getSubCborRef( cObj ));
     }
 
     toData( v?: ToDataVersion ): DataConstr

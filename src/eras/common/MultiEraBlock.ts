@@ -1,4 +1,5 @@
 import { ConwayBlock } from '../conway/block/ConwayBlock';
+import { DijkstraBlock } from '../dijkstra/block/DijkstraBlock';
 import { BabbageBlock } from '../babbage/block/BabbageBlock';
 import { AlonzoBlock } from '../alonzo/block/AlonzoBlock';
 import { MaryBlock } from '../mary/block/MaryBlock';
@@ -14,7 +15,7 @@ import { InvalidCborFormatError } from "../../utils/InvalidCborFormatError"
 import { CardanoEra } from "./types/CardanoEra";
 
 export type AnyEraBlock =
-    ConwayBlock | BabbageBlock | AlonzoBlock | MaryBlock | AllegraBlock | ShelleyBlock
+    DijkstraBlock | ConwayBlock | BabbageBlock | AlonzoBlock | MaryBlock | AllegraBlock | ShelleyBlock
     | ByronMainBlock | ByronEbBlock;
 
 export interface IMultiEraBlock {
@@ -86,6 +87,9 @@ IMultiEraBlock, ToCbor, ToJson
                 block = ByronEbBlock.fromCborObj(body);
                 break;
             }
+            case 8: // Dijkstra era
+                block = DijkstraBlock.fromCborObj(_blockData);
+                break;
             case 7: // Conway era
                 block = ConwayBlock.fromCborObj(_blockData);
                 break;

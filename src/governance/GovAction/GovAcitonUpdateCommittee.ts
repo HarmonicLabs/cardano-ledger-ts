@@ -2,7 +2,7 @@ import { Cbor, CborArray, CborMap, CborPositiveRational, CborSimple, CborString,
 import { isObject } from "@harmoniclabs/obj-utils";
 import { DataConstr, DataI, DataList, DataMap, DataPair, ToData } from "@harmoniclabs/plutus-data";
 import { Epoch } from "../../ledger/Epoch";
-import { Rational, cborFromRational, isRational } from "../../ledger/protocol/Rational";
+import { Rational, cborFromRational, isRational, cloneRational } from "../../ledger/protocol/Rational";
 import { IGovAction } from "./IGovAction";
 import { GovActionType } from "./GovActionType";
 import { Credential } from "../../credentials";import { roDescr } from "../../utils/roDescr";
@@ -75,7 +75,7 @@ export class GovActionUpdateCommittee
                     value: toAdd.map(({ coldCredential, epoch }) => ({ coldCredential, epoch: forceBigUInt( epoch ) }) ),
                     ...roDescr
                 },
-                threshold: { value: cborFromRational( threshold ).clone(), ...roDescr }
+                threshold: { value: cloneRational( threshold ), ...roDescr }
             }
         );
     }

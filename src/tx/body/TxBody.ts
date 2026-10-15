@@ -62,7 +62,7 @@ export function isITxBody( body: Readonly<object> ): body is ITxBody
         b.inputs.every( _in => _in instanceof UTxO || isIUTxO( _in ) ) &&
         
         hasOwn( b, "outputs" ) &&
-        Array.isArray( b.outputs ) && b.outputs.length > 0 &&
+        Array.isArray( b.outputs ) &&
         b.outputs.every( out => out instanceof TxOut || isITxOut( out ) ) &&
 
         hasOwn( b, "fee" ) && canBeUInteger( b.fee ) &&
@@ -210,7 +210,6 @@ export class TxBody
 
         if(!(
             Array.isArray( outputs )  &&
-            outputs.length > 0 &&
             outputs.every( isITxOut )
         )) throw new Error("invald 'outputs' field");
 

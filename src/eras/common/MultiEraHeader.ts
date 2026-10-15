@@ -1,4 +1,5 @@
 import { ConwayHeader } from '../conway/header/ConwayHeader';
+import { DijkstraHeader } from '../dijkstra/header/DijkstraHeader';
 import { BabbageHeader } from '../babbage/header/BabbageHeader';
 import { AlonzoHeader } from '../alonzo/header/AlonzoHeader';
 import { MaryHeader } from '../mary/header/MaryHeader';
@@ -15,7 +16,7 @@ import { toHex } from "@harmoniclabs/uint8array-utils";
 import { CardanoEra } from "./types/CardanoEra";
 
 export type AnyEraHeader =
-    ConwayHeader | BabbageHeader | AlonzoHeader | MaryHeader | AllegraHeader | ShelleyHeader
+    DijkstraHeader | ConwayHeader | BabbageHeader | AlonzoHeader | MaryHeader | AllegraHeader | ShelleyHeader
     | ByronBlockHeaderBody | ByronEbbHead;
 
 export interface IMultiEraHeader {
@@ -90,6 +91,9 @@ export class MultiEraHeader implements
                 header = ByronEbbHead.fromCborObj(body);
                 break;
             }
+            case 8: // Dijkstra era
+                header = DijkstraHeader.fromCborObj(_headerData);
+                break;
             case 7: // Conway era
                 header = ConwayHeader.fromCborObj(_headerData);
                 break;

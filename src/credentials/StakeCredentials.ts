@@ -130,11 +130,11 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
 
     toData( version?: ToDataVersion ): DataConstr
     {
-        const isOldVersion = version !== "v1" && version !== "v2";
+        const isConway = version !== "v1" && version !== "v2";
 
         if( this.type === "pointer" )
         {
-            if( isOldVersion )
+            if( isConway )
             throw new Error("staking pointer was deprecated in conway, can't convert to data");
 
             return new DataConstr(
@@ -149,13 +149,12 @@ export class StakeCredentials<T extends StakeCredentialsType = StakeCredentialsT
             hash: (this.hash as StakeHash<StakeCredentialsType.KeyHash | StakeCredentialsType.Script>)
         }).toData( version );
 
-        if( isOldVersion )
+        // `StakingCredential = StakingHash Credential | StakingPtr ...` in every Plutus
+        // version: the credential is always wrapped in the `StakingHash` constructor.
         return new DataConstr(
             0, // PStakingHash
             [ credData ]
         );
-
-        return credData;
     }
 
     static fromData( data: Data ): StakeCredentials

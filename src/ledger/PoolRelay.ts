@@ -93,12 +93,10 @@ export function isIpPoolRelay( something: any ): something is IpPoolRelay
     return (
         minimumPoolRelayCheck( something ) &&
         (something as any).type === "ip" &&
-        (
-            (hasOwn( something, "ipv4" ) && isUint8Array( ipv4 )) || 
-            (hasOwn( something, "ipv6" ) && isUint8Array( ipv6 )) 
-        ) &&
-        ( ipv4 === undefined || ipv4.length === 4 ) &&
-        ( ipv6 === undefined || ipv6.length === 16 ) &&
+        // single_host_addr = (0, port / nil, ipv4 / nil, ipv6 / nil): every field may be nil
+        // (preview slot 98785139 registers a relay with a port and no address).
+        ( ipv4 === undefined || (isUint8Array( ipv4 ) && ipv4.length === 4) ) &&
+        ( ipv6 === undefined || (isUint8Array( ipv6 ) && ipv6.length === 16) ) &&
         portCheck( something )
     );
 }

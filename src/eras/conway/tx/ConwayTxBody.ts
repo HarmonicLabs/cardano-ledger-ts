@@ -56,7 +56,7 @@ export function isIConwayTxBody( body: Readonly<object> ): body is IConwayTxBody
         b.inputs.every( _in => _in instanceof ConwayUTxO || isIConwayUTxO( _in ) ) &&
         
         hasOwn( b, "outputs" ) &&
-        Array.isArray( b.outputs ) && b.outputs.length > 0 &&
+        Array.isArray( b.outputs ) &&
         b.outputs.every( out => out instanceof ConwayTxOut || isIConwayTxOut( out ) ) &&
 
         hasOwn( b, "fee" ) && canBeUInteger( b.fee ) &&
@@ -204,7 +204,6 @@ export class ConwayTxBody
 
         if(!(
             Array.isArray( outputs )  &&
-            outputs.length > 0 &&
             outputs.every( isIConwayTxOut )
         )) throw new Error("invald 'outputs' field");
 
@@ -642,8 +641,11 @@ export class ConwayTxBody
             ttl = _ttl.num;
         }
         
-        //** TO DO: add votingProcedures, proposalProcedures, currentTreasuryValue, donation */
         return new ConwayTxBody({
+            votingProcedures:           _voting_procedures === undefined ? undefined : VotingProcedures.fromCborObj( _voting_procedures ),
+            proposalProcedures:         _proposal_procedures === undefined ? undefined : getCborSet( _proposal_procedures ).map( ProposalProcedure.fromCborObj ),
+            currentTreasuryValue:       _current_treasury instanceof CborUInt ? _current_treasury.num : undefined,
+            donation:                   _donation instanceof CborUInt ? _donation.num : undefined,
             inputs: getCborSet( _ins_ ).map( txOutRefAsUTxOFromCborObj ) as [ConwayUTxO, ...ConwayUTxO[]],
             outputs: _outs.array.map( ConwayTxOut.fromCborObj ),
             fee: _fee.num,

@@ -1,5 +1,5 @@
 Order of eras to respect:
-
+8) Dijkstra
 7) Conway
 6) Babbage
 5) Alonzo

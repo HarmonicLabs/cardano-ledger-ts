@@ -1,3 +1,4 @@
+import { getSubCborRef } from "../utils/getSubCborRef";
 import { CborString, Cbor, CborObj, CborMap, SubCborRef } from "@harmoniclabs/cbor";
 import { roDescr } from "../utils/roDescr";
 import { IVoter, Voter, isIVoter } from "./Voter";
@@ -82,6 +83,22 @@ export class VotingProcedures
         
         return Cbor.encode( this.toCborObj() )
     }
+    /** `{ voter => { gov_action_id => voting_procedure } }`. */
+    static fromCborObj( cObj: CborObj ): VotingProcedures
+    {
+        if(!( cObj instanceof CborMap )) throw new Error("invalid CBOR for voting_procedures");
+        return new VotingProcedures(
+            cObj.map.map(({ k, v }) => {
+                if(!( v instanceof CborMap )) throw new Error("invalid CBOR for voting_procedures entry");
+                return {
+                    voter: Voter.fromCborObj( k ),
+                    votes: v.map.map(({ k: id, v: proc }) => ({ govActionId: TxOutRef.fromCborObj( id ), vote: VotingProcedure.fromCborObj( proc ) }))
+                };
+            }),
+            getSubCborRef( cObj )
+        );
+    }
+
     toCborObj(): CborObj
     {
         if( this.cborRef instanceof SubCborRef )

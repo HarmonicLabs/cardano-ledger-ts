@@ -77,9 +77,9 @@ export class DijkstraHeader
     {
         // console.log("DijkstraHeader.fromCborObj", cbor)
         if(!(
-            cbor instanceof CborArray 
-            // && cbor.array.length >= 2
-        )) throw new InvalidCborFormatError("invalid cbor for DijkstraHeader");
+            cbor instanceof CborArray &&
+            cbor.array.length === 2
+        )) throw new InvalidCborFormatError("invalid cbor for DijkstraHeader: expected [header_body, body_signature]");
 
         const [
             cHdrBody,
@@ -89,7 +89,8 @@ export class DijkstraHeader
         // console.log("DijkstraHeader cBodySignature", cBodySignature);
 
         if(!(
-            cBodySignature instanceof CborBytes
+            cBodySignature instanceof CborBytes &&
+            cBodySignature.bytes.length === 448
         )) throw new InvalidCborFormatError("invalid cbor for DijkstraHeader cBodySignature");
 
         const dijkstraHeader = new DijkstraHeader({

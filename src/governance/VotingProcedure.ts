@@ -1,4 +1,5 @@
-import { CborString, Cbor, CborObj, CborArray, CborText, CborBytes, CborUInt, CborSimple, SubCborRef } from "@harmoniclabs/cbor";
+import { getSubCborRef } from "../utils/getSubCborRef";
+import { Cbor, CborArray, CborBytes, CborObj, CborSimple, CborString, CborText, CborUInt, SubCborRef } from "@harmoniclabs/cbor";
 import { roDescr } from "../utils/roDescr";
 import { Anchor, IAnchor, isIAnchor } from "./Anchor";
 import { Vote, isVote, voteToCborObj } from "./Vote";
@@ -66,5 +67,15 @@ export class VotingProcedure
             voteToCborObj( this.vote ),
             this.anchor?.toCborObj() ?? new CborSimple( null )
         ]);
+    }
+
+    /** `[vote, anchor / null]`. */
+    static fromCborObj( cObj: CborObj ): VotingProcedure
+    {
+        if(!( cObj instanceof CborArray && cObj.array.length >= 1 && cObj.array[0] instanceof CborUInt ))
+        throw new Error("invalid CBOR for voting_procedure");
+        const anchorObj = cObj.array[1];
+        const anchor = anchorObj === undefined || ( anchorObj instanceof CborSimple && anchorObj.simple === null ) ? undefined : Anchor.fromCborObj( anchorObj );
+        return new VotingProcedure({ vote: Number( cObj.array[0].num ) as Vote, anchor }, getSubCborRef( cObj ));
     }
 }

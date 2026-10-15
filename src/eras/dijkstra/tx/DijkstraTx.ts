@@ -1,6 +1,6 @@
 import { XPrv } from "@harmoniclabs/bip32_ed25519"
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborString, forceCborString } from "@harmoniclabs/cbor"
-import { signEd25519_sync } from "@harmoniclabs/crypto"
+import { signEd25519_sync, blake2b_256 } from "@harmoniclabs/crypto"
 import { toHex } from "@harmoniclabs/uint8array-utils"
 import { PrivateKey, CredentialType, PubKeyHash, Credential } from "../../../credentials"
 import { Signature, Hash32, Hash28 } from "../../../hashes"
@@ -206,38 +206,110 @@ export class DijkstraTx
         ]);
     }
 
+    /**
+     * Dijkstra `hashTx` (Tx.hs): blake2b-256 of
+     * `hash(body) || hash(witness_set) || hash(auxiliary_data)? || cbor(is_valid)`.
+     * Unlike the tx id (hash of the body only) it identifies the complete
+     * transaction; Leios endorser blocks reference transactions by it.
+     * Component bytes come from the original encoding when the tx was decoded.
+     */
+    hashTx(): Uint8Array
+    {
+        if( this.cborRef instanceof SubCborRef ) return DijkstraTx.hashTxBytes( this.cborRef.toBuffer(), this.isScriptValid );
+        return dijkstraHashTxParts(
+            this.body.toCborBytes(),
+            this.witnesses.toCborBytes(),
+            this.auxiliaryData === undefined || this.auxiliaryData === null ? undefined : this.auxiliaryData.toCborBytes(),
+            this.isScriptValid
+        );
+    }
+
+    /**
+     * `hashTx` straight from the bytes of a mempool (`[b, w, aux]`, `[b, w, true, aux]`)
+     * or block (`[b, w, aux, bool]`) transaction, without decoding it.
+     */
+    static hashTxBytes( txBytes: Uint8Array, isValid?: boolean ): Uint8Array
+    {
+        const parts: Uint8Array[] = ( Cbor.parseLazy( txBytes ) as any ).array;
+        if(!( parts.length === 3 || parts.length === 4 )) throw new InvalidCborFormatError("DijkstraTx.hashTxBytes: not a transaction");
+        // auxiliary data is never a bool, so a `true` at index 2 means the mempool form
+        const mempoolFlag = parts.length === 4 && parts[2].length === 1 && parts[2][0] === 0xf5;
+        const auxPart = mempoolFlag ? parts[3] : parts[2];
+        const flag = isValid ?? ( parts.length === 4 && !mempoolFlag ? parts[3][0] === 0xf5 : true );
+        return dijkstraHashTxParts( parts[0], parts[1], auxPart.length === 1 && auxPart[0] === 0xf6 ? undefined : auxPart, flag );
+    }
+
+    /** `block_transaction` form: `[body, witness_set, auxiliary_data/ nil, is_valid]` (ignores any mempool cborRef) */
+    toBlockTransactionCborObj(): CborArray
+    {
+        return new CborArray([
+            this.body.toCborObj(),
+            this.witnesses.toCborObj(),
+            this.auxiliaryData === undefined || this.auxiliaryData === null ?
+                new CborSimple( null ) :
+                this.auxiliaryData.toCborObj(),
+            new CborSimple( this.isScriptValid )
+        ]);
+    }
+
     static fromCbor( cStr: CanBeCborString ): DijkstraTx
     {
-        return DijkstraTx.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true }) );
+        const bytes = cStr instanceof Uint8Array ? cStr : forceCborString( cStr );
+        return DijkstraTx.fromCborObj( Cbor.parse( bytes, { keepRef: true }), bytes );
     }
-    static fromCborObj( cObj: CborObj ): DijkstraTx
+    /**
+     * `mempool_transaction` (cardano-ledger Dijkstra CDDL):
+     *   [body, wits, auxiliary_data/ nil]            (preferred)
+     *   [body, wits, true, auxiliary_data/ nil]      (legacy flag, only `true` accepted)
+     */
+    static fromCborObj( cObj: CborObj, _originalBytes?: Uint8Array ): DijkstraTx
     {
         if(!(
             cObj instanceof CborArray &&
-            cObj.array.length >= 3
-        ))throw new InvalidCborFormatError("DijkstraTx");
+            ( cObj.array.length === 3 || cObj.array.length === 4 )
+        ))throw new InvalidCborFormatError("DijkstraTx: expected 3 or 4 elements");
 
-        // Accept both forms:
-        //   transaction          = [body, wits, auxiliary_data/ nil]                 (3 elems)
-        //   transaction_mempool  = [body, wits, true, auxiliary_data/ nil]           (4 elems; is_valid tolerated inbound)
-        const hasIsValid =
-            cObj.array.length >= 4 &&
+        if( cObj.array.length === 4 && !(
             cObj.array[2] instanceof CborSimple &&
-            typeof (cObj.array[2] as CborSimple).simple === "boolean";
+            (cObj.array[2] as CborSimple).simple === true
+        )) throw new InvalidCborFormatError("DijkstraTx: a mempool transaction may only carry is_valid = true");
 
         const _body = cObj.array[0];
         const _wits = cObj.array[1];
-        const _isValid = hasIsValid ? (cObj.array[2] as CborSimple).simple as boolean : true;
-        const _aux = hasIsValid ? cObj.array[3] : cObj.array[2];
+        const _aux = cObj.array.length === 4 ? cObj.array[3] : cObj.array[2];
 
-        const noDijkstraAuxiliaryData = _aux === undefined || ( _aux instanceof CborSimple && (_aux.simple === null || _aux.simple === undefined) );
+        const noDijkstraAuxiliaryData = _aux instanceof CborSimple && _aux.simple === null;
 
         return new DijkstraTx({
             body: DijkstraTxBody.fromCborObj( _body ),
             witnesses: DijkstraTxWitnessSet.fromCborObj( _wits ),
-            isScriptValid: _isValid,
+            isScriptValid: true,
             auxiliaryData: noDijkstraAuxiliaryData ? undefined : DijkstraAuxiliaryData.fromCborObj( _aux )
-        }, getSubCborRef( cObj ));
+        }, getSubCborRef( cObj, _originalBytes ));
+    }
+
+    /**
+     * `block_transaction = [transaction_body, transaction_witness_set, auxiliary_data/ nil, bool]`:
+     * inside a block the producer-set `is_valid` flag trails the author's fields.
+     */
+    static fromBlockTransactionCborObj( cObj: CborObj, _originalBytes?: Uint8Array ): DijkstraTx
+    {
+        if(!(
+            cObj instanceof CborArray &&
+            cObj.array.length === 4 &&
+            cObj.array[3] instanceof CborSimple &&
+            typeof (cObj.array[3] as CborSimple).simple === "boolean"
+        )) throw new InvalidCborFormatError("Dijkstra block_transaction must be [body, witness_set, auxiliary_data/nil, bool]");
+
+        const [ _body, _wits, _aux, _isValid ] = cObj.array;
+        const noAux = _aux instanceof CborSimple && _aux.simple === null;
+
+        return new DijkstraTx({
+            body: DijkstraTxBody.fromCborObj( _body ),
+            witnesses: DijkstraTxWitnessSet.fromCborObj( _wits ),
+            isScriptValid: (_isValid as CborSimple).simple as boolean,
+            auxiliaryData: noAux ? undefined : DijkstraAuxiliaryData.fromCborObj( _aux )
+        }, getSubCborRef( cObj, _originalBytes ));
     }
 
     toJSON() { 
@@ -308,4 +380,16 @@ function getNSignersNeeded( body: Readonly<DijkstraTxBody> ): number
 {
     const n = getAllRequiredSigners( body ).length
     return n === 0 ? 1 : n;
+}
+
+/** blake2b-256( hash(body) || hash(wits) || hash(aux)? || cbor(is_valid) ) (Dijkstra Tx.hs `hashTx`) */
+export function dijkstraHashTxParts( body: Uint8Array, wits: Uint8Array, aux: Uint8Array | undefined, isValid: boolean ): Uint8Array
+{
+    const chunks = [ blake2b_256( body ), blake2b_256( wits ) ];
+    if( aux !== undefined ) chunks.push( blake2b_256( aux ) );
+    chunks.push( new Uint8Array([ isValid ? 0xf5 : 0xf4 ]) );
+    const cat = new Uint8Array( chunks.reduce( ( n, c ) => n + c.length, 0 ) );
+    let off = 0;
+    for( const c of chunks ) { cat.set( c, off ); off += c.length; }
+    return blake2b_256( cat );
 }

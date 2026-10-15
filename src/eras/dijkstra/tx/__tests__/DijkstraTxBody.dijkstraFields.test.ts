@@ -64,11 +64,11 @@ describe("DijkstraTxBody new fields round-trip", () => {
         const body = minimalBody({
             accountBalanceIntervals: [
                 {
-                    credential: Credential.keyHash("66".repeat(28)),
+                    rewardAccount: Buffer.from( "e0" + "66".repeat(28), "hex" ),
                     interval: { inclusiveLowerBound: 10, exclusiveUpperBound: 100 }
                 },
                 {
-                    credential: Credential.script("77".repeat(28)),
+                    rewardAccount: Buffer.from( "f0" + "77".repeat(28), "hex" ),
                     interval: { inclusiveLowerBound: null, exclusiveUpperBound: 50 }
                 }
             ]
@@ -90,7 +90,7 @@ describe("DijkstraTxBody new fields round-trip", () => {
             guards: [ Credential.keyHash("33".repeat(28)) ],
             directDeposits: [ { rewardAccount: new Hash28("55".repeat(28)), amount: 7 } ],
             accountBalanceIntervals: [
-                { credential: Credential.keyHash("66".repeat(28)), interval: { inclusiveLowerBound: 1, exclusiveUpperBound: null } }
+                { rewardAccount: Buffer.from( "e0" + "66".repeat(28), "hex" ), interval: { inclusiveLowerBound: 1, exclusiveUpperBound: null } }
             ]
         });
         expect( roundtrips( body ) ).toBe( true );

@@ -1,4 +1,4 @@
-import { CborArray, CborBytes, CborUInt } from "@harmoniclabs/cbor";
+import { CborArray, CborBytes, CborObj, CborUInt } from "@harmoniclabs/cbor";
 import { CanBeHash28, Hash28, canBeHash28 } from "../hashes";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { uint8ArrayEq } from "@harmoniclabs/uint8array-utils";
@@ -104,6 +104,14 @@ export class Voter
             new CborUInt( this.kind ),
             new CborBytes( this.hash.toBuffer() )
         ]);
+    }
+
+    /** `[voter_kind, hash28]` (0–4: CC key/script, DRep key/script, pool key). */
+    static fromCborObj( cObj: CborObj ): Voter
+    {
+        if(!( cObj instanceof CborArray && cObj.array.length >= 2 && cObj.array[0] instanceof CborUInt && cObj.array[1] instanceof CborBytes ))
+        throw new Error("invalid CBOR for voter");
+        return new Voter({ kind: Number( cObj.array[0].num ) as VoterKind, hash: cObj.array[1].bytes });
     }
 
     toData( version?: ToDataVersion ): DataConstr

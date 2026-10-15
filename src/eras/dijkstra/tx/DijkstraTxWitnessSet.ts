@@ -359,14 +359,14 @@ export class DijkstraTxWitnessSet
 
         let fields: (CborObj | undefined)[] = new Array( 9 ).fill( undefined );
 
-        for( let i = 0; i < 9; i++)
+        // keys 0..8 only, each at most once (Dijkstra adds key 8, Plutus V4 scripts)
+        for( const { k, v } of cObj.map )
         {
-            const { v } = cObj.map.find(
-                ({ k }) => k instanceof CborUInt && Number( k.num ) === i
-            ) ?? { v: undefined };
-
-            if( v === undefined || !isCborObj( v ) ) continue;
-
+            if(!( k instanceof CborUInt && k.num <= BigInt( 8 ) ))
+            throw new InvalidCborFormatError("DijkstraTxWitnessSet: unexpected key");
+            const i = Number( k.num );
+            if( fields[i] !== undefined ) throw new InvalidCborFormatError("DijkstraTxWitnessSet: duplicate key " + i );
+            if( !isCborObj( v ) ) continue;
             fields[i] = v;
         }
 
@@ -430,14 +430,16 @@ export class DijkstraTxWitnessSet
 
 }
 
+/** Dijkstra accepts only the map form of `redeemers` (the flat array form was removed) */
 function witnessRedeemersFromCborObj( cbor: CborObj ): DijkstraTxRedeemer[]
 {
     if( cbor instanceof CborArray )
     {
-        return cbor.array.map( DijkstraTxRedeemer.fromCborObj );
+        throw new InvalidCborFormatError("DijkstraTxWitnessSet: redeemers must use the map format");
     }
     else if( cbor instanceof CborMap )
     {
+        if( cbor.map.length === 0 ) throw new InvalidCborFormatError("DijkstraTxWitnessSet: redeemers must be non-empty");
         return cbor.map.map( DijkstraTxRedeemer.fromCborMapEntry );
     }
     else throw new Error("invalid format for witness set redeemers field");

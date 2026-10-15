@@ -191,6 +191,15 @@ export class ConwayMoveInstantRewardsCert
             cObj instanceof CborArray 
         ))throw new Error(`Invalid CBOR fromat for "ConwayMoveInstantRewardsCert"`);
 
+        // `certificateFromCborObj` passes the whole certificate `[6, [source, destination]]`;
+        // accept that form as well as the bare `[source, destination]` pair.
+        if(
+            cObj.array.length === 2 &&
+            cObj.array[0] instanceof CborUInt &&
+            Number( cObj.array[0].num ) === 6 &&
+            cObj.array[1] instanceof CborArray
+        ) cObj = cObj.array[1];
+
         const [
             _src,
             _dst

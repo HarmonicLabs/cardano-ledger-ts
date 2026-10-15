@@ -48,7 +48,7 @@ export function isIAlonzoTxBody( body: Readonly<object> ): body is IAlonzoTxBody
         b.inputs.every( _in => _in instanceof AlonzoUTxO || isIAlonzoUTxO( _in ) ) &&
         
         hasOwn( b, "outputs" ) &&
-        Array.isArray( b.outputs ) && b.outputs.length > 0 &&
+        Array.isArray( b.outputs ) &&
         b.outputs.every( out => out instanceof AlonzoTxOut || isIAlonzoTxOut( out ) ) &&
 
         hasOwn( b, "fee" ) && canBeUInteger( b.fee ) &&
@@ -148,7 +148,6 @@ export class AlonzoTxBody
 
         if(!(
             Array.isArray( outputs )  &&
-            outputs.length > 0 &&
             outputs.every( isIAlonzoTxOut )
         )) throw new Error("invald 'outputs' field");
 

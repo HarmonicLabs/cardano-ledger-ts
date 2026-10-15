@@ -15,7 +15,8 @@ export enum DijkstraTxRedeemerTag {
     Cert        = 2,
     Withdraw    = 3,
     Voting      = 4,
-    Proposing   = 5
+    Proposing   = 5,
+    Guarding    = 6  // Dijkstra: script guards (key 14 / key 24)
 };
 
 Object.freeze( DijkstraTxRedeemerTag );
@@ -27,6 +28,7 @@ export type DijkstraTxRedeemerTagStr<Tag extends DijkstraTxRedeemerTag> =
     Tag extends DijkstraTxRedeemerTag.Withdraw  ? "Withdraw"    :
     Tag extends DijkstraTxRedeemerTag.Voting    ? "Voting"      :
     Tag extends DijkstraTxRedeemerTag.Proposing ? "Proposing"   :
+    Tag extends DijkstraTxRedeemerTag.Guarding  ? "Guarding"    :
     never;
 
 export function DijkstraTxRedeemerTagToString<Tag extends DijkstraTxRedeemerTag>( tag: Tag ): DijkstraTxRedeemerTagStr<Tag>
@@ -38,6 +40,7 @@ export function DijkstraTxRedeemerTagToString<Tag extends DijkstraTxRedeemerTag>
         case DijkstraTxRedeemerTag.Cert:        return "Cert" as any;
         case DijkstraTxRedeemerTag.Withdraw:    return "Withdraw" as any;
         case DijkstraTxRedeemerTag.Voting:      return "Voting" as any;
+        case DijkstraTxRedeemerTag.Guarding:    return "Guarding" as any;
         case DijkstraTxRedeemerTag.Proposing:   return "Proposing" as any;
         default:
             throw new BasePlutsError("invalid DijkstraTxRedeemerTag")
@@ -103,7 +106,8 @@ export class DijkstraTxRedeemer
             tag === 2 || 
             tag === 3 ||
             tag === 4 ||
-            tag === 5
+            tag === 5 ||
+            tag === 6
         ))throw new Error("invalid redeemer tag");
         this.tag = tag;
 

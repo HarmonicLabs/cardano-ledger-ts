@@ -8,3 +8,4 @@ export * from './DijkstraTxRedeemer';
 export * from './DijkstraTxWitnessSet';
 export * from './DijkstraUTxO';
 export * from './DijkstraTxIn';
+export * from './DijkstraCertificates';

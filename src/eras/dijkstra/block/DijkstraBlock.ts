@@ -1,132 +1,127 @@
-import { CborArray, CborBytes, CborSimple, ToCbor, SubCborRef, CborString, Cbor, CborObj, CborUInt, CanBeCborString, forceCborString, isCborObj} from "@harmoniclabs/cbor";
-import { IDijkstraHeader, DijkstraHeader, isIDijkstraHeader } from "../header/DijkstraHeader";
-import { IDijkstraTxBody, DijkstraTxBody } from "../tx/DijkstraTxBody";
-import { IDijkstraTxWitnessSet, DijkstraTxWitnessSet } from "../tx/DijkstraTxWitnessSet";
-import { IDijkstraAuxiliaryData, DijkstraAuxiliaryData } from "../tx/DijkstraAuxiliaryData";
+import { CborArray, CborBytes, CborSimple, ToCbor, SubCborRef, CborString, Cbor, CborObj, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
+import { blake2b_256 } from "@harmoniclabs/crypto";
+import { IDijkstraHeader, DijkstraHeader } from "../header/DijkstraHeader";
+import { DijkstraTx, IDijkstraTx } from "../tx/DijkstraTx";
+import { DijkstraTxBody } from "../tx/DijkstraTxBody";
+import { DijkstraTxWitnessSet } from "../tx/DijkstraTxWitnessSet";
+import { DijkstraAuxiliaryData } from "../tx/DijkstraAuxiliaryData";
 import { ToJson } from "../../../utils/ToJson"
 import { getSubCborRef } from "../../../utils/getSubCborRef";
-import { getCborSet } from "../../../utils/getCborSet";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError"
 
 /*
-    CDDL (Dijkstra — CIP-0176 non-segregated block body)
+    CDDL (cardano-ledger eras/dijkstra/impl/cddl/data/dijkstra.cddl, tag
+    cardano-ledger-dijkstra-0.4.0.0 = master 2026-10-08):
 
     block = [header, block_body]
 
     block_body =
-      [ invalid_transactions : invalid_transactions/ nil
-      , transactions         : [* transaction]
-      , peras_certificate    : peras_certificate
+      [ transactions      : [* block_transaction]
+      , leios_certificate : leios_certificate/ nil
+      , peras_certificate : peras_certificate/ nil
       ]
 
-    transaction          = [transaction_body, transaction_witness_set, auxiliary_data/ nil]
-    invalid_transactions = nonempty_set<transaction_index>
-    peras_certificate    = bytes/ nil
+    block_transaction =
+      [transaction_body, transaction_witness_set, auxiliary_data/ nil, bool]
 
-    Unlike Conway, the body/witness/auxiliary-data are no longer carried as parallel
-    segregated arrays: each transaction is a self-contained triple. The Conway `is_valid`
-    flag is deprecated and is never present on a transaction once it is inside a block.
+    leios_certificate = [ signers : bytes .size (0 .. 8192), signature : bytes .size 48 ]
+    peras_certificate = bytes
+
+    Transactions are no longer segregated into parallel arrays. The header's
+    block_body_hash is blake2b-256 of the whole block_body encoding
+    (BlockBody/Internal.hs `hashBlockBody` = hash of the memoised bytes), and
+    block_body_size is the length of those bytes.
+
+    For code written against the segregated Shelley..Conway blocks this class
+    also exposes `transactionBodies`, `transactionWitnessSets`,
+    `auxiliaryDataSet` and `invalidTransactions` (indices whose is_valid flag
+    is false), all derived from `transactions`.
 */
 
-export interface IDijkstraBlockTransaction {
-    body: IDijkstraTxBody;
-    witnessSet: IDijkstraTxWitnessSet;
-    auxiliaryData?: IDijkstraAuxiliaryData | null;
+export interface ILeiosCertificate {
+    /** bitfield of the signing committee members (up to 8192 bytes) */
+    signers: Uint8Array;
+    /** BLS signature, 48 bytes */
+    signature: Uint8Array;
 }
 
 export interface IDijkstraBlock {
-    header: IDijkstraHeader;
-    /** `nonempty_set<transaction_index>` or absent (encoded as `nil`) */
-    invalidTransactions?: (number | bigint)[] | undefined;
-    transactions: IDijkstraBlockTransaction[];
-    /** `peras_certificate = bytes/ nil` */
+    header: IDijkstraHeader | DijkstraHeader;
+    transactions: (IDijkstraTx | DijkstraTx)[];
+    leiosCertificate?: ILeiosCertificate | null;
     perasCertificate?: Uint8Array | null;
 }
 
-export class DijkstraBlockTransaction implements IDijkstraBlockTransaction, ToCbor, ToJson {
-    readonly body: DijkstraTxBody;
-    readonly witnessSet: DijkstraTxWitnessSet;
-    readonly auxiliaryData?: DijkstraAuxiliaryData | null;
-
-    constructor(
-        tx: IDijkstraBlockTransaction,
-        readonly cborRef: SubCborRef | undefined = undefined
-    )
-    {
-        this.body = tx.body instanceof DijkstraTxBody ? tx.body : new DijkstraTxBody( tx.body );
-        this.witnessSet = tx.witnessSet instanceof DijkstraTxWitnessSet ? tx.witnessSet : new DijkstraTxWitnessSet( tx.witnessSet );
-        this.auxiliaryData = (
-            tx.auxiliaryData === undefined || tx.auxiliaryData === null ? null :
-            tx.auxiliaryData instanceof DijkstraAuxiliaryData ? tx.auxiliaryData :
-            new DijkstraAuxiliaryData( tx.auxiliaryData )
-        );
-    }
-
-    toCborBytes(): Uint8Array
-    {
-        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
-        return this.toCbor();
-    }
-    toCbor(): CborString { return Cbor.encode( this.toCborObj() ); }
-    toCborObj(): CborArray
-    {
-        return new CborArray([
-            this.body.toCborObj(),
-            this.witnessSet.toCborObj(),
-            this.auxiliaryData === undefined || this.auxiliaryData === null ?
-                new CborSimple( null ) :
-                this.auxiliaryData.toCborObj()
-        ]);
-    }
-
-    static fromCborObj( cObj: CborObj ): DijkstraBlockTransaction
-    {
-        if(!(
-            cObj instanceof CborArray &&
-            cObj.array.length >= 2
-        )) throw new InvalidCborFormatError("DijkstraBlockTransaction must be a CBOR array of [body, witnessSet, auxiliaryData/nil]");
-
-        const [ _body, _wits, _aux ] = cObj.array;
-
-        return new DijkstraBlockTransaction({
-            body: DijkstraTxBody.fromCborObj( _body ),
-            witnessSet: DijkstraTxWitnessSet.fromCborObj( _wits ),
-            auxiliaryData: ( _aux === undefined || _aux instanceof CborSimple ) ? null : DijkstraAuxiliaryData.fromCborObj( _aux )
-        });
-    }
-
-    toJSON() { return this.toJson(); }
-    toJson()
-    {
-        return {
-            body: this.body.toJson(),
-            witnessSet: this.witnessSet.toJson(),
-            auxiliaryData: this.auxiliaryData?.toJson() ?? null
-        };
-    }
-}
-
-export class DijkstraBlock implements
-    IDijkstraBlock, ToCbor, ToJson
+export class DijkstraBlock implements ToCbor, ToJson
 {
     readonly header: DijkstraHeader;
-    readonly invalidTransactions: (number | bigint)[] | undefined;
-    readonly transactions: DijkstraBlockTransaction[];
+    readonly transactions: DijkstraTx[];
+    readonly leiosCertificate: ILeiosCertificate | null;
     readonly perasCertificate: Uint8Array | null;
+    /** sub reference of the `block_body` array (set when decoded) */
+    readonly blockBodyCborRef: SubCborRef | undefined;
 
     constructor(
         block: IDijkstraBlock,
-        readonly cborRef: SubCborRef | undefined = undefined
+        readonly cborRef: SubCborRef | undefined = undefined,
+        blockBodyCborRef: SubCborRef | undefined = undefined
     )
     {
-        this.header = new DijkstraHeader( block.header );
-        this.transactions = block.transactions.map( tx => new DijkstraBlockTransaction( tx ) );
-        // nonempty_set or nil: empty list normalizes to undefined (-> nil)
-        this.invalidTransactions = (
-            block.invalidTransactions === undefined || block.invalidTransactions.length === 0 ?
-            undefined : block.invalidTransactions
-        );
+        this.header = block.header instanceof DijkstraHeader ? block.header : new DijkstraHeader( block.header );
+        this.transactions = block.transactions.map( tx => tx instanceof DijkstraTx ? tx : new DijkstraTx( tx ) );
+        this.leiosCertificate = block.leiosCertificate ?? null;
         this.perasCertificate = block.perasCertificate ?? null;
+        if( this.leiosCertificate !== null && !(
+            this.leiosCertificate.signers instanceof Uint8Array && this.leiosCertificate.signers.length <= 8192 &&
+            this.leiosCertificate.signature instanceof Uint8Array && this.leiosCertificate.signature.length === 48
+        )) throw new Error("invalid leios_certificate");
+        this.blockBodyCborRef = blockBodyCborRef;
+    }
+
+    // ---------------------------------------------------- segregated views (Conway-compatible)
+
+    get transactionBodies(): DijkstraTxBody[] { return this.transactions.map( tx => tx.body ); }
+    get transactionWitnessSets(): DijkstraTxWitnessSet[] { return this.transactions.map( tx => tx.witnesses ); }
+    get auxiliaryDataSet(): { [transactionIndex: number]: DijkstraAuxiliaryData }
+    {
+        const out: { [transactionIndex: number]: DijkstraAuxiliaryData } = {};
+        this.transactions.forEach( ( tx, i ) => { if( tx.auxiliaryData ) out[i] = tx.auxiliaryData; } );
+        return out;
+    }
+    /** indices of the transactions whose `is_valid` flag is false */
+    get invalidTransactions(): number[]
+    {
+        const out: number[] = [];
+        this.transactions.forEach( ( tx, i ) => { if( tx.isScriptValid === false ) out.push( i ); } );
+        return out;
+    }
+
+    // ---------------------------------------------------- body bytes / hash
+
+    /** the exact `block_body` bytes (re-encoded if the block was built, not decoded) */
+    get blockBodyBytes(): Uint8Array
+    {
+        if( this.blockBodyCborRef instanceof SubCborRef ) return this.blockBodyCborRef.toBuffer();
+        return Cbor.encode( this.blockBodyToCborObj() );
+    }
+    /** blake2b-256 of `block_body`: what the header's block_body_hash must equal */
+    computeBlockBodyHash(): Uint8Array { return blake2b_256( this.blockBodyBytes ); }
+
+    blockBodyToCborObj(): CborArray
+    {
+        if( this.blockBodyCborRef instanceof SubCborRef ) return Cbor.parse( this.blockBodyCborRef.toBuffer() ) as CborArray;
+        return new CborArray([
+            new CborArray( this.transactions.map( tx =>
+                tx.cborRef instanceof SubCborRef && isBlockTxRef( tx.cborRef ) ?
+                    Cbor.parse( tx.cborRef.toBuffer() ) :
+                    tx.toBlockTransactionCborObj()
+            ) ),
+            this.leiosCertificate === null ? new CborSimple( null ) : new CborArray([
+                new CborBytes( this.leiosCertificate.signers ),
+                new CborBytes( this.leiosCertificate.signature )
+            ]),
+            this.perasCertificate === null ? new CborSimple( null ) : new CborBytes( this.perasCertificate )
+        ]);
     }
 
     toCborBytes(): Uint8Array
@@ -144,95 +139,84 @@ export class DijkstraBlock implements
     toCborObj(): CborArray
     {
         if( this.cborRef instanceof SubCborRef ) return Cbor.parse( this.cborRef.toBuffer() ) as CborArray;
-
         return new CborArray([
             this.header.toCborObj(),
-            // block_body
-            new CborArray([
-                // invalid_transactions/ nil
-                this.invalidTransactions === undefined || this.invalidTransactions.length === 0 ?
-                    new CborSimple( null ) :
-                    new CborArray( this.invalidTransactions.map( it => new CborUInt( BigInt( it ) ) ) ),
-                // transactions
-                new CborArray( this.transactions.map( tx => tx.toCborObj() ) ),
-                // peras_certificate = bytes/ nil
-                this.perasCertificate === null || this.perasCertificate === undefined ?
-                    new CborSimple( null ) :
-                    new CborBytes( this.perasCertificate )
-            ])
+            this.blockBodyToCborObj()
         ]);
     }
 
     static fromCbor( cbor: CanBeCborString ): DijkstraBlock
     {
         const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor );
-        return DijkstraBlock.fromCborObj(
-            Cbor.parse( bytes, { keepRef: true } ),
-            bytes
-        );
+        return DijkstraBlock.fromCborObj( Cbor.parse( bytes, { keepRef: true } ), bytes );
     }
 
     static fromCborObj( cObj: CborObj, _originalBytes?: Uint8Array ): DijkstraBlock
     {
         if(!(
             cObj instanceof CborArray &&
-            cObj.array.length >= 2
-        )) throw new InvalidCborFormatError("Dijkstra Block must be a CBOR array [header, block_body]");
+            cObj.array.length === 2
+        )) throw new InvalidCborFormatError("Dijkstra block must be [header, block_body]");
 
         const [ _header, _blockBody ] = cObj.array;
 
-        if(!(
-            _header instanceof CborArray &&
-            _header.array.length >= 2
-        )) throw new InvalidCborFormatError("Header must be a CBOR array with at least 2 elements");
-
         const header = DijkstraHeader.fromCborObj( _header );
 
-        if(!(
-            _blockBody instanceof CborArray &&
-            _blockBody.array.length >= 3
-        )) throw new InvalidCborFormatError("block_body must be [invalid_transactions/nil, [* transaction], peras_certificate]");
+        if(!( _blockBody instanceof CborArray ))
+        throw new InvalidCborFormatError("Dijkstra block_body must be an array");
+        if( _blockBody.array.length !== 3 )
+        throw new InvalidCborFormatError("Dijkstra block_body: expected 3 components, got " + _blockBody.array.length );
 
-        const [ _invalidTxs, _transactions, _peras ] = _blockBody.array;
+        const [ _transactions, _leios, _peras ] = _blockBody.array;
 
-        // invalid_transactions/ nil
-        const invalidTransactions = ( _invalidTxs === undefined || _invalidTxs instanceof CborSimple ) ?
-            undefined :
-            getCborSet( _invalidTxs ).map( ( it, index ) => {
-                if(!( it instanceof CborUInt ))
-                throw new InvalidCborFormatError(`Invalid transaction_index at invalid_transactions[${index}]`);
-                return it.num;
-            });
-
-        // transactions
         if(!( _transactions instanceof CborArray ))
-        throw new InvalidCborFormatError("block_body.transactions must be a CBOR array");
+        throw new InvalidCborFormatError("Dijkstra block_body.transactions must be an array");
 
-        const transactions = _transactions.array.map( ( tx, index ) => {
-            if(!isCborObj( tx ))
-            throw new InvalidCborFormatError(`Invalid CBOR object at transactions[${index}]`);
-            return DijkstraBlockTransaction.fromCborObj( tx );
-        });
+        const transactions = _transactions.array.map( tx => DijkstraTx.fromBlockTransactionCborObj( tx ) );
 
-        // peras_certificate = bytes/ nil
-        const perasCertificate = _peras instanceof CborBytes ? _peras.bytes : null;
+        let leiosCertificate: ILeiosCertificate | null = null;
+        if(!( _leios instanceof CborSimple && _leios.simple === null ))
+        {
+            if(!(
+                _leios instanceof CborArray &&
+                _leios.array.length === 2 &&
+                _leios.array[0] instanceof CborBytes && _leios.array[0].bytes.length <= 8192 &&
+                _leios.array[1] instanceof CborBytes && _leios.array[1].bytes.length === 48
+            )) throw new InvalidCborFormatError("Dijkstra leios_certificate must be [bytes .size (0..8192), bytes .size 48] or nil");
+            leiosCertificate = { signers: _leios.array[0].bytes, signature: _leios.array[1].bytes };
+        }
 
-        return new DijkstraBlock({
-            header,
-            invalidTransactions,
-            transactions,
-            perasCertificate
-        }, getSubCborRef( cObj ));
+        let perasCertificate: Uint8Array | null = null;
+        if(!( _peras instanceof CborSimple && _peras.simple === null ))
+        {
+            if(!( _peras instanceof CborBytes )) throw new InvalidCborFormatError("Dijkstra peras_certificate must be bytes or nil");
+            perasCertificate = _peras.bytes;
+        }
+
+        return new DijkstraBlock(
+            { header, transactions, leiosCertificate, perasCertificate },
+            getSubCborRef( cObj, _originalBytes ),
+            _blockBody.subCborRef instanceof SubCborRef ? _blockBody.subCborRef.clone() : undefined
+        );
     }
 
     toJSON() { return this.toJson(); }
     toJson()
     {
+        const hex = ( b: Uint8Array ) => Buffer.from( b ).toString("hex");
         return {
             header: this.header,
-            invalidTransactions: this.invalidTransactions,
             transactions: this.transactions.map( tx => tx.toJson() ),
-            perasCertificate: this.perasCertificate === null ? null : Buffer.from( this.perasCertificate ).toString("hex")
+            invalidTransactions: this.invalidTransactions,
+            leiosCertificate: this.leiosCertificate === null ? null : { signers: hex( this.leiosCertificate.signers ), signature: hex( this.leiosCertificate.signature ) },
+            perasCertificate: this.perasCertificate === null ? null : hex( this.perasCertificate )
         };
     }
+}
+
+/** true if the sub reference holds a 4-element array (the `block_transaction` form) */
+function isBlockTxRef( ref: SubCborRef ): boolean
+{
+    const bytes = ref.toBuffer();
+    return bytes.length > 0 && bytes[0] === 0x84;
 }

@@ -41,3 +41,14 @@ export  function numberFromRational( n: Rational ): number
 {
     return n instanceof CborPositiveRational ? n.toNumber() : Number( n );
 }
+
+/**
+ * A fresh CborPositiveRational with the same value. `CborPositiveRational.clone()`
+ * returns a plain CborTag (the base class), which then fails every
+ * `instanceof CborPositiveRational` check (Gerolamo, preview slot 64848165).
+ */
+export function cloneRational( n: Rational ): CborPositiveRational
+{
+    const r = cborFromRational( n );
+    return new CborPositiveRational( r.num, r.den );
+}

@@ -52,7 +52,7 @@ export function isIBabbageTxBody( body: Readonly<object> ): body is IBabbageTxBo
         b.inputs.every( _in => _in instanceof BabbageUTxO || isIBabbageUTxO( _in ) ) &&
         
         hasOwn( b, "outputs" ) &&
-        Array.isArray( b.outputs ) && b.outputs.length > 0 &&
+        Array.isArray( b.outputs ) &&
         b.outputs.every( out => out instanceof BabbageTxOut || isIBabbageTxOut( out ) ) &&
 
         hasOwn( b, "fee" ) && canBeUInteger( b.fee ) &&
@@ -172,7 +172,6 @@ export class BabbageTxBody
 
         if(!(
             Array.isArray( outputs )  &&
-            outputs.length > 0 &&
             outputs.every( isIBabbageTxOut )
         )) throw new Error("invald 'outputs' field");
 
