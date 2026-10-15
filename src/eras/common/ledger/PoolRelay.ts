@@ -1,5 +1,5 @@
 import { CborObj, CborArray, CborUInt, CborSimple, CborBytes, CborText } from "@harmoniclabs/cbor";
-import { definiteBytes, definiteText } from "../../../utils/strictCbor";
+import { boundedText, cborUInt16, expectSize, fixedBytes, nullOr, recordSum, urlMaxBytes } from "../../../utils/strictCbor";
 import { hasOwn, isObject } from "@harmoniclabs/obj-utils";
 import { isUint8Array, readUInt16BE, readUInt8 } from "@harmoniclabs/uint8array-utils";
 import { CanBeUInteger, forceBigUInt, canBeUInteger } from "../../../utils/ints";
@@ -187,51 +187,51 @@ export function poolRelayToCborObj( poolRelay: PoolRelay ): CborObj
 }
 
 
+/**
+ * cardano-ledger `DecCBOR StakePoolRelay` (`decodeRecordSum`):
+ *   [0, port / null, ipv4 / null, ipv6 / null]
+ *   [1, port / null, dns_name]
+ *   [2, dns_name]
+ * port is a Word16, ipv4 exactly 4 bytes, ipv6 exactly 16, dns_name a text of at
+ * most 128 bytes (64 below protocol version 9); strings are definite; only `null`
+ * stands for an absent field.
+ */
 export function poolRelayFromCborObj( cObj: CborObj ): PoolRelay
 {
-    if(!( cObj instanceof CborArray ))
-    throw new Error(`Invalid CBOR format for "PoolRelay"`);
+    const what = "PoolRelay";
+    const { tag, fields, size } = recordSum( cObj, what );
+    const port = ( c: CborObj | undefined ) => nullOr( c, p => cborUInt16( p, "PoolRelay port" ) );
 
-    const [
-        _type,
-        _1,
-        _2,
-        _3
-    ] = cObj.array;
-
-    if(!( _type instanceof CborUInt ))
-    throw new Error(`Invalid CBOR format for "PoolRelay"`);
-
-    const n = Number( _type.num );
-
-    if( n === 0 )
+    if( tag === 0 )
     {
+        expectSize( size, 4, what );
+        const [ _1, _2, _3 ] = fields;
         return {
             type: "ip",
-            port: _1 instanceof CborUInt ? _1.num : undefined,
-            ipv4: _2 instanceof CborBytes ? definiteBytes( _2, "PoolRelay ipv4" ) : undefined as any,
-            ipv6: _3 instanceof CborBytes ? definiteBytes( _3, "PoolRelay ipv6" ) : undefined as any,
-        }
+            port: port( _1 ),
+            ipv4: nullOr( _2, c => fixedBytes( c, 4, "PoolRelay ipv4" ) ) as any,
+            ipv6: nullOr( _3, c => fixedBytes( c, 16, "PoolRelay ipv6" ) ) as any,
+        };
     }
-    if( n === 1 )
+    if( tag === 1 )
     {
+        expectSize( size, 3, what );
+        const [ _1, _2 ] = fields;
         return {
             type: "dns",
-            port: _1 instanceof CborUInt ? _1.num : undefined,
-            dnsName: _2 instanceof CborText ? definiteText( _2, "PoolRelay dns name" ) : undefined as any,
-        }
+            port: port( _1 ),
+            dnsName: boundedText( _2, urlMaxBytes(), "PoolRelay dns name" ),
+        };
     }
-    if( n === 2 )
+    if( tag === 2 )
     {
-        if(!( _1 instanceof CborText ))
-        throw new Error(`Invalid CBOR format for "PoolRelay"`);
-
+        expectSize( size, 2, what );
         return {
             type: "multi-host",
-            dnsName: definiteText( _1, "PoolRelay dns name" ),
-        }
+            dnsName: boundedText( fields[0], urlMaxBytes(), "PoolRelay dns name" ),
+        };
     }
-    
+
     throw new Error(
         "can't match 'PoolRelay' type"
     )

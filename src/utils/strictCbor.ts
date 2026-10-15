@@ -234,3 +234,189 @@ export function decodeAtVersion<C extends { fromCborObj: ( ...args: any[] ) => a
     };
     return cls;
 }
+
+/**
+ * text of at most `maxBytes` UTF-8 bytes (`textDecCBOR n`: Url and DnsName
+ * take 128 bytes from protocol version 9, 64 before)
+ */
+export function boundedText( cObj: CborObj | undefined, maxBytes: number, what: string ): string
+{
+    const t = definiteText( cObj, what );
+    const n = new TextEncoder().encode( t ).length;
+    if( n > maxBytes ) fail( what, `text of ${n} bytes exceeds ${maxBytes}` );
+    return t;
+}
+
+/** Url / DnsName size bound for the current decoder version */
+export function urlMaxBytes(): number
+{
+    return decodeVersionAtLeast( 9 ) ? 128 : 64;
+}
+
+/** `decodeNullStrictMaybe`: `null` is absent, anything else goes to `dec` */
+export function nullOr<T>( cObj: CborObj | undefined, dec: ( c: CborObj ) => T ): T | undefined
+{
+    if( isCborNull( cObj ) ) return undefined;
+    return dec( cObj as CborObj );
+}
+
+/**
+ * `decodeRecordSum`: `[tag, ...fields]`, definite or indefinite; the tag is a
+ * `decodeWord`, a definite array must have exactly the size the branch expects.
+ * Returns the tag and the elements; the caller checks the size with `expectSize`.
+ */
+export function recordSum( cObj: CborObj | undefined, what: string ): { tag: number, fields: CborObj[], size: number }
+{
+    const arr = cborArray( cObj, what );
+    if( arr.length < 1 ) fail( what, "empty sum" );
+    const tag = Number( cborUInt( arr[0], what ) );
+    return { tag, fields: arr.slice( 1 ), size: arr.length };
+}
+
+export function expectSize( actual: number, expected: number, what: string ): void
+{
+    if( actual !== expected ) fail( what, `expected ${expected} elements, got ${actual}` );
+}
+
+export type RationalBounds = "unit" | "nonNegative" | "positiveUnit" | "positive";
+
+function gcd( a: bigint, b: bigint ): bigint
+{
+    while( b !== BigInt(0) ) { const t = a % b; a = b; b = t; }
+    return a;
+}
+
+/**
+ * cardano-ledger `DecCBOR (BoundedRatio b Word64)` (UnitInterval, NonNegativeInterval, ...).
+ *
+ * Below protocol version 12 (`Plain.decodeRationalWithTag`): tag 30 is required, the
+ * array (definite or indefinite) has exactly two `decodeInteger`s (bignums allowed),
+ * the denominator is not zero; the value is reduced (`n % d`, sign on the numerator)
+ * and must fit Word64 / the interval bounds.
+ * From 12 (`decodeIntegralRational @Word64`): tag 30 and two Word64s.
+ *
+ * Returns the reduced numerator and denominator.
+ */
+export function boundedRational( cObj: CborObj | undefined, bounds: RationalBounds, what: string ): { num: bigint, den: bigint }
+{
+    const data = expectTag( cObj, 30, what );
+    const elems = cborArray( data, what, { len: 2 } );
+    let n: bigint, d: bigint;
+    if( decodeVersionAtLeast( 12 ) )
+    {
+        n = cborUInt( elems[0], what );
+        d = cborUInt( elems[1], what );
+    }
+    else
+    {
+        n = cborInteger( elems[0], what );
+        d = cborInteger( elems[1], what );
+    }
+    if( d === BigInt(0) ) fail( what, "denominator cannot be zero" );
+    if( d < BigInt(0) ) { n = -n; d = -d; }
+    const g = gcd( n < BigInt(0) ? -n : n, d );
+    if( g > BigInt(1) ) { n = n / g; d = d / g; }
+    if( n < BigInt(0) || n > U64_MAX || d > U64_MAX ) fail( what, `${n}/${d} out of the Word64 range` );
+    // positiveIntervalEpsilon = 1 % 10^19
+    const eps = BigInt("10000000000000000000");
+    switch( bounds )
+    {
+        case "unit": if( n > d ) fail( what, `${n}/${d} is not in [0, 1]` ); break;
+        case "positiveUnit": if( n > d || n * eps < d ) fail( what, `${n}/${d} is not in (0, 1]` ); break;
+        case "positive": if( n * eps < d ) fail( what, `${n}/${d} is not positive` ); break;
+        case "nonNegative": break;
+    }
+    return { num: n, den: d };
+}
+
+/**
+ * converts a CborObj built by another copy of @harmoniclabs/cbor (e.g. the one
+ * nested under cardano-costmodels-ts) into this copy's classes, so `instanceof`
+ * based encoders and decoders accept it.
+ */
+export function toLocalCborObj( obj: any ): CborObj
+{
+    if( obj instanceof CborUInt || obj instanceof CborNegInt || obj instanceof CborBytes || obj instanceof CborText
+        || obj instanceof CborArray || obj instanceof CborMap || obj instanceof CborTag || obj instanceof CborSimple ) return obj;
+    if( Array.isArray( obj?.map ) )
+        return new CborMap( obj.map.map( ({ k, v }: any) => ({ k: toLocalCborObj( k ), v: toLocalCborObj( v ) }) ), { indefinite: Boolean( obj.indefinite ) } );
+    if( Array.isArray( obj?.array ) )
+        return new CborArray( obj.array.map( toLocalCborObj ), { indefinite: Boolean( obj.indefinite ) } );
+    if( obj?.tag !== undefined && obj?.data !== undefined ) return new CborTag( obj.tag, toLocalCborObj( obj.data ) );
+    if( typeof obj?.num === "bigint" ) return obj.num < BigInt(0) ? new CborNegInt( obj.num ) : new CborUInt( obj.num );
+    if( obj?.bytes instanceof Uint8Array ) return new CborBytes( obj.bytes );
+    if( typeof obj?.text === "string" ) return new CborText( obj.text );
+    if( obj && "simple" in obj ) return new CborSimple( obj.simple, obj.numAs );
+    throw new Error("toLocalCborObj: not a CborObj");
+}
+
+/** cardano-ledger-binary `MaxVersion` */
+export const MAX_PROTOCOL_VERSION = 13;
+
+/**
+ * cardano-ledger `fromCborAccountAddress`: a definite byte string of exactly 29
+ * bytes whose header is `0b111s000n` (`header .&. 0b11101110 == 0b11100000`)
+ * followed by a 28-byte key or script hash, nothing after it.
+ */
+export function rewardAccountBytes( cObj: CborObj | undefined, what: string ): Uint8Array
+{
+    const b = definiteBytes( cObj, what );
+    if( b.length < 1 ) fail( what, "empty reward account" );
+    if( ( b[0] & 0b11101110 ) !== 0b11100000 ) fail( what, `invalid reward account header ${b[0]}` );
+    if( b.length !== 29 ) fail( what, `reward account of ${b.length} bytes, expected 29` );
+    return b;
+}
+
+/**
+ * elements of a CBOR set as cardano-ledger's `decodeSet` reads it: from protocol
+ * version 9 the tag 258 is allowed (any other tag fails) and duplicates are
+ * rejected (`keyOf` gives the identity of an element); below 9 a plain array
+ * (duplicates collapse; the tag is still accepted here, as this library always did).
+ */
+export function cborSet( cObj: CborObj | undefined, what: string, opts: { nonEmpty?: boolean } = {} ): CborObj[]
+{
+    let data = cObj;
+    if( data instanceof CborTag )
+    {
+        if( Number( data.tag ) !== 258 ) fail( what, `expected tag 258 for a set, got tag ${data.tag}` );
+        data = data.data;
+    }
+    const elems = cborArray( data, what );
+    if( opts.nonEmpty && elems.length === 0 ) fail( what, "empty set where a non-empty set is required" );
+    return elems;
+}
+
+/** rejects repeated elements from protocol version 9 (`decodeSetEnforceNoDuplicates`, `decodeMap`) */
+export function noDuplicates<T>( items: T[], keyOf: ( x: T ) => string, what: string ): T[]
+{
+    if( !decodeVersionAtLeast( 9 ) ) return items;
+    const seen = new Set<string>();
+    for( const x of items )
+    {
+        const k = keyOf( x );
+        if( seen.has( k ) ) fail( what, "duplicate element" );
+        seen.add( k );
+    }
+    return items;
+}
+
+/** identity of a CBOR element by its canonical re-encoding (for duplicate checks) */
+export function cborKey( c: CborObj ): string
+{
+    const bytes = Cbor.encode( stripRefs( c ) );
+    let s = "";
+    for( let i = 0; i < bytes.length; i++ ) s += bytes[i].toString(16).padStart(2, "0");
+    return s;
+}
+
+function stripRefs( c: CborObj ): CborObj
+{
+    if( c instanceof CborArray ) return new CborArray( c.array.map( stripRefs ) );
+    if( c instanceof CborMap ) return new CborMap( c.map.map(({ k, v }) => ({ k: stripRefs( k ), v: stripRefs( v ) })) );
+    if( c instanceof CborTag ) return new CborTag( c.tag, stripRefs( c.data ) );
+    if( c instanceof CborBytes ) return new CborBytes( c.bytes );
+    if( c instanceof CborText ) return new CborText( c.text );
+    if( c instanceof CborUInt ) return new CborUInt( c.num );
+    if( c instanceof CborNegInt ) return new CborNegInt( c.num );
+    return c;
+}
