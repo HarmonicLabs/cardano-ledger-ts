@@ -1,5 +1,5 @@
 import { ToCbor, CborString, Cbor, CborObj, CborBytes, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
-import { definiteBytes } from "../utils/strictCbor";
+import { definiteBytes, parseCborFull } from "../utils/strictCbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { ToData, Data, DataB } from "@harmoniclabs/plutus-data";
 import { fromAscii, fromHex, isUint8Array, toAscii, toHex } from "@harmoniclabs/uint8array-utils";
@@ -139,7 +139,7 @@ export class Hash
 
     static fromCbor( cStr: CanBeCborString ): Hash
     {
-        return Hash.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
+        return Hash.fromCborObj( parseCborFull( cStr, "Hash" ) );
     }
     static fromCborObj( cObj: CborObj ): Hash
     {

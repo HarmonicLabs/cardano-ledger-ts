@@ -1,5 +1,5 @@
 import { CanBeCborString, Cbor, forceCborString, CborObj, CborBytes, SubCborRef } from "@harmoniclabs/cbor";
-import { definiteBytes } from "../../utils/strictCbor";
+import { definiteBytes, parseCborFull } from "../../utils/strictCbor";
 import { assert } from "../../utils/assert";
 import { Hash, canBeHashInstance } from "../Hash";
 import { isHex } from "../../utils/hex";
@@ -54,7 +54,7 @@ export class Hash28 extends Hash
 
     static fromCbor( cStr: CanBeCborString ): Hash28
     {
-        return Hash28.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
+        return Hash28.fromCborObj( parseCborFull( cStr, "Hash28" ) );
     }
     static fromCborObj( cObj: CborObj ): Hash28
     {

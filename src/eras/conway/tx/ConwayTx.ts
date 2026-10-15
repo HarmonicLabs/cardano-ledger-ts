@@ -1,4 +1,5 @@
 import { XPrv } from "@harmoniclabs/bip32_ed25519"
+import { cborArray, isCborNull, parseCborFull } from "../../../utils/strictCbor";
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborString, forceCborString } from "@harmoniclabs/cbor"
 import { signEd25519_sync } from "@harmoniclabs/crypto"
 import { toHex } from "@harmoniclabs/uint8array-utils"
@@ -206,22 +207,24 @@ export class ConwayTx
 
     static fromCbor( cStr: CanBeCborString ): ConwayTx
     {
-        return ConwayTx.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true }) );
+        return ConwayTx.fromCborObj( parseCborFull( cStr, "ConwayTx" ) );
     }
     static fromCborObj( cObj: CborObj ): ConwayTx
     {
-        if(!(
-            cObj instanceof CborArray
-            // && cObj.array.length >= 4
-        ))throw new InvalidCborFormatError("ConwayTx");
-        
-        const [ _body, _wits, _isValid, _aux ] = cObj.array;
+        // cardano-ledger `DecCBOR (Annotator (AlonzoTx l era))`: `decodeRecordNamed` (definite
+        // or indefinite) of `[body, witnesses, is_valid, aux / null]`, where the boolean may be
+        // left out (then the transaction is valid and the array has three elements)
+        const arr = cborArray( cObj, "ConwayTx" );
+        if(!( arr.length === 3 || arr.length === 4 )) throw new InvalidCborFormatError("ConwayTx", "expected 3 or 4 elements");
+        const [ _body, _wits ] = arr;
+        const _isValid = arr.length === 4 ? arr[2] : new CborSimple( true );
+        const _aux = arr[ arr.length - 1 ];
         if(!(
             _isValid instanceof CborSimple &&
             typeof (_isValid.simple) === "boolean"
         ))throw new InvalidCborFormatError("ConwayTx","isScriptValid is not a boolean")
 
-        const noConwayAuxiliaryData = _aux instanceof CborSimple && (_aux.simple === null || _aux.simple === undefined);
+        const noConwayAuxiliaryData = isCborNull( _aux );
 
         const conwayTx = new ConwayTx({
             body: ConwayTxBody.fromCborObj( _body ),

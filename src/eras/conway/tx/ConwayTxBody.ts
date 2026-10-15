@@ -1,4 +1,5 @@
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
+import { cborArray, cborKey, cborMapEntries, cborSet, cborUInt, noDuplicates, sparseMapKeys, parseCborFull } from "../../../utils/strictCbor";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
 import { blake2b_256 } from "@harmoniclabs/crypto";
 import { hasOwn, isObject } from "@harmoniclabs/obj-utils";
@@ -52,7 +53,7 @@ export function isIConwayTxBody( body: Readonly<object> ): body is IConwayTxBody
         fields.length >= 3 &&
         
         hasOwn( b, "inputs" ) &&
-        Array.isArray( b.inputs ) && b.inputs.length > 0 &&
+        Array.isArray( b.inputs ) &&
         b.inputs.every( _in => _in instanceof ConwayUTxO || isIConwayUTxO( _in ) ) &&
         
         hasOwn( b, "outputs" ) &&
@@ -193,8 +194,9 @@ export class ConwayTxBody
 
         // -------------------------------------- inputs -------------------------------------- //
         if(!(
+            // an empty input set decodes (cardano-ledger rejects it in the UTXO rule,
+            // InputSetEmptyUTxO, not in the decoder)
             Array.isArray( inputs )  &&
-            inputs.length > 0 &&
             inputs.every( isIConwayUTxO )
         )) throw new Error("invalid 'inputs' field");
 
@@ -571,29 +573,32 @@ export class ConwayTxBody
 
     static fromCbor( cStr: CanBeCborString ): ConwayTxBody
     {
-        return ConwayTxBody.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
+        return ConwayTxBody.fromCborObj( parseCborFull( cStr, "ConwayTxBody" ) );
     }
 
+    /**
+     * cardano-ledger `DecCBOR (ConwayTxBodyRaw l ConwayEra)` (`SparseKeyed "TxBodyRaw"`):
+     *
+     * - keys 0-5, 7-9, 11, 13-22 (`decodeWord`); a repeated or unknown key fails
+     *   (6 `update`, 10 and 12 do not exist in Conway); 0, 1 and 2 are required;
+     * - inputs (0): a set of TxIns, possibly empty (the UTXO rule rejects an empty
+     *   one, not the decoder); outputs (1): a list;
+     * - fee, ttl, validity start, total collateral, current treasury value: Word64;
+     *   donation (22): a positive Word64; network id (15): 0 or 1;
+     * - certificates (4), withdrawals (5), mint (9), collateral inputs (13), required
+     *   signers (14), reference inputs (18), voting procedures (19) and proposal
+     *   procedures (20) must not be empty when present;
+     * - sets and maps reject repeated elements (protocol version 9).
+     */
     static fromCborObj( cObj: CborObj ): ConwayTxBody
     {
-        // console.log("cObj: ", cObj);
-        if(!(
-            cObj instanceof CborMap 
-            // && cObj.map.length >= 20 
-        ))throw new InvalidCborFormatError("ConwayTxBody")
+        const what = "ConwayTxBody";
+        const keys = sparseMapKeys( cObj, what );
+        const allowed = new Set([ 0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22 ]);
+        for( const k of keys ) if( !allowed.has( k ) ) throw new InvalidCborFormatError( what, "invalid field " + k );
 
         let fields: (CborObj | undefined)[] = new Array( 23 ).fill( undefined );
-
-        for( let i = 0; i < 23; i++)
-        {
-            const { v } = cObj.map.find(
-                ({ k }) => k instanceof CborUInt && Number( k.num ) === i
-            ) ?? { v: undefined };
-
-            if( v === undefined ) continue;
-
-            fields[i] = v;
-        }
+        for( const { k, v } of ( cObj as CborMap ).map ) fields[ Number( ( k as CborUInt ).num ) ] = v;
 
         const [
             _ins_,                  // 0 // set
@@ -620,49 +625,76 @@ export class ConwayTxBody
             _current_treasury,      // 21
             _donation               // 22
         ] = fields;
-        // console.log("fee", _fee);
 
         if( _ins_ === undefined || _outs === undefined || _fee === undefined )
-        throw new InvalidCborFormatError("ConwayTxBody");
+        throw new InvalidCborFormatError( what, "missing inputs, outputs or fee" );
 
-        if(!(
-            // _ins  instanceof CborArray &&
-            _outs instanceof CborArray &&
-            _fee  instanceof CborUInt
-        ))
-        throw new InvalidCborFormatError("ConwayTxBody");
+        const inputSet = ( c: CborObj, name: string, nonEmpty: boolean ) => noDuplicates(
+            cborSet( c, name, { nonEmpty } ).map( txOutRefAsUTxOFromCborObj ),
+            u => u.utxoRef.toString(),
+            name
+        );
+        const uintOrUndef = ( c: CborObj | undefined, name: string ) => c === undefined ? undefined : cborUInt( c, name );
 
-        let ttl: bigint | undefined = undefined;
-        if( _ttl !== undefined )
+        const votingProcedures = _voting_procedures === undefined ? undefined : VotingProcedures.fromCborObj( _voting_procedures );
+        if( votingProcedures !== undefined && votingProcedures.procedures.length === 0 )
+        throw new InvalidCborFormatError( what, "'VotingProcedures' must be non-empty when supplied" );
+
+        const withdrawals = _withdrawals === undefined ? undefined : TxWithdrawals.fromCborObj( _withdrawals );
+        if( withdrawals !== undefined && withdrawals.map.length === 0 )
+        throw new InvalidCborFormatError( what, "'Withdrawals' must be non-empty when supplied" );
+
+        if( _mint !== undefined && cborMapEntries( _mint, "Mint" ).length === 0 )
+        throw new InvalidCborFormatError( what, "'Mint' must be non-empty when supplied" );
+
+        let network: NetworkT | undefined = undefined;
+        if( _net !== undefined )
         {
-            if(!( _ttl instanceof CborUInt ))
-            throw new InvalidCborFormatError("ConwayTxBody");
-
-            ttl = _ttl.num;
+            const n = cborUInt( _net, "ConwayTxBody network id", BigInt( 255 ) );
+            if( n > BigInt( 1 ) ) throw new InvalidCborFormatError( what, "invalid network id " + n );
+            network = n === BigInt( 0 ) ? "testnet" : "mainnet";
         }
-        
+
+        let donation: bigint | undefined = undefined;
+        if( _donation !== undefined )
+        {
+            donation = cborUInt( _donation, "ConwayTxBody treasury donation" );
+            if( donation === BigInt( 0 ) ) throw new InvalidCborFormatError( what, "'Treasury Donation' must be non-zero when supplied" );
+        }
+
         return new ConwayTxBody({
-            votingProcedures:           _voting_procedures === undefined ? undefined : VotingProcedures.fromCborObj( _voting_procedures ),
-            proposalProcedures:         _proposal_procedures === undefined ? undefined : getCborSet( _proposal_procedures ).map( ProposalProcedure.fromCborObj ),
-            currentTreasuryValue:       _current_treasury instanceof CborUInt ? _current_treasury.num : undefined,
-            donation:                   _donation instanceof CborUInt ? _donation.num : undefined,
-            inputs: getCborSet( _ins_ ).map( txOutRefAsUTxOFromCborObj ) as [ConwayUTxO, ...ConwayUTxO[]],
-            outputs: _outs.array.map( ConwayTxOut.fromCborObj ),
-            fee: _fee.num,
-            ttl,
-            certs:                      _certs_ !== undefined ? getCborSet( _certs_ ).map( certificateFromCborObj ) : undefined,
-            withdrawals:                _withdrawals === undefined ? undefined : TxWithdrawals.fromCborObj( _withdrawals ),
-            protocolUpdate:             _pUp === undefined ? undefined : LegacyPPUpdateProposalFromCborObj( _pUp, (cObj) => LegacyPPUpdateMapFromCborObj( cObj, partialConwayProtocolParametersFromCborObj as any ) ),
+            votingProcedures,
+            proposalProcedures:         _proposal_procedures === undefined ? undefined : noDuplicates(
+                cborSet( _proposal_procedures, "ConwayTxBody proposal procedures", { nonEmpty: true } ),
+                cborKey,
+                "ConwayTxBody proposal procedures"
+            ).map( ProposalProcedure.fromCborObj ),
+            currentTreasuryValue:       uintOrUndef( _current_treasury, "ConwayTxBody current treasury value" ),
+            donation,
+            inputs: inputSet( _ins_, "ConwayTxBody inputs", false ) as [ConwayUTxO, ...ConwayUTxO[]],
+            outputs: cborArray( _outs, "ConwayTxBody outputs" ).map( ConwayTxOut.fromCborObj ),
+            fee: cborUInt( _fee, "ConwayTxBody fee" ),
+            ttl: uintOrUndef( _ttl, "ConwayTxBody ttl" ),
+            certs:                      _certs_ !== undefined ? noDuplicates(
+                cborSet( _certs_, "ConwayTxBody certificates", { nonEmpty: true } ),
+                cborKey,
+                "ConwayTxBody certificates"
+            ).map( certificateFromCborObj ) : undefined,
+            withdrawals,
             auxDataHash:                _auxDataHash === undefined ? undefined : AuxiliaryDataHash.fromCborObj( _auxDataHash ),
-            validityIntervalStart:      _validityStart instanceof CborUInt ? _validityStart.num : undefined,
+            validityIntervalStart:      uintOrUndef( _validityStart, "ConwayTxBody validity interval start" ),
             mint:                       _mint === undefined ? undefined : Value.fromCborObj( _mint, { mint: true } ),
             scriptDataHash:             _scriptDataHash === undefined ? undefined : ScriptDataHash.fromCborObj( _scriptDataHash ),
-            collateralInputs:           _collIns !== undefined ? getCborSet( _collIns ).map( txOutRefAsUTxOFromCborObj ) : undefined ,
-            requiredSigners:            _reqSigs !== undefined  ? getCborSet( _reqSigs ).map( PubKeyHash.fromCborObj ) : undefined,
-            network:                    _net instanceof CborUInt ? (Number( _net.num ) === 0 ? "testnet": "mainnet") : undefined,
+            collateralInputs:           _collIns !== undefined ? inputSet( _collIns, "ConwayTxBody collateral inputs", true ) : undefined ,
+            requiredSigners:            _reqSigs !== undefined ? noDuplicates(
+                cborSet( _reqSigs, "ConwayTxBody required signers", { nonEmpty: true } ).map( PubKeyHash.fromCborObj ),
+                h => h.toString(),
+                "ConwayTxBody required signers"
+            ) : undefined,
+            network,
             collateralReturn:           _collRet === undefined ? undefined : ConwayTxOut.fromCborObj( _collRet ),
-            totCollateral:              _totColl instanceof CborUInt ? _totColl.num : undefined,
-            refInputs:                  _refIns !== undefined ? getCborSet( _refIns ).map( txOutRefAsUTxOFromCborObj ) : undefined
+            totCollateral:              uintOrUndef( _totColl, "ConwayTxBody total collateral" ),
+            refInputs:                  _refIns !== undefined ? inputSet( _refIns, "ConwayTxBody reference inputs", true ) : undefined
         }, getSubCborRef( cObj ));
     }
 

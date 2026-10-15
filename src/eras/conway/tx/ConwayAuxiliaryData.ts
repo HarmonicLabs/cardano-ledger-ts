@@ -1,5 +1,5 @@
 import { CborArray, CborBytes, ToCbor, SubCborRef, CborString, Cbor, CborTag, CborMap, CborUInt, CborMapEntry, CanBeCborString, forceCborString, CborObj } from "@harmoniclabs/cbor";
-import { cborArray, cborMapEntries, decodeVersionAtLeast, definiteBytes, expectTag, sparseMapKeys } from "../../../utils/strictCbor";
+import { cborArray, cborMapEntries, decodeVersionAtLeast, definiteBytes, expectTag, sparseMapKeys, parseCborFull } from "../../../utils/strictCbor";
 import { blake2b_256 } from "@harmoniclabs/crypto";
 import { hasOwn } from "@harmoniclabs/obj-utils";
 import { AuxiliaryDataHash } from "../../../hashes";
@@ -222,7 +222,7 @@ export class ConwayAuxiliaryData
 
     static fromCbor( cStr: CanBeCborString ): ConwayAuxiliaryData
     {
-        return ConwayAuxiliaryData.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
+        return ConwayAuxiliaryData.fromCborObj( parseCborFull( cStr, "ConwayAuxiliaryData" ) );
     }
     
     /**

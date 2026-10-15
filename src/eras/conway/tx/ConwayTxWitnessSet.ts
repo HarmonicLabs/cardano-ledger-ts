@@ -1,5 +1,5 @@
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString, isCborObj, CborBytes } from "@harmoniclabs/cbor";
-import { decodeVersionAtLeast, definiteBytes } from "../../../utils/strictCbor";
+import { decodeVersionAtLeast, definiteBytes, parseCborFull } from "../../../utils/strictCbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { Data, isData, dataToCborObj, dataFromCborObj } from "@harmoniclabs/plutus-data";
 import { isObject } from "@harmoniclabs/obj-utils";
@@ -343,7 +343,7 @@ export class ConwayTxWitnessSet
 
     static fromCbor( cStr: CanBeCborString ): ConwayTxWitnessSet
     {
-        return ConwayTxWitnessSet.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
+        return ConwayTxWitnessSet.fromCborObj( parseCborFull( cStr, "ConwayTxWitnessSet" ) );
     }
 
     static fromCborObj( cObj: CborObj ): ConwayTxWitnessSet

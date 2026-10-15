@@ -1,5 +1,5 @@
 import { ToCbor, CborString, Cbor, CborArray, CborUInt, CanBeCborString, forceCborString, CborObj, CborMapEntry, SubCborRef } from "@harmoniclabs/cbor";
-import { cborArray, cborUInt, MAX_WORD32 } from "../../../utils/strictCbor";
+import { cborArray, cborUInt, MAX_WORD32, parseCborFull } from "../../../utils/strictCbor";
 import { checkExUnitsCbor } from "../protocol/conwayPParamsUpdateCbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { isObject, hasOwn } from "@harmoniclabs/obj-utils";
@@ -205,7 +205,7 @@ export class ConwayTxRedeemer
 
     static fromCbor( cStr: CanBeCborString ): ConwayTxRedeemer
     {
-        return ConwayTxRedeemer.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
+        return ConwayTxRedeemer.fromCborObj( parseCborFull( cStr, "ConwayTxRedeemer" ) );
     }
 
     /**

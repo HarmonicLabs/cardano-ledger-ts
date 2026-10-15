@@ -1,5 +1,5 @@
 import { ToCbor, CborString, Cbor, CborObj, CborUInt, CborMap, CborBytes, CborNegInt, CborArray, CanBeCborString, forceCborString, CborMapEntry, SubCborRef } from "@harmoniclabs/cbor";
-import { cborArray, cborInt, cborMapEntries, cborUInt, decodeVersionAtLeast, definiteBytes } from "../../../../utils/strictCbor";
+import { cborArray, cborInt, cborMapEntries, cborUInt, decodeVersionAtLeast, definiteBytes, parseCborFull } from "../../../../utils/strictCbor";
 import { ToData, DataMap, DataB, DataI, DataPair, Data } from "@harmoniclabs/plutus-data";
 import { lexCompare, toHex, fromHex } from "@harmoniclabs/uint8array-utils";
 import { Hash28 } from "../../../../hashes";
@@ -403,7 +403,7 @@ export class Value
 
     static fromCbor( cStr: CanBeCborString ): Value
     {
-        return Value.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) )
+        return Value.fromCborObj( parseCborFull( cStr, "Value" ) )
     }
     /**
      * cardano-ledger `decodeMaryValue` (outputs) and `decodeMultiAsset` (mint):

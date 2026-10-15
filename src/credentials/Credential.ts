@@ -1,5 +1,5 @@
 import { ToCbor, CborString, Cbor, CborObj, CborArray, CborUInt, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
-import { expectSize, recordSum } from "../utils/strictCbor";
+import { expectSize, recordSum, parseCborFull } from "../utils/strictCbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { ToData, Data, DataConstr, DataB } from "@harmoniclabs/plutus-data";
 import { canBeHash28, CanBeHash28, Hash28 } from "../hashes/Hash28/Hash28";
@@ -150,7 +150,7 @@ export class Credential<T extends CredentialType = CredentialType>
 
     static fromCbor( cStr: CanBeCborString ): Credential
     {
-        return Credential.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
+        return Credential.fromCborObj( parseCborFull( cStr, "Credential" ) );
     }
     /**
      * cardano-ledger `DecCBOR Credential` (`Summands` / `decodeRecordSum`): `[0, keyhash]`

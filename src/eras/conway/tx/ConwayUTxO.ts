@@ -1,4 +1,5 @@
 import { ToCbor, CborString, Cbor, CborArray, CanBeCborString, forceCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
+import { parseCborFull } from "../../../utils/strictCbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { ToData, Data, DataConstr } from "@harmoniclabs/plutus-data";
 import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
@@ -91,7 +92,7 @@ export class ConwayUTxO
 
     static fromCbor( cStr: CanBeCborString ): ConwayUTxO
     {
-        return ConwayUTxO.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
+        return ConwayUTxO.fromCborObj( parseCborFull( cStr, "ConwayUTxO" ) );
     }
     static fromCborObj( cObj: CborObj ): ConwayUTxO
     {

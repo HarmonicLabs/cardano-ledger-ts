@@ -229,7 +229,7 @@ export class ConwayTxOut
 
     static fromCbor( cStr: CanBeCborString ): ConwayTxOut
     {
-        return ConwayTxOut.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
+        return ConwayTxOut.fromCborObj( parseCborFull( cStr, "ConwayTxOut" ) );
     }
     /**
      * cardano-ledger `decodeBabbageTxOut` (below protocol version 12):

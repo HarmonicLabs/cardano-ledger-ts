@@ -1,5 +1,5 @@
 import { ToCbor, CborString, Cbor, CborObj, CborArray, CborUInt, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
-import { cborArray, cborUInt16 } from "../../../utils/strictCbor";
+import { cborArray, cborUInt16, parseCborFull } from "../../../utils/strictCbor";
 import { lexCompare } from "@harmoniclabs/uint8array-utils";
 import { forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
 import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
@@ -222,7 +222,7 @@ export class TxOutRef
 
     static fromCbor( cStr: CanBeCborString ): TxOutRef
     {
-        return TxOutRef.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
+        return TxOutRef.fromCborObj( parseCborFull( cStr, "TxOutRef" ) );
     }
     /**
      * cardano-ledger `DecCBOR TxIn`: `decodeRecordNamed "TxIn" (const 2)` (definite or
