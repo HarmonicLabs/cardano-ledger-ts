@@ -1,12 +1,12 @@
 
-import { definiteBytes, definiteText } from "../utils/strictCbor";
+import { boundedRational, boundedText, cborArray, cborSet, cborUInt, definiteBytes, noDuplicates, nullOr, rewardAccountBytes, urlMaxBytes } from "../utils/strictCbor";
 import { Coin } from "./Coin";
 import { PubKeyHash } from "../credentials/PubKeyHash";
 import { CanBeHash32, Hash32, canBeHash32 } from "../hashes/Hash32/Hash32";
 import { PoolKeyHash } from "../hashes/Hash28/PoolKeyHash";
 import { VRFKeyHash } from "../hashes/Hash32/VRFKeyHash";
 import { CborPositiveRational, CborObj, CborUInt, CborArray, CborSimple, CborText, CborTag, CborBytes, SubCborRef, Cbor } from "@harmoniclabs/cbor";
-import { CanBeHash28, Hash28, canBeHash28 } from "../hashes";
+import { CanBeHash28, Hash, Hash28, canBeHash28 } from "../hashes";
 import { canBeUInteger, forceBigUInt } from "../utils/ints";
 import { PoolRelay, isPoolRelay, poolRelayToCborObj, poolRelayFromCborObj, poolRelayToJson } from "./PoolRelay";
 import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
@@ -26,7 +26,7 @@ export function isIPoolParamsMetadata( stuff: any ): stuff is IPoolParamsMetadat
 {
     return isObject( stuff ) && (
         typeof stuff.poolMetadataUrl === "string" &&
-        canBeHash32( stuff.hash )
+        ( stuff.hash instanceof Hash || canBeHash32( stuff.hash ) )
     );
 }
 
@@ -39,7 +39,7 @@ export function typedPoolParamsMetadata({ poolMetadataUrl, hash }: IPoolParamsMe
 {
     return {
         poolMetadataUrl,
-        hash: new Hash32( hash )
+        hash: hash instanceof Hash32 ? hash : hash instanceof Hash ? hash as Hash32 : new Hash32( hash )
     };
 }
 
@@ -217,56 +217,56 @@ export class PoolParams
         ])
     }
 
-    static fromCborObjArray([
-        _operator,
-        _vrfKeyHash,
-        _pledge,
-        _cost,
-        _margin,
-        _rewAccount,
-        _owners,
-        _relays,
-        _metadata
-    ]: CborObj[]): PoolParams
+    /**
+     * the nine pool parameter fields of a pool registration certificate, as
+     * cardano-ledger's `decodeStakePoolParamsFlat` reads them (below protocol version 12):
+     * operator (28-byte key hash), VRF key hash (32 bytes), pledge and cost (Word64),
+     * margin (`UnitInterval`), reward account, owners (a set of key hashes), relays
+     * (a list) and metadata (`null` or `[url, bytes]`, `decodeRecordNamed`).
+     */
+    static fromCborObjArray( fields: CborObj[] ): PoolParams
     {
-        if(!(
-            _pledge instanceof CborUInt &&
-            _cost instanceof CborUInt &&
-            // _owners instanceof CborArray &&
-            _relays instanceof CborArray &&
-            _margin instanceof CborTag && _margin.data instanceof CborArray &&
-            _rewAccount instanceof CborBytes &&
-            _margin.data.array.every( n => n instanceof CborUInt ) && _margin.data.array.length >= 2
-        ))
-        throw new Error(`Invlid CBOR format for "PoolParams"`);
+        if( fields.length !== 9 ) throw new Error(`Invlid CBOR format for "PoolParams"; expected 9 fields, got ${fields.length}`);
+        const [
+            _operator,
+            _vrfKeyHash,
+            _pledge,
+            _cost,
+            _margin,
+            _rewAccount,
+            _owners,
+            _relays,
+            _metadata
+        ] = fields;
 
-        const [ margin_num, margin_den ] = _margin.data.array.map( n => (n as CborUInt).num );
+        const margin = boundedRational( _margin, "unit", "PoolParams margin" );
 
-        const rewAccountBytes = definiteBytes( _rewAccount, "PoolParams reward account" );
-        const rewardAccount =
-            rewAccountBytes.length === 28 ?
-            new Hash28( rewAccountBytes ) :
-            StakeAddress.fromBytes( rewAccountBytes );
+        const owners = noDuplicates(
+            cborSet( _owners, "PoolParams owners" ).map( PubKeyHash.fromCborObj ),
+            h => h.toString(),
+            "PoolParams owners"
+        );
+
+        const metadata = nullOr( _metadata, m => {
+            const [ url, hash ] = cborArray( m, "PoolMetadata", { len: 2 } );
+            const hashBytes = definiteBytes( hash, "PoolMetadata hash" );
+            return {
+                poolMetadataUrl: boundedText( url, urlMaxBytes(), "PoolMetadata url" ),
+                // `pmHash :: ByteArray`: any length (a 32-byte hash in practice)
+                hash: hashBytes.length === 32 ? Hash32.fromCborObj( hash ) : new Hash( hashBytes ) as Hash32
+            };
+        });
 
         return new PoolParams({
             operator: PoolKeyHash.fromCborObj( _operator ),
             vrfKeyHash: VRFKeyHash.fromCborObj( _vrfKeyHash ),
-            pledge: _pledge.num,
-            cost: _cost.num,
-            margin: new CborPositiveRational( margin_num, margin_den ),
-            rewardAccount,
-            owners: getCborSet( _owners ).map( PubKeyHash.fromCborObj ),
-            relays: _relays.array.map( poolRelayFromCborObj ),
-            metadata: (
-                _metadata instanceof CborArray &&
-                _metadata.array[0] instanceof CborText &&
-                _metadata.array[1] instanceof CborBytes
-            ) ? 
-            {
-                poolMetadataUrl: definiteText( _metadata.array[0], "PoolMetadata url" ),
-                hash: Hash32.fromCborObj( _metadata.array[1] )
-            }
-            : undefined
+            pledge: cborUInt( _pledge, "PoolParams pledge" ),
+            cost: cborUInt( _cost, "PoolParams cost" ),
+            margin: new CborPositiveRational( margin.num, margin.den ),
+            rewardAccount: StakeAddress.fromBytes( rewardAccountBytes( _rewAccount, "PoolParams reward account" ) ),
+            owners,
+            relays: cborArray( _relays, "PoolParams relays" ).map( poolRelayFromCborObj ),
+            metadata
         })
     }
 

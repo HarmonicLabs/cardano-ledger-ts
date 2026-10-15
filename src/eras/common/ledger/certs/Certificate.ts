@@ -1,4 +1,5 @@
 import { CborArray, CborObj, CborUInt } from "@harmoniclabs/cbor";
+import { cborUInt, decodeVersionAtLeast, expectSize, recordSum } from "../../../../utils/strictCbor";
 import { ConwayCertAuthCommitteeHot, IConwayCertAuthCommitteeHot } from "../../../conway/governance/certs/ConwayCertAuthCommitteeHot";
 import { CertGenesisKeyDelegation, ICertGenesisKeyDelegation } from "./CertGenesisKeyDelegation";
 import { CertPoolRegistration, ICertPoolRegistration } from "./CertPoolRegistration";
@@ -66,18 +67,38 @@ export function isCertificate( stuff: any ): stuff is Certificate
     );
 }
 
+/** number of array elements of each certificate (tag included), cardano-ledger `TxCert` decoders */
+const certSizes: { [tag: number]: number } = {
+    0: 2, 1: 2, 2: 3, 3: 10, 4: 3, 5: 4, 6: 2,
+    7: 3, 8: 3, 9: 3, 10: 4, 11: 4, 12: 4, 13: 5, 14: 3, 15: 3, 16: 4, 17: 3, 18: 3
+};
+/** Word64 fields (index in the array) of each certificate: epoch and deposits */
+const certWord64Fields: { [tag: number]: number } = {
+    4: 2, 7: 2, 8: 2, 11: 3, 12: 3, 13: 4, 16: 2, 17: 2
+};
+
+/**
+ * cardano-ledger `DecCBOR TxCert` (`decodeRecordSum`): an array (definite or
+ * indefinite) whose first element is the certificate tag; a definite array has
+ * exactly the certificate's size. From protocol version 9 (Conway) genesis
+ * delegation (5) and MIR (6) certificates are rejected; below 9 only tags 0-6 exist.
+ */
 export function certificateFromCborObj( cbor: CborObj ): Certificate
 {
-    if(!(
-        cbor instanceof CborArray &&
-        cbor.array.length > 0 &&
-        cbor.array[0] instanceof CborUInt
-    )) throw new Error("invalid cbor for 'Certificate'");
+    const { tag, size, fields } = recordSum( cbor, "Certificate" );
+    const certType = tag as CertificateType;
 
-    const certType = Number( cbor.array[0].num ) as CertificateType;
+    if( !isCertificateType( certType ) || certSizes[tag] === undefined )
+    throw new Error("invalid certType for 'Certificate'; " + tag.toString() );
 
-    if( !isCertificateType( certType ) )
-    throw new Error("invalid certType for 'Certificate'; " + (certType as number).toString() );
+    if( decodeVersionAtLeast( 9 ) && ( tag === 5 || tag === 6 ) )
+    throw new Error("genesis delegation and MIR certificates are no longer supported");
+    if( !decodeVersionAtLeast( 9 ) && tag >= 7 )
+    throw new Error("invalid certType for 'Certificate' before Conway; " + tag.toString() );
+
+    expectSize( size, certSizes[tag], "Certificate" );
+    const w64 = certWord64Fields[tag];
+    if( w64 !== undefined ) cborUInt( fields[ w64 - 1 ], "Certificate" );
 
     switch( certType )
     {

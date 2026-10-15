@@ -1,4 +1,5 @@
 import { CborArray, CborObj, CborUInt } from "@harmoniclabs/cbor";
+import { expectSize, recordSum } from "../../../../utils/strictCbor";
 import { DRepAlwaysAbstain } from "./DRepAlwaysAbstain";
 import { DRepAlwaysNoConfidence } from "./DRepAlwaysNoConfidence";
 import { DRepKeyHash } from "./DRepKeyHash";
@@ -11,20 +12,22 @@ export type DRep
     | DRepAlwaysAbstain
     | DRepAlwaysNoConfidence;
 
+/**
+ * cardano-ledger `DecCBOR DRep` (`Summands` / `decodeRecordSum`): `[0, keyhash]`,
+ * `[1, scripthash]`, `[2]`, `[3]`; definite arrays have exactly that size.
+ */
 export function drepFromCborObj( cbor: CborObj ): DRep
 {
-    if(!(
-        cbor instanceof CborArray &&
-        cbor.array.length > 0 &&
-        cbor.array[0] instanceof CborUInt
-    )) throw new Error("invalid cbor for 'Certificate'");
-
-    const drepType = Number( cbor.array[0].num ) as DRepType;
+    const { tag, size } = recordSum( cbor, "DRep" );
+    const drepType = tag as DRepType;
 
     if( !isDRepType( drepType ) )
-    throw new Error("invalid drepType for 'Certificate'; " + (drepType as number).toString() );
+    throw new Error("invalid drepType for 'Certificate'; " + tag.toString() );
+
+    expectSize( size, drepType === DRepType.KeyHash || drepType === DRepType.Script ? 2 : 1, "DRep" );
 
     switch( drepType )
+
     {
         case DRepType.KeyHash: return DRepKeyHash.fromCborObj( cbor );
         case DRepType.Script: return DRepScript.fromCborObj( cbor );

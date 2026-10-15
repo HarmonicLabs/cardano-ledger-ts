@@ -1,4 +1,5 @@
 import { ToCbor, CborString, Cbor, CborObj, CborArray, CborUInt, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
+import { expectSize, recordSum } from "../utils/strictCbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { ToData, Data, DataConstr, DataB } from "@harmoniclabs/plutus-data";
 import { canBeHash28, CanBeHash28, Hash28 } from "../hashes/Hash28/Hash28";
@@ -151,18 +152,20 @@ export class Credential<T extends CredentialType = CredentialType>
     {
         return Credential.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
+    /**
+     * cardano-ledger `DecCBOR Credential` (`Summands` / `decodeRecordSum`): `[0, keyhash]`
+     * or `[1, scripthash]`, definite (exactly two elements) or indefinite.
+     */
     static fromCborObj( cObj: CborObj ): Credential
     {
-        if(!(
-            cObj instanceof CborArray &&
-            cObj.array[0] instanceof CborUInt &&
-            (cObj.array[0].num === BigInt( 0 ) || cObj.array[0].num === BigInt( 1 ))
-        ))
+        const { tag, fields, size } = recordSum( cObj, "Credential" );
+        if(!( tag === 0 || tag === 1 ))
         throw new Error(`Invalid CBOR format for "Credential"`);
+        expectSize( size, 2, "Credential" );
 
         return new Credential({
-            type: Number( cObj.array[0].num ),
-            hash: Hash28.fromCborObj( cObj.array[1] ),
+            type: tag,
+            hash: Hash28.fromCborObj( fields[0] ),
         }, getSubCborRef( cObj )
         );
     }
