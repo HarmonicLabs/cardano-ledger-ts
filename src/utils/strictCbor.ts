@@ -16,6 +16,8 @@ import { InvalidCborFormatError } from "./InvalidCborFormatError";
  */
 
 let _decodeVersion: number = 11;
+/** how many withDecodeVersion scopes are active (0 = a decoder was called directly, with no era context) */
+let _explicitDepth = 0;
 
 /** current decoder (protocol) version; defaults to Conway (11) for decoders called directly */
 export function getDecodeVersion(): number
@@ -33,13 +35,33 @@ export function withDecodeVersion<T>( v: number, fn: () => T ): T
 {
     const prev = _decodeVersion;
     _decodeVersion = v;
+    _explicitDepth++;
     try {
         return fn();
     }
     finally {
+        _explicitDepth--;
         _decodeVersion = prev;
     }
 }
+
+/**
+ * runs `fn` at decoder version `v` only when no era context is active; inside an era decoder
+ * (`withDecodeVersion` / `decodeAtVersion`) the enclosing version is kept. For era-agnostic entry
+ * points that decode data of any era, e.g. a stored UTxO output created in Mary (zero-quantity assets
+ * were legal before protocol 9) read back with `TxOut.fromCbor`.
+ */
+export function withDefaultDecodeVersion<T>( v: number, fn: () => T ): T
+{
+    return _explicitDepth > 0 ? fn() : withDecodeVersion( v, fn );
+}
+
+/**
+ * decoder version for era-agnostic entry points: before protocol 9, where cardano-ledger's
+ * decoders are most permissive for outputs and values (duplicate keys, zero quantities and empty
+ * asset maps were only rejected from 9), so stored outputs of every era decode
+ */
+export const ERA_AGNOSTIC_DECODE_VERSION = 7;
 
 const U64_MAX = BigInt("0xffffffffffffffff");
 export const MAX_WORD16 = BigInt( 0xffff );

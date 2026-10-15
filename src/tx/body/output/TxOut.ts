@@ -1,3 +1,4 @@
+import { withDefaultDecodeVersion, ERA_AGNOSTIC_DECODE_VERSION } from "../../../utils/strictCbor";
 import { ToCbor, CborString, Cbor, CborMap, CborUInt, CborArray, CborTag, CborBytes, CborMapEntry, CanBeCborString, forceCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { isObject, hasOwn } from "@harmoniclabs/obj-utils";
@@ -347,7 +348,15 @@ export class TxOut
     {
         return TxOut.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
+    /**
+     * era-agnostic: called directly (e.g. on a stored UTxO output of any era) it decodes with the
+     * pre-protocol-9 rules (`ERA_AGNOSTIC_DECODE_VERSION`); inside an era decoder it keeps that era's version
+     */
     static fromCborObj( cObj: CborObj ): TxOut
+    {
+        return withDefaultDecodeVersion( ERA_AGNOSTIC_DECODE_VERSION, () => TxOut._fromCborObj( cObj ) );
+    }
+    private static _fromCborObj( cObj: CborObj ): TxOut
     {
         if(!(
             cObj instanceof CborMap ||
