@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { isKesSignature, KesSignature, KesSignatureBytes } from "../../common/ledger/Kes";
@@ -103,3 +104,5 @@ export class DijkstraHeader
         return dijkstraHeader;
     }
 }
+// cardano-ledger decodes the Dijkstra era at protocol version 12
+decodeAtVersion( 12, DijkstraHeader );

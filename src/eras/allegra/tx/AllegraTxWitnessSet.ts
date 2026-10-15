@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString, isCborObj } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { Data, isData, dataToCborObj, dataFromCborObj } from "@harmoniclabs/plutus-data";
@@ -282,3 +283,5 @@ export class AllegraTxWitnessSet
         }, getSubCborRef( cObj ));
     }
 }
+// cardano-ledger decodes the Allegra era at protocol version 3 (eraProtVerLow)
+decodeAtVersion( 3, AllegraTxWitnessSet );

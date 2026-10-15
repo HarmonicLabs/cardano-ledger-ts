@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { canBeUInteger, CanBeUInteger } from "@harmoniclabs/cbor/dist/utils/ints";
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborSimple, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { blake2b_256, sha2_256_sync } from "@harmoniclabs/crypto";
@@ -258,3 +259,5 @@ export class AlonzoHeaderBody
         }, getSubCborRef(cHdrBody, _originalBytes));
     }
 }
+// cardano-ledger decodes the Alonzo era at protocol version 5 (eraProtVerLow)
+decodeAtVersion( 5, AlonzoHeaderBody );

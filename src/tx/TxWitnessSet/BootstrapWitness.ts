@@ -1,4 +1,5 @@
 import { ToCbor, CborString, Cbor, CborObj, CborArray, CborBytes, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
+import { definiteBytes } from "../../utils/strictCbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { isUint8Array, toHex } from "@harmoniclabs/uint8array-utils";
 import { Hash32, Hash } from "../../hashes";
@@ -122,7 +123,7 @@ export class BootstrapWitness
                 pubKey: Hash32.fromCborObj(cObj.array[0]),
                 signature: Signature.fromCborObj(cObj.array[1]),
                 chainCode: Hash32.fromCborObj(cObj.array[2]),
-                attributes: cObj.array[3].bytes
+                attributes: definiteBytes( cObj.array[3], "BootstrapWitness attributes" )
             },
             getSubCborRef( cObj )
         );

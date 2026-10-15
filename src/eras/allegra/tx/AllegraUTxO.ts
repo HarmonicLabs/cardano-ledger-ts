@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { ToCbor, CborString, Cbor, CborArray, CanBeCborString, forceCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
@@ -125,3 +126,6 @@ export class AllegraUTxO
 }
 
 export { TxOutRef };
+
+// cardano-ledger decodes the Allegra era at protocol version 3 (eraProtVerLow)
+decodeAtVersion( 3, AllegraUTxO );

@@ -1,4 +1,5 @@
 import { CborArray, CborBytes, CborObj, CborUInt } from "@harmoniclabs/cbor";
+import { definiteBytes } from "../utils/strictCbor";
 import { CanBeHash28, Hash28, canBeHash28 } from "../hashes";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { uint8ArrayEq } from "@harmoniclabs/uint8array-utils";
@@ -111,7 +112,7 @@ export class Voter
     {
         if(!( cObj instanceof CborArray && cObj.array.length >= 2 && cObj.array[0] instanceof CborUInt && cObj.array[1] instanceof CborBytes ))
         throw new Error("invalid CBOR for voter");
-        return new Voter({ kind: Number( cObj.array[0].num ) as VoterKind, hash: cObj.array[1].bytes });
+        return new Voter({ kind: Number( cObj.array[0].num ) as VoterKind, hash: definiteBytes( cObj.array[1], "Voter hash" ) });
     }
 
     toData( version?: ToDataVersion ): DataConstr

@@ -1,4 +1,5 @@
 import { CanBeCborString, Cbor, forceCborString, CborObj, CborBytes, SubCborRef } from "@harmoniclabs/cbor";
+import { definiteBytes } from "../../utils/strictCbor";
 import { assert } from "../../utils/assert";
 import { Hash, canBeHashInstance } from "../Hash";
 import { isHex } from "../../utils/hex";
@@ -57,11 +58,8 @@ export class Hash28 extends Hash
     }
     static fromCborObj( cObj: CborObj ): Hash28
     {
-        if(!(cObj instanceof CborBytes ))
-        throw new Error(`Invalid CBOR format for "Hash"`);
-
         return new Hash28(
-            cObj.bytes,
+            definiteBytes( cObj, "Hash28" ),
             getSubCborRef( cObj )
         );
     }

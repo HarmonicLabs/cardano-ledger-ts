@@ -1,4 +1,5 @@
 import { Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
+import { definiteBytes } from "../utils/strictCbor";
 import { govActionFromCborObj } from "./govActionFromCborObj";
 import { Credential } from "../credentials";
 import { getSubCborRef } from "../utils/getSubCborRef";
@@ -87,7 +88,7 @@ export class ProposalProcedure
         throw new Error("invalid CBOR for proposal_procedure");
         const [ deposit, acct, action, anchor ] = cObj.array;
         let rewardAccount: StakeAddress;
-        if( acct instanceof CborBytes ) rewardAccount = StakeAddress.fromBytes( acct.bytes );
+        if( acct instanceof CborBytes ) rewardAccount = StakeAddress.fromBytes( definiteBytes( acct, "ProposalProcedure reward account" ) );
         else
         {
             const cred = Credential.fromCborObj( acct! );

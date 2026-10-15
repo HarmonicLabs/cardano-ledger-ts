@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { ToCbor, CborString, Cbor, CborArray, CanBeCborString, forceCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
@@ -128,3 +129,6 @@ export class ShelleyUTxO
 }
 
 export { TxOutRef };
+
+// cardano-ledger decodes the Shelley era at protocol version 2 (eraProtVerLow)
+decodeAtVersion( 2, ShelleyUTxO );

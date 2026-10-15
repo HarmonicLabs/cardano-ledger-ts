@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborBytes, CborMapEntry, CborSimple, CborTag, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
 import { blake2b_256 } from "@harmoniclabs/crypto";
@@ -631,3 +632,6 @@ export function requiredTopLevelGuardsFromCborObj( cObj: CborObj ): IDijkstraReq
         data: v instanceof CborSimple && v.simple === null ? null : dataFromCborObj( v )
     }));
 }
+
+// cardano-ledger decodes the Dijkstra era at protocol version 12
+decodeAtVersion( 12, DijkstraTxBody );

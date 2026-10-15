@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborBytes, CborMap, CborUInt, CborSimple, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
 import { isObject } from "@harmoniclabs/obj-utils";
@@ -190,3 +191,6 @@ export function normalizeAccountBalanceIntervals( entries: IDijkstraAccountBalan
         };
     });
 }
+
+// cardano-ledger decodes the Dijkstra era at protocol version 12
+decodeAtVersion( 12, DijkstraAccountBalanceInterval );

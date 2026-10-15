@@ -1,4 +1,5 @@
 import { encodeBech32, decodeBech32, byte } from "@harmoniclabs/crypto";
+import { definiteBytes } from "../../../utils/strictCbor";
 import { CanBeCborString, Cbor, CborBytes, CborObj, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { fromHex } from "@harmoniclabs/uint8array-utils";
 import { NetworkT } from "./Network";
@@ -137,12 +138,7 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType> {
         return StakeAddress.fromCborObj(Cbor.parse(forceCborString(cStr)));
     }
     static fromCborObj(cObj: CborObj): StakeAddress {
-        
-        if (!(
-            cObj instanceof CborBytes
-        )) throw new Error(`Invalid CBOR format for "Hash"`);
-
-        return StakeAddress.fromBytes(cObj.bytes);
+        return StakeAddress.fromBytes( definiteBytes( cObj, "StakeAddress" ) );
     }
 
     toCredential() {

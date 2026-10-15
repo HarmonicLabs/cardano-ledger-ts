@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { CborArray, CborBytes, ToCbor, SubCborRef, CborString, Cbor, CborTag, CborMap, CborUInt, CborMapEntry, CanBeCborString, forceCborString, CborObj } from "@harmoniclabs/cbor";
 import { blake2b_256 } from "@harmoniclabs/crypto";
 import { hasOwn } from "@harmoniclabs/obj-utils";
@@ -302,3 +303,5 @@ export class BabbageAuxiliaryData
         }
     }
 }
+// cardano-ledger decodes the Babbage era at protocol version 7 (eraProtVerLow)
+decodeAtVersion( 7, BabbageAuxiliaryData );

@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
 import { blake2b_256 } from "@harmoniclabs/crypto";
 import { Credential, PubKeyHash } from "../../../credentials";
@@ -181,3 +182,9 @@ export class DijkstraSubTransaction implements ToCbor, ToJson {
         };
     }
 }
+
+// cardano-ledger decodes the Dijkstra era at protocol version 12
+decodeAtVersion( 12, DijkstraSubTransaction );
+
+// cardano-ledger decodes the Dijkstra era at protocol version 12
+decodeAtVersion( 12, DijkstraSubTransactionBody );

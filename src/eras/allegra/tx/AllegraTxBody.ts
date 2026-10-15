@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
 import { blake2b_256 } from "@harmoniclabs/crypto";
@@ -400,3 +401,5 @@ function txOutRefAsUTxOFromCborObj( cObj: CborObj ): AllegraUTxO
         resolved: AllegraTxOut.fake
     });
 }
+// cardano-ledger decodes the Allegra era at protocol version 3 (eraProtVerLow)
+decodeAtVersion( 3, AllegraTxBody );

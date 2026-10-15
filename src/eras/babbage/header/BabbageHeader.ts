@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { isKesSignature, KesSignature, KesSignatureBytes } from "../../common/ledger/Kes";
@@ -94,3 +95,5 @@ export class BabbageHeader
         return babbageHeader;
     }
 }
+// cardano-ledger decodes the Babbage era at protocol version 7 (eraProtVerLow)
+decodeAtVersion( 7, BabbageHeader );

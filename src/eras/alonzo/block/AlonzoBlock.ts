@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { CborArray, CborBytes, ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborMapEntry, CanBeCborString, forceCborString, isCborObj} from "@harmoniclabs/cbor";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { IAlonzoHeader, AlonzoHeader, isIAlonzoHeader } from "../header/AlonzoHeader";
@@ -208,3 +209,5 @@ export class AlonzoBlock implements
         };
     };
   }
+// cardano-ledger decodes the Alonzo era at protocol version 5 (eraProtVerLow)
+decodeAtVersion( 5, AlonzoBlock );

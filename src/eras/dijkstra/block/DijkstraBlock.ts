@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { CborArray, CborBytes, CborSimple, ToCbor, SubCborRef, CborString, Cbor, CborObj, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
 import { blake2b_256 } from "@harmoniclabs/crypto";
 import { IDijkstraHeader, DijkstraHeader } from "../header/DijkstraHeader";
@@ -220,3 +221,6 @@ function isBlockTxRef( ref: SubCborRef ): boolean
     const bytes = ref.toBuffer();
     return bytes.length > 0 && bytes[0] === 0x84;
 }
+
+// cardano-ledger decodes the Dijkstra era at protocol version 12
+decodeAtVersion( 12, DijkstraBlock );

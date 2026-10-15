@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { CborArray, ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CanBeCborString, forceCborString, isCborObj} from "@harmoniclabs/cbor";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { IAllegraHeader, AllegraHeader, isIAllegraHeader } from "../header/AllegraHeader";
@@ -186,3 +187,5 @@ export class AllegraBlock implements
         };
     };
   }
+// cardano-ledger decodes the Allegra era at protocol version 3 (eraProtVerLow)
+decodeAtVersion( 3, AllegraBlock );

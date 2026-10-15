@@ -1,4 +1,5 @@
 import { CborArray, CborUInt, CborBytes, CborString, Cbor, CborObj } from "@harmoniclabs/cbor";
+import { definiteBytes } from "../utils/strictCbor";
 import { Hash28 } from "../hashes/Hash28/Hash28";
 import { toHex } from "@harmoniclabs/uint8array-utils";
 import { CanBeUInteger, forceBigUInt } from "../utils/ints";
@@ -131,7 +132,7 @@ export function nativeScriptFromCborObj( cbor: CborObj ): NativeScript
             if( !(f1 instanceof CborBytes) )
             throw notNativeScriptError;
 
-            const pkh = toHex( f1.buffer );
+            const pkh = toHex( definiteBytes( f1, "NativeScript key hash" ) );
 
             return {
                 type: "sig",

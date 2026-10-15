@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
 import { blake2b_256 } from "@harmoniclabs/crypto";
@@ -385,3 +386,5 @@ function txOutRefAsUTxOFromCborObj( cObj: CborObj ): ShelleyUTxO
         resolved: ShelleyTxOut.fake
     });
 }
+// cardano-ledger decodes the Shelley era at protocol version 2 (eraProtVerLow)
+decodeAtVersion( 2, ShelleyTxBody );

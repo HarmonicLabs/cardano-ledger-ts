@@ -1,4 +1,5 @@
 import { ToCbor, CborString, Cbor, CborObj, CborBytes, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
+import { definiteBytes } from "../utils/strictCbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { ToData, Data, DataB } from "@harmoniclabs/plutus-data";
 import { fromAscii, fromHex, isUint8Array, toAscii, toHex } from "@harmoniclabs/uint8array-utils";
@@ -142,11 +143,8 @@ export class Hash
     }
     static fromCborObj( cObj: CborObj ): Hash
     {
-        if(!(cObj instanceof CborBytes ))
-        throw new Error(`Invalid CBOR format for "Hash"`);
-
         return new Hash(
-            cObj.bytes,
+            definiteBytes( cObj, "Hash" ),
             getSubCborRef( cObj )
         );
     }

@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { XPrv } from "@harmoniclabs/bip32_ed25519"
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborString, forceCborString } from "@harmoniclabs/cbor"
 import { signEd25519_sync, signEd25519 } from "@harmoniclabs/crypto"
@@ -281,3 +282,5 @@ function getNSignersNeeded( body: Readonly<MaryTxBody> ): number
     const n = getAllRequiredSigners( body ).length
     return n === 0 ? 1 : n;
 }
+// cardano-ledger decodes the Mary era at protocol version 4 (eraProtVerLow)
+decodeAtVersion( 4, MaryTx );

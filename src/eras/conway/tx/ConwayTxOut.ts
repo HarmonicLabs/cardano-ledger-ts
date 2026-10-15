@@ -1,4 +1,5 @@
 import { ToCbor, CborString, Cbor, CborMap, CborUInt, CborArray, CborTag, CborBytes, CborMapEntry, CanBeCborString, forceCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
+import { definiteBytes } from "../../../utils/strictCbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { Data, isData, ToData, DataConstr, dataToCbor, dataFromCborObj } from "@harmoniclabs/plutus-data";
@@ -297,7 +298,7 @@ export class ConwayTxOut
                 ))
                 throw new InvalidCborFormatError("ConwayTxOut");
 
-                datum = new Hash32( _1.buffer );
+                datum = new Hash32( definiteBytes( _1, "ConwayTxOut datum hash" ) );
             }
             else if( opt === 1 )
             {
@@ -309,7 +310,7 @@ export class ConwayTxOut
                     throw new InvalidCborFormatError("ConwayTxOut");
                 }
 
-                datum = dataFromCborObj( Cbor.parse( _1.data.buffer ) )
+                datum = dataFromCborObj( Cbor.parse( definiteBytes( _1.data, "ConwayTxOut inline datum" ) ) )
             }
             else throw new InvalidCborFormatError("ConwayTxOut");
 
@@ -324,7 +325,7 @@ export class ConwayTxOut
             ))
             throw new InvalidCborFormatError("ConwayTxOut");
 
-            refScript = Script.fromCbor( _refScript.data.bytes );
+            refScript = Script.fromCbor( definiteBytes( _refScript.data, "ConwayTxOut script_ref" ) );
         }
 
         if( _addr === undefined || _amt === undefined )

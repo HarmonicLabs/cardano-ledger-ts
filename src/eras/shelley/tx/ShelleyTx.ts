@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { XPrv } from "@harmoniclabs/bip32_ed25519"
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborString, forceCborString } from "@harmoniclabs/cbor"
 import { signEd25519_sync } from "@harmoniclabs/crypto"
@@ -283,3 +284,5 @@ function getNSignersNeeded( body: Readonly<ShelleyTxBody> ): number
     const n = getAllRequiredSigners( body ).length
     return n === 0 ? 1 : n;
 }
+// cardano-ledger decodes the Shelley era at protocol version 2 (eraProtVerLow)
+decodeAtVersion( 2, ShelleyTx );

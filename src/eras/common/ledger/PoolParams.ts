@@ -1,4 +1,5 @@
 
+import { definiteBytes, definiteText } from "../../../utils/strictCbor";
 import { CborPositiveRational, CborObj, CborUInt, CborArray, CborSimple, CborText, CborTag, CborBytes, SubCborRef, Cbor } from "@harmoniclabs/cbor";
 import { isObject, hasOwn } from "@harmoniclabs/obj-utils";
 import { Coin } from "./Coin";
@@ -240,7 +241,7 @@ export class PoolParams
 
         const [ margin_num, margin_den ] = _margin.data.array.map( n => (n as CborUInt).num );
 
-        const rewAccountBytes = _rewAccount.bytes;
+        const rewAccountBytes = definiteBytes( _rewAccount, "PoolParams reward account" );
         const rewardAccount =
             rewAccountBytes.length === 28 ?
             new Hash28( rewAccountBytes ) :
@@ -261,7 +262,7 @@ export class PoolParams
                 _metadata.array[1] instanceof CborBytes
             ) ? 
             {
-                poolMetadataUrl: _metadata.array[0].text,
+                poolMetadataUrl: definiteText( _metadata.array[0], "PoolMetadata url" ),
                 hash: Hash32.fromCborObj( _metadata.array[1] )
             }
             : undefined

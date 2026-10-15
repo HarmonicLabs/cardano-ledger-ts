@@ -1,4 +1,5 @@
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString, isCborObj, CborBytes } from "@harmoniclabs/cbor";
+import { definiteBytes } from "../../../utils/strictCbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { Data, isData, dataToCborObj, dataFromCborObj } from "@harmoniclabs/plutus-data";
 import { isObject } from "@harmoniclabs/obj-utils";
@@ -387,18 +388,18 @@ export class ConwayTxWitnessSet
                 getCborSet( _bootstrap ).map( BootstrapWitness.fromCborObj ),
             plutusV1Scripts: _plutusV1 === undefined ? undefined :
                 getCborSet( _plutusV1 ).map( cbor =>
-                    Script.plutusV1( Cbor.encode( cbor ) )
+                    Script.plutusV1( Cbor.encode( new CborBytes( definiteBytes( cbor, "plutus V1 script" ) ) ) )
                 ),
             datums: _dats === undefined ? undefined :
                 getCborSet( _dats ).map( dataFromCborObj ),
             redeemers: _reds === undefined ? undefined : witnessRedeemersFromCborObj( _reds ),
             plutusV2Scripts: _plutusV2 === undefined ? undefined :
                 getCborSet( _plutusV2 ).map( cbor =>
-                    Script.plutusV2(Cbor.encode( cbor ))
+                    Script.plutusV2( Cbor.encode( new CborBytes( definiteBytes( cbor, "plutus V2 script" ) ) ) )
                 ),
             plutusV3Scripts: _plutusV3 === undefined ? undefined :
                 getCborSet( _plutusV3 ).map( cbor =>
-                    Script.plutusV3(Cbor.encode( cbor ))
+                    Script.plutusV3( Cbor.encode( new CborBytes( definiteBytes( cbor, "plutus V3 script" ) ) ) )
                 ),
         }, getSubCborRef( cObj ));
     }

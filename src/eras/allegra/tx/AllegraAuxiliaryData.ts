@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { CborArray, CborBytes, ToCbor, SubCborRef, CborString, Cbor, CborTag, CborMap, CborUInt, CborMapEntry, CanBeCborString, forceCborString, CborObj } from "@harmoniclabs/cbor";
 import { blake2b_256 } from "@harmoniclabs/crypto";
 import { hasOwn } from "@harmoniclabs/obj-utils";
@@ -204,3 +205,5 @@ export class AllegraAuxiliaryData
         }
     }
 }
+// cardano-ledger decodes the Allegra era at protocol version 3 (eraProtVerLow)
+decodeAtVersion( 3, AllegraAuxiliaryData );

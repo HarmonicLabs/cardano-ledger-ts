@@ -1,4 +1,5 @@
 import { CborObj, CborArray, CborUInt, CborSimple, CborBytes, CborText } from "@harmoniclabs/cbor";
+import { definiteBytes, definiteText } from "../../../utils/strictCbor";
 import { hasOwn, isObject } from "@harmoniclabs/obj-utils";
 import { isUint8Array, readUInt16BE, readUInt8 } from "@harmoniclabs/uint8array-utils";
 import { CanBeUInteger, forceBigUInt, canBeUInteger } from "../../../utils/ints";
@@ -208,8 +209,8 @@ export function poolRelayFromCborObj( cObj: CborObj ): PoolRelay
         return {
             type: "ip",
             port: _1 instanceof CborUInt ? _1.num : undefined,
-            ipv4: _2 instanceof CborBytes ? _2.buffer : undefined as any,
-            ipv6: _3 instanceof CborBytes ? _3.buffer : undefined as any,
+            ipv4: _2 instanceof CborBytes ? definiteBytes( _2, "PoolRelay ipv4" ) : undefined as any,
+            ipv6: _3 instanceof CborBytes ? definiteBytes( _3, "PoolRelay ipv6" ) : undefined as any,
         }
     }
     if( n === 1 )
@@ -217,7 +218,7 @@ export function poolRelayFromCborObj( cObj: CborObj ): PoolRelay
         return {
             type: "dns",
             port: _1 instanceof CborUInt ? _1.num : undefined,
-            dnsName: _2 instanceof CborText ? _2.text : undefined as any,
+            dnsName: _2 instanceof CborText ? definiteText( _2, "PoolRelay dns name" ) : undefined as any,
         }
     }
     if( n === 2 )
@@ -227,7 +228,7 @@ export function poolRelayFromCborObj( cObj: CborObj ): PoolRelay
 
         return {
             type: "multi-host",
-            dnsName: _1.text,
+            dnsName: definiteText( _1, "PoolRelay dns name" ),
         }
     }
     

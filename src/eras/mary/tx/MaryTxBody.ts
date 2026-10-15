@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from "@harmoniclabs/cbor/dist/utils/ints";
 import { blake2b_256 } from "@harmoniclabs/crypto";
@@ -432,3 +433,5 @@ function txOutRefAsUTxOFromCborObj( cObj: CborObj ): MaryUTxO
         resolved: MaryTxOut.fake
     });
 }
+// cardano-ledger decodes the Mary era at protocol version 4 (eraProtVerLow)
+decodeAtVersion( 4, MaryTxBody );

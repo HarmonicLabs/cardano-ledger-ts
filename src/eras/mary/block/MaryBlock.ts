@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { CborArray, ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CanBeCborString, forceCborString, isCborObj} from "@harmoniclabs/cbor";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { IMaryHeader, MaryHeader, isIMaryHeader } from "../header/MaryHeader";
@@ -190,3 +191,5 @@ export class MaryBlock implements
         };
     };
   }
+// cardano-ledger decodes the Mary era at protocol version 4 (eraProtVerLow)
+decodeAtVersion( 4, MaryBlock );

@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { ToCbor, CborString, Cbor, CborArray, CanBeCborString, forceCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { isObject, hasOwn } from "@harmoniclabs/obj-utils";
@@ -126,3 +127,6 @@ export class MaryUTxO
 }
 
 export { TxOutRef };
+
+// cardano-ledger decodes the Mary era at protocol version 4 (eraProtVerLow)
+decodeAtVersion( 4, MaryUTxO );

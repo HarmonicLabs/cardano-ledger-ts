@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { ToCbor, CborString, Cbor, CborArray, CanBeCborString, forceCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { ToData, Data, DataConstr } from "@harmoniclabs/plutus-data";
@@ -140,3 +141,6 @@ export class AlonzoUTxO
 }
 
 export { TxOutRef };
+
+// cardano-ledger decodes the Alonzo era at protocol version 5 (eraProtVerLow)
+decodeAtVersion( 5, AlonzoUTxO );

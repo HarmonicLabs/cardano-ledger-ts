@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { canBeUInteger, CanBeUInteger } from "@harmoniclabs/cbor/dist/utils/ints";
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborSimple, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { blake2b_256, sha2_256_sync } from "@harmoniclabs/crypto";
@@ -256,3 +257,5 @@ export class ShelleyHeaderBody
         }, getSubCborRef(cHdrBody, _originalBytes));
     }
 }
+// cardano-ledger decodes the Shelley era at protocol version 2 (eraProtVerLow)
+decodeAtVersion( 2, ShelleyHeaderBody );

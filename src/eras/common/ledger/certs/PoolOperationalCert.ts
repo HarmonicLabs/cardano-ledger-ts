@@ -1,4 +1,5 @@
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
+import { definiteBytes } from "../../../../utils/strictCbor";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { isU8Arr, U8Arr } from "../../../../utils/U8Arr";
 import { isKesPubKey, KesPubKey } from "../../ledger/Kes";
@@ -126,10 +127,10 @@ export class PoolOperationalCert
         )) throw new Error("invalid cbor for PoolOperationalCert");
 
         return new PoolOperationalCert({
-            kesPubKey: cKes.bytes,
+            kesPubKey: definiteBytes( cKes, "PoolOperationalCert hot_vkey" ),
             sequenceNumber: cSeq.num,
             kesPeriod: cPeriod.num,
-            signature: cSig.bytes
+            signature: definiteBytes( cSig, "PoolOperationalCert sigma" )
         }, getSubCborRef( cbor, _originalBytes ));
     }
 }

@@ -1,4 +1,5 @@
 import { isObject } from "@harmoniclabs/obj-utils";
+import { definiteBytes } from "../../../utils/strictCbor";
 import { isU8Arr, U8Arr } from "../../../utils/U8Arr";
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
@@ -94,8 +95,8 @@ export class VrfCert
         )) throw new Error("invalid cbor for 'VrfCert'");
     
         return new VrfCert({
-            proofHash: cbor.array[0].bytes,
-            proof: cbor.array[1].bytes as VrfProofBytes
+            proofHash: definiteBytes( cbor.array[0], "VrfCert output" ),
+            proof: definiteBytes( cbor.array[1], "VrfCert proof" ) as VrfProofBytes
         }, getSubCborRef( cbor, _originalBytes ));
     }
 }

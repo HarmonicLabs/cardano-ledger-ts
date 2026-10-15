@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { ToCbor, CborString, Cbor, CborArray, CanBeCborString, forceCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { ToData, Data, DataConstr } from "@harmoniclabs/plutus-data";
@@ -138,3 +139,6 @@ export class BabbageUTxO
 }
 
 export { TxOutRef };
+
+// cardano-ledger decodes the Babbage era at protocol version 7 (eraProtVerLow)
+decodeAtVersion( 7, BabbageUTxO );

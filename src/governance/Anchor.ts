@@ -1,4 +1,5 @@
 import { Cbor, CborArray, CborBytes, CborObj, CborString, CborText, SubCborRef } from "@harmoniclabs/cbor";
+import { definiteText } from "../utils/strictCbor";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { CanBeHash32, Hash32, canBeHash32 } from "../hashes";
 import { getSubCborRef, subCborRefOrUndef } from "../utils/getSubCborRef";
@@ -72,7 +73,7 @@ export class Anchor
         )) throw new Error("invalid cbor for Anchor");
 
         return new Anchor({
-            url: cbor.array[0].text,
+            url: definiteText( cbor.array[0], "Anchor url" ),
             anchorDataHash: Hash32.fromCborObj( cbor.array[1] )
         }, getSubCborRef( cbor ));
     }

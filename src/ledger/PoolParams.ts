@@ -1,4 +1,5 @@
 
+import { definiteBytes, definiteText } from "../utils/strictCbor";
 import { Coin } from "./Coin";
 import { PubKeyHash } from "../credentials/PubKeyHash";
 import { CanBeHash32, Hash32, canBeHash32 } from "../hashes/Hash32/Hash32";
@@ -241,7 +242,7 @@ export class PoolParams
 
         const [ margin_num, margin_den ] = _margin.data.array.map( n => (n as CborUInt).num );
 
-        const rewAccountBytes = _rewAccount.bytes;
+        const rewAccountBytes = definiteBytes( _rewAccount, "PoolParams reward account" );
         const rewardAccount =
             rewAccountBytes.length === 28 ?
             new Hash28( rewAccountBytes ) :
@@ -262,7 +263,7 @@ export class PoolParams
                 _metadata.array[1] instanceof CborBytes
             ) ? 
             {
-                poolMetadataUrl: _metadata.array[0].text,
+                poolMetadataUrl: definiteText( _metadata.array[0], "PoolMetadata url" ),
                 hash: Hash32.fromCborObj( _metadata.array[1] )
             }
             : undefined

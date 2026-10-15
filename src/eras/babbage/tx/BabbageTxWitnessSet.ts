@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString, isCborObj, CborBytes } from "@harmoniclabs/cbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { Data, isData, dataToCborObj, dataFromCborObj } from "@harmoniclabs/plutus-data";
@@ -394,3 +395,5 @@ function witnessRedeemersFromCborObj( cbor: CborObj ): BabbageTxRedeemer[]
     }
     else throw new Error("invalid format for witness set redeemers field");
 }
+// cardano-ledger decodes the Babbage era at protocol version 7 (eraProtVerLow)
+decodeAtVersion( 7, BabbageTxWitnessSet );

@@ -1,4 +1,5 @@
 import { ToCbor, CborString, Cbor, CborBytes, CborObj, CborArray, CborUInt, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
+import { definiteBytes } from "../utils/strictCbor";
 import { blake2b_224, byte } from "@harmoniclabs/crypto";
 import { fromHex, isUint8Array, toHex } from "@harmoniclabs/uint8array-utils";
 import { Hash28 } from "../hashes";
@@ -389,7 +390,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         {
             return new Script(
                 defType,
-                cObj.bytes,
+                definiteBytes( cObj, "Script" ),
                 getSubCborRef( cObj )
             );
         }
@@ -412,12 +413,9 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
             getSubCborRef( cObj )
         );
 
-        if(!( cObj.array[1] instanceof CborBytes ))
-        throw new Error(`Invalid CBOR format for "Script"`);
-
         return new Script(
             t,
-            cObj.array[1].bytes,
+            definiteBytes( cObj.array[1], "Script" ),
             getSubCborRef( cObj )
         );
     }

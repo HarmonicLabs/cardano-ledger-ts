@@ -1,4 +1,5 @@
 import { ToCbor, CborString, Cbor, CborObj, CborUInt, CborMap, CborBytes, CborNegInt, CborArray, CanBeCborString, forceCborString, CborMapEntry, SubCborRef } from "@harmoniclabs/cbor";
+import { definiteBytes } from "../../../../utils/strictCbor";
 import { ToData, DataMap, DataB, DataI, DataPair, Data } from "@harmoniclabs/plutus-data";
 import { lexCompare, toHex, fromHex } from "@harmoniclabs/uint8array-utils";
 import { Hash28 } from "../../../../hashes";
@@ -478,10 +479,8 @@ export class Value
         {
             const { k , v } = cborMap[i];
 
-            if(!( k instanceof CborBytes ))
-            throw new Error(`Invalid CBOR format for "Value"`);
-
-            const policy = k.bytes.length === 0 ? "" : new Hash28( k.bytes )
+            const policyBytes = definiteBytes( k, "Value policy id" );
+            const policy = policyBytes.length === 0 ? "" : new Hash28( policyBytes )
 
             if(!( v instanceof CborMap ))
             throw new Error(`Invalid CBOR format for "Value"`);
@@ -495,26 +494,25 @@ export class Value
             for( let j = 0 ; j < assetsMapLen; j++ )
             {
                 const { k, v } = assetsMap[j];
-                if(!( k instanceof CborBytes ))
-                throw new Error(`Invalid CBOR format for "Value"`);
+                const name = definiteBytes( k, "Value asset name" );
 
                 if(!( v instanceof CborNegInt || v instanceof CborUInt ))
                 throw new Error(`Invalid CBOR format for "Value"`);
 
-                const nameHex = toHex( k.bytes );
+                const nameHex = toHex( name );
                 const at = seenNames.get( nameHex );
-                if( at !== undefined ) assets[at] = { name: k.bytes, quantity: v.num };
+                if( at !== undefined ) assets[at] = { name, quantity: v.num };
                 else
                 {
                     seenNames.set( nameHex, assets.length );
                     assets.push({
-                        name: k.bytes,
+                        name,
                         quantity: v.num
                     });
                 }
             }
 
-            const policyHex = policy === "" ? "" : toHex( k.bytes );
+            const policyHex = policy === "" ? "" : toHex( policyBytes );
             const entry = {
                 policy: policy,
                 assets

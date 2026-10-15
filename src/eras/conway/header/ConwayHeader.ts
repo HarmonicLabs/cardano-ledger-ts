@@ -1,4 +1,5 @@
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
+import { definiteBytes } from "../../../utils/strictCbor";
 import { isObject } from "@harmoniclabs/obj-utils";
 import { isKesSignature, KesSignature, KesSignatureBytes } from "../../common/ledger/Kes";
 import { ConwayHeaderBody, IConwayHeaderBody, isIConwayHeaderBody } from "./ConwayHeaderBody";
@@ -94,7 +95,7 @@ export class ConwayHeader
 
         const conwayHeader = new ConwayHeader({
             body: ConwayHeaderBody.fromCborObj( cHdrBody ),
-            kesSignature: cBodySignature.bytes
+            kesSignature: definiteBytes( cBodySignature, "ConwayHeader body_signature" )
         }, getSubCborRef( cbor, _originalBytes ))
 
         // console.log("ConwayHeader", conwayHeader);

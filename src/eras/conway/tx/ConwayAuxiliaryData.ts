@@ -1,4 +1,5 @@
 import { CborArray, CborBytes, ToCbor, SubCborRef, CborString, Cbor, CborTag, CborMap, CborUInt, CborMapEntry, CanBeCborString, forceCborString, CborObj } from "@harmoniclabs/cbor";
+import { definiteBytes } from "../../../utils/strictCbor";
 import { blake2b_256 } from "@harmoniclabs/crypto";
 import { hasOwn } from "@harmoniclabs/obj-utils";
 import { AuxiliaryDataHash } from "../../../hashes";
@@ -316,15 +317,15 @@ export class ConwayAuxiliaryData
                 ),
             plutusV1Scripts: _pV1 === undefined ? undefined :
                 _pV1.array.map( cbor =>
-                    Script.plutusV1( Cbor.encode( cbor ) )
+                    Script.plutusV1( Cbor.encode( new CborBytes( definiteBytes( cbor, "plutus V1 script" ) ) ) )
                 ),
             plutusV2Scripts: _pV2 === undefined ? undefined :
                 _pV2.array.map( cbor =>
-                    Script.plutusV2( Cbor.encode( cbor ) )
+                    Script.plutusV2( Cbor.encode( new CborBytes( definiteBytes( cbor, "plutus V2 script" ) ) ) )
                 ),
             plutusV3Scripts: _pV3 === undefined ? undefined :
                 _pV3.array.map( cbor =>
-                    Script.plutusV3( Cbor.encode( cbor ) )
+                    Script.plutusV3( Cbor.encode( new CborBytes( definiteBytes( cbor, "plutus V3 script" ) ) ) )
                 )                
         }, getSubCborRef( cObj ));
     }

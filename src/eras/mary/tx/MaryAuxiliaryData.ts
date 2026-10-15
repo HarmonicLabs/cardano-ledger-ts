@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { CborArray, CborBytes, ToCbor, SubCborRef, CborString, Cbor, CborTag, CborMap, CborUInt, CborMapEntry, CanBeCborString, forceCborString, CborObj } from "@harmoniclabs/cbor";
 import { blake2b_256 } from "@harmoniclabs/crypto";
 import { hasOwn } from "@harmoniclabs/obj-utils";
@@ -203,3 +204,5 @@ export class MaryAuxiliaryData
         }
     }
 }
+// cardano-ledger decodes the Mary era at protocol version 4 (eraProtVerLow)
+decodeAtVersion( 4, MaryAuxiliaryData );

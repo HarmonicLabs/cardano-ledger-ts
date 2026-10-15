@@ -1,4 +1,5 @@
 import { ToCbor, CborObj, CborBytes, CborString, Cbor, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
+import { definiteBytes } from "../../../utils/strictCbor";
 import { byte, encodeBech32, decodeBech32, isBech32 } from "@harmoniclabs/crypto";
 import { ByronAddress } from "../../byron/ByronAddress";
 import { ToData, Data, DataConstr } from "@harmoniclabs/plutus-data";
@@ -376,12 +377,8 @@ export class Address
 
     static fromCborObj( buff: CborObj ): Address
     {
-        if(!(
-            buff instanceof CborBytes
-        ))throw new Error(`Invalid CBOR format for "Address"`);
-
         return Address.fromBuffer(
-            buff.bytes,
+            definiteBytes( buff, "Address" ),
             getSubCborRef( buff )
         );
     }

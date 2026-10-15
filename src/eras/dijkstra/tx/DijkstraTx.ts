@@ -1,3 +1,4 @@
+import { decodeAtVersion } from "../../../utils/strictCbor";
 import { XPrv } from "@harmoniclabs/bip32_ed25519"
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborArray, CborSimple, CanBeCborString, forceCborString } from "@harmoniclabs/cbor"
 import { signEd25519_sync, blake2b_256 } from "@harmoniclabs/crypto"
@@ -393,3 +394,6 @@ export function dijkstraHashTxParts( body: Uint8Array, wits: Uint8Array, aux: Ui
     for( const c of chunks ) { cat.set( c, off ); off += c.length; }
     return blake2b_256( cat );
 }
+
+// cardano-ledger decodes the Dijkstra era at protocol version 12
+decodeAtVersion( 12, DijkstraTx );

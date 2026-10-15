@@ -1,4 +1,5 @@
 import { CborArray, CborBytes, CborMap, CborObj, CborPositiveRational, CborSimple, CborUInt } from "@harmoniclabs/cbor";
+import { definiteBytes } from "../utils/strictCbor";
 import { Credential } from "../credentials";
 import { Hash28 } from "../hashes";
 import { TxWithdrawals } from "../ledger/TxWithdrawals";
@@ -22,7 +23,7 @@ function hash28OrUndef( c: CborObj | undefined ): Hash28 | undefined
 {
     if( isNull( c ) ) return undefined;
     if(!( c instanceof CborBytes )) throw new Error("invalid CBOR for policy / script hash in gov action");
-    return new Hash28( c.bytes );
+    return new Hash28( definiteBytes( c, "gov action script hash" ) );
 }
 
 /**

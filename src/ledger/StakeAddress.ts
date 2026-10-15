@@ -1,4 +1,5 @@
 import { NetworkT } from "../ledger/Network";
+import { definiteBytes } from "../utils/strictCbor";
 import { StakeCredentials, StakeCredentialsType, StakeValidatorHash } from "../credentials/StakeCredentials";
 import { StakeKeyHash } from "../credentials/StakeKeyHash";
 import { Hash28 } from "../hashes/Hash28/Hash28";
@@ -134,9 +135,7 @@ export class StakeAddress<T extends StakeAddressType = StakeAddressType> {
         return StakeAddress.fromCborObj(Cbor.parse(forceCborString(cStr)));
     }
     static fromCborObj(cObj: CborObj): StakeAddress {
-        if (!(cObj instanceof CborBytes)) throw new Error(`Invalid CBOR format for "Hash"`);
-
-        return StakeAddress.fromBytes(cObj.bytes);
+        return StakeAddress.fromBytes( definiteBytes( cObj, "StakeAddress" ) );
     }
 
     toCredential() {

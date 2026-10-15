@@ -1,4 +1,5 @@
 import { canBeUInteger, CanBeUInteger } from "@harmoniclabs/cbor/dist/utils/ints";
+import { definiteBytes } from "../../../utils/strictCbor";
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborMap, CborSimple, CborString, CborUInt, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { blake2b_256, sha2_256_sync } from "@harmoniclabs/crypto";
 import { isObject } from "@harmoniclabs/obj-utils";
@@ -190,12 +191,12 @@ export class ConwayHeaderBody
         const conwayHeaderBody = new ConwayHeaderBody({
             blockNumber: Number(_cBlockNo.num),
             slot: _cSlotNo.num,
-            prevHash: _cPrevHash?.bytes as U8Arr32 | undefined, // Handle nil case
-            issuerPubKey: _cIssuerVkey.bytes as U8Arr32,
-            vrfPubKey: _cVrfVkey.bytes as U8Arr32,
+            prevHash: ( _cPrevHash === undefined ? undefined : definiteBytes( _cPrevHash, "ConwayHeaderBody prev_hash" ) ) as U8Arr32 | undefined, // Handle nil case
+            issuerPubKey: definiteBytes( _cIssuerVkey, "ConwayHeaderBody issuer_vkey" ) as U8Arr32,
+            vrfPubKey: definiteBytes( _cVrfVkey, "ConwayHeaderBody vrf_vkey" ) as U8Arr32,
             vrfResult: VrfCert.fromCborObj(_cVrfCert),
             blockBodySize: _cBlockBodySize.num,
-            blockBodyHash: _cBlockBodyHash.bytes as U8Arr32,
+            blockBodyHash: definiteBytes( _cBlockBodyHash, "ConwayHeaderBody block_body_hash" ) as U8Arr32,
             opCert: PoolOperationalCert.fromCborObj(_cOpCert),
             protocolVersion: ProtocolVersion.fromCborObj(_cProtVer)
         }, getSubCborRef( cHdrBody, _originalBytes))
