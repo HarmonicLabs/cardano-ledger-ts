@@ -1,5 +1,5 @@
 import { ToCbor, CborString, Cbor, CborMap, CborUInt, CborArray, CborTag, CborBytes, CborMapEntry, CanBeCborString, forceCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
-import { definiteBytes } from "../../../utils/strictCbor";
+import { definiteBytes, expectSize, expectTag, parseCborFull, recordSum, sparseMapKeys } from "../../../utils/strictCbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
 import { Data, isData, ToData, DataConstr, dataToCbor, dataFromCborObj } from "@harmoniclabs/plutus-data";
@@ -231,44 +231,42 @@ export class ConwayTxOut
     {
         return ConwayTxOut.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
+    /**
+     * cardano-ledger `decodeBabbageTxOut` (below protocol version 12):
+     *
+     * - legacy form: `[address, value]` or `[address, value, datum_hash]`, definite or
+     *   indefinite;
+     * - map form (`SparseKeyed "TxOut"`): keys 0 address, 1 value (both required),
+     *   2 datum option, 3 script reference; a repeated or unknown key fails;
+     * - datum option (`Summands "Datum"`): `[0, hash32]` or `[1, #6.24(bytes)]` whose
+     *   bytes are exactly one Plutus Data item;
+     * - script reference: `#6.24(bytes)` (the tag number is compared) whose bytes are
+     *   exactly one script (`decodeCIC`).
+     *
+     * Every form keeps its source bytes (585: a legacy output used to be re-encoded
+     * in the map form).
+     */
     static fromCborObj( cObj: CborObj ): ConwayTxOut
     {
-        if(!(
-            cObj instanceof CborMap ||
-            cObj instanceof CborArray
-            // cObj instanceof CborMap && cObj.map.length >= 3 ||
-            // cObj instanceof CborArray && cObj.array.length >= 3
-        )) throw new InvalidCborFormatError("ConwayTxOut");
-
         // legacy
         if( cObj instanceof CborArray )
         {
-            const [ _addr, _val, _dat, _refScript ] = cObj.array;
+            const n = cObj.array.length;
+            if(!( n === 2 || n === 3 )) throw new InvalidCborFormatError("ConwayTxOut", "wrong number of terms in a legacy output");
+            const [ _addr, _val, _dat ] = cObj.array;
             
             return new ConwayTxOut({
                 address: Address.fromCborObj( _addr ),
                 value: Value.fromCborObj( _val ),
                 datum: _dat === undefined ? undefined : Hash32.fromCborObj( _dat ),
-            });
+            }, getSubCborRef( cObj ));
         }
+
+        const keys = sparseMapKeys( cObj, "ConwayTxOut" );
+        if( keys.some( k => k > 3 ) ) throw new InvalidCborFormatError("ConwayTxOut", "unknown output field");
 
         let fields: (CborObj | undefined )[] = new Array( 4 ).fill( undefined );
-
-        for( let i = 0; i < 4; i++)
-        {
-            const { v } = (cObj as CborMap).map.find(
-                ({ k }) => {
-                    if(!( k instanceof CborUInt ))
-                    throw new InvalidCborFormatError("TxBody");
-
-                    return Number( k.num ) === i
-                }
-            ) ?? { v: undefined };
-
-            if( v === undefined ) continue;
-
-            fields[i] = v;
-        }
+        for( const { k, v } of ( cObj as CborMap ).map ) fields[ Number( ( k as CborUInt ).num ) ] = v;
 
         const [
             _addr,
@@ -277,59 +275,34 @@ export class ConwayTxOut
             _refScript
         ] = fields;
 
+        if( _addr === undefined || _amt === undefined )
+        throw new InvalidCborFormatError("ConwayTxOut", "missing address or value");
+
         let datum: Hash32 | Data | undefined = undefined;
 
         if( _dat !== undefined )
         {
-            if(!(_dat instanceof CborArray))
-            throw new InvalidCborFormatError("ConwayTxOut");
-            
-            const [ _0, _1 ] = _dat.array;
-
-            if(!(_0 instanceof CborUInt))
-            throw new InvalidCborFormatError("ConwayTxOut");
-
-            const opt = Number( _0.num );
+            const { tag: opt, fields: dFields, size } = recordSum( _dat, "ConwayTxOut datum" );
+            expectSize( size, 2, "ConwayTxOut datum" );
+            const [ _1 ] = dFields;
 
             if( opt === 0 )
             {
-                if(!(
-                    _1 instanceof CborBytes
-                ))
-                throw new InvalidCborFormatError("ConwayTxOut");
-
-                datum = new Hash32( definiteBytes( _1, "ConwayTxOut datum hash" ) );
+                datum = Hash32.fromCborObj( _1 );
             }
             else if( opt === 1 )
             {
-                if(!(
-                    _1 instanceof CborTag &&
-                    _1.data instanceof CborBytes
-                ))
-                {
-                    throw new InvalidCborFormatError("ConwayTxOut");
-                }
-
-                datum = dataFromCborObj( Cbor.parse( definiteBytes( _1.data, "ConwayTxOut inline datum" ) ) )
+                const payload = definiteBytes( expectTag( _1, 24, "ConwayTxOut inline datum" ), "ConwayTxOut inline datum" );
+                datum = dataFromCborObj( parseCborFull( payload, "ConwayTxOut inline datum" ) );
             }
             else throw new InvalidCborFormatError("ConwayTxOut");
-
         }
 
         let refScript: Script | undefined = undefined;
         if( _refScript !== undefined )
         {
-            if(!(
-                _refScript instanceof CborTag &&
-                _refScript.data instanceof CborBytes
-            ))
-            throw new InvalidCborFormatError("ConwayTxOut");
-
-            refScript = Script.fromCbor( definiteBytes( _refScript.data, "ConwayTxOut script_ref" ) );
+            refScript = Script.fromCbor( definiteBytes( expectTag( _refScript, 24, "ConwayTxOut script_ref" ), "ConwayTxOut script_ref" ) );
         }
-
-        if( _addr === undefined || _amt === undefined )
-        throw new InvalidCborFormatError("ConwayTxOut");
 
         return new ConwayTxOut({
             address: Address.fromCborObj( _addr ),
