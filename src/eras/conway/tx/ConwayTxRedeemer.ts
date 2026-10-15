@@ -1,4 +1,6 @@
 import { ToCbor, CborString, Cbor, CborArray, CborUInt, CanBeCborString, forceCborString, CborObj, CborMapEntry, SubCborRef } from "@harmoniclabs/cbor";
+import { cborArray, cborUInt, MAX_WORD32 } from "../../../utils/strictCbor";
+import { checkExUnitsCbor } from "../protocol/conwayPParamsUpdateCbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { isObject, hasOwn } from "@harmoniclabs/obj-utils";
 import { Data, isData, dataToCborObj, dataFromCborObj } from "@harmoniclabs/plutus-data";
@@ -149,23 +151,22 @@ export class ConwayTxRedeemer
         };
     }
     
+    /**
+     * one entry of the map form of `redeemers`: `[tag, index] => [data, ex_units]`
+     * (cardano-ledger: the key a `CBORGroup` purpose, the value a 2-tuple, which below
+     * protocol version 12 is a definite array of two)
+     */
     static fromCborMapEntry( entry: CborMapEntry ): ConwayTxRedeemer
     {
-        if(!(
-            isObject( entry ) &&
-            entry.k instanceof CborArray &&
-            entry.k.array.length >= 2 &&
-            entry.k.array[0] instanceof CborUInt &&
-            entry.k.array[1] instanceof CborUInt &&
-            entry.v instanceof CborArray &&
-            entry.v.array.length >= 2
-        )) throw new Error("invalid CborMapEntry building ConwayTxRedeemer");
+        const [ _tag, _index ] = cborArray( entry?.k, "ConwayTxRedeemer key", { len: 2 } );
+        const [ _data, _execUnits ] = cborArray( entry?.v, "ConwayTxRedeemer value", { len: 2, definite: true } );
+        const [ mem, cpu ] = checkExUnitsCbor( _execUnits, "ConwayTxRedeemer ex_units" );
 
         return new ConwayTxRedeemer({
-            tag: Number( entry.k.array[0].num ),
-            index: Number( entry.k.array[1].num ),
-            data: dataFromCborObj( entry.v.array[0] ),
-            execUnits: ExBudget.fromCborObj( entry.v.array[1] )
+            tag: conwayRedeemerTag( _tag ),
+            index: Number( cborUInt( _index, "ConwayTxRedeemer index", MAX_WORD32 ) ),
+            data: dataFromCborObj( _data ),
+            execUnits: new ExBudget({ mem, cpu })
         });
     }
 
@@ -207,22 +208,21 @@ export class ConwayTxRedeemer
         return ConwayTxRedeemer.fromCborObj( Cbor.parse( forceCborString( cStr ), { keepRef: true } ) );
     }
 
+    /**
+     * list form `[tag, index, data, ex_units]` (cardano-ledger `decodeRecordNamed
+     * "Redeemer"`: exactly four, definite or indefinite); the tag is a Word8 purpose
+     * 0-5, the index a Word32 and the ex units a `RecD` record (definite array of two).
+     */
     static fromCborObj( cObj: CborObj ): ConwayTxRedeemer
     {
-        if(!(
-            cObj instanceof CborArray 
-            && cObj.array.length >= 4 
-            && cObj.array[0] instanceof CborUInt 
-            && cObj.array[1] instanceof CborUInt
-        ))throw new InvalidCborFormatError("ConwayTxRedeemer");
-
-        const [ _tag, _index, _data, _execUnits ] = cObj.array;
+        const [ _tag, _index, _data, _execUnits ] = cborArray( cObj, "ConwayTxRedeemer", { len: 4 } );
+        const [ mem, cpu ] = checkExUnitsCbor( _execUnits, "ConwayTxRedeemer ex_units" );
 
         return new ConwayTxRedeemer({
-            tag: Number( cObj.array[0].num ) as any,
-            index: cObj.array[1].num,
-            data: dataFromCborObj( cObj.array[2] ),
-            execUnits: ExBudget.fromCborObj( cObj.array[3] )
+            tag: conwayRedeemerTag( _tag ) as any,
+            index: cborUInt( _index, "ConwayTxRedeemer index", MAX_WORD32 ),
+            data: dataFromCborObj( _data ),
+            execUnits: new ExBudget({ mem, cpu })
         }, getSubCborRef( cObj ));
     }
 
@@ -236,4 +236,11 @@ export class ConwayTxRedeemer
             data: this.data.toJson(),
         }
     }
+}
+/** `ConwayPlutusPurpose` tag: `decodeWord8`, 0 spend .. 5 propose */
+function conwayRedeemerTag( c: CborObj | undefined ): number
+{
+    const t = Number( cborUInt( c, "ConwayTxRedeemer tag", BigInt( 255 ) ) );
+    if( t > 5 ) throw new InvalidCborFormatError( "ConwayTxRedeemer", "unexpected redeemer tag " + t );
+    return t;
 }

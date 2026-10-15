@@ -1,5 +1,5 @@
 import { ToCbor, SubCborRef, CborString, Cbor, CborObj, CborMap, CborUInt, CborArray, CborMapEntry, CanBeCborString, forceCborString, isCborObj, CborBytes } from "@harmoniclabs/cbor";
-import { definiteBytes } from "../../../utils/strictCbor";
+import { decodeVersionAtLeast, definiteBytes } from "../../../utils/strictCbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
 import { Data, isData, dataToCborObj, dataFromCborObj } from "@harmoniclabs/plutus-data";
 import { isObject } from "@harmoniclabs/obj-utils";
@@ -178,7 +178,19 @@ export class ConwayTxWitnessSet
         defGetterArr( "nativeScripts", nativeScripts );
         defGetterArr( "plutusV1Scripts", plutusV1Scripts );
         defGetterArr( "plutusV2Scripts", plutusV2Scripts );
-        defGetterArr( "redeemers", redeemers );
+        // the redeemers keep the bytes they were decoded from (list or map form,
+        // definite or indefinite): they are covered by the script data hash
+        const _redeemersRef: SubCborRef | undefined = ( redeemers as any )?.cborRef instanceof SubCborRef ? ( redeemers as any ).cborRef : undefined;
+        const _redeemers = redeemers ?? [];
+        defGetter(
+            "redeemers",
+            () => {
+                if( _redeemers.length === 0 ) return undefined;
+                const arr = cloneArr( _redeemers );
+                if( _redeemersRef !== undefined ) Object.defineProperty( arr, "cborRef", { value: _redeemersRef, enumerable: false } );
+                return arr;
+            }
+        );
         defGetterArr( "plutusV3Scripts", plutusV3Scripts );
 
         const _reqSigs =
@@ -300,9 +312,11 @@ export class ConwayTxWitnessSet
                 this.redeemers === undefined ? undefined :
                 {
                     k: new CborUInt( 5 ),
-                    v: new CborArray(
-                        this.redeemers.map( r => r.toCborObj() )
-                    )
+                    v: ( this.redeemers as any ).cborRef instanceof SubCborRef ?
+                        Cbor.parse( ( this.redeemers as any ).cborRef.toBuffer() ) :
+                        new CborArray(
+                            this.redeemers.map( r => r.toCborObj() )
+                        )
                 },
 
                 this.plutusV2Scripts === undefined ? undefined :
@@ -406,15 +420,27 @@ export class ConwayTxWitnessSet
 
 }
 
+/**
+ * `redeemers` as cardano-ledger decodes them from protocol version 9: the map form
+ * `{ [tag, index] => [data, ex_units] }` or (below version 12) the list form, either
+ * definite or indefinite, never empty. The result carries the source bytes
+ * (`cborRef`), which the witness set re-emits.
+ */
 function witnessRedeemersFromCborObj( cbor: CborObj ): ConwayTxRedeemer[]
 {
-    if( cbor instanceof CborArray )
+    let result: ConwayTxRedeemer[];
+    if( cbor instanceof CborMap )
     {
-        return cbor.array.map( ConwayTxRedeemer.fromCborObj );
+        result = cbor.map.map( ConwayTxRedeemer.fromCborMapEntry );
     }
-    else if( cbor instanceof CborMap )
+    else if( cbor instanceof CborArray )
     {
-        return cbor.map.map( ConwayTxRedeemer.fromCborMapEntry );
+        if( decodeVersionAtLeast( 12 ) ) throw new Error("list encoding of redeemers is not supported from protocol version 12");
+        result = cbor.array.map( ConwayTxRedeemer.fromCborObj );
     }
     else throw new Error("invalid format for witness set redeemers field");
-};
+
+    if( result.length === 0 ) throw new Error("invalid witness set redeemers field: empty redeemers");
+    Object.defineProperty( result, "cborRef", { value: getSubCborRef( cbor ), enumerable: false } );
+    return result;
+}
