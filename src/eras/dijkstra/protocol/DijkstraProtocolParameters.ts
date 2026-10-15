@@ -1,4 +1,6 @@
 import { fromUtf8 } from '@harmoniclabs/uint8array-utils';
+import { costModelsFromCborObjViaBytes } from '../../conway/protocol/conwayPParamsUpdateCbor';
+import { toLocalCborObj } from '../../../utils/strictCbor';
 import { ExBudget, ExBudgetJson } from '@harmoniclabs/plutus-machine';
 import { freezeAll, isObject } from '@harmoniclabs/obj-utils';
 import { Data, DataB, DataConstr, DataI, DataList, DataMap, DataPair } from '@harmoniclabs/plutus-data';
@@ -172,7 +174,7 @@ export function partialDijkstraProtocolParametersToCborObj(pps: Partial<Dijkstra
 			kv(11, tryCborFromRational(pps.treasuryCut)),
 			mapUIntEntryOrUndefined(16, pps.minPoolCost),
 			mapUIntEntryOrUndefined(17, pps.utxoCostPerByte),
-			kv(18, costModels === undefined || (!costModelsKeys.includes('PlutusV1') && !costModelsKeys.includes('PlutusV2') && !costModelsKeys.includes('PlutusV3')) ? undefined : costModelsToCborObj(costModels)),
+			kv(18, costModels === undefined ? undefined : toLocalCborObj(costModelsToCborObj(costModels))),
 			executionUnitPrices === undefined ? undefined : kv(19, Array.isArray(executionUnitPrices) ? new CborArray(executionUnitPrices) : new CborArray([CborPositiveRational.fromNumber(executionUnitPrices.priceMemory), CborPositiveRational.fromNumber(executionUnitPrices.priceSteps)])),
 			kv(20, ExBudget.isJson(maxTxExecutionUnits) ? ExBudget.fromJson(maxTxExecutionUnits).toCborObj() : maxTxExecutionUnits?.toCborObj()),
 			kv(21, ExBudget.isJson(maxBlockExecutionUnits) ? ExBudget.fromJson(maxBlockExecutionUnits).toCborObj() : maxBlockExecutionUnits?.toCborObj()),
@@ -280,7 +282,7 @@ export function partialDijkstraProtocolParametersFromCborObj(cObj: CborObj): Par
 		executionUnitPrices = mem_price !== undefined && cpu_price !== undefined ? [mem_price, cpu_price] : undefined;
 	}
 
-	const _costModels = costModelsFromCborObj(_costmdls);
+	const _costModels = costModelsFromCborObjViaBytes(_costmdls);
 
 	return {
 		txFeePerByte: fromUIntOrUndef(_minFeeCoeff),
@@ -297,7 +299,7 @@ export function partialDijkstraProtocolParametersFromCborObj(cObj: CborObj): Par
 		treasuryCut: CborPositiveRational.fromCborObjOrUndef(_treasureryGrowthRate),
 		minPoolCost: fromUIntOrUndef(_poolMinFee),
 		utxoCostPerByte: fromUIntOrUndef(_adaPerUtxoByte),
-		costModels: Object.keys(_costModels).length === 0 ? undefined : _costModels,
+		costModels: _costModels,
 		executionUnitPrices,
 		maxTxExecutionUnits: _maxTxExecUnits === undefined ? undefined : ExBudget.fromCborObj(_maxTxExecUnits),
 		maxBlockExecutionUnits: _maxBlockExecUnits === undefined ? undefined : ExBudget.fromCborObj(_maxBlockExecUnits),

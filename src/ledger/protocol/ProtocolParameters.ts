@@ -1,4 +1,6 @@
 import type { Epoch } from '../Epoch';
+import { checkConwayPParamsUpdateCbor, costModelsFromCborObjViaBytes, isConwayPParamsUpdateVersion } from '../../eras/conway/protocol/conwayPParamsUpdateCbor';
+import { toLocalCborObj } from '../../utils/strictCbor';
 import type { Coin } from '../Coin';
 import { CborPositiveRational, CborUInt, CborObj, CborMapEntry, CborMap, CborArray, CborNegInt, CborBytes, CborTag, CborText } from '@harmoniclabs/cbor';
 import { CanBeUInteger, canBeUInteger, forceBigUInt } from '../../utils/ints';
@@ -188,7 +190,7 @@ export function partialProtocolParametersToCborObj(pps: Partial<ProtocolParamete
 			protocolVersion === undefined ? undefined : kv(14, new ProtocolVersion(protocolVersion).toCborObj()),
 			mapUIntEntryOrUndefined(16, pps.minPoolCost),
 			mapUIntEntryOrUndefined(17, pps.utxoCostPerByte),
-			kv(18, costModels === undefined || (!costModelsKeys.includes('PlutusV1') && !costModelsKeys.includes('PlutusV2')) ? undefined : costModelsToCborObj(costModels)),
+			kv(18, costModels === undefined ? undefined : toLocalCborObj(costModelsToCborObj(costModels))),
 			executionUnitPrices === undefined ? undefined : kv(19, Array.isArray(executionUnitPrices) ? new CborArray(executionUnitPrices) : new CborArray([CborPositiveRational.fromNumber(executionUnitPrices.priceSteps), CborPositiveRational.fromNumber(executionUnitPrices.priceMemory)])),
 			kv(20, ExBudget.isJson(maxTxExecutionUnits) ? ExBudget.fromJson(maxTxExecutionUnits).toCborObj() : maxTxExecutionUnits?.toCborObj()),
 			kv(21, ExBudget.isJson(maxBlockExecutionUnits) ? ExBudget.fromJson(maxBlockExecutionUnits).toCborObj() : maxBlockExecutionUnits?.toCborObj()),
@@ -243,6 +245,7 @@ const maxProtocolParamsEntries = 33;
 
 export function partialProtocolParametersFromCborObj(cObj: CborObj): Partial<ProtocolParameters> {
 	if (!(cObj instanceof CborMap)) throw new Error(`Invalid CBOR format for "Partial<ProtocolParameters>"`);
+	if (isConwayPParamsUpdateVersion()) cObj = checkConwayPParamsUpdateCbor(cObj);
 
 	let fields: (CborObj | undefined)[] = new Array(maxProtocolParamsEntries).fill(undefined);
 
@@ -304,7 +307,7 @@ export function partialProtocolParametersFromCborObj(cObj: CborObj): Partial<Pro
 		executionUnitPrices = mem_price !== undefined && cpu_price !== undefined ? [mem_price, cpu_price] : undefined;
 	}
 
-	const _costModels = costModelsFromCborObj(_costmdls);
+	const _costModels = costModelsFromCborObjViaBytes(_costmdls);
 
 	return {
 		txFeePerByte: fromUIntOrUndef(_minFeeCoeff),
@@ -322,7 +325,7 @@ export function partialProtocolParametersFromCborObj(cObj: CborObj): Partial<Pro
 		protocolVersion,
 		minPoolCost: fromUIntOrUndef(_poolMinFee),
 		utxoCostPerByte: fromUIntOrUndef(_adaPerUtxoByte),
-		costModels: Object.keys(_costModels).length === 0 ? undefined : _costModels,
+		costModels: _costModels,
 		executionUnitPrices,
 		maxTxExecutionUnits: _maxTxExecUnits === undefined ? undefined : ExBudget.fromCborObj(_maxTxExecUnits),
 		maxBlockExecutionUnits: _maxBlockExecUnits === undefined ? undefined : ExBudget.fromCborObj(_maxBlockExecUnits),
