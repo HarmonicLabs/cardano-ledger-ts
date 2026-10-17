@@ -88,22 +88,34 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
 
     /**
      * format expected by `cardano-cli`
-     * 
+     *
      * for standard ledger format (as defined in CDDL) use `toCbor` method
-     * 
+     *
      * this one is used in the witness set
-     * 
+     *
      * @deprecated
     **/
     readonly cbor!: CborString;
-    
+
+    /**
+     * Plutus scripts only: the payload of the ledger's `[tag, payload]` wrapper exactly as it
+     * was decoded (cardano-ledger `PlutusBinary`, the byte-string content; for a program built by
+     * the Plutus tools it is the CBOR byte string around the flat encoding). Set by `fromCborObj`;
+     * `toCbor` emits it and `hash` hashes it (`hashPlutusScript`: language tag ++ binary), so
+     * both match cardano-ledger byte for byte even when the payload is not the canonical
+     * wrapping of `bytes`. Scripts built from `bytes` alone wrap them canonically instead.
+     *
+     * A native script's payload is `bytes` itself (the timelock's own CBOR, `MemoBytes`).
+     */
+    readonly ledgerPayload: Uint8Array | undefined;
+
     // --------- hash ---- //
     private _hash!: Hash28;
 
     get hash(): Hash28
     {
         if(
-            this. _hash !== undefined && this._hash instanceof Hash28 
+            this. _hash !== undefined && this._hash instanceof Hash28
         ) return this._hash;
 
         let scriptDataToBeHashed = [] as number[];
@@ -112,13 +124,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
             scriptDataToBeHashed = [ 0x00 ].concat( Array.from( this.bytes ) );
         else
         {
-            const singleCbor = Array.from(
-                Cbor.encode(
-                    new CborBytes(
-                        this.bytes
-                    )
-                )
-            );
+            const singleCbor = Array.from( this.plutusPayload() );
 
             scriptDataToBeHashed = [
                 this.type === ScriptType.PlutusV1 ? 0x01 :
@@ -176,9 +182,10 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
     constructor(
         scriptType: T,
         bytes: Uint8Array | (T extends ScriptType.NativeScript ? NativeScript : PlutusScriptJsonFormat),
-        readonly cborRef: SubCborRef | undefined = undefined
+        readonly cborRef: SubCborRef | undefined = undefined,
+        ledgerPayload: Uint8Array | undefined = undefined
     )
-    
+
     {
         if(!(
             scriptType === ScriptType.NativeScript  ||
@@ -259,6 +266,20 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
             this.cbor = Uint8Array.prototype.slice.call( this.bytes );
         }
         this.cborRef = cborRef;
+        this.ledgerPayload =
+            scriptType !== ScriptType.NativeScript && ledgerPayload instanceof Uint8Array ?
+                Uint8Array.prototype.slice.call( ledgerPayload ) :
+                undefined;
+    }
+
+    /**
+     * a Plutus script's payload in the ledger form: `ledgerPayload` when the script was decoded
+     * from it, otherwise `bytes` wrapped in one CBOR byte string
+     */
+    private plutusPayload(): Uint8Array
+    {
+        if( this.ledgerPayload instanceof Uint8Array ) return this.ledgerPayload;
+        return Cbor.encode( new CborBytes( Uint8Array.prototype.slice.call( this.bytes ) ) );
     }
 
     /*
@@ -283,7 +304,8 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         return new Script(
             this.type,
             this.bytes,
-            this.cborRef instanceof SubCborRef ? this.cborRef.clone() : undefined
+            this.cborRef instanceof SubCborRef ? this.cborRef.clone() : undefined,
+            this.ledgerPayload
         );
     }
 
@@ -338,6 +360,16 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
         if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
         return this.toCbor();
     }
+    /**
+     * The ledger form `[tag, payload]`, rebuilt as cardano-ledger rebuilds it (Alonzo
+     * `encodeScript`: `Sum NativeScript 0 !> To timelock`, `Sum (PlutusScript ..) n !> To binary`,
+     * i.e. `encodeListLen 2 <> encodeWord tag <> payload`): the wrapper is always a definite
+     * two-element array, the payload is emitted as the ledger keeps it, a native script's own
+     * bytes (`MemoBytes`) or the Plutus binary as a definite byte string.
+     *
+     * `cborRef` is only set for a script decoded from a bare byte string (the witness-set form),
+     * which is re-emitted as such.
+    **/
     toCbor(): CborString
     {
         if( this.cborRef instanceof SubCborRef )
@@ -346,11 +378,21 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
             // we assume correctness here
             return this.cborRef.toBuffer();
         }
-        
+
+        if( this.type === ScriptType.NativeScript )
+        {
+            // [0, <timelock bytes as they are>]
+            const out = new Uint8Array( 2 + this.bytes.length );
+            out[0] = 0x82;
+            out[1] = 0x00;
+            out.set( this.bytes, 2 );
+            return out;
+        }
+
         return Cbor.encode( this.toCborObj() );
     }
     /**
-     * format specified in the ledger CDDL
+     * format specified in the ledger CDDL (see `toCbor`)
     **/
     toCborObj(): CborObj
     {
@@ -370,11 +412,7 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
             new CborUInt(
                 scriptTypeToNumber( this.type as ScriptType )
             ),
-            new CborBytes(
-                Cbor.encode(
-                    new CborBytes( Uint8Array.prototype.slice.call( this.bytes ) )
-                )
-            )
+            new CborBytes( this.plutusPayload() )
         ]);
     }
 
@@ -397,40 +435,41 @@ export class Script<T extends LitteralScriptType = LitteralScriptType>
 
         // cardano-ledger `DecCBOR (Annotator (AlonzoScript era))` (`Summands`): `[0, native]`,
         // `[1 | 2 | 3, plutus bytes]`, plus `[4, bytes]` from protocol version 12;
-        // definite arrays have exactly two elements
+        // definite arrays have exactly two elements (an indefinite array is accepted).
+        //
+        // The wrapper's own bytes are not kept: cardano-ledger rebuilds `[tag, payload]` on
+        // re-serialisation (`toCbor`) and keeps only the payload, the timelock's bytes
+        // (`MemoBytes`) or the Plutus binary.
         const { tag: n, fields, size } = recordSum( cObj, "Script" );
         if( n > ( decodeVersionAtLeast( 12 ) ? 4 : 3 ) )
         throw new Error(`Invalid CBOR format for "Script"; unsupported script tag ${n}`);
         expectSize( size, 2, "Script" );
-        const t = scriptTypeFromNumber( n ); 
-        
+        const t = scriptTypeFromNumber( n );
+
 
         if( t === ScriptType.NativeScript )
         {
             nativeScriptFromCborObj( fields[0] ); // must decode as a native script
+            // the timelock's bytes as decoded (`getSubCborRef` re-encodes only when the object
+            // was parsed without references)
             return new Script(
-            t,
-            Cbor.encode( fields[0] ),
-            getSubCborRef( cObj )
+                t,
+                getSubCborRef( fields[0] ).toBuffer()
             );
         }
 
+        const payload = definiteBytes( fields[0], "Script" );
         return new Script(
             t,
-            definiteBytes( fields[0], "Script" ),
-            getSubCborRef( cObj )
+            payload,
+            undefined,
+            payload
         );
     }
 
     static encodePlutusScriptForWitnessSet( script: Script ): CborBytes
     {
-        return new CborBytes(
-            Cbor.encode(
-                new CborBytes(
-                    Uint8Array.prototype.slice.call(script.bytes)
-                )
-            )
-        )
+        return new CborBytes( script.plutusPayload() );
         // return Cbor.parse( script.cbor ) as CborBytes
         // return new CborBytes( script.bytes );
     }
