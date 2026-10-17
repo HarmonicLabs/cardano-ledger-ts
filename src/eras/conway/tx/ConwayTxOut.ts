@@ -1,17 +1,18 @@
-import { ToCbor, CborString, Cbor, CborMap, CborUInt, CborArray, CborTag, CborBytes, CborMapEntry, CanBeCborString, forceCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
+import { ToCbor, CborString, Cbor, CborMap, CborUInt, CborArray, CanBeCborString, CborObj, SubCborRef } from "@harmoniclabs/cbor";
 import { definiteBytes, expectSize, expectTag, parseCborFull, recordSum, sparseMapKeys } from "../../../utils/strictCbor";
 import { Cloneable } from "@harmoniclabs/cbor/dist/utils/Cloneable";
-import { isObject, hasOwn, defineReadOnlyProperty } from "@harmoniclabs/obj-utils";
-import { Data, isData, ToData, DataConstr, dataToCbor, dataFromCborObj } from "@harmoniclabs/plutus-data";
+import { isObject, hasOwn } from "@harmoniclabs/obj-utils";
+import { Data, isData, ToData, DataConstr, dataFromCborObj } from "@harmoniclabs/plutus-data";
 import { Hash32 } from "../../../hashes";
 import { Address, AddressStr, Value, IValue, isAddressStr, isIValue } from "../../common/ledger";
-import { Script, ScriptType } from "../../../script";
+import { Script } from "../../../script";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 import { maybeData } from "../../../utils/maybeData";
 import { BasePlutsError } from "../../../utils/BasePlutsError";
 import { ToDataVersion } from "../../../toData/defaultToDataVersion";
 import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
+import { txOutToCborObj } from "../../../tx/body/output/txOutCbor";
 
 
 export interface IConwayTxOut {
@@ -44,6 +45,12 @@ export class ConwayTxOut
     readonly datum?: Hash32 | Data
     readonly refScript?: Script
 
+    /**
+     * @param cborRef the bytes the output was decoded from, when it was decoded. They are kept
+     * for readers of the source bytes (e.g. the UTxO metadata a node derives from an output as it
+     * appeared in its block) and are **not** re-emitted: an output is re-encoded from its fields,
+     * as cardano-ledger does (see `toCborObj`).
+     */
     constructor(
         ConwayTxOutput: IConwayTxOut,
         readonly cborRef: SubCborRef | undefined = undefined
@@ -156,31 +163,23 @@ export class ConwayTxOut
 
     toCborBytes(): Uint8Array
     {
-        if( this.cborRef instanceof SubCborRef ) return this.cborRef.toBuffer();
         return this.toCbor();
     }
     toCbor(): CborString
     {
-        if( this.cborRef instanceof SubCborRef )
-        {
-            // TODO: validate cbor structure
-            // we assume correctness here
-            return this.cborRef.toBuffer();
-        }
-        
         return Cbor.encode( this.toCborObj() );
     }
-    toCborObj(): CborMap
+    /**
+     * The output re-encoded from its fields exactly as cardano-ledger re-encodes a decoded
+     * `BabbageTxOut` (`txOutToCborObj`): the legacy array `[address, value]` /
+     * `[address, value, datum_hash]` when there is no script reference and no inline datum,
+     * the definite map `{0: address, 1: value, 2?: datum_option, 3?: script_ref}` otherwise;
+     * address, datum `Data` and script payload bytes as decoded, the value canonical, the
+     * `[tag, payload]` script wrapper and the datum option rebuilt. The bytes the output was
+     * decoded from (`cborRef`) are not re-emitted.
+     */
+    toCborObj(): CborArray | CborMap
     {
-        const datum = this.datum;
-
-        if( this.cborRef instanceof SubCborRef )
-        {
-            // TODO: validate cbor structure
-            // we assume correctness here
-            return Cbor.parse( this.cborRef.toBuffer() ) as CborMap;
-        }
-
         if( !Value.isPositive( this.value ) )
         {
             console.error(
@@ -192,39 +191,7 @@ export class ConwayTxOut
             )
             throw new BasePlutsError("ConwayTxOut values can only be positive; value was: " + JSON.stringify( this.value.toJson() ));
         }
-        return new CborMap([
-            {
-                k: new CborUInt( 0 ),
-                v: this.address.toCborObj()
-            },
-            {
-                k: new CborUInt( 1 ),
-                v: this.value.toCborObj()
-            },
-            datum === undefined ? undefined :
-            {
-                k: new CborUInt( 2 ),
-                v: datum instanceof Hash32 ? 
-                    new CborArray([
-                        new CborUInt( 0 ),
-                        datum.toCborObj()
-                    ]) :
-                    new CborArray([
-                        new CborUInt( 1 ),
-                        new CborTag(
-                            24,
-                            new CborBytes(
-                                dataToCbor( datum )
-                            )
-                        )
-                    ])
-            },
-            this.refScript === undefined ? undefined :
-            {
-                k: new CborUInt( 3 ),
-                v: new CborTag( 24, new CborBytes( this.refScript.toCbor() ) )
-            }
-        ].filter( elem => elem !== undefined ) as CborMapEntry[])
+        return txOutToCborObj( this );
     }
 
     static fromCbor( cStr: CanBeCborString ): ConwayTxOut
@@ -243,8 +210,10 @@ export class ConwayTxOut
      * - script reference: `#6.24(bytes)` (the tag number is compared) whose bytes are
      *   exactly one script (`decodeCIC`).
      *
-     * Every form keeps its source bytes (585: a legacy output used to be re-encoded
-     * in the map form).
+     * The source bytes are kept in `cborRef` for readers; re-encoding rebuilds the output
+     * from its fields as cardano-ledger does (`toCborObj`), so a legacy output stays in the
+     * array form (585) and a wrapper the encoder rebuilds (datum option, script `[tag, payload]`)
+     * comes out definite whatever form it was decoded in.
      */
     static fromCborObj( cObj: CborObj ): ConwayTxOut
     {
