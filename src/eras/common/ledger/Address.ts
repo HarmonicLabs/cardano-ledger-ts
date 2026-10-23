@@ -1,7 +1,7 @@
 import { ToCbor, CborObj, CborBytes, CborString, Cbor, CanBeCborString, forceCborString, SubCborRef } from "@harmoniclabs/cbor";
 import { definiteBytes } from "../../../utils/strictCbor";
 import { byte, encodeBech32, decodeBech32, isBech32 } from "@harmoniclabs/crypto";
-import { ByronAddress } from "../../byron/ByronAddress";
+import type { ByronAddress } from "../../byron/ByronAddress";
 import { ToData, Data, DataConstr } from "@harmoniclabs/plutus-data";
 import { Credential, StakeCredentials, StakeCredentialsType, CredentialType, PublicKey } from "../../../credentials";
 import { Hash28 } from "../../../hashes";
@@ -34,6 +34,14 @@ export type AddressType
     | "enterprise"
     | "byron"
     | "unknown"
+
+// set by the `ByronAddress` module when it loads; a value import here would be a
+// circular runtime dependency, since `ByronAddress extends Address`.
+let _parseByronAddress: ( ( str: string ) => ByronAddress | undefined ) | undefined = undefined;
+export function _registerByronAddressParser( parse: ( str: string ) => ByronAddress | undefined ): void
+{
+    _parseByronAddress = parse;
+}
 
 export interface IAddress {
     network: NetworkT,
@@ -413,16 +421,17 @@ export class Address
         ) as AddressStr;
     }
 
-    static fromBech32( addr: AddressStr ): Address | ByronAddress
+    static fromBech32( addr: AddressStr ): Address
     {
         return Address.fromString( addr );
     }
-    static fromString( addr: string ): Address | ByronAddress
+    static fromString( addr: string ): Address
     {
         // Byron (bootstrap) addresses are base58, not bech32; handle them first.
         if( !isBech32( addr ) )
         {
-            if( ByronAddress.isValid( addr ) ) return ByronAddress.fromBase58( addr );
+            const byron = _parseByronAddress === undefined ? undefined : _parseByronAddress( addr );
+            if( byron !== undefined ) return byron;
             throw new Error(
                 "string passed is not a Cardano address"
             );
@@ -455,8 +464,9 @@ export class Address
         return _addr;
     }
 
-    toJSON() { return this.toJson(); }
-    toJson()
+    // `any` so that subclasses (`ByronAddress`) can return richer JSON shapes
+    toJSON(): any { return this.toJson(); }
+    toJson(): any
     {
         return this.toString();
     }

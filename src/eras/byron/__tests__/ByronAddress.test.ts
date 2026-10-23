@@ -18,7 +18,8 @@ describe("ByronAddress", () => {
         const b = ByronAddress.fromBase58( MAINNET );
         expect( isByronAddress( b ) ).toBe( true );
         expect( toHex( b.rootHash ) ).toBe( MAINNET_ROOT );
-        expect( b.type ).toBe( 0 );
+        expect( b.byronType ).toBe( 0 );
+        expect( b.type ).toBe( "byron" );
         expect( b.attributes.derivationPath ).toBeUndefined();
         expect( b.attributes.networkMagic ).toBeUndefined();
         expect( b.network ).toBe( "mainnet" );
@@ -39,7 +40,7 @@ describe("ByronAddress", () => {
             const rebuilt = new ByronAddress({
                 rootHash: decoded.rootHash,
                 attributes: decoded.attributes,
-                type: decoded.type
+                type: decoded.byronType
             }); // note: NO originalBytes -> forces the encode path
             expect( rebuilt.toBase58() ).toBe( s );
         }
@@ -100,11 +101,11 @@ describe("ByronAddress construction from spending data", () => {
         for( const v of AVVM_VECTORS )
         {
             const a = ByronAddress.fromRedeemPublicKey( base64urlToBytes( v.pk ) );
-            expect( a.type ).toBe( 2 );
+            expect( a.byronType ).toBe( 2 );
             expect( a.attributes.networkMagic ).toBeUndefined();
             expect( a.toBase58() ).toBe( v.addr );
             // genesis UTxO id = blake2b-256 of the address bytes (cardano-ledger-byron genesisUtxo)
-            expect( toHex( blake2b_256( a.toBytes() ) ) ).toBe( v.utxoId );
+            expect( toHex( blake2b_256( a.toBuffer() ) ) ).toBe( v.utxoId );
             // decode → re-encode is byte-exact
             expect( ByronAddress.fromBase58( v.addr ).toBase58() ).toBe( v.addr );
         }
@@ -124,7 +125,7 @@ describe("ByronAddress construction from spending data", () => {
     test("fromPublicKey builds a decodable type-0 address and rejects bad key sizes", () => {
         const xpub = new Uint8Array( 64 ).map( (_, i) => (i * 13 + 1) & 0xff );
         const a = ByronAddress.fromPublicKey( xpub );
-        expect( a.type ).toBe( 0 );
+        expect( a.byronType ).toBe( 0 );
         expect( a.rootHash.length ).toBe( 28 );
         expect( ByronAddress.fromBase58( a.toBase58() ).toBase58() ).toBe( a.toBase58() );
         expect( () => ByronAddress.fromPublicKey( new Uint8Array( 32 ) ) ).toThrow();
