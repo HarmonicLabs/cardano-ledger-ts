@@ -129,24 +129,17 @@ export class TxWithdrawals
                 // Plutus V1/V2 key withdrawals by `StakingCredential`:
                 //   txInfoWdrl :: [(StakingCredential, Integer)]
                 //   StakingCredential = StakingHash Credential | StakingPtr ...
-                // `StakeCredentials.toData(version)` is shaped to match the
-                // address path: bare `Credential` for v1/v2, `Constr 0 [Credential]`
-                // for v3. Reward accounts never carry pointer credentials
-                // (StakeAddress is stakeKey | script only), so we just normalize
-                // the wrap shape here for the withdrawal map key:
-                //   v1/v2 -> wrap in PStakingHash (Constr 0 [Credential])
-                //   v3    -> strip PStakingHash wrap (bare Credential)
+                // `StakeCredentials.toData(version)` returns the `StakingCredential`
+                // in every version: `Constr 0 [Credential]` (PStakingHash). Reward
+                // accounts never carry pointer credentials (StakeAddress is
+                // stakeKey | script only), so for the withdrawal map key:
+                //   v1/v2 -> the StakingCredential as it is (wrapping it again
+                //            would give StakingHash (StakingHash credential))
+                //   v3    -> strip the PStakingHash wrap (bare Credential)
                 const credData: DataConstr = rewardAccount.toStakeCredentials().toData( version );
-                let keyData: DataConstr;
-                if ( version === "v3" ) {
-                    keyData = (
-                        credData.constr === BigInt(0)
-                        && Array.isArray( credData.fields )
-                        && credData.fields.length === 1
-                    ) ? credData.fields[0] as DataConstr : credData;
-                } else {
-                    keyData = new DataConstr( 0, [ credData ] );
-                }
+                const keyData: DataConstr = version === "v3"
+                    ? credData.fields[0] as DataConstr
+                    : credData;
                 return new DataPair( keyData, new DataI( amount ) );
             })
         );
