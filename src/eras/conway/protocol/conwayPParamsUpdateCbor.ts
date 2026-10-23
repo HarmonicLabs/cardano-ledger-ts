@@ -3,7 +3,8 @@ import { costModelsFromCbor, CostModels } from "@harmoniclabs/cardano-costmodels
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import {
     boundedRational, cborArray, cborInt, cborMapEntries, cborUInt, decodeVersionAtLeast, getDecodeVersion,
-    MAX_INT64, MAX_WORD16, MAX_WORD32, RationalBounds
+    MAX_INT64, MAX_WORD16, MAX_WORD32, RationalBounds,
+    isLenientDecoding
 } from "../../../utils/strictCbor";
 
 /**
@@ -66,7 +67,7 @@ function costModels( c: CborObj, what: string ): void
     for( const { k, v } of cborMapEntries( c, what ) )
     {
         const lang = Number( cborUInt( k, what, BigInt( 255 ) ) );
-        if( seen.has( lang ) ) throw new InvalidCborFormatError( what, `duplicate language ${lang}` );
+        if( seen.has( lang ) && !isLenientDecoding() ) throw new InvalidCborFormatError( what, `duplicate language ${lang}` );
         seen.add( lang );
         for( const x of cborArray( v, what ) ) cborInt( x, what );
     }
@@ -106,7 +107,7 @@ export function checkConwayPParamsUpdateCbor( cObj: CborObj ): CborMap
     for( const { k, v } of entries )
     {
         const key = Number( cborUInt( k, what ) );
-        if( seen.has( key ) ) throw new InvalidCborFormatError( what, `duplicate key ${key}` );
+        if( seen.has( key ) && !isLenientDecoding() ) throw new InvalidCborFormatError( what, `duplicate key ${key}` );
         seen.add( key );
         const check = conwayFields[key];
         if( check === undefined ) throw new InvalidCborFormatError( what, `unknown parameter key ${key}` );

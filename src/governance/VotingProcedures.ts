@@ -1,5 +1,5 @@
 import { getSubCborRef } from "../utils/getSubCborRef";
-import { cborMapEntries } from "../utils/strictCbor";
+import { cborMapEntries, isLenientDecoding } from "../utils/strictCbor";
 import { CborString, Cbor, CborObj, CborMap, SubCborRef } from "@harmoniclabs/cbor";
 import { roDescr } from "../utils/roDescr";
 import { IVoter, Voter, isIVoter } from "./Voter";
@@ -96,7 +96,7 @@ export class VotingProcedures
             cborMapEntries( cObj, "VotingProcedures" ).map(({ k, v }) => {
                 const voter = Voter.fromCborObj( k );
                 const vKey = voter.kind + ":" + voter.hash.toString();
-                if( seenVoters.has( vKey ) ) throw new Error("invalid CBOR for voting_procedures: duplicate voter");
+                if( seenVoters.has( vKey ) && !isLenientDecoding() ) throw new Error("invalid CBOR for voting_procedures: duplicate voter");
                 seenVoters.add( vKey );
                 const entries = cborMapEntries( v, "VotingProcedures votes" );
                 if( entries.length === 0 ) throw new Error("invalid CBOR for voting_procedures: voter without votes");
@@ -106,7 +106,7 @@ export class VotingProcedures
                     votes: entries.map(({ k: id, v: proc }) => {
                         const govActionId = TxOutRef.govActionIdFromCborObj( id );
                         const idKey = govActionId.toString();
-                        if( seenIds.has( idKey ) ) throw new Error("invalid CBOR for voting_procedures: duplicate gov action id");
+                        if( seenIds.has( idKey ) && !isLenientDecoding() ) throw new Error("invalid CBOR for voting_procedures: duplicate gov action id");
                         seenIds.add( idKey );
                         return { govActionId, vote: VotingProcedure.fromCborObj( proc ) };
                     })

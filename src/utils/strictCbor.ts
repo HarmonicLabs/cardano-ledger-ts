@@ -63,6 +63,68 @@ export function withDefaultDecodeVersion<T>( v: number, fn: () => T ): T
  */
 export const ERA_AGNOSTIC_DECODE_VERSION = 7;
 
+/**
+ * Decoding strictness.
+ *
+ * - `"strict"` (the default): every decoder accepts exactly what cardano-ledger accepts.
+ * - `"lenient"`: the CBOR *form* checks added in 0.6.0 are relaxed, so data that is well-formed
+ *   enough to read but not canonical decodes the way 0.5.x decoded it. Relaxed: definite-length
+ *   byte and text strings and records (indefinite ones are accepted), bignums and integer
+ *   ranges in fixed-width fields, extra elements after the expected ones, a missing tag where
+ *   one is expected (the untagged value is read), duplicate keys and set elements, empty
+ *   non-empty sets, text length bounds, and trailing bytes after the item.
+ *   Not relaxed: the type of each field, hash sizes, required fields, and the era rules gated by
+ *   protocol version (use `withDecodeVersion` for those).
+ *
+ * Use lenient decoding to read data a node would reject (explorers, debugging, data produced by
+ * older tools). Never use it to decide whether a transaction or block is valid.
+ */
+export type DecodeStrictness = "strict" | "lenient";
+
+let _defaultStrictness: DecodeStrictness = "strict";
+let _scopedStrictness: DecodeStrictness | undefined = undefined;
+
+/** the strictness decoders use right now */
+export function getDecodeStrictness(): DecodeStrictness
+{
+    return _scopedStrictness ?? _defaultStrictness;
+}
+
+/** `true` while decoders run in lenient mode */
+export function isLenientDecoding(): boolean
+{
+    return getDecodeStrictness() === "lenient";
+}
+
+/** sets the strictness used outside any `withDecodeStrictness` scope (process-wide; default "strict") */
+export function setDefaultDecodeStrictness( strictness: DecodeStrictness ): void
+{
+    if(!( strictness === "strict" || strictness === "lenient" ))
+    throw new Error("decode strictness must be \"strict\" or \"lenient\"");
+    _defaultStrictness = strictness;
+}
+
+/** runs `fn` with the given strictness (restored afterwards, also on throw) */
+export function withDecodeStrictness<T>( strictness: DecodeStrictness, fn: () => T ): T
+{
+    if(!( strictness === "strict" || strictness === "lenient" ))
+    throw new Error("decode strictness must be \"strict\" or \"lenient\"");
+    const prev = _scopedStrictness;
+    _scopedStrictness = strictness;
+    try {
+        return fn();
+    }
+    finally {
+        _scopedStrictness = prev;
+    }
+}
+
+/** `withDecodeStrictness( "lenient", fn )` */
+export function withLenientDecoding<T>( fn: () => T ): T
+{
+    return withDecodeStrictness( "lenient", fn );
+}
+
 const U64_MAX = BigInt("0xffffffffffffffff");
 export const MAX_WORD16 = BigInt( 0xffff );
 export const MAX_WORD32 = BigInt( 0xffffffff );
@@ -99,7 +161,7 @@ function fail( what: string, msg: string ): never
 export function definiteBytes( cObj: CborObj | undefined, what: string ): Uint8Array
 {
     if(!( cObj instanceof CborBytes )) fail( what, "expected a byte string" );
-    if( !cObj.isDefiniteLength && !decodeVersionAtLeast( 12 ) )
+    if( !cObj.isDefiniteLength && !decodeVersionAtLeast( 12 ) && !isLenientDecoding() )
         fail( what, "indefinite-length (chunked) byte strings are not allowed here" );
     return cObj.bytes;
 }
@@ -110,7 +172,7 @@ export function definiteText( cObj: CborObj | undefined, what: string ): string
     if(!( cObj instanceof CborText )) fail( what, "expected a text string" );
     const definite = ( cObj as any ).isDefiniteLength;
     const isDefinite = typeof definite === "boolean" ? definite : typeof ( cObj as any ).chunks === "string";
-    if( !isDefinite && !decodeVersionAtLeast( 12 ) )
+    if( !isDefinite && !decodeVersionAtLeast( 12 ) && !isLenientDecoding() )
         fail( what, "indefinite-length (chunked) text strings are not allowed here" );
     return cObj.text;
 }
@@ -130,8 +192,9 @@ export function fixedBytes( cObj: CborObj | undefined, len: number, what: string
 export function cborUInt( cObj: CborObj | undefined, what: string, max: bigint = U64_MAX ): bigint
 {
     if(!( cObj instanceof CborUInt )) fail( what, "expected an unsigned integer" );
-    if( isBigNum( cObj ) ) fail( what, "bignums are not allowed here" );
     const n = cObj.num;
+    if( isLenientDecoding() ) return n;
+    if( isBigNum( cObj ) ) fail( what, "bignums are not allowed here" );
     if( n > max ) fail( what, `integer ${n} out of range (max ${max})` );
     return n;
 }
@@ -153,8 +216,9 @@ export function cborUInt32( cObj: CborObj | undefined, what: string ): bigint
 export function cborInt( cObj: CborObj | undefined, what: string, min: bigint = MIN_INT64, max: bigint = MAX_INT64 ): bigint
 {
     if(!( cObj instanceof CborUInt || cObj instanceof CborNegInt )) fail( what, "expected an integer" );
-    if( isBigNum( cObj ) ) fail( what, "bignums are not allowed here" );
     const n = cObj.num;
+    if( isLenientDecoding() ) return n;
+    if( isBigNum( cObj ) ) fail( what, "bignums are not allowed here" );
     if( n < min || n > max ) fail( what, `integer ${n} out of range [${min}, ${max}]` );
     return n;
 }
@@ -182,9 +246,10 @@ export interface ArrayOpts {
 export function cborArray( cObj: CborObj | undefined, what: string, opts: ArrayOpts = {} ): CborObj[]
 {
     if(!( cObj instanceof CborArray )) fail( what, "expected an array" );
-    if( opts.definite && cObj.indefinite && !decodeVersionAtLeast( 12 ) )
+    const lenient = isLenientDecoding();
+    if( opts.definite && cObj.indefinite && !decodeVersionAtLeast( 12 ) && !lenient )
         fail( what, "indefinite-length arrays are not allowed here" );
-    if( typeof opts.len === "number" && cObj.array.length !== opts.len )
+    if( typeof opts.len === "number" && ( lenient ? cObj.array.length < opts.len : cObj.array.length !== opts.len ) )
         fail( what, `expected ${opts.len} elements, got ${cObj.array.length}` );
     return cObj.array;
 }
@@ -192,7 +257,11 @@ export function cborArray( cObj: CborObj | undefined, what: string, opts: ArrayO
 /** the payload of a tag, checking the tag number */
 export function expectTag( cObj: CborObj | undefined, tag: number, what: string ): CborObj
 {
-    if(!( cObj instanceof CborTag )) fail( what, `expected tag ${tag}` );
+    if(!( cObj instanceof CborTag ))
+    {
+        if( isLenientDecoding() && cObj !== undefined ) return cObj;
+        fail( what, `expected tag ${tag}` );
+    }
     if( Number( cObj.tag ) !== tag ) fail( what, `expected tag ${tag}, got tag ${cObj.tag}` );
     return cObj.data;
 }
@@ -223,7 +292,7 @@ export function sparseMapKeys( cObj: CborObj | undefined, what: string ): number
     for( const { k } of entries )
     {
         const n = Number( cborUInt( k, what ) );
-        if( seen.has( n ) ) fail( what, `duplicate key ${n}` );
+        if( seen.has( n ) && !isLenientDecoding() ) fail( what, `duplicate key ${n}` );
         seen.add( n );
         keys.push( n );
     }
@@ -238,7 +307,7 @@ export function parseCborFull( cStr: CanBeCborString, what: string ): CborObj
 {
     const bytes = forceCborString( cStr );
     const { parsed, offset } = Cbor.parseWithOffset( bytes, { keepRef: true } );
-    if( offset !== bytes.length )
+    if( offset !== bytes.length && !isLenientDecoding() )
         fail( what, `${bytes.length - offset} trailing bytes after the CBOR item` );
     return parsed;
 }
@@ -265,7 +334,7 @@ export function boundedText( cObj: CborObj | undefined, maxBytes: number, what: 
 {
     const t = definiteText( cObj, what );
     const n = new TextEncoder().encode( t ).length;
-    if( n > maxBytes ) fail( what, `text of ${n} bytes exceeds ${maxBytes}` );
+    if( n > maxBytes && !isLenientDecoding() ) fail( what, `text of ${n} bytes exceeds ${maxBytes}` );
     return t;
 }
 
@@ -297,7 +366,8 @@ export function recordSum( cObj: CborObj | undefined, what: string ): { tag: num
 
 export function expectSize( actual: number, expected: number, what: string ): void
 {
-    if( actual !== expected ) fail( what, `expected ${expected} elements, got ${actual}` );
+    if( isLenientDecoding() ? actual < expected : actual !== expected )
+        fail( what, `expected ${expected} elements, got ${actual}` );
 }
 
 export type RationalBounds = "unit" | "nonNegative" | "positiveUnit" | "positive";
@@ -404,14 +474,14 @@ export function cborSet( cObj: CborObj | undefined, what: string, opts: { nonEmp
         data = data.data;
     }
     const elems = cborArray( data, what );
-    if( opts.nonEmpty && elems.length === 0 ) fail( what, "empty set where a non-empty set is required" );
+    if( opts.nonEmpty && elems.length === 0 && !isLenientDecoding() ) fail( what, "empty set where a non-empty set is required" );
     return elems;
 }
 
 /** rejects repeated elements from protocol version 9 (`decodeSetEnforceNoDuplicates`, `decodeMap`) */
 export function noDuplicates<T>( items: T[], keyOf: ( x: T ) => string, what: string ): T[]
 {
-    if( !decodeVersionAtLeast( 9 ) ) return items;
+    if( !decodeVersionAtLeast( 9 ) || isLenientDecoding() ) return items;
     const seen = new Set<string>();
     for( const x of items )
     {
