@@ -22,8 +22,6 @@ import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 
-export { accountBalanceIntervalsToCborObj, accountBalanceIntervalsFromCborObj } from "./DijkstraAccountBalanceInterval";
-
 /**
  * CDDL (Dijkstra): `guards = nonempty_set<addr_keyhash>/ nonempty_oset<credential>`
  *
