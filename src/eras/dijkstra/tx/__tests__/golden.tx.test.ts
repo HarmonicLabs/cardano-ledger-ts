@@ -56,26 +56,22 @@ describe("Dijkstra golden transaction (upstream cardano-ledger)", () => {
         expect( (decoded.body.toCbor().toString()) ).toBe( tx.body.toCbor().toString() );
     });
 
-    // The golden body does NOT round-trip through our decoder — but the reason is
-    // the golden vector, not our implementation: its pool_registration cert carries
-    // a 2-byte pool_metadata hash, while the CDDL requires `metadata_hash = hash32`
-    // (bytes .size 32). Our Hash32 is correctly strict; real on-chain txs always
-    // carry 32-byte metadata hashes. This test PINS that exact cause so the
-    // distinction stays documented.
-    test("golden body fails only due to a size-invalid (2-byte) pool_metadata hash, not our logic", () => {
+    // The golden body does NOT decode with this library. KNOWN DRIFT, ours: cardano-ledger
+    // master keys `account_balance_intervals` (body key 26) by `credential`
+    // (`{+ credential => account_balance_interval}`), while DijkstraAccountBalanceInterval
+    // still follows the earlier draft (29-byte reward accounts, plus a key 27). Updating the
+    // Dijkstra shapes to the current CDDL is a follow-up; when it lands, this test should
+    // become a full decode / re-encode round trip of the golden body.
+    test("golden body is rejected because of the balance-interval key drift (credential keys upstream)", () => {
         const parsed = Cbor.parse( GOLDEN_HEX ) as CborArray;
-
-        // 1) confirm the offending value really is a 2-byte hash in a hash32 slot
         const body = parsed.array[0] as CborMap;
-        const certsV = body.map.find( e => Number((e.k as CborUInt).num) === 4 )!.v;
-        const certs = certsV instanceof CborTag ? (certsV.data as CborArray).array : (certsV as CborArray).array;
-        const poolReg = certs.find( (c: any) => Number(c.array[0].num) === 3 ) as CborArray;
-        const poolMetadata = poolReg.array[9] as CborArray; // [url, metadata_hash]
-        const metaHash = poolMetadata.array[1] as CborBytes;
-        expect( metaHash.bytes.length ).toBe( 2 );            // golden junk; CDDL wants 32
-        expect( metaHash.bytes.length ).not.toBe( 32 );
-
-        // 2) and that this is precisely what makes our strict decoder reject it
-        expect( () => DijkstraTxBody.fromCborObj( body ) ).toThrow( /Hash32.*length was: 2/ );
+        const abi = body.map.find( e => Number((e.k as CborUInt).num) === 26 )!.v as CborMap;
+        expect( abi.map.length ).toBeGreaterThan( 0 );
+        for( const { k } of abi.map ) {
+            // credential = [0, addr_keyhash] / [1, script_hash]
+            expect( k ).toBeInstanceOf( CborArray );
+            expect( (k as CborArray).array.length ).toBe( 2 );
+        }
+        expect( () => DijkstraTxBody.fromCborObj( body ) ).toThrow( /invalid reward account/ );
     });
 });
