@@ -1,17 +1,26 @@
 import { fromUtf8 } from '@harmoniclabs/uint8array-utils';
-import { costModelsFromCborObjViaBytes } from '../../conway/protocol/conwayPParamsUpdateCbor';
 import { toLocalCborObj } from '../../../utils/strictCbor';
 import { ExBudget, ExBudgetJson } from '@harmoniclabs/plutus-machine';
-import { freezeAll, isObject } from '@harmoniclabs/obj-utils';
+import { freezeAll, hasOwn, isObject } from '@harmoniclabs/obj-utils';
 import { Data, DataB, DataConstr, DataI, DataList, DataMap, DataPair } from '@harmoniclabs/plutus-data';
-import { CborPositiveRational, CborUInt, CborObj, CborMapEntry, CborMap, CborArray, CborNegInt, CborBytes, CborTag, CborText } from '@harmoniclabs/cbor';
-import { CostModels, costModelsFromCborObj, costModelsToCborObj, costModelsToJson, defaultV1Costs, defaultV2Costs, defaultV3Costs, isCostModels } from '@harmoniclabs/cardano-costmodels-ts';
+import { CborPositiveRational, CborUInt, CborObj, CborMapEntry, CborMap, CborArray, CborNegInt, CborBytes, CborTag, CborText, CborSimple } from '@harmoniclabs/cbor';
+import { CostModels, costModelsToCborObj, costModelsToJson, defaultV1Costs, defaultV2Costs, defaultV3Costs, isCostModels, toCostModelV1, toCostModelV2, toCostModelV3 } from '@harmoniclabs/cardano-costmodels-ts';
+import { defaultDijkstraPlutusV4CostModel, DIJKSTRA_PLUTUS_V4_COST_MODEL_LENGTH } from './DijkstraV4CostModel';
 import type { Epoch } from '../../common/ledger/Epoch';
 import type { Coin } from '../../common/ledger/Coin';
-import { CanBeUInteger, canBeUInteger, forceBigUInt } from '../../../utils/ints';
+import { CanBeUInteger } from '../../../utils/ints';
 import { DijkstraPParamsPoolVotingThresholds, isDijkstraPParamsPoolVotingThresholds, dijkstraPoolVotingThresholdsToCborObj, tryGetDijkstraPParamsPoolVotingThresholdsFromCborObj } from './DijkstraPParamsPoolVotingThresholds';
 import { DijkstraPParamsDrepVotingThresholds, isDijkstraPParamsDrepVotingThresholds, dijkstraDrepVotingThresholdsToCborObj, tryGetDijkstraPParamsDrepVotingThresholdsFromCborObj } from './DijkstraPParamsDrepVotingThresholds';
 import { Rational, isRational, isRationalOrUndefined, tryCborFromRational } from '../../common';
+
+export interface DijkstraCostModels extends CostModels {
+	/**
+	 * Plutus V4 cost model (`cost_models` language key 3), raw int64 values.
+	 * `cardano-ledger` reuses the Plutus V3 parameter names and initialises
+	 * genesis files with 251 values; PP updates may carry more.
+	 */
+	PlutusScriptV4?: number[];
+}
 
 export interface DijkstraProtocolParameters {
 	txFeePerByte: CanBeUInteger;
@@ -30,7 +39,7 @@ export interface DijkstraProtocolParameters {
 	// protocolVersion?: IProtocolVersion,
 	minPoolCost: Coin;
 	utxoCostPerByte: Coin;
-	costModels: CostModels;
+	costModels: DijkstraCostModels;
 	executionUnitPrices:
 		| [mem_price: CborPositiveRational, step_price: CborPositiveRational]
 		| {
@@ -52,6 +61,152 @@ export interface DijkstraProtocolParameters {
 	drepDeposit: Coin;
 	drepActivityPeriod: Epoch;
 	minfeeRefScriptCostPerByte: Rational;
+	// Dijkstra reference-script limits and cost function (keys 34-37)
+	maxRefScriptSizePerBlock?: CanBeUInteger;
+	maxRefScriptSizePerTx?: CanBeUInteger;
+	refScriptCostStride?: CanBeUInteger;
+	refScriptCostMultiplier?: Rational;
+	// Dijkstra stake-pool economics (keys 38-39)
+	maxPledgeLeverage?: Rational | null;
+	minPoolMargin?: Rational;
+	// Linear Leios (keys 40-44)
+	leiosAnnouncementPeriodLength?: CanBeUInteger;
+	leiosVotePeriodLength?: CanBeUInteger;
+	leiosDiffusionPeriodLength?: CanBeUInteger;
+	leiosCommitteeSize?: CanBeUInteger;
+	leiosQuorumStakeThreshold?: Rational;
+	// Endorser-block limits (keys 45-48)
+	maxEndorserBlockReferencesSize?: CanBeUInteger;
+	maxEndorserBlockTxsSize?: CanBeUInteger;
+	maxEndorserBlockExecutionUnits?: ExBudget | ExBudgetJson;
+	maxRefScriptSizePerEndorserBlock?: CanBeUInteger;
+	// Peras codec extensions (keys 49-54), inactive until the phase-2 fork
+	perasMinCandidateBlockAge?: CanBeUInteger;
+	perasHealingFactor?: Rational;
+	perasCertBoost?: CanBeUInteger;
+	perasTargetCommitteeSize?: CanBeUInteger;
+	perasBootstrapRound?: CanBeUInteger | null;
+	perasQuorumThresholdSafetyMargin?: Rational;
+	// Reference-input fee function (keys 55-56)
+	refInputsCostPerMultiAssetPolicy?: Coin;
+	refInputsCostPerDatumByte?: Coin;
+}
+
+function isInt64Value( n: any ): n is number | bigint
+{
+	const MIN = BigInt( "-9223372036854775808" ), MAX = BigInt( "9223372036854775807" );
+	if( typeof n === "bigint" ) return n >= MIN && n <= MAX;
+	return typeof n === "number" && Number.isSafeInteger( n ) && n >= Number( MIN ) && n <= Number( MAX );
+}
+
+/** `cost_models` may carry Plutus V1/V2/V3 (cardano-costmodels-ts) and Dijkstra's V4 raw array (key 3). */
+export function isDijkstraCostModels( something: any ): something is DijkstraCostModels
+{
+	if( !isObject( something ) ) return false;
+	const hasBase = isCostModels( something );
+	const hasV4 = hasOwn( something, 'PlutusScriptV4' );
+	if( !hasBase && !hasV4 ) return false;
+	if( hasV4 )
+	{
+		const v4 = something.PlutusScriptV4;
+		if( !Array.isArray( v4 ) || !v4.every( isInt64Value ) ) return false;
+	}
+	return true;
+}
+
+const MAX_UINT64 = BigInt( "18446744073709551615" );
+
+/** exact non-negative uint64: bigint, or a safe-integer number (coins exceed uint32 as numbers) */
+function isUInt64Value( value: any ): value is number | bigint
+{
+	if( typeof value === "bigint" ) return value >= BigInt( 0 ) && value <= MAX_UINT64;
+	if( typeof value !== "number" ) return false;
+	if( !Number.isSafeInteger( value ) || value < 0 ) return false;
+	const n = BigInt( value );
+	return n >= BigInt( 0 ) && n <= MAX_UINT64;
+}
+
+function bigUIntOf( n: CanBeUInteger ): bigint
+{
+	if( typeof n === "bigint" )
+	{
+		if( n < BigInt( 0 ) || n > MAX_UINT64 ) throw new Error( "uint64 out of range" );
+		return n;
+	}
+	if( typeof n === "number" && Number.isSafeInteger( n ) && n >= 0 )
+	return BigInt( n );
+	throw new Error( "invalid uint64: expected a non-negative safe integer or bigint" );
+}
+
+function isUIntOrUndefined( value: any ): boolean
+{
+	return value === undefined || isUInt64Value( value );
+}
+
+function isUIntRangeOrUndefined( value: any, max: bigint ): boolean
+{
+	if( value === undefined ) return true;
+	if( !isUInt64Value( value ) ) return false;
+	const n = bigUIntOf( value );
+	return n >= BigInt( 0 ) && n <= max;
+}
+
+function isUInt32OrUndefined( value: any ): boolean
+{
+	return isUIntRangeOrUndefined( value, BigInt( 0xffffffff ) );
+}
+
+function isUInt16OrUndefined( value: any ): boolean
+{
+	return isUIntRangeOrUndefined( value, BigInt( 0xffff ) );
+}
+
+function isPositiveUInt32OrUndefined( value: any ): boolean
+{
+	if( value === undefined ) return true;
+	if( !isUInt64Value( value ) ) return false;
+	const n = bigUIntOf( value );
+	return n >= BigInt( 1 ) && n <= BigInt( 0xffffffff );
+}
+
+function isRationalOrNullOrUndefined( value: any ): boolean
+{
+	return value === undefined || value === null || isRational( value );
+}
+
+function isExBudgetOrJsonOrUndefined( value: any ): boolean
+{
+	return value === undefined || value instanceof ExBudget || ExBudget.isJson( value );
+}
+
+function hasValidOptionalDijkstraFields( pp: Partial<DijkstraProtocolParameters> ): boolean
+{
+	if( pp.costModels !== undefined && !isDijkstraCostModels( pp.costModels ) ) return false;
+
+	if( ![
+		'maxRefScriptSizePerBlock', 'maxRefScriptSizePerTx',
+		'leiosAnnouncementPeriodLength', 'leiosVotePeriodLength', 'leiosDiffusionPeriodLength',
+		'maxEndorserBlockReferencesSize', 'maxEndorserBlockTxsSize', 'maxRefScriptSizePerEndorserBlock',
+		'perasMinCandidateBlockAge',
+	].every( ( k ) => isUInt32OrUndefined( pp[k as keyof DijkstraProtocolParameters] ) ) ) return false;
+
+	if( ![
+		'leiosCommitteeSize', 'perasCertBoost', 'perasTargetCommitteeSize',
+	].every( ( k ) => isUInt16OrUndefined( pp[k as keyof DijkstraProtocolParameters] ) ) ) return false;
+
+	if( !isPositiveUInt32OrUndefined( pp.refScriptCostStride ) ) return false;
+	if( !isRationalOrNullOrUndefined( pp.refScriptCostMultiplier ) ) return false;
+	if( !isRationalOrNullOrUndefined( pp.minPoolMargin ) ) return false;
+	if( !isRationalOrNullOrUndefined( pp.leiosQuorumStakeThreshold ) ) return false;
+	if( !isRationalOrNullOrUndefined( pp.perasHealingFactor ) ) return false;
+	if( !isRationalOrNullOrUndefined( pp.perasQuorumThresholdSafetyMargin ) ) return false;
+	if( !( pp.maxPledgeLeverage === undefined || pp.maxPledgeLeverage === null || isRational( pp.maxPledgeLeverage ) ) ) return false;
+	if( !isExBudgetOrJsonOrUndefined( pp.maxEndorserBlockExecutionUnits ) ) return false;
+	if( !( pp.perasBootstrapRound === undefined || pp.perasBootstrapRound === null || isUInt32OrUndefined( pp.perasBootstrapRound ) ) ) return false;
+	if( !isUIntOrUndefined( pp.refInputsCostPerMultiAssetPolicy ) ) return false;
+	if( !isUIntOrUndefined( pp.refInputsCostPerDatumByte ) ) return false;
+
+	return true;
 }
 
 export function isDijkstraProtocolParameters(something: any): something is DijkstraProtocolParameters {
@@ -96,7 +251,7 @@ export function isDijkstraProtocolParameters(something: any): something is Dijks
 
 	const pp: DijkstraProtocolParameters = something;
 
-	if (!(['txFeePerByte', 'txFeeFixed', 'maxBlockBodySize', 'maxTxSize', 'maxBlockHeaderSize', 'stakeAddressDeposit', 'stakePoolDeposit', 'poolRetireMaxEpoch', 'stakePoolTargetNum', 'minPoolCost', 'utxoCostPerByte', 'maxValueSize', 'collateralPercentage', 'maxCollateralInputs', 'minCommitteSize', 'committeeTermLimit', 'governanceActionValidityPeriod', 'governanceActionDeposit', 'drepDeposit', 'drepActivityPeriod'] as const).every((uintKey) => canBeUInteger(pp[uintKey]))) return false;
+	if (!(['txFeePerByte', 'txFeeFixed', 'maxBlockBodySize', 'maxTxSize', 'maxBlockHeaderSize', 'stakeAddressDeposit', 'stakePoolDeposit', 'poolRetireMaxEpoch', 'stakePoolTargetNum', 'minPoolCost', 'utxoCostPerByte', 'maxValueSize', 'collateralPercentage', 'maxCollateralInputs', 'minCommitteSize', 'committeeTermLimit', 'governanceActionValidityPeriod', 'governanceActionDeposit', 'drepDeposit', 'drepActivityPeriod'] as const).every((uintKey) => isUInt64Value(pp[uintKey]))) return false;
 
 	if (!(isRational(pp.poolPledgeInfluence) && isRational(pp.monetaryExpansion) && isRational(pp.treasuryCut) && isRational(pp.minfeeRefScriptCostPerByte))) return false;
 
@@ -106,7 +261,9 @@ export function isDijkstraProtocolParameters(something: any): something is Dijks
 
 	if (!(pp.maxTxExecutionUnits instanceof ExBudget || (ExBudget.isJson(pp.maxTxExecutionUnits) && pp.maxBlockExecutionUnits instanceof ExBudget) || ExBudget.isJson(pp.maxBlockExecutionUnits))) return false;
 
-	if (!(isCostModels(pp.costModels) && isDijkstraPParamsPoolVotingThresholds(pp.poolVotingThresholds) && isDijkstraPParamsDrepVotingThresholds(pp.drepVotingThresholds))) return false;
+	if (!(isDijkstraCostModels(pp.costModels) && isDijkstraPParamsPoolVotingThresholds(pp.poolVotingThresholds) && isDijkstraPParamsDrepVotingThresholds(pp.drepVotingThresholds))) return false;
+
+	if (!hasValidOptionalDijkstraFields(pp)) return false;
 
 	return true;
 }
@@ -116,7 +273,7 @@ export function isPartialDijkstraProtocolParameters(something: object): somethin
 
 	const pp: Partial<DijkstraProtocolParameters> = something;
 
-	if (!(['txFeePerByte', 'txFeeFixed', 'maxBlockBodySize', 'maxTxSize', 'maxBlockHeaderSize', 'stakeAddressDeposit', 'stakePoolDeposit', 'poolRetireMaxEpoch', 'stakePoolTargetNum', 'minPoolCost', 'utxoCostPerByte', 'maxValueSize', 'collateralPercentage', 'maxCollateralInputs', 'minCommitteSize', 'committeeTermLimit', 'governanceActionValidityPeriod', 'governanceActionDeposit', 'drepDeposit', 'drepActivityPeriod'] as const).every((uintKey) => pp[uintKey] === undefined || canBeUInteger(pp[uintKey]))) return false;
+	if (!(['txFeePerByte', 'txFeeFixed', 'maxBlockBodySize', 'maxTxSize', 'maxBlockHeaderSize', 'stakeAddressDeposit', 'stakePoolDeposit', 'poolRetireMaxEpoch', 'stakePoolTargetNum', 'minPoolCost', 'utxoCostPerByte', 'maxValueSize', 'collateralPercentage', 'maxCollateralInputs', 'minCommitteSize', 'committeeTermLimit', 'governanceActionValidityPeriod', 'governanceActionDeposit', 'drepDeposit', 'drepActivityPeriod'] as const).every((uintKey) => isUInt64Value(pp[uintKey]))) return false;
 
 	if (!(isRationalOrUndefined(pp.poolPledgeInfluence) && isRationalOrUndefined(pp.monetaryExpansion) && isRationalOrUndefined(pp.treasuryCut) && isRationalOrUndefined(pp.minfeeRefScriptCostPerByte))) return false;
 
@@ -126,7 +283,9 @@ export function isPartialDijkstraProtocolParameters(something: object): somethin
 
 	if (!((pp.maxTxExecutionUnits === undefined || pp.maxTxExecutionUnits instanceof ExBudget || ExBudget.isJson(pp.maxTxExecutionUnits)) && (pp.maxBlockExecutionUnits === undefined || pp.maxBlockExecutionUnits instanceof ExBudget || ExBudget.isJson(pp.maxBlockExecutionUnits)))) return false;
 
-	if (!((pp.costModels === undefined || isCostModels(pp.costModels)) && (pp.poolVotingThresholds === undefined || isDijkstraPParamsPoolVotingThresholds(pp.poolVotingThresholds)) && (pp.drepVotingThresholds === undefined || isDijkstraPParamsDrepVotingThresholds(pp.drepVotingThresholds)))) return false;
+	if (!((pp.costModels === undefined || isDijkstraCostModels(pp.costModels)) && (pp.poolVotingThresholds === undefined || isDijkstraPParamsPoolVotingThresholds(pp.poolVotingThresholds)) && (pp.drepVotingThresholds === undefined || isDijkstraPParamsDrepVotingThresholds(pp.drepVotingThresholds)))) return false;
+
+	if (!hasValidOptionalDijkstraFields(pp)) return false;
 
 	return true;
 }
@@ -136,12 +295,34 @@ function mapUIntEntryOrUndefined(tag: number, a: CanBeUInteger | undefined): { k
 		? undefined
 		: {
 				k: new CborUInt(tag),
-				v: new CborUInt(forceBigUInt(a)),
+				v: new CborUInt(bigUIntOf(a)),
 			};
 }
 
 function fromUIntOrUndef(n: CborObj | undefined): bigint | undefined {
 	return n instanceof CborUInt ? n.num : undefined;
+}
+
+function fromUInt16OrUndef(n: CborObj | undefined): number | undefined {
+	if (!(n instanceof CborUInt) || n.num > BigInt(0xffff)) return undefined;
+	return Number(n.num);
+}
+
+function fromUInt32OrUndef(n: CborObj | undefined): number | undefined {
+	if (!(n instanceof CborUInt) || n.num > BigInt(0xffffffff)) return undefined;
+	return Number(n.num);
+}
+
+function fromNilOrUInt32OrUndef(n: CborObj | undefined): number | null | undefined {
+	if (n === undefined) return undefined;
+	if (n instanceof CborSimple && n.simple === null) return null;
+	return fromUInt32OrUndef(n);
+}
+
+function fromRationalOrNullOrUndef(n: CborObj | undefined): Rational | null | undefined {
+	if (n === undefined) return undefined;
+	if (n instanceof CborSimple && n.simple === null) return null;
+	return CborPositiveRational.fromCborObjOrUndef(n);
 }
 
 function kv(k: number, v: CborObj | undefined): CborMapEntry | undefined {
@@ -153,10 +334,99 @@ function kv(k: number, v: CborObj | undefined): CborMapEntry | undefined {
 			};
 }
 
+function mapUInt16EntryOrUndefined(tag: number, a: CanBeUInteger | undefined): CborMapEntry | undefined {
+	if (a === undefined) return undefined;
+	const n = bigUIntOf(a);
+	if (n > BigInt(0xffff)) throw new Error(`Dijkstra PP key ${tag}: uint16 out of range`);
+	return { k: new CborUInt(tag), v: new CborUInt(n) };
+}
+
+function mapUInt32EntryOrUndefined(tag: number, a: CanBeUInteger | undefined): CborMapEntry | undefined {
+	if (a === undefined) return undefined;
+	const n = bigUIntOf(a);
+	if (n > BigInt(0xffffffff)) throw new Error(`Dijkstra PP key ${tag}: uint32 out of range`);
+	return { k: new CborUInt(tag), v: new CborUInt(n) };
+}
+
+function mapPositiveUInt32EntryOrUndefined(tag: number, a: CanBeUInteger | undefined): CborMapEntry | undefined {
+	if (a === undefined) return undefined;
+	const n = bigUIntOf(a);
+	if (n < BigInt(1) || n > BigInt(0xffffffff)) throw new Error(`Dijkstra PP key ${tag}: positive uint32 out of range`);
+	return { k: new CborUInt(tag), v: new CborUInt(n) };
+}
+
+function mapNilOrUInt32EntryOrUndefined(tag: number, a: CanBeUInteger | null | undefined): CborMapEntry | undefined {
+	if (a === undefined) return undefined;
+	if (a === null) return { k: new CborUInt(tag), v: new CborSimple(null) };
+	return mapUInt32EntryOrUndefined(tag, a);
+}
+
+function kvRationalOrNull(tag: number, r: Rational | null | undefined, allowNull: boolean): CborMapEntry | undefined {
+	if (r === undefined) return undefined;
+	if (r === null) {
+		if (!allowNull) throw new Error(`Dijkstra PP key ${tag}: null not allowed`);
+		return { k: new CborUInt(tag), v: new CborSimple(null) };
+	}
+	const cbor = tryCborFromRational(r);
+	if (cbor === undefined) throw new Error(`Dijkstra PP key ${tag}: invalid rational`);
+	return { k: new CborUInt(tag), v: cbor };
+}
+
+function costModelIntToCbor(n: number | bigint): CborObj {
+	if (typeof n === "bigint") {
+		if (n < BigInt("-9223372036854775808") || n > BigInt("9223372036854775807")) throw new Error("PlutusV4 cost model value out of int64 range");
+		return n < BigInt(0) ? new CborNegInt(n) : new CborUInt(n);
+	}
+	if (!Number.isSafeInteger(n) || n < -9223372036854775808 || n > 9223372036854775807) throw new Error("PlutusV4 cost model value out of int64 range");
+	return n < 0 ? new CborNegInt(n) : new CborUInt(n);
+}
+
+function dijkstraCostModelsToCborObj(costModels: DijkstraCostModels): CborMap {
+	const base = toLocalCborObj(costModelsToCborObj(costModels)) as CborMap;
+	const entries = base.map.slice();
+	const v4 = costModels.PlutusScriptV4;
+	if (v4 !== undefined) {
+		entries.push({
+			k: new CborUInt(3),
+			v: new CborArray(v4.map(costModelIntToCbor)),
+		});
+	}
+	return new CborMap(entries);
+}
+
+export function dijkstraCostModelsFromCborObj(cObj: CborObj | undefined): DijkstraCostModels | undefined {
+	if (cObj === undefined) return undefined;
+	if (!(cObj instanceof CborMap)) return undefined;
+	const seen = new Set<number>();
+	let v4: number[] | undefined;
+	const base: CostModels = {};
+
+	for (const entry of cObj.map) {
+		const { k, v } = entry;
+		if (!(k instanceof CborUInt)) return undefined;
+		const language = Number(k.num);
+		if (language > 255 || seen.has(language)) return undefined;
+		seen.add(language);
+
+		if (!(v instanceof CborArray)) return undefined;
+		const values: number[] = [];
+		for (const value of v.array) {
+			if (!(value instanceof CborUInt || value instanceof CborNegInt)) return undefined;
+			values.push(Number(value.num));
+		}
+
+		if (language === 3) v4 = values;
+		else if (language === 0) base.PlutusScriptV1 = toCostModelV1(values as any) as any;
+		else if (language === 1) base.PlutusScriptV2 = toCostModelV2(values as any) as any;
+		else if (language === 2) base.PlutusScriptV3 = toCostModelV3(values as any) as any;
+	}
+
+	if (base.PlutusScriptV1 === undefined && base.PlutusScriptV2 === undefined && base.PlutusScriptV3 === undefined && v4 === undefined) return undefined;
+	return { ...base, ...(v4 === undefined ? {} : { PlutusScriptV4: v4 }) } as DijkstraCostModels;
+}
+
 export function partialDijkstraProtocolParametersToCborObj(pps: Partial<DijkstraProtocolParameters>): CborMap {
 	const { executionUnitPrices, maxTxExecutionUnits, maxBlockExecutionUnits, costModels } = pps;
-
-	const costModelsKeys = Object.keys(costModels ?? {});
 
 	return new CborMap(
 		[
@@ -174,7 +444,7 @@ export function partialDijkstraProtocolParametersToCborObj(pps: Partial<Dijkstra
 			kv(11, tryCborFromRational(pps.treasuryCut)),
 			mapUIntEntryOrUndefined(16, pps.minPoolCost),
 			mapUIntEntryOrUndefined(17, pps.utxoCostPerByte),
-			kv(18, costModels === undefined ? undefined : toLocalCborObj(costModelsToCborObj(costModels))),
+			kv(18, costModels === undefined ? undefined : dijkstraCostModelsToCborObj(costModels)),
 			executionUnitPrices === undefined ? undefined : kv(19, Array.isArray(executionUnitPrices) ? new CborArray(executionUnitPrices) : new CborArray([CborPositiveRational.fromNumber(executionUnitPrices.priceMemory), CborPositiveRational.fromNumber(executionUnitPrices.priceSteps)])),
 			kv(20, ExBudget.isJson(maxTxExecutionUnits) ? ExBudget.fromJson(maxTxExecutionUnits).toCborObj() : maxTxExecutionUnits?.toCborObj()),
 			kv(21, ExBudget.isJson(maxBlockExecutionUnits) ? ExBudget.fromJson(maxBlockExecutionUnits).toCborObj() : maxBlockExecutionUnits?.toCborObj()),
@@ -190,6 +460,29 @@ export function partialDijkstraProtocolParametersToCborObj(pps: Partial<Dijkstra
 			mapUIntEntryOrUndefined(31, pps.drepDeposit),
 			mapUIntEntryOrUndefined(32, pps.drepActivityPeriod),
 			kv(33, tryCborFromRational(pps.minfeeRefScriptCostPerByte)),
+			mapUInt32EntryOrUndefined(34, pps.maxRefScriptSizePerBlock),
+			mapUInt32EntryOrUndefined(35, pps.maxRefScriptSizePerTx),
+			mapPositiveUInt32EntryOrUndefined(36, pps.refScriptCostStride),
+			kvRationalOrNull(37, pps.refScriptCostMultiplier, false),
+			kvRationalOrNull(38, pps.maxPledgeLeverage, true),
+			kvRationalOrNull(39, pps.minPoolMargin, false),
+			mapUInt32EntryOrUndefined(40, pps.leiosAnnouncementPeriodLength),
+			mapUInt32EntryOrUndefined(41, pps.leiosVotePeriodLength),
+			mapUInt32EntryOrUndefined(42, pps.leiosDiffusionPeriodLength),
+			mapUInt16EntryOrUndefined(43, pps.leiosCommitteeSize),
+			kvRationalOrNull(44, pps.leiosQuorumStakeThreshold, false),
+			mapUInt32EntryOrUndefined(45, pps.maxEndorserBlockReferencesSize),
+			mapUInt32EntryOrUndefined(46, pps.maxEndorserBlockTxsSize),
+			kv(47, ExBudget.isJson(pps.maxEndorserBlockExecutionUnits) ? ExBudget.fromJson(pps.maxEndorserBlockExecutionUnits).toCborObj() : pps.maxEndorserBlockExecutionUnits?.toCborObj()),
+			mapUInt32EntryOrUndefined(48, pps.maxRefScriptSizePerEndorserBlock),
+			mapUInt32EntryOrUndefined(49, pps.perasMinCandidateBlockAge),
+			kvRationalOrNull(50, pps.perasHealingFactor, false),
+			mapUInt16EntryOrUndefined(51, pps.perasCertBoost),
+			mapUInt16EntryOrUndefined(52, pps.perasTargetCommitteeSize),
+			mapNilOrUInt32EntryOrUndefined(53, pps.perasBootstrapRound),
+			kvRationalOrNull(54, pps.perasQuorumThresholdSafetyMargin, false),
+			mapUIntEntryOrUndefined(55, pps.refInputsCostPerMultiAssetPolicy),
+			mapUIntEntryOrUndefined(56, pps.refInputsCostPerDatumByte),
 		].filter((elem) => elem !== undefined) as CborMapEntry[]
 	);
 }
@@ -220,15 +513,18 @@ function cborToDataLitteral(cbor: CborObj): Data {
 	if (cbor instanceof CborTag) {
 		return cborToDataLitteral(cbor.data);
 	}
+	if (cbor instanceof CborSimple && cbor.simple === null) {
+		return new DataConstr(1, []); // Nothing
+	}
 	throw new Error('unsupported cbor for literal data');
 }
 
-const maxProtocolParamsEntries = 34;
+const maxProtocolParamsEntries = 57;
 
 export function partialDijkstraProtocolParametersFromCborObj(cObj: CborObj): Partial<DijkstraProtocolParameters> {
 	if (!(cObj instanceof CborMap)) throw new Error(`Invalid CBOR format for "Partial<DijkstraProtocolParameters>"`);
 
-	let fields: (CborObj | undefined)[] = new Array(maxProtocolParamsEntries).fill(undefined);
+	let fields: (CborObj | undefined)[] = new Array(maxProtocolParamsEntries + 1).fill(undefined);
 
 	for (let i = 0; i <= maxProtocolParamsEntries; i++) {
 		const { v } = (cObj as CborMap).map.find(({ k }) => k instanceof CborUInt && Number(k.num) === i) ?? { v: undefined };
@@ -273,6 +569,29 @@ export function partialDijkstraProtocolParametersFromCborObj(cObj: CborObj): Par
 		_drepDeposit, // 31: drepDeposit (Dijkstra)
 		_drepActivityPeriod, // 32: drepActivityPeriod (Dijkstra)
 		_minfeeRefScriptCostPerByte, // 33: minfeeRefScriptCostPerByte (Dijkstra)
+		_maxRefScriptSizePerBlock, // 34: maxRefScriptSizePerBlock
+		_maxRefScriptSizePerTx, // 35: maxRefScriptSizePerTx
+		_refScriptCostStride, // 36: refScriptCostStride
+		_refScriptCostMultiplier, // 37: refScriptCostMultiplier
+		_maxPledgeLeverage, // 38: maxPledgeLeverage
+		_minPoolMargin, // 39: minPoolMargin
+		_leiosAnnouncementPeriodLength, // 40
+		_leiosVotePeriodLength, // 41
+		_leiosDiffusionPeriodLength, // 42
+		_leiosCommitteeSize, // 43
+		_leiosQuorumStakeThreshold, // 44
+		_maxEndorserBlockReferencesSize, // 45
+		_maxEndorserBlockTxsSize, // 46
+		_maxEndorserBlockExecutionUnits, // 47
+		_maxRefScriptSizePerEndorserBlock, // 48
+		_perasMinCandidateBlockAge, // 49
+		_perasHealingFactor, // 50
+		_perasCertBoost, // 51
+		_perasTargetCommitteeSize, // 52
+		_perasBootstrapRound, // 53
+		_perasQuorumThresholdSafetyMargin, // 54
+		_refInputsCostPerMultiAssetPolicy, // 55
+		_refInputsCostPerDatumByte, // 56
 	] = fields;
 
 	let executionUnitPrices: [CborPositiveRational, CborPositiveRational] | undefined = undefined;
@@ -282,7 +601,7 @@ export function partialDijkstraProtocolParametersFromCborObj(cObj: CborObj): Par
 		executionUnitPrices = mem_price !== undefined && cpu_price !== undefined ? [mem_price, cpu_price] : undefined;
 	}
 
-	const _costModels = costModelsFromCborObjViaBytes(_costmdls);
+	const _costModels = dijkstraCostModelsFromCborObj(_costmdls);
 
 	return {
 		txFeePerByte: fromUIntOrUndef(_minFeeCoeff),
@@ -315,6 +634,29 @@ export function partialDijkstraProtocolParametersFromCborObj(cObj: CborObj): Par
 		drepDeposit: fromUIntOrUndef(_drepDeposit),
 		drepActivityPeriod: fromUIntOrUndef(_drepActivityPeriod),
 		minfeeRefScriptCostPerByte: CborPositiveRational.fromCborObjOrUndef(_minfeeRefScriptCostPerByte),
+		maxRefScriptSizePerBlock: fromUInt32OrUndef(_maxRefScriptSizePerBlock),
+		maxRefScriptSizePerTx: fromUInt32OrUndef(_maxRefScriptSizePerTx),
+		refScriptCostStride: fromUInt32OrUndef(_refScriptCostStride),
+		refScriptCostMultiplier: CborPositiveRational.fromCborObjOrUndef(_refScriptCostMultiplier),
+		maxPledgeLeverage: fromRationalOrNullOrUndef(_maxPledgeLeverage),
+		minPoolMargin: CborPositiveRational.fromCborObjOrUndef(_minPoolMargin),
+		leiosAnnouncementPeriodLength: fromUInt32OrUndef(_leiosAnnouncementPeriodLength),
+		leiosVotePeriodLength: fromUInt32OrUndef(_leiosVotePeriodLength),
+		leiosDiffusionPeriodLength: fromUInt32OrUndef(_leiosDiffusionPeriodLength),
+		leiosCommitteeSize: fromUInt16OrUndef(_leiosCommitteeSize),
+		leiosQuorumStakeThreshold: CborPositiveRational.fromCborObjOrUndef(_leiosQuorumStakeThreshold),
+		maxEndorserBlockReferencesSize: fromUInt32OrUndef(_maxEndorserBlockReferencesSize),
+		maxEndorserBlockTxsSize: fromUInt32OrUndef(_maxEndorserBlockTxsSize),
+		maxEndorserBlockExecutionUnits: _maxEndorserBlockExecutionUnits === undefined ? undefined : ExBudget.fromCborObj(_maxEndorserBlockExecutionUnits),
+		maxRefScriptSizePerEndorserBlock: fromUInt32OrUndef(_maxRefScriptSizePerEndorserBlock),
+		perasMinCandidateBlockAge: fromUInt32OrUndef(_perasMinCandidateBlockAge),
+		perasHealingFactor: CborPositiveRational.fromCborObjOrUndef(_perasHealingFactor),
+		perasCertBoost: fromUInt16OrUndef(_perasCertBoost),
+		perasTargetCommitteeSize: fromUInt16OrUndef(_perasTargetCommitteeSize),
+		perasBootstrapRound: fromNilOrUInt32OrUndef(_perasBootstrapRound),
+		perasQuorumThresholdSafetyMargin: CborPositiveRational.fromCborObjOrUndef(_perasQuorumThresholdSafetyMargin),
+		refInputsCostPerMultiAssetPolicy: fromUIntOrUndef(_refInputsCostPerMultiAssetPolicy),
+		refInputsCostPerDatumByte: fromUIntOrUndef(_refInputsCostPerDatumByte),
 	};
 }
 
@@ -336,7 +678,8 @@ export const defaultDijkstraProtocolParameters: DijkstraProtocolParameters = fre
 	costModels: {
 		PlutusScriptV1: defaultV1Costs, // Plutus V1 cost model (from Alonzo)
 		PlutusScriptV2: defaultV2Costs, // Plutus V2 cost model (from Babbage/Vasil)
-		PlutusScriptV3: defaultV3Costs, // Plutus V3, potentially introduced or updated in Dijkstra or prior
+		PlutusScriptV3: defaultV3Costs, // Plutus V3 cost model
+		PlutusScriptV4: defaultDijkstraPlutusV4CostModel.slice(0, DIJKSTRA_PLUTUS_V4_COST_MODEL_LENGTH), // Dijkstra initial V4 model (251 values)
 	},
 	executionUnitPrices: [
 		CborPositiveRational.fromNumber(0.0577), // Memory price (historical approximation)
@@ -377,7 +720,38 @@ export const defaultDijkstraProtocolParameters: DijkstraProtocolParameters = fre
 	drepDeposit: 500_000_000, // 500 ADA, deposit for DRep registration
 	drepActivityPeriod: 20, // Epochs, activity period for DReps before becoming inactive
 	minfeeRefScriptCostPerByte: CborPositiveRational.fromNumber(15.0), // Cost per byte for reference scripts (approximation)
+	maxRefScriptSizePerBlock: 1_048_576, // Conway fixed default; Dijkstra makes it a protocol parameter
+	maxRefScriptSizePerTx: 204_800, // Conway fixed default
+	refScriptCostStride: 25_600, // Conway fixed default
+	refScriptCostMultiplier: CborPositiveRational.fromNumber(1.2), // Conway fixed default
+	maxPledgeLeverage: null, // CIP-50: Nothing preserves current reward behaviour
+	minPoolMargin: CborPositiveRational.fromNumber(0.015), // live Dijkstra genesis value (dingo), CIP-23
+	leiosAnnouncementPeriodLength: 1000, // ms, CIP-0164
+	leiosVotePeriodLength: 4000, // ms
+	leiosDiffusionPeriodLength: 7000, // ms
+	leiosCommitteeSize: 900, // seats
+	leiosQuorumStakeThreshold: CborPositiveRational.fromNumber(0.75), // CIP-0164 quorum
+	maxEndorserBlockReferencesSize: 40_000, // bytes of EB references
+	maxEndorserBlockTxsSize: 260_000, // bytes of endorsed txs
+	maxEndorserBlockExecutionUnits: new ExBudget({ mem: 720_000_000, cpu: 200_000_000_000 }),
+	maxRefScriptSizePerEndorserBlock: 1_048_576,
+	perasMinCandidateBlockAge: 90, // slots
+	perasHealingFactor: CborPositiveRational.fromNumber(0.5),
+	perasCertBoost: 15,
+	perasTargetCommitteeSize: 800,
+	perasBootstrapRound: 0, // nil disables the manual bootstrap; genesis uses 0 on DijkstraNet
+	perasQuorumThresholdSafetyMargin: CborPositiveRational.fromNumber(0.05),
+	refInputsCostPerMultiAssetPolicy: 0, // fee function: hardcoded zero at launch
+	refInputsCostPerDatumByte: 0,
 } as DijkstraProtocolParameters);
+
+export function dijkstraCostModelsToJson(costModels: DijkstraCostModels) {
+	const base = costModelsToJson(costModels as CostModels) as any;
+	return {
+		...base,
+		...(costModels.PlutusScriptV4 === undefined ? {} : { PlutusScriptV4: costModels.PlutusScriptV4.map(n => Number(n)) }),
+	};
+}
 
 export function partialDijkstraProtocolParamsToJson(pp: Partial<DijkstraProtocolParameters>) {
 	return {
@@ -385,7 +759,13 @@ export function partialDijkstraProtocolParamsToJson(pp: Partial<DijkstraProtocol
 		poolPledgeInfluence: typeof pp.poolPledgeInfluence === 'number' ? pp.poolPledgeInfluence : pp.poolPledgeInfluence?.toNumber(),
 		monetaryExpansion: typeof pp.monetaryExpansion === 'number' ? pp.monetaryExpansion : pp.monetaryExpansion?.toNumber(),
 		treasuryCut: typeof pp.treasuryCut === 'number' ? pp.treasuryCut : pp.treasuryCut?.toNumber(),
-		costModels: pp.costModels === undefined ? undefined : costModelsToJson(pp.costModels),
+		refScriptCostMultiplier: typeof pp.refScriptCostMultiplier === 'number' ? pp.refScriptCostMultiplier : pp.refScriptCostMultiplier?.toNumber(),
+		maxPledgeLeverage: pp.maxPledgeLeverage === null ? null : typeof pp.maxPledgeLeverage === 'number' ? pp.maxPledgeLeverage : pp.maxPledgeLeverage?.toNumber(),
+		minPoolMargin: typeof pp.minPoolMargin === 'number' ? pp.minPoolMargin : pp.minPoolMargin?.toNumber(),
+		leiosQuorumStakeThreshold: typeof pp.leiosQuorumStakeThreshold === 'number' ? pp.leiosQuorumStakeThreshold : pp.leiosQuorumStakeThreshold?.toNumber(),
+		perasHealingFactor: typeof pp.perasHealingFactor === 'number' ? pp.perasHealingFactor : pp.perasHealingFactor?.toNumber(),
+		perasQuorumThresholdSafetyMargin: typeof pp.perasQuorumThresholdSafetyMargin === 'number' ? pp.perasQuorumThresholdSafetyMargin : pp.perasQuorumThresholdSafetyMargin?.toNumber(),
+		costModels: pp.costModels === undefined ? undefined : dijkstraCostModelsToJson(pp.costModels),
 		executionUnitPrices: Array.isArray(pp.executionUnitPrices)
 			? {
 					priceSteps: pp.executionUnitPrices[1].toNumber(),
