@@ -20,3 +20,14 @@ Dijkstra test vectors (copied verbatim, hex):
   config/cardano/musashi/dijkstra-genesis.json at d4572ed (2026-10-20); sha256
   9895c096a45225e99630b3fb866e5b115ce3d28c6ecd45ceda8feb0e29306127.
   Both carry the initial 251-value plutusV4CostModel (language key 3).
+- gouroboros_leios_rc_2026w41_announcing_block.hex: gouroboros
+  ledger/leios/testdata/rc-2026w41-announcing-block.hex at 5f854bb
+  (2026-10-14, the same commit as the Leios endorser-block tests); sha256
+  e25627652b82583786708b2995605e6b2f533e15ee020252d18e859e3eee83f9. Block 42
+  in slot 459, header announces eb hash 9674ce55... size 38.
+- gouroboros_leios_rc_2026w41_certifying_block.hex: gouroboros
+  ledger/leios/testdata/rc-2026w41-certifying-block.hex at 5f854bb; sha256
+  886a51f374d35c904c1daf6fbe94a1e9bdca1c4c30a307e84001712a9305c0d8. Block 43
+  in slot 478, certified, zero transactions, leios_certificate signers c0 and
+  a 48-byte signature. The eb_references map hash/one-entry vector comes from
+  gouroboros ledger/common/leios_endorser_block_test.go at the same commit.

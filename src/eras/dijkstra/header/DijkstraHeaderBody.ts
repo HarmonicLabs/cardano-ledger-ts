@@ -151,6 +151,31 @@ export class DijkstraHeaderBody
             this.vrfResult.proofHash
         ) as U8Arr<32>;
     }
+
+    /** eb_references_announcement.size must fit the protocol's max EB references size */
+    validateEbAnnouncementSize( maxEndorserBlockReferencesSize: CanBeUInteger ): void
+    {
+        const max = forceBigUInt( maxEndorserBlockReferencesSize );
+        if( max > BigInt( 0xffffffff ) )
+            throw new Error("maxEndorserBlockReferencesSize must be uint32");
+        if( this.ebAnnouncement !== null && BigInt( this.ebAnnouncement.size ) > max )
+            throw new Error(
+                "eb_references_announcement.size " + this.ebAnnouncement.size +
+                " exceeds maxEndorserBlockReferencesSize " + max.toString()
+            );
+    }
+
+    /** header_version_info.highest_supported_major_version lower bound */
+    validateProtocolVersion( minMajor: CanBeUInteger ): void
+    {
+        const min = Number( forceBigUInt( minMajor ) );
+        if( this.protocolVersion.major < min )
+            throw new Error(
+                "header major version " + this.protocolVersion.major +
+                " is below the Dijkstra minimum " + min
+            );
+    }
+
     // Not used after
     getNonceVrfOutput: () => U8Arr32;
 

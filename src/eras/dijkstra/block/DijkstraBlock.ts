@@ -2,13 +2,17 @@ import { decodeAtVersion } from "../../../utils/strictCbor";
 import { CborArray, CborBytes, CborSimple, ToCbor, SubCborRef, CborString, Cbor, CborObj, CanBeCborString, forceCborString } from "@harmoniclabs/cbor";
 import { blake2b_256 } from "@harmoniclabs/crypto";
 import { IDijkstraHeader, DijkstraHeader } from "../header/DijkstraHeader";
+import { DijkstraHeaderBody } from "../header/DijkstraHeaderBody";
 import { DijkstraTx, IDijkstraTx } from "../tx/DijkstraTx";
 import { DijkstraTxBody } from "../tx/DijkstraTxBody";
 import { DijkstraTxWitnessSet } from "../tx/DijkstraTxWitnessSet";
 import { DijkstraAuxiliaryData } from "../tx/DijkstraAuxiliaryData";
+import { ILeiosCertificate, areLeiosSignersSignatureValid, validateLeiosSignerBitfield } from "./DijkstraLeiosCertificate";
+import { ILeiosAnnouncingHeader, ILeiosTimingProtocolParameters, validateLeiosCertificationTiming } from "./DijkstraLeiosTiming";
 import { ToJson } from "../../../utils/ToJson"
 import { getSubCborRef } from "../../../utils/getSubCborRef";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError"
+import { CanBeUInteger } from "@harmoniclabs/cbor/dist/utils/ints";
 
 /*
     CDDL (cardano-ledger eras/dijkstra/impl/cddl/data/dijkstra.cddl, tag
@@ -39,18 +43,25 @@ import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError"
     is false), all derived from `transactions`.
 */
 
-export interface ILeiosCertificate {
-    /** bitfield of the signing committee members (up to 8192 bytes) */
-    signers: Uint8Array;
-    /** BLS signature, 48 bytes */
-    signature: Uint8Array;
-}
+export type { ILeiosCertificate };
 
 export interface IDijkstraBlock {
     header: IDijkstraHeader | DijkstraHeader;
     transactions: (IDijkstraTx | DijkstraTx)[];
     leiosCertificate?: ILeiosCertificate | null;
     perasCertificate?: Uint8Array | null;
+}
+
+export interface IDijkstraBlockValidationOptions
+{
+    /** Dijkstra protocol parameter 45; announcement sizes must be below it */
+    maxEndorserBlockReferencesSize?: CanBeUInteger;
+    /** Dijkstra minimum major version (12 on DijkstraNet) */
+    minProtocolMajor?: CanBeUInteger;
+    /** committee size used to bitfield-check a Leios certificate */
+    leiosCommitteeSize?: CanBeUInteger;
+    /** the reference node has no Peras certificates; set to accept them */
+    perasEnabled?: boolean;
 }
 
 export class DijkstraBlock implements ToCbor, ToJson
@@ -72,9 +83,9 @@ export class DijkstraBlock implements ToCbor, ToJson
         this.transactions = block.transactions.map( tx => tx instanceof DijkstraTx ? tx : new DijkstraTx( tx ) );
         this.leiosCertificate = block.leiosCertificate ?? null;
         this.perasCertificate = block.perasCertificate ?? null;
-        if( this.leiosCertificate !== null && !(
-            this.leiosCertificate.signers instanceof Uint8Array && this.leiosCertificate.signers.length <= 8192 &&
-            this.leiosCertificate.signature instanceof Uint8Array && this.leiosCertificate.signature.length === 48
+        if( this.leiosCertificate !== null && !areLeiosSignersSignatureValid(
+            this.leiosCertificate.signers,
+            this.leiosCertificate.signature
         )) throw new Error("invalid leios_certificate");
         this.blockBodyCborRef = blockBodyCborRef;
     }
@@ -107,6 +118,61 @@ export class DijkstraBlock implements ToCbor, ToJson
     }
     /** blake2b-256 of `block_body`: what the header's block_body_hash must equal */
     computeBlockBodyHash(): Uint8Array { return blake2b_256( this.blockBodyBytes ); }
+
+    /**
+     * Checks the block against its own header (body hash/size, Leios flag and
+     * certificate, announcement bounds and, optionally, the committee bitfield).
+     * The live DijkstraNet/Musashi nodes carry no Peras certificates.
+     */
+    validate( options: IDijkstraBlockValidationOptions = {} ): void
+    {
+        if( this.blockBodyBytes.length !== this.header.body.blockBodySize )
+            throw new Error(
+                "block_body_size " + this.header.body.blockBodySize +
+                " != actual block_body bytes " + this.blockBodyBytes.length
+            );
+        if( !Buffer.from( this.computeBlockBodyHash() ).equals( Buffer.from( this.header.body.blockBodyHash ) ) )
+            throw new Error("block_body_hash does not match the block_body bytes");
+        if( options.maxEndorserBlockReferencesSize !== undefined )
+            this.header.body.validateEbAnnouncementSize( options.maxEndorserBlockReferencesSize );
+        if( options.minProtocolMajor !== undefined )
+            this.header.body.validateProtocolVersion( options.minProtocolMajor );
+
+        const certified = this.header.body.leiosCertified;
+        if( certified !== ( this.leiosCertificate !== null ) )
+            throw new Error(
+                "block_body_contains_leios_cert is " + certified +
+                " but the block_body " + ( this.leiosCertificate === null ? "has no" : "has a" ) +
+                " leios_certificate"
+            );
+        if( this.leiosCertificate !== null && this.transactions.length !== 0 )
+            throw new Error("a certified block carries zero transactions");
+        if( this.leiosCertificate !== null && options.leiosCommitteeSize !== undefined )
+            validateLeiosSignerBitfield( this.leiosCertificate.signers, options.leiosCommitteeSize );
+        if( this.perasCertificate !== null && options.perasEnabled !== true )
+            throw new Error("block carries a peras_certificate but Peras is not enabled on the reference node");
+    }
+
+    /**
+     * A certified block must follow the block that announced its EB, at least
+     * `ceil((3*ann + vote + diff)/slotLength)` slots later. Returns the earliest
+     * allowed slot (gouroboros `leiosEarliestCertificationSlot`/dingo logic).
+     */
+    validateLeiosCertificateTiming(
+        announcingHeader: DijkstraHeaderBody | ILeiosAnnouncingHeader,
+        slotLengthMs: number | bigint,
+        pp: ILeiosTimingProtocolParameters
+    ): bigint
+    {
+        if( !this.header.body.leiosCertified ) throw new Error("block is not Leios-certified");
+        if( this.leiosCertificate === null ) throw new Error("certified block has no leios_certificate");
+        return validateLeiosCertificationTiming(
+            this.header.body,
+            announcingHeader,
+            slotLengthMs,
+            pp
+        );
+    }
 
     blockBodyToCborObj(): CborArray
     {

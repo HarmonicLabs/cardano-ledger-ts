@@ -210,9 +210,11 @@ export class DijkstraTx
     /**
      * Dijkstra `hashTx` (Tx.hs): blake2b-256 of
      * `hash(body) || hash(witness_set) || hash(auxiliary_data)? || cbor(is_valid)`.
-     * Unlike the tx id (hash of the body only) it identifies the complete
-     * transaction; Leios endorser blocks reference transactions by it.
-     * Component bytes come from the original encoding when the tx was decoded.
+     * This is the API's complete-transaction identifier (cardano-ledger golden
+     * `hashtx.hex`); it is NOT the Leios endorser block reference hash (that is
+     * blake2b-256 of the whole block-format transaction bytes, see
+     * `blockTransactionHash()` below). Component bytes come from the original
+     * encoding when the tx was decoded.
      */
     hashTx(): Uint8Array
     {
@@ -251,6 +253,34 @@ export class DijkstraTx
                 this.auxiliaryData.toCborObj(),
             new CborSimple( this.isScriptValid )
         ]);
+    }
+
+    /**
+     * The bytes the Leios endorser block manifest references: the complete
+     * block-format transaction array `[body, witness_set, auxiliary_data, bool]`.
+     * Decoded block transactions keep their original bytes; everything else is
+     * re-encoded in block form (a decoded mempool transaction is converted).
+     */
+    get blockTransactionBytes(): Uint8Array
+    {
+        if( this.cborRef instanceof SubCborRef )
+        {
+            const bytes = this.cborRef.toBuffer();
+            if( isRawBlockTransactionBytes( bytes ) ) return bytes;
+        }
+        return Cbor.encode( this.toBlockTransactionCborObj() );
+    }
+
+    /** blake2b-256 of `blockTransactionBytes` (gouroboros `TransactionHash`) */
+    blockTransactionHash(): Uint8Array
+    {
+        return blake2b_256( this.blockTransactionBytes );
+    }
+
+    /** byte length of `blockTransactionBytes` (gouroboros `TransactionSize`) */
+    get blockTransactionSize(): number
+    {
+        return this.blockTransactionBytes.length;
     }
 
     static fromCbor( cStr: CanBeCborString ): DijkstraTx
@@ -393,6 +423,20 @@ export function dijkstraHashTxParts( body: Uint8Array, wits: Uint8Array, aux: Ui
     let off = 0;
     for( const c of chunks ) { cat.set( c, off ); off += c.length; }
     return blake2b_256( cat );
+}
+
+/** true if `bytes` is a complete block-format transaction (the trailing bool, not a mempool flag at index 2) */
+function isRawBlockTransactionBytes( bytes: Uint8Array ): boolean
+{
+    try
+    {
+        const arr = Cbor.parse( bytes );
+        return arr instanceof CborArray &&
+            arr.array.length === 4 &&
+            arr.array[3] instanceof CborSimple &&
+            typeof ( arr.array[3] as CborSimple ).simple === "boolean";
+    }
+    catch { return false; }
 }
 
 // cardano-ledger decodes the Dijkstra era at protocol version 12
