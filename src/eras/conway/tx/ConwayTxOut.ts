@@ -19,6 +19,8 @@ export interface IConwayTxOut {
     address: Address | AddressStr,
     value: Value | IValue,
     datum?: Hash32 | Data,
+    /** original CBOR payload inside tag 24, when decoded; re-emitted if present */
+    datumBytes?: Uint8Array,
     refScript?: Script
 }
 
@@ -33,6 +35,7 @@ export function isIConwayTxOut( stuff: any ): stuff is IConwayTxOut
             stuff.value instanceof Value || isIValue( stuff.value )
         ) &&
         ( stuff.datum === undefined || stuff.datum instanceof Hash32 || isData( stuff.datum ) ) &&
+        ( stuff.datumBytes === undefined || stuff.datumBytes instanceof Uint8Array ) &&
         ( stuff.refScript === undefined || stuff.refScript instanceof Script )
     );
 }
@@ -43,13 +46,16 @@ export class ConwayTxOut
     readonly address!: Address
     readonly value!: Value
     readonly datum?: Hash32 | Data
+    /** original inline datum payload bytes (tag 24 content), when decoded */
+    readonly datumBytes?: Uint8Array
     readonly refScript?: Script
 
     /**
      * @param cborRef the bytes the output was decoded from, when it was decoded. They are kept
      * for readers of the source bytes (e.g. the UTxO metadata a node derives from an output as it
-     * appeared in its block) and are **not** re-emitted: an output is re-encoded from its fields,
-     * as cardano-ledger does (see `toCborObj`).
+     * appeared in its block) and are **not** re-emitted (except the decoded inline datum payload,
+     * which `datumBytes` preserves): an output is re-encoded from its fields, as cardano-ledger
+     * does (see `toCborObj`).
      */
     constructor(
         ConwayTxOutput: IConwayTxOut,
@@ -66,6 +72,7 @@ export class ConwayTxOut
             address,
             value,
             datum,
+            datumBytes,
             refScript
         } = ConwayTxOutput;
         
@@ -92,6 +99,12 @@ export class ConwayTxOut
         
         this.datum = datum;
 
+        if( datumBytes !== undefined )
+            if( datum === undefined || datum instanceof Hash32 || !( datumBytes instanceof Uint8Array ) )
+                throw new Error("invalid 'datumBytes' field: only inline Data can carry source bytes");
+
+        this.datumBytes = datumBytes;
+
         if( refScript !== undefined )
             if(!(
                 refScript instanceof Script
@@ -108,6 +121,7 @@ export class ConwayTxOut
             address: this.address.clone(),
             value: this.value.clone(),
             datum: this.datum?.clone(),
+            datumBytes: this.datumBytes?.slice(),
             refScript: this.refScript?.clone() 
         })
     }
@@ -174,9 +188,10 @@ export class ConwayTxOut
      * `BabbageTxOut` (`txOutToCborObj`): the legacy array `[address, value]` /
      * `[address, value, datum_hash]` when there is no script reference and no inline datum,
      * the definite map `{0: address, 1: value, 2?: datum_option, 3?: script_ref}` otherwise;
-     * address, datum `Data` and script payload bytes as decoded, the value canonical, the
-     * `[tag, payload]` script wrapper and the datum option rebuilt. The bytes the output was
-     * decoded from (`cborRef`) are not re-emitted.
+     * address, datum `Data` and its decoded tag-24 payload bytes / script payload bytes as
+     * decoded, the value canonical, the `[tag, payload]` script wrapper and the datum option
+     * rebuilt. A hand-built output has no source datum bytes and emits canonical `Data` bytes.
+     * The bytes the output was decoded from (`cborRef`) are not re-emitted.
      */
     toCborObj(): CborArray | CborMap
     {
@@ -248,6 +263,7 @@ export class ConwayTxOut
         throw new InvalidCborFormatError("ConwayTxOut", "missing address or value");
 
         let datum: Hash32 | Data | undefined = undefined;
+        let datumBytes: Uint8Array | undefined = undefined;
 
         if( _dat !== undefined )
         {
@@ -263,6 +279,7 @@ export class ConwayTxOut
             {
                 const payload = definiteBytes( expectTag( _1, 24, "ConwayTxOut inline datum" ), "ConwayTxOut inline datum" );
                 datum = dataFromCborObj( parseCborFull( payload, "ConwayTxOut inline datum" ) );
+                datumBytes = payload;
             }
             else throw new InvalidCborFormatError("ConwayTxOut");
         }
@@ -277,6 +294,7 @@ export class ConwayTxOut
             address: Address.fromCborObj( _addr ),
             value:  Value.fromCborObj( _amt ),
             datum,
+            datumBytes,
             refScript
         }, getSubCborRef( cObj ));
     }

@@ -57,6 +57,18 @@ describe("ConwayTxOut re-encodes as cardano-ledger re-encodes a decoded BabbageT
         });
     }
 
+    test("a decoded inline datum keeps its source bytes, including through clone", () => {
+        const [ , input, expected ] = SAMPLES[5];
+        const decoded = ConwayTxOut.fromCbor( input );
+        expect( hex( decoded.datumBytes! ) ).toBe( "bfff" );
+        expect( hex( decoded.clone().toCbor() ) ).toBe( expected );
+        // a hand-built output has no source datum bytes and still emits canonical Data
+        const rebuilt = new ConwayTxOut({
+            address: decoded.address, value: decoded.value, datum: decoded.datum, refScript: decoded.refScript
+        });
+        expect( hex( rebuilt.toCbor() ) ).toContain( "41a0" );
+    });
+
     test("the form follows the fields, not the decoded form", () => {
         // TxOutCompact: no datum, no script -> [address, value]
         expect( reencode( "82" + ADDR + COIN ) ).toBe( "82" + ADDR + COIN );

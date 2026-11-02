@@ -16,6 +16,7 @@ The DijkstraNet/Leios overlay surfaces, plus the decoder strictness and golden r
 
 ### Fixed
 - `vrf_cert` decoding is exactly `[bytes .size 64, bytes .size 80]` and exactly two elements; extra fields and wrong hash/proof lengths are rejected.
+- Conway outputs keep the decoded inline datum's source tag-24 payload bytes (`ConwayTxOut.datumBytes`) and re-emit them; hand-built outputs still encode canonical `Data`. The cardano-cbor-dataset corpus reencode suite now passes all samples and clones preserve the bytes.
 - Dijkstra header version decoding no longer rejects a future major (> 13).
 
 ## 0.6.0

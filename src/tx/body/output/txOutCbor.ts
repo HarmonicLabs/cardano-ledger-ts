@@ -9,6 +9,8 @@ export interface ITxOutFields {
     address: Address;
     value: Value;
     datum?: Hash32 | Data;
+    /** original inline datum payload bytes (tag 24 content), when decoded */
+    datumBytes?: Uint8Array;
     refScript?: Script;
 }
 
@@ -44,14 +46,16 @@ function definiteByteString( cObj: CborObj ): CborObj
  * - value: `fromCompact cVal`, the canonical `Value` encoding (`Value.toCborObj`);
  * - datum (`EncCBOR (Datum era)`, libs/cardano-ledger-core/src/Cardano/Ledger/Plutus/Data.hs):
  *   `Sum DatumHash 0 !> To dh` is `[0, hash32]`, `Sum Datum 1 !> To binaryData` is
- *   `[1, #6.24(bytes)]` with the `BinaryData` bytes as decoded (`dataToCbor` re-emits them);
+ *   `[1, #6.24(bytes)]` with the decoded `BinaryData` bytes re-emitted when the output
+ *   carries them (`datumBytes`), otherwise the canonical Data term is encoded
+ *   (`dataToCbor`).
  * - script reference: `#6.24(bytes)` of the script's `[tag, payload]` wrapper, which
  *   `Script.toCbor` rebuilds around the payload bytes cardano-ledger keeps (Alonzo
  *   `encodeScript`: `Sum NativeScript 0 !> To timelock`, `Sum PlutusScript n !> To plutusBinary`).
  */
 export function txOutToCborObj( out: ITxOutFields ): CborArray | CborMap
 {
-    const { address, value, datum, refScript } = out;
+    const { address, value, datum, datumBytes, refScript } = out;
 
     const addr = definiteByteString( address.toCborObj() );
     const val = value.toCborObj();
@@ -84,7 +88,7 @@ export function txOutToCborObj( out: ITxOutFields ): CborArray | CborMap
                 ]) :
                 new CborArray([
                     new CborUInt( 1 ),
-                    new CborTag( 24, new CborBytes( dataToCbor( datum ) ) )
+                    new CborTag( 24, new CborBytes( datumBytes ?? dataToCbor( datum ) ) )
                 ])
         });
     }
