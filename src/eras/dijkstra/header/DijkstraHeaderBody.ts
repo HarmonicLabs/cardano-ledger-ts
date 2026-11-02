@@ -39,9 +39,12 @@ import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 
     eb_references_announcement = [ eb_hash : hash32, eb_size : uint .size 4 ]
 
-    `header_version_info` has the same wire shape as the Babbage/Conway
-    `protocol_version`; it is exposed both as `versionInfo` and (for code that
-    reads every Praos header the same way) as `protocolVersion`.
+    `header_version_info` is cardano-ledger's `BlockHeaderVersionInfo`: the same
+    wire shape as the Babbage/Conway `protocol_version`, but *neither field is
+    validated upon decoding* — major is any `Word32`, not the supported
+    `Version` cap (`MAX_PROTOCOL_VERSION`) that `ProtVer` decodes enforce.
+    It is exposed both as `versionInfo` and (for code that reads every Praos
+    header the same way) as `protocolVersion`.
 */
 
 export const DIJKSTRA_HEADER_BODY_FIELDS = 12;
@@ -165,7 +168,7 @@ export class DijkstraHeaderBody
             );
     }
 
-    /** header_version_info.highest_supported_major_version lower bound */
+    /** `header_version_info.highest_supported_major_version` lower bound (BBODY requires it not to trail the current version) */
     validateProtocolVersion( minMajor: CanBeUInteger ): void
     {
         const min = Number( forceBigUInt( minMajor ) );
@@ -319,7 +322,10 @@ export class DijkstraHeaderBody
             blockBodySize: _cBlockBodySize.num,
             blockBodyHash: _cBlockBodyHash.bytes as U8Arr32,
             opCert: PoolOperationalCert.fromCborObj( _cOpCert ),
-            protocolVersion: ProtocolVersion.fromCborObj( _cVersionInfo ),
+            protocolVersion: new ProtocolVersion({
+                major: Number( ( _cVersionInfo.array[0] as CborUInt ).num ),
+                minor: Number( ( _cVersionInfo.array[1] as CborUInt ).num )
+            }, getSubCborRef( _cVersionInfo )),
             leiosCertified: _cLeiosCertified.simple as boolean,
             ebAnnouncement
         }, getSubCborRef( cHdrBody, _originalBytes ));

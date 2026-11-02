@@ -208,38 +208,27 @@ export class DijkstraTx
     }
 
     /**
-     * Dijkstra `hashTx` (Tx.hs): blake2b-256 of
-     * `hash(body) || hash(witness_set) || hash(auxiliary_data)? || cbor(is_valid)`.
-     * This is the API's complete-transaction identifier (cardano-ledger golden
-     * `hashtx.hex`); it is NOT the Leios endorser block reference hash (that is
-     * blake2b-256 of the whole block-format transaction bytes, see
-     * `blockTransactionHash()` below). Component bytes come from the original
-     * encoding when the tx was decoded.
+     * Dijkstra `hashTx` is cardano-ledger's `hashAnnotated` for a top-level
+     * transaction: the memo hash over the stored **block-format** bytes
+     * `[body, witness_set, auxiliary_data, is_valid]`. A decoded mempool
+     * transaction is converted to that form first (the `IsPhase2Valid` flag is
+     * the trailing element, not the legacy mempool marker at index 2).
      */
     hashTx(): Uint8Array
     {
-        if( this.cborRef instanceof SubCborRef ) return DijkstraTx.hashTxBytes( this.cborRef.toBuffer(), this.isScriptValid );
-        return dijkstraHashTxParts(
-            this.body.toCborBytes(),
-            this.witnesses.toCborBytes(),
-            this.auxiliaryData === undefined || this.auxiliaryData === null ? undefined : this.auxiliaryData.toCborBytes(),
-            this.isScriptValid
-        );
+        return this.blockTransactionHash();
     }
 
     /**
-     * `hashTx` straight from the bytes of a mempool (`[b, w, aux]`, `[b, w, true, aux]`)
-     * or block (`[b, w, aux, bool]`) transaction, without decoding it.
+     * `hashTx` straight from the bytes of a mempool (`[b, w, aux]`,
+     * `[b, w, true, aux]`) or block (`[b, w, aux, bool]`) transaction, without
+     * decoding it. Returns blake2b-256 of the canonical block-format bytes.
      */
     static hashTxBytes( txBytes: Uint8Array, isValid?: boolean ): Uint8Array
     {
-        const parts: Uint8Array[] = ( Cbor.parseLazy( txBytes ) as any ).array;
-        if(!( parts.length === 3 || parts.length === 4 )) throw new InvalidCborFormatError("DijkstraTx.hashTxBytes: not a transaction");
-        // auxiliary data is never a bool, so a `true` at index 2 means the mempool form
-        const mempoolFlag = parts.length === 4 && parts[2].length === 1 && parts[2][0] === 0xf5;
-        const auxPart = mempoolFlag ? parts[3] : parts[2];
-        const flag = isValid ?? ( parts.length === 4 && !mempoolFlag ? parts[3][0] === 0xf5 : true );
-        return dijkstraHashTxParts( parts[0], parts[1], auxPart.length === 1 && auxPart[0] === 0xf6 ? undefined : auxPart, flag );
+        const blockBytes = blockTransactionBytesFromBytes( txBytes, isValid );
+        if( blockBytes === undefined ) throw new InvalidCborFormatError("DijkstraTx.hashTxBytes: not a transaction");
+        return blake2b_256( blockBytes );
     }
 
     /** `block_transaction` form: `[body, witness_set, auxiliary_data/ nil, is_valid]` (ignores any mempool cborRef) */
@@ -265,8 +254,8 @@ export class DijkstraTx
     {
         if( this.cborRef instanceof SubCborRef )
         {
-            const bytes = this.cborRef.toBuffer();
-            if( isRawBlockTransactionBytes( bytes ) ) return bytes;
+            const bytes = blockTransactionBytesFromBytes( this.cborRef.toBuffer(), this.isScriptValid );
+            if( bytes !== undefined ) return bytes;
         }
         return Cbor.encode( this.toBlockTransactionCborObj() );
     }
@@ -413,7 +402,11 @@ function getNSignersNeeded( body: Readonly<DijkstraTxBody> ): number
     return n === 0 ? 1 : n;
 }
 
-/** blake2b-256( hash(body) || hash(wits) || hash(aux)? || cbor(is_valid) ) (Dijkstra Tx.hs `hashTx`) */
+/**
+ * Legacy component-hash form (hash(body) || hash(wits) || hash(aux)? || cbor(is_valid)).
+ * Not cardano-ledger's Dijkstra `hashTx` since the top transaction is memoized
+ * in block format; kept for consumers of the old exported helper.
+ */
 export function dijkstraHashTxParts( body: Uint8Array, wits: Uint8Array, aux: Uint8Array | undefined, isValid: boolean ): Uint8Array
 {
     const chunks = [ blake2b_256( body ), blake2b_256( wits ) ];
@@ -425,18 +418,58 @@ export function dijkstraHashTxParts( body: Uint8Array, wits: Uint8Array, aux: Ui
     return blake2b_256( cat );
 }
 
-/** true if `bytes` is a complete block-format transaction (the trailing bool, not a mempool flag at index 2) */
-function isRawBlockTransactionBytes( bytes: Uint8Array ): boolean
+const boolByte = ( b: boolean ) => b ? 0xf5 : 0xf4;
+
+/**
+ * Converts mempool transaction bytes to the exact block-format bytes the memo
+ * hash is taken over: `[body, witness_set, auxiliary_data, bool]`. Returns
+ * `undefined` when the input is not a well-formed 3/4-element transaction;
+ * the caller falls back to encoding the decoded fields.
+ */
+function blockTransactionBytesFromBytes( txBytes: Uint8Array, isValid?: boolean ): Uint8Array | undefined
 {
-    try
+    let parts: Uint8Array[];
+    try { parts = ( Cbor.parseLazy( txBytes ) as any ).array; }
+    catch { return undefined; }
+
+    if( parts.length === 3 )
     {
-        const arr = Cbor.parse( bytes );
-        return arr instanceof CborArray &&
-            arr.array.length === 4 &&
-            arr.array[3] instanceof CborSimple &&
-            typeof ( arr.array[3] as CborSimple ).simple === "boolean";
+        // the canonical mempool head is the 3-element definite array (0x83)
+        if( txBytes.length === 0 || txBytes[0] !== 0x83 ) return undefined;
+        const out = new Uint8Array( txBytes.length + 1 );
+        out.set( txBytes );
+        out[0] = 0x84;
+        out[txBytes.length] = boolByte( isValid === undefined ? true : isValid );
+        return out;
     }
-    catch { return false; }
+    if( parts.length === 4 )
+    {
+        const trailing = parts[3].length === 1 ? parts[3][0] : undefined;
+        const mempoolFlag = parts[2].length === 1 && ( parts[2][0] === 0xf5 || parts[2][0] === 0xf4 );
+        if( trailing === 0xf5 || trailing === 0xf4 )
+        {
+            // already block form; keep raw bytes (the memo hash is over them)
+            const flag = isValid === undefined ? trailing : boolByte( isValid );
+            if( flag === trailing ) return txBytes;
+            const out = txBytes.slice();
+            out[out.length - 1] = flag;
+            return out;
+        }
+        if( mempoolFlag )
+        {
+            // legacy mempool form `[body, wits, true, aux]`: move the flag last
+            const flag = isValid === undefined ? parts[2][0] : boolByte( isValid );
+            const out = new Uint8Array( 1 + parts[0].length + parts[1].length + parts[3].length + 1 );
+            let off = 0;
+            out[off++] = 0x84;
+            out.set( parts[0], off ); off += parts[0].length;
+            out.set( parts[1], off ); off += parts[1].length;
+            out.set( parts[3], off ); off += parts[3].length;
+            out[off] = flag;
+            return out;
+        }
+    }
+    return undefined;
 }
 
 // cardano-ledger decodes the Dijkstra era at protocol version 12

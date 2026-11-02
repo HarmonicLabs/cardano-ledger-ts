@@ -2,16 +2,21 @@ Dijkstra test vectors (copied verbatim, hex):
 
 - musashi_type8_dijkstra_block.hex / _header.hex: a block captured from the
   ouroboros-leios "musashi" testnet in the current 3-field body format
-  (Dingo 14f789e ouroboros/testdata).
+  (Dingo `ouroboros/testdata/musashi_type8_dijkstra_{block,header}.hex` at
+  0a0096, 2026-09-27); sha256 6bb3f7d3… (block), 87643c0f… (header). Bytes
+  unchanged since the earlier 14f789e pin.
 - musashi_legacy_4field_block.hex: an older musashi block with the
-  pre-respin 4-field body; peers must not deliver it (gouroboros v0.210.0
-  ledger/dijkstra/testdata/musashi_dijkstra_block.hex).
+  pre-respin 4-field body; peers must not deliver it (gouroboros
+  ledger/dijkstra/testdata/musashi_dijkstra_block.hex at 267610).
 - cardano_ledger_golden_tx.hex / _hashtx.hex: IntersectMBO/cardano-ledger
-  eras/dijkstra/impl/golden/tx.cbor and hashtx.hex at 5b31cdd (2026-10-08),
-  the same as tag cardano-ledger-dijkstra-0.4.0.0 for the CDDL.
-- gouroboros_current_tx.hex: gouroboros v0.210.0
-  ledger/dijkstra/testdata/cardano_ledger_dijkstra_current_tx.hex
-  (cardano-ledger golden at c2114bd).
+  eras/dijkstra/impl/golden/tx.cbor at 3bd42ad (2026-10-16) and hashtx.hex at
+  ae4013 (2026-10-16); sha256 2626a87f… and 86ce4682….
+- cardano_ledger_dijkstra_pparams.json / pparams_update.json: cardano-ledger
+  eras/dijkstra/impl/golden/{pparams,pparams-update}.json at 6d57bb
+  (2026-09-29); sha256 9c15e370… and 2b9aa7a6….
+- gouroboros_current_tx.hex: gouroboros `ledger/dijkstra/testdata/
+  cardano_ledger_dijkstra_current_tx.hex` at e1a985 (2026-09-24); sha256
+  71766a31… (cardano-ledger golden at c2114bd in the older pin).
 - dingo_dijkstra_genesis.json: Blink Labs Dingo
   config/cardano/dijkstra/dijkstra-genesis.json at c776031 (2026-10-24,
   "feat: support DijkstraNet" #5573); sha256

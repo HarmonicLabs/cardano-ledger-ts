@@ -22,10 +22,11 @@ import { ToJson } from "../../../utils/ToJson";
  * hashes, no zero sizes. The announcement hash is blake2b-256 of the
  * canonical map encoding, and its size is the byte length of that encoding.
  *
- * Reference hashes are the "hash of complete transaction" (full block
- * `[body, witness_set, auxiliary_data, is_valid]` bytes), not the component
- * `hashTx` exposed on DijkstraTx; see `DijkstraTx.blockTransactionHash()`
- * (gouroboros `TransactionReferences` in ledger/common/leios.go).
+ * Reference hashes are cardano-ledger's `hashAnnotated` (the memo hash over
+ * complete block-format transaction bytes), which is also `DijkstraTx.hashTx()`;
+ * the legacy component-hash helper `dijkstraHashTxParts` is not used here.
+ * See `DijkstraTx.blockTransactionHash()` (gouroboros `TransactionReferences`
+ * in ledger/common/leios.go).
  */
 export const LEIOS_MAX_ENDORSER_BLOCK_REFS = 17142;
 

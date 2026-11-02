@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.6.1
+
+The DijkstraNet/Leios overlay surfaces, plus the decoder strictness and golden refresh driven by live dingo/gouroboros data.
+
+### Added
+- Dijkstra protocol parameters keys 34–56: ref-script limits, pledge leverage/pool margin, the Leios announcement/vote/diffusion periods, committee/quorum, EB limits, Peras phase-1 fields, and ref-input fees. Dijkstra genesis (`plutusV4CostModel` exactly 251 values at cost-model language key 3).
+- `DijkstraEbReferences`/`DijkstraEndorserBlock`: canonical ordered map `hash32 -> uint32`, 1..17142 references, unique non-zero entries, announcement hash/size over canonical bytes.
+- `DijkstraLeiosCertificate` bitfield/signature and certification-window helpers; `DijkstraBlock.validate()` for body hash/size, the certified flag ↔ certificate, zero-transaction certifying bodies, announcement/PP bounds and Peras gating.
+
+### Changed
+- Dijkstra `hashTx` is cardano-ledger's `hashAnnotated`: blake2b-256 of the stored block-format transaction bytes (`[body, witness_set, auxiliary_data, is_valid]`), which is also the Leios endorser-block reference hash. The old component-hash helper remains exported as `dijkstraHashTxParts`.
+- Dijkstra `header_version_info` decodes as `BlockHeaderVersionInfo`: arbitrary uint32 major/tag, not the `ProtVer` supported-version cap.
+- Goldens refreshed to cardano-ledger master `tx.cbor`/`hashtx` (3bd42ad/ae4013) and `pparams` JSON (6d57bb), plus gouroboros current tx (e1a985) and Dingo musashi block provenance (0a0096).
+
+### Fixed
+- `vrf_cert` decoding is exactly `[bytes .size 64, bytes .size 80]` and exactly two elements; extra fields and wrong hash/proof lengths are rejected.
+- Dijkstra header version decoding no longer rejects a future major (> 13).
+
 ## 0.6.0
 
 The Dijkstra era, and decoders that accept and re-encode exactly what cardano-ledger does, made for pragma-org's

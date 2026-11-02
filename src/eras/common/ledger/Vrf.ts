@@ -3,6 +3,7 @@ import { definiteBytes } from "../../../utils/strictCbor";
 import { isU8Arr, U8Arr } from "../../../utils/U8Arr";
 import { CanBeCborString, Cbor, CborArray, CborBytes, CborObj, CborString, forceCborString, SubCborRef, ToCbor } from "@harmoniclabs/cbor";
 import { getSubCborRef, subCborRefOrUndef } from "../../../utils/getSubCborRef";
+import { parseCborFull } from "../../../utils/strictCbor";
 
 /** just an alias to accepts all bytes, but still give indications **/
 export type VrfProofHashBytes = Uint8Array;
@@ -30,7 +31,7 @@ export function isIVrfCert( stuff: any ): stuff is IVrfCertChecked
     );
 }
 
-/** $vrf_cert = [bytes, bytes .size 80] **/
+/** `vrf_cert = [bytes .size 64, bytes .size 80]` (Dijkstra CDDL; Shelley-era bytes, Conway-Dijkstra fixed widths) **/
 export class VrfCert
     implements IVrfCertChecked, ToCbor
 {
@@ -79,7 +80,10 @@ export class VrfCert
     static fromCbor( cbor: CanBeCborString ): VrfCert
     {
         const bytes = cbor instanceof Uint8Array ? cbor : forceCborString( cbor );
-        return VrfCert.fromCborObj( Cbor.parse( bytes, { keepRef: true } ), bytes );
+        return VrfCert.fromCborObj(
+            parseCborFull( bytes, "VrfCert" ),
+            bytes
+        );
     }
     static fromCborObj(
         cbor: CborObj,
@@ -88,14 +92,15 @@ export class VrfCert
     {
         if(!(
             cbor instanceof CborArray &&
-            cbor.array.length >= 2 &&
+            cbor.array.length === 2 &&
             cbor.array[0] instanceof CborBytes &&
+            cbor.array[0].bytes.length === 64 &&
             cbor.array[1] instanceof CborBytes &&
             cbor.array[1].bytes.length === 80
-        )) throw new Error("invalid cbor for 'VrfCert'");
+        )) throw new Error("invalid cbor for 'VrfCert': expected [bytes .size 64, bytes .size 80]");
     
         return new VrfCert({
-            proofHash: definiteBytes( cbor.array[0], "VrfCert output" ),
+            proofHash: definiteBytes( cbor.array[0], "VrfCert proof hash" ) as VrfProofHash,
             proof: definiteBytes( cbor.array[1], "VrfCert proof" ) as VrfProofBytes
         }, getSubCborRef( cbor, _originalBytes ));
     }

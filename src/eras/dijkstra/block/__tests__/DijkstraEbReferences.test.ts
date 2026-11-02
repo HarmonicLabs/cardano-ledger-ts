@@ -93,14 +93,14 @@ describe("Dijkstra endorser block references", () => {
     const golden = DijkstraTx.fromCbor( Buffer.from( goldenHex, "hex" ) );
     const current = DijkstraTx.fromCbor( bytesOf( "gouroboros_current_tx.hex" ) );
 
-    test("fromTransactions uses the whole block-format transaction bytes, not hashTx", () => {
+    test("fromTransactions uses the whole block-format transaction bytes, which is also Dijkstra hashTx", () => {
         const eb = DijkstraEndorserBlock.fromTransactions([ golden ]);
         expect( eb.references.count ).toBe( 1 );
         const ref = eb.references.references[0];
         expect( toHex( ref.hash ) ).toBe( toHex( golden.blockTransactionHash() ) );
         expect( ref.size ).toBe( golden.blockTransactionSize );
         expect( golden.blockTransactionSize ).toBe( golden.blockTransactionBytes.length );
-        expect( toHex( golden.blockTransactionHash() ) ).not.toBe( toHex( golden.hashTx() ) );
+        expect( toHex( golden.blockTransactionHash() ) ).toBe( toHex( golden.hashTx() ) );
         expect( eb.announcement ).toEqual( eb.references.announcement );
     });
 
