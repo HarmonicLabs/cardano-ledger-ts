@@ -102,7 +102,9 @@ export class TxRedeemer
             tag === 0 || 
             tag === 1 || 
             tag === 2 || 
-            tag === 3
+            tag === 3 ||
+            tag === 4 ||
+            tag === 5
         ))throw new Error("invalid redeemer tag");
         this.tag = tag;
 
