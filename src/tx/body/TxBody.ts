@@ -677,6 +677,10 @@ export class TxBody
             collateralReturn:           _collRet === undefined ? undefined : TxOut.fromCborObj( _collRet ),
             totCollateral:              _totColl instanceof CborUInt ? _totColl.num : undefined,
             refInputs:                  _refIns !== undefined ? getCborSet( _refIns ).map( txOutRefAsUTxOFromCborObj ) : undefined,
+            votingProcedures:           _voting_procedures === undefined ? undefined : VotingProcedures.fromCborObj( _voting_procedures ),
+            proposalProcedures:         _proposal_procedures !== undefined ? getCborSet( _proposal_procedures ).map( ProposalProcedure.fromCborObj ) : undefined,
+            currentTreasuryValue:       _current_treasury instanceof CborUInt ? _current_treasury.num : undefined,
+            donation:                   _donation instanceof CborUInt ? _donation.num : undefined,
         }, getSubCborRef( cObj ));
     }
 
