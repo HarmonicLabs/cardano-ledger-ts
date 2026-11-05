@@ -44,7 +44,7 @@ export class DijkstraTx
 
     constructor(
         tx: IDijkstraTx,
-        readonly cborRef: SubCborRef | undefined = undefined
+        public cborRef: SubCborRef | undefined = undefined,
     )
     {
         const {
@@ -79,7 +79,8 @@ export class DijkstraTx
         this.witnesses = new DijkstraTxWitnessSet(
             witnesses,
             subCborRefOrUndef( witnesses ),
-            getAllRequiredSigners( this.body )
+            getAllRequiredSigners( this.body ),
+            ( witnesses as any ).sourceFields
         );
         this.isScriptValid = isScriptValid === undefined ? true : isScriptValid;
         this.auxiliaryData = auxiliaryData;
@@ -97,6 +98,7 @@ export class DijkstraTx
     **/
     addVKeyWitness( this: DijkstraTx, vkeyWit: VKeyWitness ): void
     {
+        if( this.cborRef instanceof SubCborRef ) this.cborRef = undefined;
         this.witnesses.addVKeyWitness( vkeyWit )
     }
     /**

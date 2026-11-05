@@ -12,6 +12,7 @@ import { TxRedeemer } from "./TxRedeemer";
 import { VKeyWitness } from "./VKeyWitness/VKeyWitness";
 import { getCborSet, isCborSet } from "../../utils/getCborSet";
 import { getSubCborRef, subCborRefOrUndef } from "../../utils/getSubCborRef";
+import { WitnessSetFieldSources, encodeCborSetLike, unchangedWitnessField } from "../../utils/witnessSetCbor";
 
 
 export interface ITxWitnessSet {
@@ -118,6 +119,7 @@ export class TxWitnessSet
         witnesses: ITxWitnessSet,
         public cborRef: SubCborRef | undefined = undefined,
         allRequiredSigners: Hash28[] | undefined = undefined,
+        readonly sourceFields?: WitnessSetFieldSources,
     )
     {
         if(!(
@@ -256,7 +258,8 @@ export class TxWitnessSet
                 this.vkeyWitnesses === undefined ? undefined :
                 {
                     k: new CborUInt( 0 ),
-                    v: new CborArray(
+                    v: encodeCborSetLike(
+                        this.sourceFields?.[0],
                         this.vkeyWitnesses.map( witness => witness.toCborObj() )
                     )
                 },
@@ -264,7 +267,8 @@ export class TxWitnessSet
                 this.nativeScripts === undefined ? undefined :
                 {
                     k: new CborUInt( 1 ),
-                    v: new CborArray(
+                    v: unchangedWitnessField(
+                        this.sourceFields?.[1],
                         this.nativeScripts.map( 
                             nativeScript => nativeScript instanceof Script ?
                             Cbor.parse( nativeScript.bytes ) :
@@ -276,7 +280,8 @@ export class TxWitnessSet
                 this.bootstrapWitnesses === undefined ? undefined :
                 {
                     k: new CborUInt( 2 ),
-                    v: new CborArray(
+                    v: unchangedWitnessField(
+                        this.sourceFields?.[2],
                         this.bootstrapWitnesses.map( w => w.toCborObj() )
                     )
                 },
@@ -284,7 +289,8 @@ export class TxWitnessSet
                 this.plutusV1Scripts === undefined ? undefined :
                 {
                     k: new CborUInt( 3 ),
-                    v: new CborArray(
+                    v: unchangedWitnessField(
+                        this.sourceFields?.[3],
                         this.plutusV1Scripts
                         .map( Script.encodePlutusScriptForWitnessSet )
                     )
@@ -293,7 +299,8 @@ export class TxWitnessSet
                 this.datums === undefined ? undefined :
                 {
                     k: new CborUInt( 4 ),
-                    v: new CborArray(
+                    v: unchangedWitnessField(
+                        this.sourceFields?.[4],
                         this.datums.map( dataToCborObj )
                     )
                 },
@@ -301,7 +308,8 @@ export class TxWitnessSet
                 this.redeemers === undefined ? undefined :
                 {
                     k: new CborUInt( 5 ),
-                    v: new CborArray(
+                    v: unchangedWitnessField(
+                        this.sourceFields?.[5],
                         this.redeemers.map( r => r.toCborObj() )
                     )
                 },
@@ -309,7 +317,8 @@ export class TxWitnessSet
                 this.plutusV2Scripts === undefined ? undefined :
                 {
                     k: new CborUInt( 6 ),
-                    v: new CborArray(
+                    v: unchangedWitnessField(
+                        this.sourceFields?.[6],
                         this.plutusV2Scripts
                         .map( Script.encodePlutusScriptForWitnessSet )
                     )
@@ -318,7 +327,8 @@ export class TxWitnessSet
                 this.plutusV3Scripts === undefined ? undefined :
                 {
                     k: new CborUInt( 7 ),
-                    v: new CborArray(
+                    v: unchangedWitnessField(
+                        this.sourceFields?.[7],
                         this.plutusV3Scripts
                         .map( Script.encodePlutusScriptForWitnessSet )
                     )
@@ -399,7 +409,7 @@ export class TxWitnessSet
                 getCborSet( _plutusV3 ).map( cbor =>
                     Script.plutusV3( Cbor.encode( cbor ) )
                 ),
-        }, getSubCborRef( cObj ));
+        }, getSubCborRef( cObj), undefined, fields);
     }
 
 }

@@ -80,7 +80,8 @@ export class Tx
         this.witnesses = new TxWitnessSet(
             witnesses,
             subCborRefOrUndef( witnesses ),
-            getAllRequiredSigners( this.body )
+            getAllRequiredSigners( this.body ),
+            ( witnesses as any ).sourceFields
         );
         this.isScriptValid = isScriptValid === undefined ? true : isScriptValid;
         this.auxiliaryData = auxiliaryData;

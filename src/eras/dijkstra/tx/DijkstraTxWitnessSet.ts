@@ -8,6 +8,7 @@ import { Hash28 } from "../../../hashes";
 import { DijkstraTxRedeemer } from "./DijkstraTxRedeemer";
 import { isCborSet, getCborSet } from "../../../utils/getCborSet";
 import { subCborRefOrUndef, getSubCborRef } from "../../../utils/getSubCborRef";
+import { WitnessSetFieldSources, encodeCborSetLike, unchangedWitnessField } from "../../../utils/witnessSetCbor";
 import { InvalidCborFormatError } from "../../../utils/InvalidCborFormatError";
 import { ToJson } from "../../../utils/ToJson";
 import { BootstrapWitness } from "../../../tx/TxWitnessSet/BootstrapWitness";
@@ -122,8 +123,9 @@ export class DijkstraTxWitnessSet
 
     constructor(
         witnesses: IDijkstraTxWitnessSet,
-        readonly cborRef: SubCborRef | undefined = undefined,
+        public cborRef: SubCborRef | undefined = undefined,
         allRequiredSigners: Hash28[] | undefined = undefined,
+        readonly sourceFields?: WitnessSetFieldSources,
     )
     {
         if(!(
@@ -213,7 +215,9 @@ export class DijkstraTxWitnessSet
             }
         );
 
-        this.addVKeyWitness = ( vkeyWit: VKeyWitness ) => {_vkeyWits.push( vkeyWit.clone() );
+        this.addVKeyWitness = ( vkeyWit: VKeyWitness ) => {
+            if( this.cborRef instanceof SubCborRef ) this.cborRef = undefined;
+            _vkeyWits.push( vkeyWit.clone() );
         }
 
         /* DONE: this.cboRref params */
@@ -265,7 +269,8 @@ export class DijkstraTxWitnessSet
                 this.vkeyWitnesses === undefined ? undefined :
                 {
                     k: new CborUInt( 0 ),
-                    v: new CborArray(
+                    v: encodeCborSetLike(
+                        this.sourceFields?.[0],
                         this.vkeyWitnesses.map( witness => witness.toCborObj() )
                     )
                 },
@@ -273,7 +278,8 @@ export class DijkstraTxWitnessSet
                 this.nativeScripts === undefined ? undefined :
                 {
                     k: new CborUInt( 1 ),
-                    v: new CborArray(
+                    v: unchangedWitnessField(
+                        this.sourceFields?.[1],
                         this.nativeScripts.map( 
                             nativeScript => nativeScript instanceof Script ?
                             Cbor.parse( nativeScript.bytes ) :
@@ -285,7 +291,8 @@ export class DijkstraTxWitnessSet
                 this.bootstrapWitnesses === undefined ? undefined :
                 {
                     k: new CborUInt( 2 ),
-                    v: new CborArray(
+                    v: unchangedWitnessField(
+                        this.sourceFields?.[2],
                         this.bootstrapWitnesses.map( w => w.toCborObj() )
                     )
                 },
@@ -293,7 +300,8 @@ export class DijkstraTxWitnessSet
                 this.plutusV1Scripts === undefined ? undefined :
                 {
                     k: new CborUInt( 3 ),
-                    v: new CborArray(
+                    v: unchangedWitnessField(
+                        this.sourceFields?.[3],
                         this.plutusV1Scripts
                         .map( Script.encodePlutusScriptForWitnessSet )
                     )
@@ -302,7 +310,8 @@ export class DijkstraTxWitnessSet
                 this.datums === undefined ? undefined :
                 {
                     k: new CborUInt( 4 ),
-                    v: new CborArray(
+                    v: unchangedWitnessField(
+                        this.sourceFields?.[4],
                         this.datums.map( dataToCborObj )
                     )
                 },
@@ -310,7 +319,8 @@ export class DijkstraTxWitnessSet
                 this.redeemers === undefined ? undefined :
                 {
                     k: new CborUInt( 5 ),
-                    v: new CborArray(
+                    v: unchangedWitnessField(
+                        this.sourceFields?.[5],
                         this.redeemers.map( r => r.toCborObj() )
                     )
                 },
@@ -318,7 +328,8 @@ export class DijkstraTxWitnessSet
                 this.plutusV2Scripts === undefined ? undefined :
                 {
                     k: new CborUInt( 6 ),
-                    v: new CborArray(
+                    v: unchangedWitnessField(
+                        this.sourceFields?.[6],
                         this.plutusV2Scripts
                         .map( Script.encodePlutusScriptForWitnessSet )
                     )
@@ -327,7 +338,8 @@ export class DijkstraTxWitnessSet
                 this.plutusV3Scripts === undefined ? undefined :
                 {
                     k: new CborUInt( 7 ),
-                    v: new CborArray(
+                    v: unchangedWitnessField(
+                        this.sourceFields?.[7],
                         this.plutusV3Scripts
                         .map( Script.encodePlutusScriptForWitnessSet )
                     )
@@ -336,7 +348,8 @@ export class DijkstraTxWitnessSet
                 this.plutusV4Scripts === undefined ? undefined :
                 {
                     k: new CborUInt( 8 ),
-                    v: new CborArray(
+                    v: unchangedWitnessField(
+                        this.sourceFields?.[8],
                         this.plutusV4Scripts
                         .map( Script.encodePlutusScriptForWitnessSet )
                     )
@@ -426,7 +439,7 @@ export class DijkstraTxWitnessSet
                 getCborSet( _plutusV4 ).map( cbor =>
                     Script.plutusV4(Cbor.encode( cbor ))
                 ),
-        }, getSubCborRef( cObj ));
+        }, getSubCborRef( cObj ), undefined, fields);
     }
 
 }
