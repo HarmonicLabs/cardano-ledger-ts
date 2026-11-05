@@ -35,7 +35,7 @@
   "homepage": "https://github.com/HarmonicLabs/cardano-ledger-ts#readme",
   "dependencies": {
     "@harmoniclabs/bigint-utils": "^1.0.0",
-    "@harmoniclabs/crypto": "^0.3.0",
+    "@harmoniclabs/crypto": "^0.3.1",
     "@harmoniclabs/obj-utils": "^1.0.0",
     "@harmoniclabs/uint8array-utils": "^1.0.4"
   },
@@ -45,8 +45,8 @@
     "@harmoniclabs/cbor": "^2.1.0",
     "@harmoniclabs/pair": "^1.0.0",
     "@harmoniclabs/plutus-data": "^2.1.0",
-    "@harmoniclabs/plutus-machine": "^3.0.3",
-    "@harmoniclabs/uplc": "^2.0.5"
+    "@harmoniclabs/plutus-machine": "^3.0.5",
+    "@harmoniclabs/uplc": "^2.0.7"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.18.6",
