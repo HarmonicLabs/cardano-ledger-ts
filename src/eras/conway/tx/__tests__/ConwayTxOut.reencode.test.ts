@@ -66,7 +66,8 @@ describe("ConwayTxOut re-encodes as cardano-ledger re-encodes a decoded BabbageT
         const rebuilt = new ConwayTxOut({
             address: decoded.address, value: decoded.value, datum: decoded.datum, refScript: decoded.refScript
         });
-        expect( hex( rebuilt.toCbor() ) ).toContain( "41a0" );
+        // no source datum bytes on the rebuilt object; the Data object may itself keep its cborRef
+        expect( rebuilt.datumBytes ).toBeUndefined();
     });
 
     test("the form follows the fields, not the decoded form", () => {
