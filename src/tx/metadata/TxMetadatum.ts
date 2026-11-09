@@ -21,40 +21,71 @@ export type TxMetadatum
 export function txMetadatumFromCborObj( cObj: CborObj ): TxMetadatum
 {
     const checkSizes = getDecodeVersion() > 2;
-    if( cObj instanceof CborMap )
+    // Metadata is a JSON-like tree and can be arbitrarily deep. Decode it with an explicit
+    // stack: a recursive walk overflows the JS stack on real preview blocks (slot 127055999),
+    // even though the ledger accepts them. Containers are created empty and filled below.
+    let root: TxMetadatum | undefined;
+    type Job = { obj: CborObj; set: (v: TxMetadatum) => void };
+    const stack: Job[] = [{ obj: cObj, set: (v) => { root = v; } }];
+    const freeze: Array<() => void> = [];
+    while( stack.length > 0 )
     {
-        return new TxMetadatumMap( 
-            cObj.map.map( entry => ({ 
-                k: txMetadatumFromCborObj( entry.k ), 
-                v: txMetadatumFromCborObj( entry.v )})
-            )
-        );
-    }
-    if( cObj instanceof CborArray )
-    {
-        return new TxMetadatumList( 
-            cObj.array.map( txMetadatumFromCborObj )
-        );
-    }
-    if( cObj instanceof CborUInt || cObj instanceof CborNegInt )
-    {
-        if( isBigNum( cObj ) ) throw new InvalidCborFormatError("TxMetadatum", "big integers are not allowed in metadata");
-        return new TxMetadatumInt( cObj.num );
-    }
-    if( cObj instanceof CborBytes )
-    {
-        const bytes = cObj.bytes;
-        if( checkSizes && bytes.length > 64 ) throw new InvalidCborFormatError("TxMetadatum", "bytes .size (0..64): bytestring exceeds 64 bytes");
-        return new TxMetadatumBytes( bytes );
-    }
-    if( cObj instanceof CborText )
-    {
-        const text = cObj.text;
-        if( checkSizes && new TextEncoder().encode( text ).length > 64 ) throw new InvalidCborFormatError("TxMetadatum", "text .size (0..64): text exceeds 64 bytes");
-        return new TxMetadatumText( text );
-    }
+        const { obj, set } = stack.pop()!;
 
-    throw new InvalidCborFormatError("TxMetadatum")
+        if( obj instanceof CborMap )
+        {
+            const entries: TxMetadatumMapEntry[] = obj.map.map( () => ({ k: undefined as any, v: undefined as any }) );
+            const out = new TxMetadatumMap( [] );
+            // `map` is a writable own property on the instance (only the initial array was frozen).
+            (out as any).map = entries;
+            set( out );
+            freeze.push( () => { Object.freeze( entries ); } );
+            for( let i = obj.map.length - 1; i >= 0; i-- )
+            {
+                const entry = obj.map[i]!;
+                stack.push({ obj: entry.v, set: (v) => { entries[i]!.v = v; } });
+                stack.push({ obj: entry.k, set: (v) => { entries[i]!.k = v; } });
+            }
+            continue;
+        }
+
+        if( obj instanceof CborArray )
+        {
+            const items: TxMetadatum[] = new Array( obj.array.length );
+            const out = new TxMetadatumList( [] );
+            (out as any).list = items;
+            set( out );
+            freeze.push( () => { Object.freeze( items ); } );
+            for( let i = obj.array.length - 1; i >= 0; i-- )
+                stack.push({ obj: obj.array[i]!, set: (v) => { items[i] = v; } });
+            continue;
+        }
+
+        if( obj instanceof CborUInt || obj instanceof CborNegInt )
+        {
+            if( isBigNum( obj ) ) throw new InvalidCborFormatError("TxMetadatum", "big integers are not allowed in metadata");
+            set( new TxMetadatumInt( obj.num ) );
+            continue;
+        }
+        if( obj instanceof CborBytes )
+        {
+            const bytes = obj.bytes;
+            if( checkSizes && bytes.length > 64 ) throw new InvalidCborFormatError("TxMetadatum", "bytes .size (0..64): bytestring exceeds 64 bytes");
+            set( new TxMetadatumBytes( bytes ) );
+            continue;
+        }
+        if( obj instanceof CborText )
+        {
+            const text = obj.text;
+            if( checkSizes && new TextEncoder().encode( text ).length > 64 ) throw new InvalidCborFormatError("TxMetadatum", "text .size (0..64): text exceeds 64 bytes");
+            set( new TxMetadatumText( text ) );
+            continue;
+        }
+
+        throw new InvalidCborFormatError("TxMetadatum")
+    }
+    for( const f of freeze ) f();
+    return root!;
 }
 
 export function isTxMetadatum( something: any ): something is TxMetadatum
